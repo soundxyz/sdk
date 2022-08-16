@@ -32,6 +32,9 @@ jobs:
       - name: Install Dependencies
         run: pnpm install --no-frozen-lockfile
 
+      - name: Test ESM & CJS integrity
+        run: pnpm bob check
+
       - name: Alpha Release
         uses: 'the-guild-org/changesets-snapshot-action@v0.0.1'
         with:

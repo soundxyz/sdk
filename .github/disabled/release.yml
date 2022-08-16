@@ -30,6 +30,9 @@ jobs:
       - name: Install Dependencies
         run: pnpm install --no-frozen-lockfile
 
+      - name: Test ESM & CJS integrity
+        run: pnpm bob check
+
       - name: Set version variables
         id: vars
         shell: bash
