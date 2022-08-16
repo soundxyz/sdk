@@ -1,0 +1,39 @@
+{
+  "name": "dummy",
+  "private": "true",
+  "version": "0.0.0",
+  "scripts": {
+    "check": "tsc --pretty --noEmit"
+  },
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
+  "exports": {
+    ".": {
+      "require": {
+        "types": "./dist/typings/index.d.cts",
+        "default": "./dist/cjs/index.js"
+      },
+      "import": {
+        "types": "./dist/typings/index.d.ts",
+        "default": "./dist/esm/index.js"
+      },
+      "default": {
+        "types": "./dist/typings/index.d.ts",
+        "default": "./dist/esm/index.js"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "typings": "dist/typings/index.d.ts",
+  "typescript": {
+    "definition": "dist/typings/index.d.ts"
+  },
+  "publishConfig": {
+    "directory": "dist",
+    "access": "public"
+  },
+  "type": "module",
+  "sideEffects": false,
+  "author": "Saihajpreet Singh <saihaj@sound.xyz> (https://saihaj.dev/)",
+  "license": "MIT"
+}
