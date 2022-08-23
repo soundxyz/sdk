@@ -34,5 +34,10 @@
   "type": "module",
   "sideEffects": false,
   "author": "Saihajpreet Singh <saihaj@sound.xyz> (https://saihaj.dev/)",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "@ethersproject/abstract-provider": "^5.7.0",
+    "@ethersproject/abstract-signer": "^5.7.0",
+    "@ethersproject/address": "^5.7.0"
+  }
 }
