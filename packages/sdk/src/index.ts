@@ -1,61 +1,62 @@
 import type { Provider } from '@ethersproject/abstract-provider'
-import type { Signer } from '@ethersproject/abstract-signer'
+import { Signer } from '@ethersproject/abstract-signer'
 import { isAddress } from '@ethersproject/address'
 
-type SoundClientConfig = {
-  chainId: number
-  provider?: Provider
+type SoundClient = {
   signer?: Signer
+  provider?: Provider
+  connect: (signer: Signer) => void
 }
 
 const SUPPORTED_CHAIN_IDS = [
-  // mainnet
-  1,
-  // goerli
-  5,
-  // hardhat
-  1337, 31337,
-]
+  1, // mainnet
+  5, // goerli
+  1337, // hardhat
+  31337, // hardhat
+] as const
 
-export class SoundClient {
-  private readonly _chainId: number
-  private readonly _signer?: Signer
+type ChainId = typeof SUPPORTED_CHAIN_IDS[number]
 
-  constructor({ chainId, provider, signer }: SoundClientConfig) {
-    if (!provider) {
-      throw new Error('Missing provider')
-    }
+export function createClient(signerOrProvider: Signer | Provider): SoundClient {
+  let signer = Signer.isSigner(signerOrProvider) ? signerOrProvider : undefined
+  const provider = !Signer.isSigner(signerOrProvider) ? signerOrProvider : undefined
 
-    if (!SUPPORTED_CHAIN_IDS.includes(chainId)) {
-      throw new Error('Unsupported chainId')
-    }
-
-    this._chainId = chainId
-    this._signer = signer
+  return {
+    signer,
+    provider,
+    connect: (_signer: Signer) => {
+      signer = _signer
+    },
   }
+}
 
-  async isSoundEdition(contractAddress: string) {
-    this._isValidAdddress(contractAddress)
-    // TODO
+export async function isSoundEdition(client: SoundClient, contractAddress: string) {
+  validateAddress(contractAddress)
+  // TODO
+}
+
+export async function isUserEligibleToMint(client: SoundClient, contractAddress: string, time = Date.now()) {
+  validateAddress(contractAddress)
+  // TODO
+}
+
+export async function mint(client: SoundClient, contractAddress: string) {
+  validateAddress(contractAddress)
+  // TODO
+}
+
+/**
+ * HELPER FUNCTIONS
+ */
+
+function validateAddress(contractAddress: string) {
+  if (!isAddress(contractAddress)) {
+    throw new Error('Invalid contract address')
   }
+}
 
-  async isUserEligibleToMint(contractAddress: string, time = Date.now()) {
-    this._isValidAdddress(contractAddress)
-    // TODO
-  }
-
-  async mint(contractAddress: string) {
-    this._isValidAdddress(contractAddress)
-    // TODO
-  }
-
-  /**
-   * HELPER FUNCTIONS
-   */
-
-  private _isValidAdddress(contractAddress: string) {
-    if (!isAddress(contractAddress)) {
-      throw new Error('Invalid contract address')
-    }
+function validateChainId(chainId: ChainId) {
+  if (!SUPPORTED_CHAIN_IDS.includes(chainId)) {
+    throw new Error('Invalid chain id')
   }
 }
