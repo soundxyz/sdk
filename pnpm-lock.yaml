@@ -9,7 +9,6 @@ importers:
       '@typescript-eslint/eslint-plugin': ^5.34.0
       '@typescript-eslint/parser': ^5.34.0
       bob-the-bundler: 4.0.0
-      bob-tsm: ^1.1.2
       eslint: ^8.22.0
       eslint-config-prettier: ^8.5.0
       eslint-plugin-prettier: ^4.2.1
@@ -25,7 +24,6 @@ importers:
       '@typescript-eslint/eslint-plugin': 5.34.0_euudt5oqhhodkyae5tf6wjmsda
       '@typescript-eslint/parser': 5.34.0_4rv7y5c6xz3vfxwhbrcxxi73bq
       bob-the-bundler: 4.0.0_typescript@4.7.4
-      bob-tsm: 1.1.2_qdqm5llmdsm5orfxy3rikpcf5i
       eslint: 8.22.0
       eslint-config-prettier: 8.5.0_eslint@8.22.0
       eslint-plugin-prettier: 4.2.1_i2cojdczqdiurzgttlwdgf764e
@@ -1044,24 +1042,6 @@ packages:
     transitivePeerDependencies:
       - supports-color
       - ts-node
-    dev: true
-
-  /bob-tsm/1.1.2_qdqm5llmdsm5orfxy3rikpcf5i:
-    resolution:
-      { integrity: sha512-5H6wIDpQTop5rt/5JRvtssmpiTkIqi1EBkpSy19GfReOed6QoeD+iJIRjNgyiI7ZsX1ogETxgN7KiW5Wx6pUEQ== }
-    engines: { node: '>=14.13.1' }
-    hasBin: true
-    peerDependencies:
-      esbuild: '>=0.14.39'
-      typescript: '>=4.7.4'
-    peerDependenciesMeta:
-      typescript:
-        optional: true
-    dependencies:
-      esbuild: 0.14.54
-      typescript: 4.7.4
-    optionalDependencies:
-      fsevents: 2.3.2
     dev: true
 
   /brace-expansion/1.1.11:

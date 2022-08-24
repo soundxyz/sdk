@@ -2,7 +2,7 @@ import type { Provider } from '@ethersproject/abstract-provider'
 import { Signer } from '@ethersproject/abstract-signer'
 import { isAddress } from '@ethersproject/address'
 
-type SoundClient = {
+export type SoundClient = {
   signer?: Signer
   provider?: Provider
   connect: (signer: Signer) => void
@@ -18,6 +18,10 @@ const SUPPORTED_CHAIN_IDS = [
 type ChainId = typeof SUPPORTED_CHAIN_IDS[number]
 
 export function createClient(signerOrProvider: Signer | Provider): SoundClient {
+  if (!signerOrProvider) {
+    throw new Error('Must provide signer or provider')
+  }
+
   let signer = Signer.isSigner(signerOrProvider) ? signerOrProvider : undefined
   const provider = !Signer.isSigner(signerOrProvider) ? signerOrProvider : undefined
 
@@ -30,18 +34,21 @@ export function createClient(signerOrProvider: Signer | Provider): SoundClient {
   }
 }
 
-export async function isSoundEdition(client: SoundClient, contractAddress: string) {
-  validateAddress(contractAddress)
+export async function isSoundEdition(client: SoundClient, params: { address: string }) {
+  await validateClient(client)
+  validateAddress(params.address)
   // TODO
 }
 
-export async function isUserEligibleToMint(client: SoundClient, contractAddress: string, time = Date.now()) {
-  validateAddress(contractAddress)
+export async function isUserEligibleToMint(client: SoundClient, params: { address: string; time?: number }) {
+  await validateClient(client)
+  validateAddress(params.address)
   // TODO
 }
 
-export async function mint(client: SoundClient, contractAddress: string) {
-  validateAddress(contractAddress)
+export async function mint(client: SoundClient, params: { address: string }) {
+  await validateClient(client)
+  validateAddress(params.address)
   // TODO
 }
 
@@ -49,14 +56,22 @@ export async function mint(client: SoundClient, contractAddress: string) {
  * HELPER FUNCTIONS
  */
 
-function validateAddress(contractAddress: string) {
-  if (!isAddress(contractAddress)) {
-    throw new Error('Invalid contract address')
+// TODO: add tests for this
+async function validateClient(client: SoundClient) {
+  const network = await client.provider?.getNetwork()
+  const chainId = network?.chainId || (await client.signer?.getChainId())
+
+  // Using type cast for chainId here because we know signer or provider exists,
+  // therefore chainId will be defined.
+  const isSupported = SUPPORTED_CHAIN_IDS.includes(chainId as ChainId)
+
+  if (!isSupported) {
+    throw new Error('Invalid chain ID')
   }
 }
 
-function validateChainId(chainId: ChainId) {
-  if (!SUPPORTED_CHAIN_IDS.includes(chainId)) {
-    throw new Error('Invalid chain id')
+function validateAddress(contractAddress: string) {
+  if (!isAddress(contractAddress)) {
+    throw new Error('Invalid contract address')
   }
 }

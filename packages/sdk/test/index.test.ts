@@ -1,19 +1,33 @@
 import 'dotenv/config'
-
-import { describe, expect, it } from 'vitest'
-import { SoundClient } from '../src/index'
-import { StaticJsonRpcProvider } from '@ethersproject/providers'
+import { beforeEach, describe, expect, it } from 'vitest'
+import { createClient, SoundClient, isSoundEdition } from '../src/index'
+import { JsonRpcProvider } from '@ethersproject/providers'
 
 const PROVIDER_URL =
   process.env.TEST_ENV === 'local'
     ? 'http://localhost:8545'
-    : `https://eth-goerli.alchemyapi.io/v2/${process.env.NEXT_PUBLIC_ALCHEMY_KEY}`
+    : `https://eth-goerli.alchemyapi.io/v2/${process.env.VITE_ALCHEMY_GOERLI_KEY}`
 
-const provider = new StaticJsonRpcProvider({ url: PROVIDER_URL })
-const client = new SoundClient({ chainId: 5, provider })
+const provider = new JsonRpcProvider({ url: PROVIDER_URL })
+
+describe('createClient', () => {
+  it('Should create SoundClient', async () => {
+    const client = createClient(provider)
+
+    expect(client.signer).toBeUndefined()
+    expect(client.provider).toBeDefined()
+    expect(client.connect).toBeDefined()
+  })
+})
 
 describe('isSoundEdition', () => {
+  let client: SoundClient
+
+  beforeEach(() => {
+    client = createClient(provider)
+  })
+
   it("Should throw error if the address isn't valid", async () => {
-    await expect(() => client.isSoundEdition('0x123')).rejects.toThrowError('Invalid contract address')
+    await expect(() => isSoundEdition(client, { address: '0x123' })).rejects.toThrowError('Invalid contract address')
   })
 })
