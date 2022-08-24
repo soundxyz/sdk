@@ -2,7 +2,8 @@
   "name": "@soundxyz/sdk",
   "version": "0.0.0",
   "scripts": {
-    "check": "tsc --pretty --noEmit"
+    "check": "tsc --pretty --noEmit",
+    "test": "TEST_ENV=local vitest"
   },
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
@@ -39,5 +40,11 @@
     "@ethersproject/abstract-provider": "^5.7.0",
     "@ethersproject/abstract-signer": "^5.7.0",
     "@ethersproject/address": "^5.7.0"
+  },
+  "devDependencies": {
+    "@ethersproject/providers": "^5.7.0",
+    "dotenv": "^16.0.1",
+    "vite": "^3.0.9",
+    "vitest": "^0.22.1"
   }
 }
