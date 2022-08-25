@@ -4,7 +4,7 @@
   "scripts": {
     "check": "tsc --pretty --noEmit",
     "test": "vitest",
-    "test:deloyed": "TEST_ENV=goerli vitest"
+    "test:deployed": "TEST_ENV=goerli vitest"
   },
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",

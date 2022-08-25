@@ -3,6 +3,8 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { createClient, SoundClient, isSoundEdition } from '../src/index'
 import { JsonRpcProvider } from '@ethersproject/providers'
 
+console.log('process.env.TEST_ENV', process.env.TEST_ENV)
+
 const PROVIDER_URL =
   process.env.TEST_ENV === 'goerli'
     ? `https://eth-goerli.alchemyapi.io/v2/${process.env.VITE_ALCHEMY_GOERLI_KEY}`
@@ -11,7 +13,7 @@ const PROVIDER_URL =
 const provider = new JsonRpcProvider({ url: PROVIDER_URL })
 
 console.log(`Waiting for network to be ready (if you're testing locally, make sure you have a local node running).`)
-let isReady = await provider.ready
+await provider.ready
 
 describe('createClient', () => {
   it('Should create SoundClient', async () => {
