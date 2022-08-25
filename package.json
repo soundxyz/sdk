@@ -9,7 +9,8 @@
     "postinstall": "husky install",
     "pretty-quick": "pretty-quick --staged",
     "release": "changeset publish",
-    "test": "pnpm -r --filter=sdk test"
+    "test": "pnpm -r --filter=sdk test",
+    "test:deployed": "pnpm -r --filter=sdk test:deployed"
   },
   "license": "MIT",
   "repository": {
