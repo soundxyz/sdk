@@ -3,8 +3,7 @@
   "version": "0.0.0",
   "scripts": {
     "check": "tsc --pretty --noEmit",
-    "test": "vitest",
-    "test:deployed": "TEST_ENV=goerli vitest"
+    "test": "vitest"
   },
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",

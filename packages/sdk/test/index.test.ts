@@ -3,12 +3,7 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { createClient, SoundClient, isSoundEdition } from '../src/index'
 import { JsonRpcProvider } from '@ethersproject/providers'
 
-console.log('process.env.TEST_ENV', process.env.TEST_ENV)
-
-const PROVIDER_URL =
-  process.env.TEST_ENV === 'goerli'
-    ? `https://eth-goerli.alchemyapi.io/v2/${process.env.VITE_ALCHEMY_GOERLI_KEY}`
-    : 'http://localhost:8545'
+const PROVIDER_URL = 'http://localhost:8545'
 
 const provider = new JsonRpcProvider({ url: PROVIDER_URL })
 
