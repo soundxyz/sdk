@@ -2,7 +2,6 @@
   "mode": "pre",
   "tag": "beta",
   "initialVersions": {
-    "dummy": "0.0.0",
     "@soundxyz/sdk": "0.0.0"
   },
   "changesets": []
