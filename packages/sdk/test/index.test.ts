@@ -10,11 +10,14 @@ const PROVIDER_URL =
 
 const provider = new JsonRpcProvider({ url: PROVIDER_URL })
 
+console.log(`Waiting for network to be ready (if you're testing locally, make sure you have a local node running).`)
+let isReady = await provider.ready
+
 describe('createClient', () => {
   it('Should create SoundClient', async () => {
     const client = createClient(provider)
 
-    expect(client.signer).toBeUndefined()
+    expect(client.signer).toBeNull()
     expect(client.provider).toBeDefined()
     expect(client.connect).toBeDefined()
   })

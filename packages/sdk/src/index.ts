@@ -3,8 +3,8 @@ import { Signer } from '@ethersproject/abstract-signer'
 import { isAddress } from '@ethersproject/address'
 
 export type SoundClient = {
-  signer?: Signer
-  provider?: Provider
+  signer: Signer | null
+  provider: Provider | null
   connect: (signer: Signer) => void
 }
 
@@ -22,8 +22,8 @@ export function createClient(signerOrProvider: Signer | Provider): SoundClient {
     throw new Error('Must provide signer or provider')
   }
 
-  let signer = Signer.isSigner(signerOrProvider) ? signerOrProvider : undefined
-  const provider = !Signer.isSigner(signerOrProvider) ? signerOrProvider : undefined
+  let signer = Signer.isSigner(signerOrProvider) ? signerOrProvider : null
+  const provider = !Signer.isSigner(signerOrProvider) ? signerOrProvider : null
 
   return {
     signer,
