@@ -1,0 +1,28 @@
+name: Continuous Integration
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  typecheck:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v2
+      - uses: pnpm/action-setup@v2.0.1
+        with:
+          version: latest
+      - name: Setup Node v16
+        uses: actions/setup-node@v2
+        with:
+          node-version: '^16.17.0'
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install
+      - name: Type Check
+        run: pnpm tsc
+      - name: Test ESM & CJS integrity
+        run: pnpm bob check
