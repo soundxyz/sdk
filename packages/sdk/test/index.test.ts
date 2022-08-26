@@ -12,7 +12,7 @@ await provider.ready
 
 describe('createClient', () => {
   it('Should create SoundClient', async () => {
-    const client = await createClient(provider)
+    const client = createClient(provider)
 
     expect(client.signer).toBeNull()
     expect(client.provider).toBeDefined()
@@ -23,7 +23,7 @@ describe('createClient', () => {
 describe('isSoundEdition', () => {
   let client: SoundClient
 
-  beforeEach(async () => {
+  beforeEach(() => {
     client = createClient(provider)
   })
 
