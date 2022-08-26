@@ -43,6 +43,7 @@
   },
   "devDependencies": {
     "@ethersproject/providers": "^5.7.0",
+    "@soundxyz/sound-protocol": "0.1.0-alpha-7773646.0",
     "dotenv": "^16.0.1",
     "vite": "^3.0.9",
     "vitest": "^0.22.1"

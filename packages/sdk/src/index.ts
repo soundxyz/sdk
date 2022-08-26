@@ -2,6 +2,11 @@ import type { Provider } from '@ethersproject/abstract-provider'
 import { Signer } from '@ethersproject/abstract-signer'
 import { isAddress } from '@ethersproject/address'
 
+import { SoundCreatorV1__factory, SoundCreatorV1 } from '@soundxyz/sound-protocol'
+import { SoundEditionCreatedEvent } from '@soundxyz/sound-protocol/SoundCreatorV1'
+
+import { chainIdToInfo } from './config'
+
 export type SoundClient = {
   signer: Signer | null
   provider: Provider | null
@@ -40,7 +45,30 @@ export function createClient(signerOrProvider: Signer | Provider) {
 export async function isSoundEdition(client: SoundClient, params: { address: string }) {
   await connectClient(client)
   validateAddress(params.address)
-  // TODO
+
+  const { chainId, signer, provider } = client
+  if (chainId === null) throw new Error('Must provide chainId')
+
+  const signerOrProvider = signer === null ? provider : signer
+  if (signerOrProvider === null) throw new Error('Must provide signer or provider')
+
+  var _isSoundEdition = false
+
+  const soundCreator = SoundCreatorV1__factory.connect(chainIdToInfo[chainId].SoundCreatorV1.address, signerOrProvider)
+
+  const events = (await soundCreator.queryFilter(
+    soundCreator.filters.SoundEditionCreated(),
+    chainIdToInfo[chainId!].SoundCreatorV1.deployedAtBlock,
+  )) as SoundEditionCreatedEvent[]
+
+  for (const event of events) {
+    if (event.args.soundEdition === params.address) {
+      _isSoundEdition = true
+      break
+    }
+  }
+
+  return _isSoundEdition
 }
 
 export async function isUserEligibleToMint(client: SoundClient, params: { address: string; time?: number }) {
