@@ -59,6 +59,9 @@ export async function isSoundEdition(client: SoundClient, params: { address: str
   try {
     _isSoundEdition = await editionContract.supportsInterface(interfaceIds.ISoundEditionV1)
   } catch (e) {
+    console.error(
+      'Call to supportsInterface failed. This is likely because the provided contract address is incorrect.',
+    )
     _isSoundEdition = false
   }
 
