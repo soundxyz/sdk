@@ -1,6 +1,6 @@
 import 'dotenv/config'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { createClient, connectClient, SoundClient, isSoundEdition } from '../src/index'
+import { createClient, connectClient, SoundClient, isSoundEdition, isUserEligibleToMint } from '../src/index'
 import { JsonRpcProvider } from '@ethersproject/providers'
 import { parseEther } from '@ethersproject/units'
 import { Wallet } from '@ethersproject/wallet'
@@ -71,5 +71,18 @@ describe('isSoundEdition', () => {
 
     const isEdition = await isSoundEdition(client, { address: EDITION_ADDRESS })
     expect(isEdition).toBe(true)
+  })
+})
+
+describe('isUserEligibleToMint', () => {
+  let client: SoundClient
+
+  beforeEach(() => {
+    client = createClient(provider)
+  })
+
+  it('Should return expected value', async () => {
+    const canMint = await isUserEligibleToMint(client, { address: EDITION_ADDRESS })
+    await expect(canMint).toBe(true)
   })
 })

@@ -1,10 +1,14 @@
 import type { Provider } from '@ethersproject/abstract-provider'
 import { Signer } from '@ethersproject/abstract-signer'
 import { isAddress } from '@ethersproject/address'
-
-import { SoundEditionV1__factory } from '@soundxyz/sound-protocol'
-import { SoundEditionCreatedEvent } from '@soundxyz/sound-protocol/SoundCreatorV1'
-
+import { BigNumber } from '@ethersproject/bignumber'
+import {
+  SoundEditionV1__factory,
+  RangeEditionMinter__factory,
+  FixedPriceSignatureMinter__factory,
+  MerkleDropMinter__factory,
+  IMinterModule__factory,
+} from '@soundxyz/sound-protocol'
 import { chainIdToInfo, interfaceIds } from './config'
 
 export type SoundClient = {
@@ -12,6 +16,19 @@ export type SoundClient = {
   provider: Provider | null
   chainId: ChainId | null
   connect: (signer: Signer) => void
+}
+
+type FactoryType = RangeEditionMinter__factory | FixedPriceSignatureMinter__factory | MerkleDropMinter__factory
+
+export type MintInfo = {
+  factory: FactoryType
+  startTime: number
+  endTime: number
+  mintPaused: boolean
+  price: BigNumber
+  maxMintable: number
+  maxMintablePerAccount: number
+  totalMinted: number
 }
 
 const SUPPORTED_CHAIN_IDS = [
@@ -68,10 +85,86 @@ export async function isSoundEdition(client: SoundClient, params: { address: str
 }
 
 export async function isUserEligibleToMint(client: SoundClient, params: { address: string; time?: number }) {
+  const editionAddress = params.address
   await connectClient(client)
-  validateAddress(params.address)
-  // TODO
+  validateAddress(editionAddress)
+
+  const { chainId, signer, provider } = client
+  if (chainId === null) throw new Error('Must provide chainId')
+
+  const signerOrProvider = signer === null ? provider : signer
+  if (signerOrProvider === null) throw new Error('Must provide signer or provider')
+
+  const isEdition = await isSoundEdition(client, params)
+  if (!isEdition) {
+    throw new Error('Not a Sound Edition')
+  }
+
+  const editionContract = SoundEditionV1__factory.connect(editionAddress, signerOrProvider)
+
+  // Get the addresses registered with MINTER_ROLE for this edition
+  const minterRole = await editionContract.MINTER_ROLE()
+  const filter = editionContract.filters.RolesUpdated(undefined, minterRole)
+  const roleEvents = await editionContract.queryFilter(filter)
+  const minterCandidateAddresses = roleEvents.map((event) => event.args.user)
+
+  // Check supportsInterface() to verify each address is a minter
+  const minterAddresses = (
+    await Promise.all(
+      minterCandidateAddresses.map(async (address) => {
+        const minterContract = IMinterModule__factory.connect(address, signerOrProvider)
+        const isMinter = await minterContract.supportsInterface(interfaceIds.IMinterModule)
+
+        if (isMinter) {
+          return address
+        }
+        return null
+      }),
+      // Filter nulls out
+    )
+  ).filter((a) => !!a) as string[]
+
+  const minterModule = await IMinterModule__factory.connect(minterAddresses[0], signerOrProvider)
+  const id = await minterModule.moduleInterfaceId()
+
+  // Get info for each
+  const mintInfos = await Promise.all(
+    minterAddresses.map(async (address) => {
+      const minterModule = await IMinterModule__factory.connect(address, signerOrProvider)
+      const interfaceId = await minterModule.moduleInterfaceId()
+      console.log({ interfaceId })
+      return interfaceId
+      // const mintInfo = await getMintInfo(client, { address })
+    }),
+  )
 }
+
+/**
+    3. View function returns all info for the mintIds associated with this edition:
+        1. start/end time, get price, Limit / user, Number minted by user
+   */
+
+/**
+    4. clientside filter all minters that are live (startTime ≤ now && endTime > now)asicMinter, IMerkleMinter
+  */
+
+/**
+    5. check eligibility (iterate through list if more than one active minter)
+        - `maxAllowedPerWallet`
+        - If user is below max, check eligibility of specific address to mint:
+            - see if it implements IRangeEditionMinter
+                - use RangeEdtionMinter abi
+                - Eligibility: true
+            - see if it implements IMerkleDropMinter
+                - use MerkleDropMinter abi
+                - Get proof: Hit sound api using address and merkle root (fall back as lanyard) to confirm if they are in the allowlist and get proof
+  */
+
+/**
+      6. set up mint transaction
+          1. for ones with supported interface: RangeEdtionMinter or MerkleDropMinter
+              1. IBasicMinter, IMerkleMinter
+   */
 
 export async function mint(client: SoundClient, params: { address: string }) {
   await connectClient(client)

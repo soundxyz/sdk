@@ -38,10 +38,11 @@ importers:
       '@ethersproject/abstract-provider': ^5.7.0
       '@ethersproject/abstract-signer': ^5.7.0
       '@ethersproject/address': ^5.7.0
+      '@ethersproject/bignumber': ^5.7.0
       '@ethersproject/providers': ^5.7.0
       '@ethersproject/units': ^5.7.0
       '@ethersproject/wallet': ^5.7.0
-      '@soundxyz/sound-protocol': 0.1.0-alpha-7773646.0
+      '@soundxyz/sound-protocol': 0.0.2-alpha-0078a44.0
       dotenv: ^16.0.1
       vite: ^3.0.9
       vitest: ^0.22.1
@@ -50,10 +51,11 @@ importers:
       '@ethersproject/abstract-signer': 5.7.0
       '@ethersproject/address': 5.7.0
     devDependencies:
+      '@ethersproject/bignumber': 5.7.0
       '@ethersproject/providers': 5.7.0
       '@ethersproject/units': 5.7.0
       '@ethersproject/wallet': 5.7.0
-      '@soundxyz/sound-protocol': 0.1.0-alpha-7773646.0
+      '@soundxyz/sound-protocol': 0.0.2-alpha-0078a44.0
       dotenv: 16.0.1
       vite: 3.0.9
       vitest: 0.22.1
@@ -786,9 +788,9 @@ packages:
       picomatch: 2.3.1
     dev: true
 
-  /@soundxyz/sound-protocol/0.1.0-alpha-7773646.0:
+  /@soundxyz/sound-protocol/0.0.2-alpha-0078a44.0:
     resolution:
-      { integrity: sha512-zEiGX8zYwrSKnar1O+mumru5wxFHO88UQKfw+80ro3yGgjqt9bTQFnf3Kvcjf70TPKArs3KLR2+DCJ6adecqfA== }
+      { integrity: sha512-3MT3rOndsIJVtM4aay/ZrM+i/k4vJwoXRyg6qnut8pX94xgBzHF2cRLSwoDfi9HsvvA+v1olt9HdPTbHYOGKhA== }
     dependencies:
       '@ethersproject/abi': 5.7.0
       '@ethersproject/providers': 5.7.0

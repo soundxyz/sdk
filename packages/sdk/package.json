@@ -42,10 +42,11 @@
     "@ethersproject/address": "^5.7.0"
   },
   "devDependencies": {
+    "@ethersproject/bignumber": "^5.7.0",
     "@ethersproject/providers": "^5.7.0",
     "@ethersproject/units": "^5.7.0",
     "@ethersproject/wallet": "^5.7.0",
-    "@soundxyz/sound-protocol": "0.1.0-alpha-7773646.0",
+    "@soundxyz/sound-protocol": "0.0.2-alpha-0078a44.0",
     "dotenv": "^16.0.1",
     "vite": "^3.0.9",
     "vitest": "^0.22.1"
