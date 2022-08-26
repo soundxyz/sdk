@@ -12,7 +12,7 @@ await provider.ready
 
 describe('createClient', () => {
   it('Should create SoundClient', async () => {
-    const client = createClient(provider)
+    const client = await createClient(provider)
 
     expect(client.signer).toBeNull()
     expect(client.provider).toBeDefined()
@@ -23,8 +23,8 @@ describe('createClient', () => {
 describe('isSoundEdition', () => {
   let client: SoundClient
 
-  beforeEach(() => {
-    client = createClient(provider)
+  beforeEach(async () => {
+    client = await createClient(provider)
   })
 
   it("Should throw error if the address isn't valid", async () => {
