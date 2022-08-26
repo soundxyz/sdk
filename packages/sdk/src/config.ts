@@ -11,7 +11,7 @@ export const chainIdToInfo: {
 }
 
 export const interfaceIds = {
-  ISoundEditionV1: '0x3b8ebf6f',
+  ISoundEditionV1: '0x41f5b0cb',
   IMinterModule: '0x41af72ad',
   IFixedPriceSignatureMinter: '0xc7843744',
   IMerkleDropMinter: '0x7deee220',

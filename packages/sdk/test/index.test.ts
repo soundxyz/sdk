@@ -1,10 +1,12 @@
 import 'dotenv/config'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { createClient, SoundClient, isSoundEdition } from '../src/index'
+import { createClient, connectClient, SoundClient, isSoundEdition } from '../src/index'
 import { JsonRpcProvider } from '@ethersproject/providers'
 import { parseEther } from '@ethersproject/units'
 import { Wallet } from '@ethersproject/wallet'
 
+// First private key from 'test test test...' mnemonic
+const TEST_PK = '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
 const PROVIDER_URL = 'http://localhost:8545'
 
 const provider = new JsonRpcProvider({ url: PROVIDER_URL })
@@ -35,6 +37,17 @@ describe('createClient', () => {
     expect(client.signer).toBeNull()
     expect(client.provider).toBeDefined()
     expect(client.connect).toBeDefined()
+  })
+})
+
+describe('connectClient', () => {
+  it('Should throw error if the signer is not connected to a provider', async () => {
+    const signer = new Wallet(TEST_PK)
+    const client = createClient(signer)
+
+    await expect(() => connectClient(client)).rejects.toThrowError(
+      'Signer must be connected to a provider: https://docs.ethers.io/v5/api/signer/#Signer-connect',
+    )
   })
 })
 

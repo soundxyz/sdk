@@ -23,7 +23,6 @@ const SUPPORTED_CHAIN_IDS = [
 
 type ChainId = typeof SUPPORTED_CHAIN_IDS[number]
 
-// TODO: add tests for this
 export function createClient(signerOrProvider: Signer | Provider) {
   if (!signerOrProvider) {
     throw new Error('Must provide signer or provider')
@@ -84,10 +83,22 @@ export async function mint(client: SoundClient, params: { address: string }) {
   HELPER FUNCTIONS
  ******************/
 
-// TODO: add tests for this
-async function connectClient(client: SoundClient) {
-  const network = await client.provider?.getNetwork()
-  const chainId = network?.chainId || (await client.signer?.getChainId())
+export async function connectClient(client: SoundClient) {
+  let chainId: number | undefined
+  if (client.signer) {
+    try {
+      chainId = await client.signer.getChainId()
+    } catch (e: any) {
+      if (e?.message.includes('missing provider')) {
+        throw new Error('Signer must be connected to a provider: https://docs.ethers.io/v5/api/signer/#Signer-connect')
+      } else {
+        throw e
+      }
+    }
+  } else {
+    const network = await client.provider!.getNetwork()
+    chainId = network.chainId
+  }
 
   // Using type cast for chainId here because we know signer or provider exists,
   // therefore chainId will be defined.
