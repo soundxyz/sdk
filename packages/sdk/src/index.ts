@@ -2,6 +2,11 @@ import type { Provider } from '@ethersproject/abstract-provider'
 import { Signer } from '@ethersproject/abstract-signer'
 import { isAddress } from '@ethersproject/address'
 
+import { SoundEditionV1__factory } from '@soundxyz/sound-protocol'
+import { SoundEditionCreatedEvent } from '@soundxyz/sound-protocol/SoundCreatorV1'
+
+import { chainIdToInfo, interfaceIds } from './config'
+
 export type SoundClient = {
   signer: Signer | null
   provider: Provider | null
@@ -40,7 +45,27 @@ export function createClient(signerOrProvider: Signer | Provider) {
 export async function isSoundEdition(client: SoundClient, params: { address: string }) {
   await connectClient(client)
   validateAddress(params.address)
-  // TODO
+
+  const { chainId, signer, provider } = client
+  if (chainId === null) throw new Error('Must provide chainId')
+
+  const signerOrProvider = signer === null ? provider : signer
+  if (signerOrProvider === null) throw new Error('Must provide signer or provider')
+
+  let _isSoundEdition = false
+
+  const editionContract = SoundEditionV1__factory.connect(params.address, signerOrProvider)
+
+  try {
+    _isSoundEdition = await editionContract.supportsInterface(interfaceIds.ISoundEditionV1)
+  } catch (e) {
+    console.error(
+      'Call to supportsInterface failed. This is likely because the provided contract address is incorrect.',
+    )
+    _isSoundEdition = false
+  }
+
+  return _isSoundEdition
 }
 
 export async function isUserEligibleToMint(client: SoundClient, params: { address: string; time?: number }) {
