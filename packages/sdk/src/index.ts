@@ -58,7 +58,7 @@ export async function isSoundEdition(client: SoundClient, params: { address: str
 
   const events = (await soundCreator.queryFilter(
     soundCreator.filters.SoundEditionCreated(),
-    chainIdToInfo[chainId!].SoundCreatorV1.deployedAtBlock,
+    chainIdToInfo[chainId].SoundCreatorV1.deployedAtBlock,
   )) as SoundEditionCreatedEvent[]
 
   for (const event of events) {
