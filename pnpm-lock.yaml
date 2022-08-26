@@ -39,6 +39,8 @@ importers:
       '@ethersproject/abstract-signer': ^5.7.0
       '@ethersproject/address': ^5.7.0
       '@ethersproject/providers': ^5.7.0
+      '@ethersproject/units': ^5.7.0
+      '@ethersproject/wallet': ^5.7.0
       '@soundxyz/sound-protocol': 0.1.0-alpha-7773646.0
       dotenv: ^16.0.1
       vite: ^3.0.9
@@ -49,6 +51,8 @@ importers:
       '@ethersproject/address': 5.7.0
     devDependencies:
       '@ethersproject/providers': 5.7.0
+      '@ethersproject/units': 5.7.0
+      '@ethersproject/wallet': 5.7.0
       '@soundxyz/sound-protocol': 0.1.0-alpha-7773646.0
       dotenv: 16.0.1
       vite: 3.0.9
