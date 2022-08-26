@@ -24,7 +24,7 @@ describe('isSoundEdition', () => {
   let client: SoundClient
 
   beforeEach(async () => {
-    client = await createClient(provider)
+    client = createClient(provider)
   })
 
   it("Should throw error if the address isn't valid", async () => {
