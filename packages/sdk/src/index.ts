@@ -11,6 +11,8 @@ import {
   RangeEditionMinter,
   MerkleDropMinter,
 } from '@soundxyz/sound-protocol'
+import { MintInfoStructOutput as StandardMintInfo } from '@soundxyz/sound-protocol/FixedPriceSignatureMinter'
+import { MintInfoStructOutput as RangeEditionMintInfo } from '@soundxyz/sound-protocol/RangeEditionMinter'
 
 export type SoundClient = {
   signer: Signer | null
@@ -27,6 +29,7 @@ type MintInfo = {
   endTime: number
   mintPaused: boolean
   price: BigNumber
+  maxMintable: number
   maxMintablePerAccount: number
   totalMinted: number
 }
@@ -152,13 +155,23 @@ export async function getEligibleMintQuantity(
   const mintInfoPromises = minterAddresses
     .map((minterAddress) =>
       mintIdsMap[minterAddress].map(async (mintId) => {
-        // TODO: handle network errors
         const minterModule = await IMinterModule__factory.connect(minterAddress, signerOrProvider)
         const interfaceId = await minterModule.moduleInterfaceId()
         const factory = await minterFactoryMap[interfaceId].connect(minterAddress, signerOrProvider)
         const mintInfo = await factory.mintInfo(editionAddress, mintId)
 
-        // TODO: need special handling for RangeEditionMinter's maxMintableUpper & maxMintableLower to resolve to maxMintable
+        // Get maxMintable
+        let maxMintable = 0
+        // RangeEditionMinter maxMintable is time-dependent
+        if (interfaceId === interfaceIds.IRangeEditionMinter) {
+          const closingTime = (mintInfo as RangeEditionMintInfo).closingTime
+          maxMintable =
+            closingTime > timestamp
+              ? (mintInfo as RangeEditionMintInfo).maxMintableUpper
+              : (mintInfo as RangeEditionMintInfo).maxMintableLower
+        } else {
+          maxMintable = (mintInfo as StandardMintInfo).maxMintable
+        }
 
         mintInfos.push({
           interfaceId,
@@ -168,6 +181,7 @@ export async function getEligibleMintQuantity(
           endTime: mintInfo.endTime,
           mintPaused: mintInfo.mintPaused,
           price: mintInfo.price,
+          maxMintable,
           maxMintablePerAccount: mintInfo.maxMintablePerAccount,
           totalMinted: mintInfo.totalMinted,
         })
@@ -194,6 +208,11 @@ export async function getEligibleMintQuantity(
   let eligibleMintQuantity = 0
   for (const mintInfo of eligibleMints) {
     const minterModule = await minterFactoryMap[mintInfo.interfaceId].connect(mintInfo.address, signerOrProvider)
+
+    // If this minter is sold out, skip it
+    if (mintInfo.totalMinted >= mintInfo.maxMintable) {
+      continue
+    }
 
     // For any minter that tracks mintedTallies, get the tally for this user
     if (
