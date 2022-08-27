@@ -11,12 +11,14 @@ const PROVIDER_URL = 'http://localhost:8545'
 
 const provider = new JsonRpcProvider({ url: PROVIDER_URL })
 
+const EDITION_ADDRESS = '0x9bd03768a7DCc129555dE410FF8E85528A4F88b5'
+const USER_ADDRESS = '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266'
+
 const PRICE = parseEther('0.1')
 const MAX_MINTABLE_LOWER = 3
 const MAX_MINTABLE_UPPER = 5
-const MAX_PER_ACCOUNT = 1
+const MAX_PER_ACCOUNT = 2
 
-const EDITION_ADDRESS = '0x9bd03768a7DCc129555dE410FF8E85528A4F88b5'
 const MINT1_START_TIME = 0
 const MINT1_CLOSING_TIME = MINT1_START_TIME + 10
 const MINT1_END_TIME = MINT1_CLOSING_TIME + 10
@@ -84,7 +86,10 @@ describe('getEligibleMintQuantity', () => {
   })
 
   it('Should return expected value', async () => {
-    const canMint = await getEligibleMintQuantity(client, { editionAddress: EDITION_ADDRESS })
-    await expect(canMint).toBe(true)
+    const eligibleAmount = await getEligibleMintQuantity(client, {
+      editionAddress: EDITION_ADDRESS,
+      userAddress: USER_ADDRESS,
+    })
+    await expect(eligibleAmount).toBe(1)
   })
 })

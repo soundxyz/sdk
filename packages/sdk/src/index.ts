@@ -194,7 +194,7 @@ export async function getEligibleMintQuantity(
   // Filter mints that are live during the given timestamp
   const eligibleMints = mintInfos
     .filter((mintInfo) => {
-      return mintInfo.startTime <= timestamp && mintInfo.endTime > timestamp && mintInfo.mintPaused === false
+      return mintInfo.startTime <= timestamp && mintInfo.endTime > timestamp && !mintInfo.mintPaused
     })
     .sort((a, b) => a.startTime - b.startTime)
     .sort((a, b) => {
@@ -211,13 +211,14 @@ export async function getEligibleMintQuantity(
 
     // If this minter is sold out, skip it
     if (mintInfo.totalMinted >= mintInfo.maxMintable) {
+      console.log('Minter is sold out. Address:', mintInfo.address, 'MintId:', mintInfo.mintId)
       continue
     }
 
     // For any minter that tracks mintedTallies, get the tally for this user
     if (
-      minterFactoryMap[mintInfo.interfaceId] instanceof RangeEditionMinter__factory ||
-      minterFactoryMap[mintInfo.interfaceId] instanceof MerkleDropMinter__factory
+      mintInfo.interfaceId == interfaceIds.IRangeEditionMinter ||
+      mintInfo.interfaceId == interfaceIds.IMerkleDropMinter
     ) {
       const userBalanceBigNum = await (minterModule as RangeEditionMinter | MerkleDropMinter).mintedTallies(
         editionAddress,
@@ -226,7 +227,7 @@ export async function getEligibleMintQuantity(
       )
 
       const userMintedBalance = userBalanceBigNum.toNumber()
-      eligibleMintQuantity = userMintedBalance - mintInfo.maxMintablePerAccount
+      eligibleMintQuantity = mintInfo.maxMintablePerAccount - userMintedBalance
 
       // If any eligible quantity found, break out of loop
       if (eligibleMintQuantity > 0) {
