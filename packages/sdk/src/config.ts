@@ -23,6 +23,8 @@ export const chainIdToInfo: {
   },
 }
 
+export const UINT32_MAX = 4294967295
+
 export const interfaceIds = {
   ISoundEditionV1: '0x41f5b0cb',
   IMinterModule: '0x97656fd6',

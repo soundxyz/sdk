@@ -1,6 +1,6 @@
 import 'dotenv/config'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { createClient, connectClient, SoundClient, isSoundEdition, isUserEligibleToMint } from '../src/index'
+import { createClient, connectClient, SoundClient, isSoundEdition, getEligibleMintQuantity } from '../src/index'
 import { JsonRpcProvider } from '@ethersproject/providers'
 import { parseEther } from '@ethersproject/units'
 import { Wallet } from '@ethersproject/wallet'
@@ -59,22 +59,24 @@ describe('isSoundEdition', () => {
   })
 
   it("Should throw error if the address isn't valid", async () => {
-    await expect(() => isSoundEdition(client, { address: '0x123' })).rejects.toThrowError('Invalid contract address')
+    await expect(() => isSoundEdition(client, { editionAddress: '0x123' })).rejects.toThrowError(
+      'Invalid contract address',
+    )
   })
 
   it('Correctly identifies SoundEdition addresses', async () => {
     for (let i = 0; i < 10; i++) {
       const wallet = Wallet.createRandom()
-      const isEdition = await isSoundEdition(client, { address: wallet.address })
+      const isEdition = await isSoundEdition(client, { editionAddress: wallet.address })
       expect(isEdition).toBe(false)
     }
 
-    const isEdition = await isSoundEdition(client, { address: EDITION_ADDRESS })
+    const isEdition = await isSoundEdition(client, { editionAddress: EDITION_ADDRESS })
     expect(isEdition).toBe(true)
   })
 })
 
-describe('isUserEligibleToMint', () => {
+describe('getEligibleMintQuantity', () => {
   let client: SoundClient
 
   beforeEach(() => {
@@ -82,7 +84,7 @@ describe('isUserEligibleToMint', () => {
   })
 
   it('Should return expected value', async () => {
-    const canMint = await isUserEligibleToMint(client, { address: EDITION_ADDRESS })
+    const canMint = await getEligibleMintQuantity(client, { editionAddress: EDITION_ADDRESS })
     await expect(canMint).toBe(true)
   })
 })

@@ -2,13 +2,14 @@ import type { Provider } from '@ethersproject/abstract-provider'
 import { Signer } from '@ethersproject/abstract-signer'
 import { isAddress } from '@ethersproject/address'
 import { BigNumber } from '@ethersproject/bignumber'
-import { minterFactoryMap, interfaceIds, idToInterfaceName, MinterFactoryType } from './config'
+import { minterFactoryMap, interfaceIds, idToInterfaceName, UINT32_MAX } from './config'
 import {
   SoundEditionV1__factory,
-  RangeEditionMinter__factory,
-  FixedPriceSignatureMinter__factory,
-  MerkleDropMinter__factory,
   IMinterModule__factory,
+  RangeEditionMinter__factory,
+  MerkleDropMinter__factory,
+  RangeEditionMinter,
+  MerkleDropMinter,
 } from '@soundxyz/sound-protocol'
 
 export type SoundClient = {
@@ -19,13 +20,14 @@ export type SoundClient = {
 }
 
 type MintInfo = {
-  name: string
+  interfaceId: string
   address: string
+  mintId: number
   startTime: number
   endTime: number
   mintPaused: boolean
   price: BigNumber
-  maxMintable: number
+  maxMintablePerAccount: number
   totalMinted: number
 }
 
@@ -56,9 +58,9 @@ export function createClient(signerOrProvider: Signer | Provider) {
   }
 }
 
-export async function isSoundEdition(client: SoundClient, params: { address: string }) {
+export async function isSoundEdition(client: SoundClient, params: { editionAddress: string }) {
   await connectClient(client)
-  validateAddress(params.address)
+  validateAddress(params.editionAddress)
 
   const { chainId, signer, provider } = client
   if (chainId === null) throw new Error('Must provide chainId')
@@ -68,7 +70,7 @@ export async function isSoundEdition(client: SoundClient, params: { address: str
 
   let _isSoundEdition = false
 
-  const editionContract = SoundEditionV1__factory.connect(params.address, signerOrProvider)
+  const editionContract = SoundEditionV1__factory.connect(params.editionAddress, signerOrProvider)
 
   try {
     _isSoundEdition = await editionContract.supportsInterface(interfaceIds.ISoundEditionV1)
@@ -82,8 +84,12 @@ export async function isSoundEdition(client: SoundClient, params: { address: str
   return _isSoundEdition
 }
 
-export async function isUserEligibleToMint(client: SoundClient, params: { address: string; time?: number }) {
-  const editionAddress = params.address
+export async function getEligibleMintQuantity(
+  client: SoundClient,
+  params: { editionAddress: string; userAddress?: string; timestamp?: number },
+) {
+  const timestamp = params.timestamp || Math.floor(Date.now() / 1000)
+  const editionAddress = params.editionAddress
   await connectClient(client)
   validateAddress(editionAddress)
 
@@ -98,6 +104,11 @@ export async function isUserEligibleToMint(client: SoundClient, params: { addres
     throw new Error('Not a Sound Edition')
   }
 
+  if (!params.userAddress && !signer) {
+    throw new Error('Must provide userAddress or a connected signer')
+  }
+
+  const userAddress = (params.userAddress || (await signer?.getAddress())) as string
   const editionContract = SoundEditionV1__factory.connect(editionAddress, signerOrProvider)
 
   // Get the addresses with MINTER_ROLE
@@ -136,8 +147,8 @@ export async function isUserEligibleToMint(client: SoundClient, params: { addres
     )
   ).forEach(handleRejections)
 
+  // Retrieve all the mint info for each minter-mintId pair
   const mintInfos: MintInfo[] = []
-
   const mintInfoPromises = minterAddresses
     .map((minterAddress) =>
       mintIdsMap[minterAddress].map(async (mintId) => {
@@ -150,13 +161,14 @@ export async function isUserEligibleToMint(client: SoundClient, params: { addres
         // TODO: need special handling for RangeEditionMinter's maxMintableUpper & maxMintableLower to resolve to maxMintable
 
         mintInfos.push({
-          name: idToInterfaceName[interfaceId],
+          interfaceId,
+          mintId: mintId.toNumber(),
           address: minterAddress,
           startTime: mintInfo.startTime,
           endTime: mintInfo.endTime,
           mintPaused: mintInfo.mintPaused,
           price: mintInfo.price,
-          maxMintable: mintInfo.maxMintablePerAccount,
+          maxMintablePerAccount: mintInfo.maxMintablePerAccount,
           totalMinted: mintInfo.totalMinted,
         })
       }),
@@ -165,27 +177,49 @@ export async function isUserEligibleToMint(client: SoundClient, params: { addres
 
   ;(await Promise.allSettled(mintInfoPromises)).forEach(handleRejections)
 
-  /**
-    4. clientside filter all minters that are live (startTime ≤ now && endTime > now)asicMinter, IMerkleMinter
-  */
+  // Filter mints that are live during the given timestamp
+  const eligibleMints = mintInfos
+    .filter((mintInfo) => {
+      return mintInfo.startTime <= timestamp && mintInfo.endTime > timestamp && mintInfo.mintPaused === false
+    })
+    .sort((a, b) => a.startTime - b.startTime)
+    .sort((a, b) => {
+      // If start times are equal, sort by address
+      if (a.startTime === b.startTime) {
+        return a.address.localeCompare(b.address)
+      }
+      return 0
+    })
 
-  /**
-    5. check eligibility (iterate through list if more than one active minter)
-        - `maxAllowedPerWallet`
-        - If user is below max, check eligibility of specific address to mint:
-            - see if it implements IRangeEditionMinter
-                - use RangeEdtionMinter abi
-                - Eligibility: true
-            - see if it implements IMerkleDropMinter
-                - use MerkleDropMinter abi
-                - Get proof: Hit sound api using address and merkle root (fall back as lanyard) to confirm if they are in the allowlist and get proof
-  */
+  let eligibleMintQuantity = 0
+  for (const mintInfo of eligibleMints) {
+    const minterModule = await minterFactoryMap[mintInfo.interfaceId].connect(mintInfo.address, signerOrProvider)
 
-  /**
-      6. set up mint transaction
-          1. for ones with supported interface: RangeEdtionMinter or MerkleDropMinter
-              1. IBasicMinter, IMerkleMinter
-   */
+    // For any minter that tracks mintedTallies, get the tally for this user
+    if (
+      minterFactoryMap[mintInfo.interfaceId] instanceof RangeEditionMinter__factory ||
+      minterFactoryMap[mintInfo.interfaceId] instanceof MerkleDropMinter__factory
+    ) {
+      const userBalanceBigNum = await (minterModule as RangeEditionMinter | MerkleDropMinter).mintedTallies(
+        editionAddress,
+        mintInfo.mintId,
+        userAddress,
+      )
+
+      const userMintedBalance = userBalanceBigNum.toNumber()
+      eligibleMintQuantity = userMintedBalance - mintInfo.maxMintablePerAccount
+
+      // If any eligible quantity found, break out of loop
+      if (eligibleMintQuantity > 0) {
+        break
+      }
+    } else {
+      // If no mintedTallies, assume user can mint the uint32 max
+      eligibleMintQuantity = UINT32_MAX
+    }
+  }
+
+  return eligibleMintQuantity
 }
 
 export async function mint(client: SoundClient, params: { address: string }) {
@@ -232,8 +266,8 @@ function validateAddress(contractAddress: string) {
   }
 }
 
-const handleRejections = (p: PromiseSettledResult<unknown>) => {
+function handleRejections(p: PromiseSettledResult<unknown>) {
   if (p.status == 'rejected') {
-    console.error(p.reason)
+    console.error('Error:', p.reason)
   }
 }
