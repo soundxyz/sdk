@@ -4,6 +4,7 @@ import { createClient, connectClient, SoundClient, isSoundEdition, getEligibleMi
 import { JsonRpcProvider } from '@ethersproject/providers'
 import { parseEther } from '@ethersproject/units'
 import { Wallet } from '@ethersproject/wallet'
+import testConfig from './testConfig.json'
 
 // First private key from 'test test test...' mnemonic
 const TEST_PK = '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
@@ -13,21 +14,19 @@ const provider = new JsonRpcProvider({ url: PROVIDER_URL })
 
 const EDITION_ADDRESS = '0x9bd03768a7DCc129555dE410FF8E85528A4F88b5'
 const USER_ADDRESS = '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266'
+const ONE_HOUR = 3600
 
-const PRICE = parseEther('0.1')
-const MAX_MINTABLE_LOWER = 3
-const MAX_MINTABLE_UPPER = 5
-const MAX_PER_ACCOUNT = 2
+const { PRICE, MAX_MINTABLE_LOWER, MAX_MINTABLE_UPPER, MAX_PER_ACCOUNT } = testConfig
 
 const MINT1_START_TIME = 0
-const MINT1_CLOSING_TIME = MINT1_START_TIME + 10
-const MINT1_END_TIME = MINT1_CLOSING_TIME + 10
+const MINT1_CLOSING_TIME = MINT1_START_TIME + ONE_HOUR
+const MINT1_END_TIME = MINT1_CLOSING_TIME + ONE_HOUR
 
 // 2nd mint starts halfway through 1st mint
 const MINT2_START_TIME = MINT1_CLOSING_TIME
-// ...but its closing time is 10 seconds after the end time of the 1st mint
-const MINT2_CLOSING_TIME = MINT1_END_TIME + 10
-const MINT2_END_TIME = MINT2_CLOSING_TIME + 10
+// ...but its closing time is one hour after the end time of the 1st mint
+const MINT2_CLOSING_TIME = MINT1_END_TIME + ONE_HOUR
+const MINT2_END_TIME = MINT2_CLOSING_TIME + ONE_HOUR
 
 console.log(`Waiting for network to be ready (if you're testing locally, make sure you have a local node running).`)
 await provider.ready
@@ -85,11 +84,22 @@ describe('getEligibleMintQuantity', () => {
     client = createClient(provider)
   })
 
-  it('Should return expected value', async () => {
+  it(`Test user is eligible for ${MAX_PER_ACCOUNT - 1} tokens.`, async () => {
     const eligibleAmount = await getEligibleMintQuantity(client, {
       editionAddress: EDITION_ADDRESS,
       userAddress: USER_ADDRESS,
     })
     await expect(eligibleAmount).toBe(1)
+  })
+
+  it(`Random users are eligible for ${MAX_PER_ACCOUNT} tokens each.`, async () => {
+    for (let i = 0; i < 10; i++) {
+      const wallet = Wallet.createRandom()
+      const eligibleAmount = await getEligibleMintQuantity(client, {
+        editionAddress: EDITION_ADDRESS,
+        userAddress: wallet.address,
+      })
+      await expect(eligibleAmount).toBe(2)
+    }
   })
 })
