@@ -210,6 +210,7 @@ export async function getEligibleMintQuantity(
     // If this minter is sold out, skip it
     if (mintInfo.totalMinted >= mintInfo.maxMintable) {
       console.log('Minter is sold out. Address:', mintInfo.address, 'MintId:', mintInfo.mintId)
+      eligibleMintQuantity = 0
       continue
     }
 
