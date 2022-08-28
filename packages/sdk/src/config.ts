@@ -33,14 +33,6 @@ export const interfaceIds = {
   IRangeEditionMinter: '0xfd5ca5c9',
 }
 
-export const idToInterfaceName = {
-  [interfaceIds.ISoundEditionV1]: 'ISoundEditionV1',
-  [interfaceIds.IMinterModule]: 'IMinterModule',
-  [interfaceIds.IFixedPriceSignatureMinter]: 'IFixedPriceSignatureMinter',
-  [interfaceIds.IMerkleDropMinter]: 'IMerkleDropMinter',
-  [interfaceIds.IRangeEditionMinter]: 'IRangeEditionMinter',
-}
-
 export const minterFactoryMap = {
   [interfaceIds.IRangeEditionMinter]: RangeEditionMinter__factory,
   [interfaceIds.IFixedPriceSignatureMinter]: FixedPriceSignatureMinter__factory,

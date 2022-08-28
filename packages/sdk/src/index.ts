@@ -2,12 +2,10 @@ import type { Provider } from '@ethersproject/abstract-provider'
 import { Signer } from '@ethersproject/abstract-signer'
 import { isAddress } from '@ethersproject/address'
 import { BigNumber } from '@ethersproject/bignumber'
-import { minterFactoryMap, interfaceIds, idToInterfaceName, UINT32_MAX } from './config'
+import { minterFactoryMap, interfaceIds, UINT32_MAX } from './config'
 import {
   SoundEditionV1__factory,
   IMinterModule__factory,
-  RangeEditionMinter__factory,
-  MerkleDropMinter__factory,
   RangeEditionMinter,
   MerkleDropMinter,
 } from '@soundxyz/sound-protocol'
