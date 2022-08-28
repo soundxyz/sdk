@@ -8,9 +8,9 @@ import {
   IMinterModule__factory,
   RangeEditionMinter,
   MerkleDropMinter,
-} from '@soundxyz/sound-protocol'
-import { MintInfoStructOutput as StandardMintInfo } from '@soundxyz/sound-protocol/FixedPriceSignatureMinter'
-import { MintInfoStructOutput as RangeEditionMintInfo } from '@soundxyz/sound-protocol/RangeEditionMinter'
+} from '@soundxyz/sound-protocol/typechain/index'
+import { MintInfoStructOutput as StandardMintInfo } from '@soundxyz/sound-protocol/typechain/contracts/modules/FixedPriceSignatureMinter'
+import { MintInfoStructOutput as RangeEditionMintInfo } from '@soundxyz/sound-protocol/typechain/contracts/modules/RangeEditionMinter'
 
 export type SoundClient = {
   signer: Signer | null

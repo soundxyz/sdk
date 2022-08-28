@@ -4,7 +4,7 @@ import {
   FixedPriceSignatureMinter__factory,
   MerkleDropMinter__factory,
   IMinterModule__factory,
-} from '@soundxyz/sound-protocol'
+} from '@soundxyz/sound-protocol/typechain/index'
 
 export type MinterFactoryType =
   | RangeEditionMinter__factory

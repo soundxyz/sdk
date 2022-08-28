@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "scripts": {
     "check": "tsc --pretty --noEmit",
-    "test": "vitest"
+    "test": "hardhat test"
   },
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
@@ -32,7 +32,6 @@
     "directory": "dist",
     "access": "public"
   },
-  "type": "module",
   "sideEffects": false,
   "author": "Saihajpreet Singh <saihaj@sound.xyz> (https://saihaj.dev/)",
   "license": "MIT",
@@ -46,8 +45,17 @@
     "@ethersproject/providers": "^5.7.0",
     "@ethersproject/units": "^5.7.0",
     "@ethersproject/wallet": "^5.7.0",
-    "@soundxyz/sound-protocol": "0.0.2-alpha-0078a44.0",
+    "@nomicfoundation/hardhat-chai-matchers": "^1.0.3",
+    "@nomicfoundation/hardhat-network-helpers": "^1.0.4",
+    "@nomiclabs/hardhat-ethers": "^2.1.1",
+    "@soundxyz/sound-protocol": "0.1.0-alpha-2e0a19c.0",
+    "@types/chai": "^4.3.3",
+    "@types/mocha": "^9.1.1",
+    "chai": "^4.3.6",
     "dotenv": "^16.0.1",
+    "hardhat": "^2.10.2",
+    "ts-node": "^10.9.1",
+    "tslib": "^2.4.0",
     "vite": "^3.0.9",
     "vitest": "^0.22.1"
   }
