@@ -8,6 +8,7 @@ importers:
       '@ethersproject/address': ^5.7.0
       '@ethersproject/bignumber': ^5.7.0
       '@ethersproject/providers': ^5.7.0
+      '@ethersproject/sha2': ^5.7.0
       '@ethersproject/units': ^5.7.0
       '@ethersproject/wallet': ^5.7.0
       '@nomicfoundation/hardhat-chai-matchers': ^1.0.3
@@ -15,10 +16,12 @@ importers:
       '@nomiclabs/hardhat-ethers': ^2.1.1
       '@soundxyz/sound-protocol': 0.1.0-alpha-2e0a19c.0
       '@types/chai': ^4.3.3
+      '@types/crypto-js': ^4.1.1
       '@types/mocha': ^9.1.1
       chai: ^4.3.6
       dotenv: ^16.0.1
       hardhat: ^2.10.2
+      merkletreejs: ^0.2.32
       ts-node: ^10.9.1
       tslib: ^2.4.0
       vite: ^3.0.9
@@ -30,6 +33,7 @@ importers:
     devDependencies:
       '@ethersproject/bignumber': 5.7.0
       '@ethersproject/providers': 5.7.0
+      '@ethersproject/sha2': 5.7.0
       '@ethersproject/units': 5.7.0
       '@ethersproject/wallet': 5.7.0
       '@nomicfoundation/hardhat-chai-matchers': 1.0.3_yjbwlpkretnkiutoh65dywxigy
@@ -37,10 +41,12 @@ importers:
       '@nomiclabs/hardhat-ethers': 2.1.1_hardhat@2.10.2
       '@soundxyz/sound-protocol': 0.1.0-alpha-2e0a19c.0
       '@types/chai': 4.3.3
+      '@types/crypto-js': 4.1.1
       '@types/mocha': 9.1.1
       chai: 4.3.6
       dotenv: 16.0.1
       hardhat: 2.10.2_ts-node@10.9.1
+      merkletreejs: 0.2.32
       ts-node: 10.9.1
       tslib: 2.4.0
       vite: 3.0.9
@@ -738,6 +744,11 @@ packages:
       { integrity: sha512-hC7OMnszpxhZPduX+m+nrx+uFoLkWOMiR4oa/AZF3MuSETYTZmFfJAHqZEM8MVlvfG7BEUcgvtwoCTxBp6hm3g== }
     dev: true
 
+  /@types/crypto-js/4.1.1:
+    resolution:
+      { integrity: sha512-BG7fQKZ689HIoc5h+6D2Dgq1fABRa0RbBWKBd9SP/MVRVXROflpm5fhwyATX5duFmbStzyzyycPB8qUYKDH3NA== }
+    dev: true
+
   /@types/level-errors/3.0.0:
     resolution:
       { integrity: sha512-/lMtoq/Cf/2DVOm6zE6ORyOM+3ZVm/BvzEZVxUhf6bgh8ZHglXlBqxbxSlJeVp8FCbD3IVvk/VbsaNmDjrQvqQ== }
@@ -968,6 +979,11 @@ packages:
       { integrity: sha512-s0IrSOzLlbvX7yp4WBfPITzpAU8sqQcpsmwXDiKwrG4r491vwCO/XpejasRNl0piBMe/DvP4Tz0mIS/X1DPJBQ== }
     dev: true
 
+  /bignumber.js/9.1.0:
+    resolution:
+      { integrity: sha512-4LwHK4nfDOraBCtst+wOWIHbu1vhvAPJK8g8nROd4iuc3PSEjWif/qwbkh8jwCJz6yDBvtU4KPynETgrfh7y3A== }
+    dev: true
+
   /binary-extensions/2.2.0:
     resolution:
       { integrity: sha512-jDctJ/IVQbZoJykoeHbhXpOlNBqGNcwXJKJog42E5HDPUwQTSdjCHdihjj0DlnheQ7blbT6dHOafNAiS8ooQKA== }
@@ -977,6 +993,11 @@ packages:
   /blakejs/1.2.1:
     resolution:
       { integrity: sha512-QXUSXI3QVc/gJME0dBpXrag1kbzOqCjCX8/b54ntNyW6sjtoqxqRk3LTmXzaJoh71zMsDCjM+47jS7XiwN/+fQ== }
+    dev: true
+
+  /bn.js/4.11.6:
+    resolution:
+      { integrity: sha512-XWwnNNFCuuSQ0m3r3C4LE3EiORltHd9M05pq6FOlVeiophzRbMo50Sbz1ehl8K3Z+jw9+vmgnXefY1hz8X+2wA== }
     dev: true
 
   /bn.js/4.12.0:
@@ -1050,6 +1071,11 @@ packages:
   /buffer-from/1.1.2:
     resolution:
       { integrity: sha512-E+XQCRwSbaaiChtv6k6Dwgc+bx+Bs6vuKJHHl5kox/BaKbhiXzqQOwK4cO22yElGp2OCmjwVhT3HmxgyPGnJfQ== }
+    dev: true
+
+  /buffer-reverse/1.0.1:
+    resolution:
+      { integrity: sha512-M87YIUBsZ6N924W57vDwT/aOu8hw7ZgdByz6ijksLjmHJELBASmYTTlNHRgjE+pTsT9oJXGaDSgqqwfdHotDUg== }
     dev: true
 
   /buffer-xor/1.0.3:
@@ -1268,6 +1294,11 @@ packages:
   /create-require/1.1.1:
     resolution:
       { integrity: sha512-dcKFX3jn0MpIaXjisoRvexIJVEKzaq7z2rZKxf+MSr9TkdmHmsU4m2lcLojrj/FHl8mk5VxMmYA+ftRkP/3oKQ== }
+    dev: true
+
+  /crypto-js/3.3.0:
+    resolution:
+      { integrity: sha512-DIT51nX0dCfKltpRiXV+/TVZq+Qq2NgF4644+K7Ttnla7zEzqc+kjJyiB96BHNyUTBxyjzRcZYpUdZa+QAqi6Q== }
     dev: true
 
   /debug/4.3.4:
@@ -1655,6 +1686,13 @@ packages:
     engines: { node: '>=10' }
     dev: true
 
+  /ethereum-bloom-filters/1.0.10:
+    resolution:
+      { integrity: sha512-rxJ5OFN3RwjQxDcFP2Z5+Q9ho4eIdEmSc2ht0fCu8Se9nbXjZ7/031uXoUYJ87KHCOdVeiUuwSnoS7hmYAGVHA== }
+    dependencies:
+      js-sha3: 0.8.0
+    dev: true
+
   /ethereum-cryptography/0.1.3:
     resolution:
       { integrity: sha512-w8/4x1SGGzc+tO97TASLja6SLd3fRIK2tLVcV2Gx4IB21hE19atll5Cq9o3d0ZmAYC/8aw0ipieTSiekAea4SQ== }
@@ -1756,6 +1794,14 @@ packages:
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
+    dev: true
+
+  /ethjs-unit/0.1.6:
+    resolution: { integrity: sha1-xmWSHkduh7ziqdWIpv4EBbLEFpk= }
+    engines: { node: '>=6.5.0', npm: '>=3' }
+    dependencies:
+      bn.js: 4.11.6
+      number-to-bn: 1.7.0
     dev: true
 
   /ethjs-util/0.1.6:
@@ -2428,6 +2474,18 @@ packages:
       semaphore-async-await: 1.5.1
     dev: true
 
+  /merkletreejs/0.2.32:
+    resolution:
+      { integrity: sha512-TostQBiwYRIwSE5++jGmacu3ODcKAgqb0Y/pnIohXS7sWxh1gCkSptbmF1a43faehRDpcHf7J/kv0Ml2D/zblQ== }
+    engines: { node: '>= 7.6.0' }
+    dependencies:
+      bignumber.js: 9.1.0
+      buffer-reverse: 1.0.1
+      crypto-js: 3.3.0
+      treeify: 1.1.0
+      web3-utils: 1.7.5
+    dev: true
+
   /miller-rabin/4.0.1:
     resolution:
       { integrity: sha512-115fLhvZVqWwHPbClyntxEVfVDfl9DLLTuJvq3g2O/Oxi8AiNouAHvDSzHS0viUJc+V5vm3eq91Xwqn9dp4jRA== }
@@ -2536,6 +2594,14 @@ packages:
     resolution:
       { integrity: sha512-6eZs5Ls3WtCisHWp9S2GUy8dqkpGi4BVSz3GaqiE6ezub0512ESztXUwUB6C6IKbQkY2Pnb/mD4WYojCRwcwLA== }
     engines: { node: '>=0.10.0' }
+    dev: true
+
+  /number-to-bn/1.7.0:
+    resolution: { integrity: sha1-uzYjWS9+X54AMLGXe9QaDFP+HqA= }
+    engines: { node: '>=6.5.0', npm: '>=3' }
+    dependencies:
+      bn.js: 4.11.6
+      strip-hex-prefix: 1.0.0
     dev: true
 
   /object-inspect/1.12.2:
@@ -3034,6 +3100,12 @@ packages:
     engines: { node: '>=0.6' }
     dev: true
 
+  /treeify/1.1.0:
+    resolution:
+      { integrity: sha512-1m4RA7xVAJrSGrrXGs0L3YTwyvBs2S8PbRHaLZAkFw7JR8oIFwYtysxlBZhYIa7xSyiYJKZ3iGrrk55cGA3i9A== }
+    engines: { node: '>=0.6' }
+    dev: true
+
   /true-case-path/2.2.1:
     resolution:
       { integrity: sha512-0z3j8R7MCjy10kc/g+qg7Ln3alJTodw9aDuVWZa3uiWqfuBMKeAeP2ocWcxoyM3D73yz3Jt/Pu4qPr4wHSdB/Q== }
@@ -3129,6 +3201,11 @@ packages:
     engines: { node: '>= 0.8' }
     dev: true
 
+  /utf8/3.0.0:
+    resolution:
+      { integrity: sha512-E8VjFIQ/TyQgp+TZfS6l8yp/xWppSAHzidGiRrqe4bK4XP9pTRyKFgGJpO3SN7zdX4DeomTrwaseCHovfpFcqQ== }
+    dev: true
+
   /util-deprecate/1.0.2:
     resolution:
       { integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw== }
@@ -3211,6 +3288,20 @@ packages:
       - stylus
       - supports-color
       - terser
+    dev: true
+
+  /web3-utils/1.7.5:
+    resolution:
+      { integrity: sha512-9AqNOziQky4wNQadEwEfHiBdOZqopIHzQQVzmvvv6fJwDSMhP+khqmAZC7YTiGjs0MboyZ8tWNivqSO1699XQw== }
+    engines: { node: '>=8.0.0' }
+    dependencies:
+      bn.js: 5.2.1
+      ethereum-bloom-filters: 1.0.10
+      ethereumjs-util: 7.1.5
+      ethjs-unit: 0.1.6
+      number-to-bn: 1.7.0
+      randombytes: 2.1.0
+      utf8: 3.0.0
     dev: true
 
   /workerpool/6.2.1:
