@@ -110,6 +110,120 @@ export async function getEligibleMintQuantity(
   }
 
   const userAddress = (params.userAddress || (await signer?.getAddress())) as string
+  // const editionContract = SoundEditionV1__factory.connect(editionAddress, signerOrProvider)
+
+  const mintInfos: MintInfo[] = await getMintInfo({ editionAddress, timestamp, signerOrProvider })
+
+  // Filter mints that are live during the given timestamp
+  const eligibleMints = mintInfos
+    .filter((mintInfo) => {
+      return mintInfo.startTime <= timestamp && mintInfo.endTime > timestamp && !mintInfo.mintPaused
+    })
+    .sort((a, b) => a.startTime - b.startTime)
+    .sort((a, b) => {
+      // If start times are equal, sort by address
+      if (a.startTime === b.startTime) {
+        return a.address.localeCompare(b.address)
+      }
+      return 0
+    })
+
+  let eligibleMintQuantity = 0
+  for (const mintInfo of eligibleMints) {
+    const minterModule = await minterFactoryMap[mintInfo.interfaceId].connect(mintInfo.address, signerOrProvider)
+
+    // If this minter is sold out, skip it
+    if (mintInfo.totalMinted >= mintInfo.maxMintable) {
+      eligibleMintQuantity = 0
+      continue
+    }
+
+    // For any minter that tracks mintedTallies, get the tally for this user
+    if (
+      mintInfo.interfaceId == interfaceIds.IRangeEditionMinter ||
+      mintInfo.interfaceId == interfaceIds.IMerkleDropMinter
+    ) {
+      const userBalanceBigNum = await (minterModule as RangeEditionMinter | MerkleDropMinter).mintedTallies(
+        editionAddress,
+        mintInfo.mintId,
+        userAddress,
+      )
+
+      const userMintedBalance = userBalanceBigNum.toNumber()
+      eligibleMintQuantity = mintInfo.maxMintablePerAccount - userMintedBalance
+
+      // If any eligible quantity found, break out of loop
+      if (eligibleMintQuantity > 0) {
+        break
+      }
+    } else {
+      // If no mintedTallies, assume user can mint the uint32 max
+      eligibleMintQuantity = UINT32_MAX
+    }
+  }
+
+  return eligibleMintQuantity
+}
+
+export async function mint(client: SoundClient, params: { address: string }) {
+  await connectClient(client)
+  validateAddress(params.address)
+  // TODO
+}
+
+/*************************************************************************************
+                              HELPER FUNCTIONS
+ ************************************************************************************/
+
+export async function connectClient(client: SoundClient) {
+  let chainId: number | undefined
+  if (client.signer) {
+    try {
+      chainId = await client.signer.getChainId()
+    } catch (e: any) {
+      if (e?.message.includes('missing provider')) {
+        throw new Error('Signer must be connected to a provider: https://docs.ethers.io/v5/api/signer/#Signer-connect')
+      } else {
+        throw e
+      }
+    }
+  } else {
+    const network = await client.provider!.getNetwork()
+    chainId = network.chainId
+  }
+
+  // Using type cast for chainId here because we know signer or provider exists,
+  // therefore chainId will be defined.
+  const isSupported = SUPPORTED_CHAIN_IDS.includes(chainId as ChainId)
+
+  if (!isSupported) {
+    throw new Error('Invalid chain ID')
+  }
+
+  client.chainId = chainId as ChainId
+}
+
+function validateAddress(contractAddress: string) {
+  if (!isAddress(contractAddress)) {
+    throw new Error('Invalid contract address')
+  }
+}
+
+function handleRejections(p: PromiseSettledResult<unknown>) {
+  if (p.status == 'rejected') {
+    console.error('Error:', p.reason)
+  }
+}
+
+async function getMintInfo({
+  editionAddress,
+  signerOrProvider,
+  timestamp,
+}: {
+  editionAddress: string
+  signerOrProvider: Signer | Provider
+  timestamp: number
+}) {
   const editionContract = SoundEditionV1__factory.connect(editionAddress, signerOrProvider)
 
   // Get the addresses with MINTER_ROLE
@@ -189,103 +303,5 @@ export async function getEligibleMintQuantity(
 
   ;(await Promise.allSettled(mintInfoPromises)).forEach(handleRejections)
 
-  // Filter mints that are live during the given timestamp
-  const eligibleMints = mintInfos
-    .filter((mintInfo) => {
-      return mintInfo.startTime <= timestamp && mintInfo.endTime > timestamp && !mintInfo.mintPaused
-    })
-    .sort((a, b) => a.startTime - b.startTime)
-    .sort((a, b) => {
-      // If start times are equal, sort by address
-      if (a.startTime === b.startTime) {
-        return a.address.localeCompare(b.address)
-      }
-      return 0
-    })
-
-  let eligibleMintQuantity = 0
-  for (const mintInfo of eligibleMints) {
-    const minterModule = await minterFactoryMap[mintInfo.interfaceId].connect(mintInfo.address, signerOrProvider)
-
-    // If this minter is sold out, skip it
-    if (mintInfo.totalMinted >= mintInfo.maxMintable) {
-      eligibleMintQuantity = 0
-      continue
-    }
-
-    // For any minter that tracks mintedTallies, get the tally for this user
-    if (
-      mintInfo.interfaceId == interfaceIds.IRangeEditionMinter ||
-      mintInfo.interfaceId == interfaceIds.IMerkleDropMinter
-    ) {
-      const userBalanceBigNum = await (minterModule as RangeEditionMinter | MerkleDropMinter).mintedTallies(
-        editionAddress,
-        mintInfo.mintId,
-        userAddress,
-      )
-
-      const userMintedBalance = userBalanceBigNum.toNumber()
-      eligibleMintQuantity = mintInfo.maxMintablePerAccount - userMintedBalance
-
-      // If any eligible quantity found, break out of loop
-      if (eligibleMintQuantity > 0) {
-        break
-      }
-    } else {
-      // If no mintedTallies, assume user can mint the uint32 max
-      eligibleMintQuantity = UINT32_MAX
-    }
-  }
-
-  return eligibleMintQuantity
-}
-
-export async function mint(client: SoundClient, params: { address: string }) {
-  await connectClient(client)
-  validateAddress(params.address)
-  // TODO
-}
-
-/*******************
-  HELPER FUNCTIONS
- ******************/
-
-export async function connectClient(client: SoundClient) {
-  let chainId: number | undefined
-  if (client.signer) {
-    try {
-      chainId = await client.signer.getChainId()
-    } catch (e: any) {
-      if (e?.message.includes('missing provider')) {
-        throw new Error('Signer must be connected to a provider: https://docs.ethers.io/v5/api/signer/#Signer-connect')
-      } else {
-        throw e
-      }
-    }
-  } else {
-    const network = await client.provider!.getNetwork()
-    chainId = network.chainId
-  }
-
-  // Using type cast for chainId here because we know signer or provider exists,
-  // therefore chainId will be defined.
-  const isSupported = SUPPORTED_CHAIN_IDS.includes(chainId as ChainId)
-
-  if (!isSupported) {
-    throw new Error('Invalid chain ID')
-  }
-
-  client.chainId = chainId as ChainId
-}
-
-function validateAddress(contractAddress: string) {
-  if (!isAddress(contractAddress)) {
-    throw new Error('Invalid contract address')
-  }
-}
-
-function handleRejections(p: PromiseSettledResult<unknown>) {
-  if (p.status == 'rejected') {
-    console.error('Error:', p.reason)
-  }
+  return mintInfos
 }
