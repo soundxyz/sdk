@@ -349,6 +349,42 @@ describe('getEligibleMintQuantity: RangeEditionMinter', () => {
     expect(eligibleQuantity1).to.equal(mint1MaxMintablePerAccount)
     expect(eligibleQuantity2).to.equal(mint2MaxMintablePerAccount)
   })
+
+  it(`Returns correct quantity from merkle minter.`, async () => {
+    const signers = await hre.ethers.getSigners()
+    const startTime = now()
+    const endTime = now() + ONE_HOUR + ONE_HOUR
+    const maxMintablePerAccount = 3
+    const maxMintable = 10
+
+    await createMerkleMint({
+      startTime,
+      endTime,
+      maxMintable,
+      maxMintablePerAccount,
+      signer: signers[0],
+      minterAddress: merkleDropMinter.address,
+      editionAddress: soundEdition.address,
+    })
+
+    // for (let i = 0; i < signers.length; i++) {
+    //   const eligibleQuantity = await getEligibleMintQuantity(client, {
+    //     editionAddress: soundEdition.address,
+    //     userAddress: signers[i].address,
+    //     timestamp: startTime,
+    //   })
+    //   await expect(eligibleQuantity).to.equal(2)
+    // }
+
+    // for (let i = 0; i < signers.length; i++) {
+    //   const eligibleQuantity = await getEligibleMintQuantity(client, {
+    //     editionAddress: soundEdition.address,
+    //     userAddress: signers[i].address,
+    //     timestamp: endTime,
+    //   })
+    //   await expect(eligibleQuantity).to.equal(0)
+    // }
+  })
 })
 
 describe('getEligibleMintQuantity: MerkleDropMinter', () => {
@@ -380,6 +416,7 @@ describe('getEligibleMintQuantity: MerkleDropMinter', () => {
       await expect(eligibleQuantity).to.equal(expectedQuantity)
     }
 
+<<<<<<< HEAD
     // No eligibility for anyone after end time
     for (let i = 0; i < 20; i++) {
       const eligibleQuantity = await getEligibleMintQuantity(client, {
@@ -483,3 +520,66 @@ describe('getEligibleMintQuantity: multiple MerkleDropMinter & RangeEditionMinte
   expect(eligibleQuantity3).to.equal(mint3MaxMintablePerAccount)
   expect(eligibleQuantity4).to.equal(mint4MaxMintablePerAccount)
 })
+=======
+  // get all mint ids for this edition & return the latest
+  const filter = minter.filters.MintConfigCreated(editionAddress)
+  const roleEvents = await minter.queryFilter(filter)
+  const mintId = roleEvents[roleEvents.length - 1].args.mintId
+  if (!roleEvents[roleEvents.length - 1].args.mintId) {
+    throw new Error('No mintId found')
+  }
+  return { mintId }
+}
+
+async function createMerkleMint({
+  signer,
+  minterAddress,
+  editionAddress,
+  startTime,
+  endTime,
+  maxMintable,
+  maxMintablePerAccount,
+}: {
+  signer: Signer
+  minterAddress: string
+  editionAddress: string
+  startTime: number
+  endTime: number
+  maxMintable: number
+  maxMintablePerAccount: number
+}) {
+  const signers = await hre.ethers.getSigners()
+  const leaves = signers.slice(0, NUM_OF_MERKLE_RECIPIENTS).map((s) => s.address)
+  // .map((x) => sha256(x))
+  const tree = new MerkleTree(leaves, sha256)
+  const root = tree.getRoot().toString('hex')
+  const leaf = signers[2].address
+  const proof = tree.getProof(leaf)
+  console.log('validProof?', tree.verify(proof, leaf, root)) // true
+  const badLeaf = signers[5].address
+  const badProof = tree.getProof(badLeaf)
+  console.log('validProof?', tree.verify(badProof, badLeaf, root)) // false
+
+  // const minter = MerkleDropMinter__factory.connect(minterAddress, signer)
+  // await minter.createEditionMint(
+  //   editionAddress,
+  //   merkleRoot,
+  //   BigNumber.from(PRICE),
+  //   startTime,
+  //   endTime,
+  //   maxMintable,
+  //   maxMintablePerAccount,
+  // )
+
+  // console.log({ merkleRoot })
+
+  // // get all mint ids for this edition & return the latest
+  // const filter = minter.filters.MintConfigCreated(editionAddress)
+  // const roleEvents = await minter.queryFilter(filter)
+  // const mintId = roleEvents[roleEvents.length - 1].args.mintId
+  // if (!roleEvents[roleEvents.length - 1].args.mintId) {
+  //   throw new Error('No mintId found')
+  // }
+  // return { mintId, merkleRoot }
+}
+>>>>>>> createMerkleMint
