@@ -1,3 +1,4 @@
+import 'dotenv/config'
 import type { Provider } from '@ethersproject/abstract-provider'
 import { Signer } from '@ethersproject/abstract-signer'
 import { isAddress } from '@ethersproject/address'
@@ -11,6 +12,9 @@ import {
 } from '@soundxyz/sound-protocol/typechain/index'
 import { MintInfoStructOutput as StandardMintInfo } from '@soundxyz/sound-protocol/typechain/contracts/modules/FixedPriceSignatureMinter'
 import { MintInfoStructOutput as RangeEditionMintInfo } from '@soundxyz/sound-protocol/typechain/contracts/modules/RangeEditionMinter'
+import { dummyMerkle } from '../test/dummyData'
+
+const TESTING = process.env.NODE_ENV === 'development'
 
 export type SoundClient = {
   signer: Signer | null
@@ -138,11 +142,22 @@ export async function getEligibleMintQuantity(
       continue
     }
 
+    // If merkle drop, check if the user is eligible
+    if (mintInfo.interfaceId === interfaceIds.IMerkleDropMinter) {
+      const merkle = TESTING
+        ? dummyMerkle
+        : await fetchMerkel({ minterAddress: mintInfo.address, mintId: mintInfo.mintId, userAddress })
+
+      const merkleRoot = merkle.tree.getRoot().toString('hex')
+      const merkleProof = merkle.tree.getProof(userAddress)
+      const isEligible = merkle.tree.verify(merkleProof, userAddress, merkleRoot)
+      if (!isEligible) {
+        continue
+      }
+    }
+
     // For any minter that tracks mintedTallies, get the tally for this user
-    if (
-      mintInfo.interfaceId == interfaceIds.IRangeEditionMinter ||
-      mintInfo.interfaceId == interfaceIds.IMerkleDropMinter
-    ) {
+    if (hasMintedTallies(mintInfo.interfaceId)) {
       const userBalanceBigNum = await (minterModule as RangeEditionMinter | MerkleDropMinter).mintedTallies(
         editionAddress,
         mintInfo.mintId,
@@ -304,4 +319,37 @@ async function getMintInfo({
   ;(await Promise.allSettled(mintInfoPromises)).forEach(handleRejections)
 
   return mintInfos
+}
+
+// Minters that have the `mintedTallies` mapping
+function hasMintedTallies(interfaceId: string) {
+  return interfaceId == interfaceIds.IRangeEditionMinter || interfaceId == interfaceIds.IMerkleDropMinter
+}
+
+async function fetchMerkel({
+  minterAddress,
+  mintId,
+  userAddress,
+}: {
+  minterAddress: string
+  mintId: number
+  userAddress: string
+}) {
+  console.error('TODO: implement fetchMerkelTree')
+
+  // Placeholder to satisfy typescript
+  return {
+    root: '0x',
+    tree: {
+      getRoot() {
+        return '0x'
+      },
+      getProof() {
+        return []
+      },
+      verify() {
+        return false
+      },
+    },
+  }
 }
