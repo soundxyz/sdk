@@ -3,7 +3,6 @@ import { createClient, connectClient, SoundClient, isSoundEdition, getEligibleMi
 import { Wallet } from '@ethersproject/wallet'
 import { BigNumber } from '@ethersproject/bignumber'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
-import { sha256 } from '@ethersproject/sha2'
 import {
   FixedPriceSignatureMinter__factory,
   MerkleDropMinter__factory,
@@ -19,16 +18,14 @@ import {
 import hre from 'hardhat'
 import { UINT32_MAX } from '../src/config'
 import { Signer } from '@ethersproject/abstract-signer'
-import { MerkleTree } from 'merkletreejs'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
+import { dummyMerkleDrop } from './dummyData'
 
 const NULL_ADDRESS = '0x0000000000000000000000000000000000000000'
 const NON_NULL_ADDRESS = '0x0000000000000000000000000000000000000001'
 const ONE_HOUR = 3600
 const PRICE = 420420420
 const SOUND_FEE = 0
-const NUM_OF_MERKLE_RECIPIENTS = 5
-
 /*******************
         SETUP
  ******************/
@@ -351,37 +348,30 @@ describe('getEligibleMintQuantity: single RangeEditionMinter instance', () => {
   it(`Returns correct quantity from merkle minter.`, async () => {
     const signers = await hre.ethers.getSigners()
     const startTime = now()
-    const endTime = now() + ONE_HOUR + ONE_HOUR
-    const maxMintablePerAccount = 3
+    const endTime = now() + ONE_HOUR
+    const maxMintablePerAccount = 2
     const maxMintable = 10
 
     await createMerkleMint({
+      editionAddress: soundEdition.address,
+      merkleRootHash: dummyMerkleDrop.root,
       startTime,
       endTime,
       maxMintable,
       maxMintablePerAccount,
       signer: signers[0],
       minterAddress: merkleDropMinter.address,
-      editionAddress: soundEdition.address,
     })
 
-    // for (let i = 0; i < signers.length; i++) {
-    //   const eligibleQuantity = await getEligibleMintQuantity(client, {
-    //     editionAddress: soundEdition.address,
-    //     userAddress: signers[i].address,
-    //     timestamp: startTime,
-    //   })
-    //   await expect(eligibleQuantity).to.equal(2)
-    // }
-
-    // for (let i = 0; i < signers.length; i++) {
-    //   const eligibleQuantity = await getEligibleMintQuantity(client, {
-    //     editionAddress: soundEdition.address,
-    //     userAddress: signers[i].address,
-    //     timestamp: endTime,
-    //   })
-    //   await expect(eligibleQuantity).to.equal(0)
-    // }
+    for (let i = 0; i < 20; i++) {
+      const expectedQuantity = i < dummyMerkleDrop.recipients.length ? maxMintablePerAccount : 0
+      const eligibleQuantity = await getEligibleMintQuantity(client, {
+        editionAddress: soundEdition.address,
+        userAddress: signers[i].address,
+        timestamp: startTime,
+      })
+      await expect(eligibleQuantity).to.equal(expectedQuantity)
+    }
   })
 })
 
@@ -440,6 +430,7 @@ async function createMerkleMint({
   signer,
   minterAddress,
   editionAddress,
+  merkleRootHash,
   startTime,
   endTime,
   maxMintable,
@@ -448,42 +439,20 @@ async function createMerkleMint({
   signer: Signer
   minterAddress: string
   editionAddress: string
+  merkleRootHash: string
   startTime: number
   endTime: number
   maxMintable: number
   maxMintablePerAccount: number
 }) {
-  const signers = await hre.ethers.getSigners()
-  const leaves = signers.slice(0, NUM_OF_MERKLE_RECIPIENTS).map((s) => s.address)
-  // .map((x) => sha256(x))
-  const tree = new MerkleTree(leaves, sha256)
-  const root = tree.getRoot().toString('hex')
-  const leaf = signers[2].address
-  const proof = tree.getProof(leaf)
-  console.log('validProof?', tree.verify(proof, leaf, root)) // true
-  const badLeaf = signers[5].address
-  const badProof = tree.getProof(badLeaf)
-  console.log('validProof?', tree.verify(badProof, badLeaf, root)) // false
-
-  // const minter = MerkleDropMinter__factory.connect(minterAddress, signer)
-  // await minter.createEditionMint(
-  //   editionAddress,
-  //   merkleRoot,
-  //   BigNumber.from(PRICE),
-  //   startTime,
-  //   endTime,
-  //   maxMintable,
-  //   maxMintablePerAccount,
-  // )
-
-  // console.log({ merkleRoot })
-
-  // // get all mint ids for this edition & return the latest
-  // const filter = minter.filters.MintConfigCreated(editionAddress)
-  // const roleEvents = await minter.queryFilter(filter)
-  // const mintId = roleEvents[roleEvents.length - 1].args.mintId
-  // if (!roleEvents[roleEvents.length - 1].args.mintId) {
-  //   throw new Error('No mintId found')
-  // }
-  // return { mintId, merkleRoot }
+  const minter = MerkleDropMinter__factory.connect(minterAddress, signer)
+  await minter.createEditionMint(
+    editionAddress,
+    merkleRootHash,
+    BigNumber.from(PRICE),
+    startTime,
+    endTime,
+    maxMintable,
+    maxMintablePerAccount,
+  )
 }

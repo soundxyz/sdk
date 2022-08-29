@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "scripts": {
     "check": "tsc --pretty --noEmit",
-    "test": "hardhat test"
+    "test": "IS_TESTING_SDK=true hardhat test"
   },
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",

@@ -12,9 +12,9 @@ import {
 } from '@soundxyz/sound-protocol/typechain/index'
 import { MintInfoStructOutput as StandardMintInfo } from '@soundxyz/sound-protocol/typechain/contracts/modules/FixedPriceSignatureMinter'
 import { MintInfoStructOutput as RangeEditionMintInfo } from '@soundxyz/sound-protocol/typechain/contracts/modules/RangeEditionMinter'
-import { dummyMerkle } from '../test/dummyData'
+import { dummyMerkleDrop } from '../test/dummyData'
 
-const TESTING = process.env.NODE_ENV === 'development'
+const IS_TESTING_SDK = !!process.env.IS_TESTING_SDK
 
 export type SoundClient = {
   signer: Signer | null
@@ -143,8 +143,8 @@ export async function getEligibleMintQuantity(
 
     // If merkle drop, check if the user is eligible
     if (mintInfo.interfaceId === interfaceIds.IMerkleDropMinter) {
-      const merkle = TESTING
-        ? dummyMerkle
+      const merkle = IS_TESTING_SDK
+        ? dummyMerkleDrop
         : await fetchMerkel({ minterAddress: mintInfo.address, mintId: mintInfo.mintId, userAddress })
 
       const merkleRoot = merkle.tree.getRoot().toString('hex')
@@ -334,7 +334,7 @@ async function fetchMerkel({
   mintId: number
   userAddress: string
 }) {
-  console.error('TODO: implement fetchMerkelTree')
+  console.error('TODO: fetchMerkelTree - Make API call to get merkle tree')
 
   // Placeholder to satisfy typescript
   return {
