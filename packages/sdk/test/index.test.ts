@@ -17,15 +17,19 @@ import {
 } from '@soundxyz/sound-protocol/typechain/index'
 import hre from 'hardhat'
 import { UINT32_MAX } from '../src/config'
-import { Signer } from '@ethersproject/abstract-signer'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { dummyMerkleDrop } from './dummyData'
+import {
+  NULL_ADDRESS,
+  NON_NULL_ADDRESS,
+  ONE_HOUR,
+  PRICE,
+  SOUND_FEE,
+  now,
+  createMerkleMint,
+  createRangeMint,
+} from './helpers'
 
-const NULL_ADDRESS = '0x0000000000000000000000000000000000000000'
-const NON_NULL_ADDRESS = '0x0000000000000000000000000000000000000001'
-const ONE_HOUR = 3600
-const PRICE = 420420420
-const SOUND_FEE = 0
 /*******************
         SETUP
  ******************/
@@ -118,11 +122,13 @@ let fixedPriceSignatureMinter: FixedPriceSignatureMinter
 let merkleDropMinter: MerkleDropMinter
 let rangeEditionMinter: RangeEditionMinter
 let signers: SignerWithAddress[]
-let firstSigner: SignerWithAddress
+let artistWallet: SignerWithAddress
+let buyer: SignerWithAddress
 
 beforeEach(async () => {
   signers = await hre.ethers.getSigners()
-  firstSigner = signers[0]
+  artistWallet = signers[0]
+  buyer = signers[1]
 
   client = createClient(hre.ethers.provider)
   const fixture = await loadFixture(deployProtocol)
@@ -152,7 +158,7 @@ describe('isSoundEdition', () => {
   })
 })
 
-describe('getEligibleMintQuantity: single RangeEditionMinter instance', () => {
+describe('getEligibleMintQuantity: RangeEditionMinter', () => {
   it(`Eligible quantity is correct`, async () => {
     const startTime = now()
 
@@ -163,27 +169,27 @@ describe('getEligibleMintQuantity: single RangeEditionMinter instance', () => {
       maxMintablePerAccount: 2,
       maxMintableLower: 4,
       maxMintableUpper: 5,
-      signer: firstSigner,
+      artistWallet,
       minterAddress: rangeEditionMinter.address,
       editionAddress: soundEdition.address,
     })
 
     const eligibleQuantity = await getEligibleMintQuantity(client, {
       editionAddress: soundEdition.address,
-      userAddress: firstSigner.address,
+      userAddress: buyer.address,
     })
 
     expect(eligibleQuantity).to.equal(2)
 
     // Test balances decreases after minting
-    const minter = RangeEditionMinter__factory.connect(rangeEditionMinter.address, firstSigner)
+    const minter = RangeEditionMinter__factory.connect(rangeEditionMinter.address, buyer)
     await minter.mint(soundEdition.address, mintId, 1, NULL_ADDRESS, {
       value: BigNumber.from(PRICE),
     })
 
     const newEligibleQuantity = await getEligibleMintQuantity(client, {
       editionAddress: soundEdition.address,
-      userAddress: firstSigner.address,
+      userAddress: buyer.address,
     })
 
     expect(newEligibleQuantity).to.equal(1)
@@ -201,14 +207,14 @@ describe('getEligibleMintQuantity: single RangeEditionMinter instance', () => {
       maxMintablePerAccount: 100,
       maxMintableLower: 100,
       maxMintableUpper: 101,
-      signer: firstSigner,
+      artistWallet,
       minterAddress: rangeEditionMinter.address,
       editionAddress: soundEdition.address,
     })
 
     const eligibleQuantity = await getEligibleMintQuantity(client, {
       editionAddress: soundEdition.address,
-      userAddress: firstSigner.address,
+      userAddress: buyer.address,
       timestamp: endTime,
     })
 
@@ -226,7 +232,7 @@ describe('getEligibleMintQuantity: single RangeEditionMinter instance', () => {
       maxMintablePerAccount: 1,
       maxMintableLower: 4,
       maxMintableUpper,
-      signer: firstSigner,
+      artistWallet,
       minterAddress: rangeEditionMinter.address,
       editionAddress: soundEdition.address,
     })
@@ -251,7 +257,6 @@ describe('getEligibleMintQuantity: single RangeEditionMinter instance', () => {
   it(`Eligible balance switches to zero after closing time if maxMintableLower has been surpassed`, async () => {
     const maxMintableLower = 5
     const maxMintablePerAccount = 1
-    const signers = await hre.ethers.getSigners()
     const startTime = now()
     const closingTime = startTime + ONE_HOUR
 
@@ -262,7 +267,7 @@ describe('getEligibleMintQuantity: single RangeEditionMinter instance', () => {
       maxMintablePerAccount,
       maxMintableLower,
       maxMintableUpper: 10,
-      signer: signers[0],
+      artistWallet,
       minterAddress: rangeEditionMinter.address,
       editionAddress: soundEdition.address,
     })
@@ -313,7 +318,7 @@ describe('getEligibleMintQuantity: single RangeEditionMinter instance', () => {
       maxMintablePerAccount: mint1MaxMintablePerAccount,
       maxMintableLower: 99,
       maxMintableUpper: 100,
-      signer: firstSigner,
+      artistWallet,
       minterAddress: rangeEditionMinter.address,
       editionAddress: soundEdition.address,
     })
@@ -325,27 +330,29 @@ describe('getEligibleMintQuantity: single RangeEditionMinter instance', () => {
       maxMintablePerAccount: mint2MaxMintablePerAccount,
       maxMintableLower: 99,
       maxMintableUpper: 100,
-      signer: firstSigner,
+      artistWallet,
       minterAddress: rangeEditionMinter.address,
       editionAddress: soundEdition.address,
     })
 
     const eligibleQuantity1 = await getEligibleMintQuantity(client, {
       editionAddress: soundEdition.address,
-      userAddress: firstSigner.address,
+      userAddress: buyer.address,
     })
 
     const eligibleQuantity2 = await getEligibleMintQuantity(client, {
       editionAddress: soundEdition.address,
-      userAddress: firstSigner.address,
+      userAddress: buyer.address,
       timestamp: mint2StartTime,
     })
 
     expect(eligibleQuantity1).to.equal(mint1MaxMintablePerAccount)
     expect(eligibleQuantity2).to.equal(mint2MaxMintablePerAccount)
   })
+})
 
-  it(`Returns correct quantity from merkle minter.`, async () => {
+describe('getEligibleMintQuantity: MerkleDropMinter', () => {
+  it(`Returns eligible quantity for merkle drop recipients.`, async () => {
     const signers = await hre.ethers.getSigners()
     const startTime = now()
     const endTime = now() + ONE_HOUR
@@ -359,7 +366,7 @@ describe('getEligibleMintQuantity: single RangeEditionMinter instance', () => {
       endTime,
       maxMintable,
       maxMintablePerAccount,
-      signer: signers[0],
+      artistWallet,
       minterAddress: merkleDropMinter.address,
     })
 
@@ -372,87 +379,107 @@ describe('getEligibleMintQuantity: single RangeEditionMinter instance', () => {
       })
       await expect(eligibleQuantity).to.equal(expectedQuantity)
     }
+
+    // No eligibility for anyone after end time
+    for (let i = 0; i < 20; i++) {
+      const eligibleQuantity = await getEligibleMintQuantity(client, {
+        editionAddress: soundEdition.address,
+        userAddress: signers[i].address,
+        timestamp: endTime,
+      })
+      await expect(eligibleQuantity).to.equal(0)
+    }
   })
 })
 
-/*******************
-    TEST HELPERS
- ******************/
+describe('getEligibleMintQuantity: multiple MerkleDropMinter & RangeEditionMinter instances', async () => {
+  const buyer = signers[1]
+  const maxMintable = 100
 
-function now() {
-  return Math.floor(Date.now() / 1000)
-}
+  const mint1StartTime = now()
+  const mint2StartTime = mint1StartTime + ONE_HOUR
+  const mint3StartTime = mint2StartTime + ONE_HOUR
+  const mint4StartTime = mint3StartTime + ONE_HOUR
 
-async function createRangeMint({
-  signer,
-  minterAddress,
-  editionAddress,
-  startTime,
-  closingTime,
-  endTime,
-  maxMintableLower,
-  maxMintableUpper,
-  maxMintablePerAccount,
-}: {
-  signer: Signer
-  minterAddress: string
-  editionAddress: string
-  startTime: number
-  closingTime: number
-  endTime: number
-  maxMintableLower: number
-  maxMintableUpper: number
-  maxMintablePerAccount: number
-}) {
-  const minter = RangeEditionMinter__factory.connect(minterAddress, signer)
-  await minter.createEditionMint(
-    editionAddress,
-    BigNumber.from(PRICE),
-    startTime,
-    closingTime,
-    endTime,
-    maxMintableLower,
-    maxMintableUpper,
-    maxMintablePerAccount,
-  )
+  const mint1MaxMintablePerAccount = 1
+  const mint2MaxMintablePerAccount = 2
+  const mint3MaxMintablePerAccount = 3
+  const mint4MaxMintablePerAccount = 4
 
-  // get all mint ids for this edition & return the latest
-  const filter = minter.filters.MintConfigCreated(editionAddress)
-  const roleEvents = await minter.queryFilter(filter)
-  const mintId = roleEvents[roleEvents.length - 1].args.mintId
-  if (!roleEvents[roleEvents.length - 1].args.mintId) {
-    throw new Error('No mintId found')
-  }
-  return { mintId }
-}
-
-async function createMerkleMint({
-  signer,
-  minterAddress,
-  editionAddress,
-  merkleRootHash,
-  startTime,
-  endTime,
-  maxMintable,
-  maxMintablePerAccount,
-}: {
-  signer: Signer
-  minterAddress: string
-  editionAddress: string
-  merkleRootHash: string
-  startTime: number
-  endTime: number
-  maxMintable: number
-  maxMintablePerAccount: number
-}) {
-  const minter = MerkleDropMinter__factory.connect(minterAddress, signer)
-  await minter.createEditionMint(
-    editionAddress,
-    merkleRootHash,
-    BigNumber.from(PRICE),
-    startTime,
-    endTime,
+  await createMerkleMint({
+    editionAddress: soundEdition.address,
+    merkleRootHash: dummyMerkleDrop.root,
+    startTime: mint1StartTime,
+    endTime: mint2StartTime,
     maxMintable,
-    maxMintablePerAccount,
-  )
-}
+    maxMintablePerAccount: mint1MaxMintablePerAccount,
+    artistWallet,
+    minterAddress: merkleDropMinter.address,
+  })
+
+  await createMerkleMint({
+    editionAddress: soundEdition.address,
+    merkleRootHash: dummyMerkleDrop.root,
+    startTime: mint2StartTime,
+    endTime: mint3StartTime,
+    maxMintable,
+    maxMintablePerAccount: mint2MaxMintablePerAccount,
+    artistWallet,
+    minterAddress: merkleDropMinter.address,
+  })
+
+  await createRangeMint({
+    editionAddress: soundEdition.address,
+    startTime: mint3StartTime,
+    closingTime: mint3StartTime + 1,
+    endTime: mint4StartTime,
+    maxMintableLower: maxMintable - 1,
+    maxMintableUpper: maxMintable,
+    maxMintablePerAccount: mint3MaxMintablePerAccount,
+    artistWallet,
+    minterAddress: merkleDropMinter.address,
+  })
+
+  await createRangeMint({
+    editionAddress: soundEdition.address,
+    startTime: mint4StartTime,
+    closingTime: mint4StartTime + 1,
+    endTime: mint4StartTime + ONE_HOUR,
+    maxMintableLower: maxMintable - 1,
+    maxMintableUpper: maxMintable,
+    maxMintablePerAccount: mint4MaxMintablePerAccount,
+    artistWallet,
+    minterAddress: merkleDropMinter.address,
+  })
+
+  // Check eligibility
+
+  const eligibleQuantity1 = await getEligibleMintQuantity(client, {
+    editionAddress: soundEdition.address,
+    userAddress: buyer.address,
+    timestamp: mint1StartTime,
+  })
+
+  const eligibleQuantity2 = await getEligibleMintQuantity(client, {
+    editionAddress: soundEdition.address,
+    userAddress: buyer.address,
+    timestamp: mint2StartTime,
+  })
+
+  const eligibleQuantity3 = await getEligibleMintQuantity(client, {
+    editionAddress: soundEdition.address,
+    userAddress: buyer.address,
+    timestamp: mint3StartTime,
+  })
+
+  const eligibleQuantity4 = await getEligibleMintQuantity(client, {
+    editionAddress: soundEdition.address,
+    userAddress: buyer.address,
+    timestamp: mint4StartTime,
+  })
+
+  expect(eligibleQuantity1).to.equal(mint1MaxMintablePerAccount)
+  expect(eligibleQuantity2).to.equal(mint2MaxMintablePerAccount)
+  expect(eligibleQuantity3).to.equal(mint3MaxMintablePerAccount)
+  expect(eligibleQuantity4).to.equal(mint4MaxMintablePerAccount)
+})

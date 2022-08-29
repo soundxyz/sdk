@@ -1,9 +1,7 @@
 import {
-  SoundEditionV1__factory,
   RangeEditionMinter__factory,
   FixedPriceSignatureMinter__factory,
   MerkleDropMinter__factory,
-  IMinterModule__factory,
 } from '@soundxyz/sound-protocol/typechain/index'
 
 export type MinterFactoryType =
