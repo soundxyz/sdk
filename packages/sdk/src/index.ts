@@ -46,9 +46,7 @@ const SUPPORTED_CHAIN_IDS = [
 type ChainId = typeof SUPPORTED_CHAIN_IDS[number]
 
 export function createClient(signerOrProvider: Signer | Provider) {
-  if (!signerOrProvider) {
-    throw new Error('Must provide signer or provider')
-  }
+  if (!signerOrProvider) throw new Error('Must provide signer or provider')
 
   let signer = Signer.isSigner(signerOrProvider) ? signerOrProvider : null
   const provider = !Signer.isSigner(signerOrProvider) ? signerOrProvider : null
@@ -105,16 +103,13 @@ export async function getEligibleMintQuantity(
   if (signerOrProvider === null) throw new Error('Must provide signer or provider')
 
   const isEdition = await isSoundEdition(client, params)
-  if (!isEdition) {
-    throw new Error('Not a Sound Edition')
-  }
+  if (!isEdition) throw new Error('Not a Sound Edition')
 
   if (!params.userAddress && !signer) {
     throw new Error('Must provide userAddress or a connected signer')
   }
 
   const userAddress = (params.userAddress || (await signer?.getAddress())) as string
-  // const editionContract = SoundEditionV1__factory.connect(editionAddress, signerOrProvider)
 
   const mintInfos: MintInfo[] = await getMintInfo({ editionAddress, timestamp, signerOrProvider })
 
@@ -180,10 +175,18 @@ export async function getEligibleMintQuantity(
   return eligibleMintQuantity
 }
 
-export async function mint(client: SoundClient, params: { address: string }) {
+export async function mint(client: SoundClient, params: { editionAddress: string; quantity?: number }) {
+  const { editionAddress, quantity = 1 } = params
   await connectClient(client)
-  validateAddress(params.address)
-  // TODO
+  validateAddress(editionAddress)
+
+  const { chainId, signer } = client
+  if (chainId === null) throw new Error('Must provide chainId')
+
+  if (!signer) throw new Error('Must a connected signer')
+
+  const isEdition = await isSoundEdition(client, params)
+  if (!isEdition) throw new Error('Not a Sound Edition')
 }
 
 /*************************************************************************************
