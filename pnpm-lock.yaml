@@ -83,6 +83,7 @@ importers:
       tslib: 2.4.0
       vite: 3.0.9
       vitest: 0.22.1
+    publishDirectory: dist
 
 packages:
   /@babel/code-frame/7.18.6:

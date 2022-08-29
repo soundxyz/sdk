@@ -110,7 +110,6 @@ export async function getEligibleMintQuantity(
   }
 
   const userAddress = (params.userAddress || (await signer?.getAddress())) as string
-  // const editionContract = SoundEditionV1__factory.connect(editionAddress, signerOrProvider)
 
   const mintInfos: MintInfo[] = await getMintInfo({ editionAddress, timestamp, signerOrProvider })
 
