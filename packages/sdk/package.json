@@ -49,7 +49,7 @@
     "@nomicfoundation/hardhat-chai-matchers": "^1.0.3",
     "@nomicfoundation/hardhat-network-helpers": "^1.0.4",
     "@nomiclabs/hardhat-ethers": "^2.1.1",
-    "@soundxyz/sound-protocol": "0.1.0-alpha-97ae534.0",
+    "@soundxyz/sound-protocol": "0.0.2-alpha-835aae3",
     "@types/chai": "^4.3.3",
     "@types/mocha": "^9.1.1",
     "chai": "^4.3.6",

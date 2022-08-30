@@ -16,9 +16,9 @@ import {
 } from '@soundxyz/sound-protocol/typechain/index'
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
-
+import { dummyMerkleDrop } from './dummyData'
 import { SoundClient } from '../src/client'
-import { createRangeMint, now } from './helpers'
+import { createRangeMint, createMerkleMint, now } from './helpers'
 
 /*******************
         SETUP
@@ -132,7 +132,7 @@ describe('isSoundEdition', () => {
   })
 })
 
-describe('getEligibleMintQuantity: single RangeEditionMinter instance', () => {
+describe('eligibleMintQuantity: single RangeEditionMinter instance', () => {
   it(`Eligible quantity is user specific and changes with mint`, async () => {
     const startTime = now()
 
@@ -373,4 +373,144 @@ describe('getEligibleMintQuantity: single RangeEditionMinter instance', () => {
     expect(eligibleQuantity1).to.equal(mint1MaxMintablePerAccount)
     expect(eligibleQuantity2).to.equal(mint2MaxMintablePerAccount)
   })
+})
+
+describe('eligibleMintQuantity: MerkleDropMinter', () => {
+  it(`Returns eligible quantity for merkle drop recipients.`, async () => {
+    const signers = await ethers.getSigners()
+    const startTime = now()
+    const endTime = now() + ONE_HOUR
+    const maxMintablePerAccount = 2
+    const maxMintable = 10
+
+    await createMerkleMint({
+      editionAddress: soundEdition.address,
+      merkleRootHash: dummyMerkleDrop.root,
+      startTime,
+      endTime,
+      affiliateFeeBPS: 0,
+      maxMintable,
+      maxMintablePerAccount,
+      artistWallet,
+      minterAddress: merkleDropMinter.address,
+    })
+
+    const mints = await client.activeMintsForEdition({ editionAddress: soundEdition.address })
+
+    for (let i = 0; i < 20; i++) {
+      const expectedQuantity = i < dummyMerkleDrop.recipients.length ? maxMintablePerAccount : 0
+      const eligibleQuantity = await client.eligibleMintQuantity({
+        mintInfo: mints[0],
+        userAddress: signers[i].address,
+        timestamp: startTime,
+      })
+      await expect(eligibleQuantity).to.equal(expectedQuantity)
+    }
+
+    // No eligibility for anyone after end time
+    for (let i = 0; i < 20; i++) {
+      const eligibleQuantity = await client.eligibleMintQuantity({
+        mintInfo: mints[0],
+        userAddress: signers[i].address,
+        timestamp: endTime,
+      })
+      await expect(eligibleQuantity).to.equal(0)
+    }
+  })
+})
+
+describe('eligibleMintQuantity: multiple MerkleDropMinter & RangeEditionMinter instances', async () => {
+  const buyer = signers[1]
+  const maxMintable = 100
+
+  const mint1StartTime = now()
+  const mint2StartTime = mint1StartTime + ONE_HOUR
+  const mint3StartTime = mint2StartTime + ONE_HOUR
+  const mint4StartTime = mint3StartTime + ONE_HOUR
+
+  const mint1MaxMintablePerAccount = 1
+  const mint2MaxMintablePerAccount = 2
+  const mint3MaxMintablePerAccount = 3
+  const mint4MaxMintablePerAccount = 4
+
+  await createMerkleMint({
+    editionAddress: soundEdition.address,
+    merkleRootHash: dummyMerkleDrop.root,
+    startTime: mint1StartTime,
+    endTime: mint2StartTime,
+    affiliateFeeBPS: 0,
+    maxMintable,
+    maxMintablePerAccount: mint1MaxMintablePerAccount,
+    artistWallet,
+    minterAddress: merkleDropMinter.address,
+  })
+
+  await createMerkleMint({
+    editionAddress: soundEdition.address,
+    merkleRootHash: dummyMerkleDrop.root,
+    startTime: mint2StartTime,
+    endTime: mint3StartTime,
+    affiliateFeeBPS: 0,
+    maxMintable,
+    maxMintablePerAccount: mint2MaxMintablePerAccount,
+    artistWallet,
+    minterAddress: merkleDropMinter.address,
+  })
+
+  await createRangeMint({
+    editionAddress: soundEdition.address,
+    startTime: mint3StartTime,
+    closingTime: mint3StartTime + 1,
+    endTime: mint4StartTime,
+    affiliateFeeBPS: 0,
+    maxMintableLower: maxMintable - 1,
+    maxMintableUpper: maxMintable,
+    maxMintablePerAccount: mint3MaxMintablePerAccount,
+    artistWallet,
+    minterAddress: merkleDropMinter.address,
+  })
+
+  await createRangeMint({
+    editionAddress: soundEdition.address,
+    startTime: mint4StartTime,
+    closingTime: mint4StartTime + 1,
+    endTime: mint4StartTime + ONE_HOUR,
+    affiliateFeeBPS: 0,
+    maxMintableLower: maxMintable - 1,
+    maxMintableUpper: maxMintable,
+    maxMintablePerAccount: mint4MaxMintablePerAccount,
+    artistWallet,
+    minterAddress: merkleDropMinter.address,
+  })
+
+  // Check eligibility
+  const mints = await client.activeMintsForEdition({ editionAddress: soundEdition.address })
+  const eligibleQuantity1 = await client.eligibleMintQuantity({
+    mintInfo: mints[0],
+    userAddress: buyer.address,
+    timestamp: mint1StartTime,
+  })
+
+  const eligibleQuantity2 = await client.eligibleMintQuantity({
+    mintInfo: mints[0],
+    userAddress: buyer.address,
+    timestamp: mint2StartTime,
+  })
+
+  const eligibleQuantity3 = await client.eligibleMintQuantity({
+    mintInfo: mints[0],
+    userAddress: buyer.address,
+    timestamp: mint3StartTime,
+  })
+
+  const eligibleQuantity4 = await client.eligibleMintQuantity({
+    mintInfo: mints[0],
+    userAddress: buyer.address,
+    timestamp: mint4StartTime,
+  })
+
+  expect(eligibleQuantity1).to.equal(mint1MaxMintablePerAccount)
+  expect(eligibleQuantity2).to.equal(mint2MaxMintablePerAccount)
+  expect(eligibleQuantity3).to.equal(mint3MaxMintablePerAccount)
+  expect(eligibleQuantity4).to.equal(mint4MaxMintablePerAccount)
 })

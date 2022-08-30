@@ -1,6 +1,6 @@
 import { Signer } from '@ethersproject/abstract-signer'
 import { BigNumber } from '@ethersproject/bignumber'
-import { MerkleDropMinter__factory, RangeEditionMinter__factory } from '@soundxyz/sound-protocol/typechain'
+import { MerkleDropMinter__factory, RangeEditionMinter__factory } from '@soundxyz/sound-protocol/typechain/index'
 
 export const NULL_ADDRESS = '0x0000000000000000000000000000000000000000'
 export const NON_NULL_ADDRESS = '0x0000000000000000000000000000000000000001'
