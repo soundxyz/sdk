@@ -1,6 +1,6 @@
-import { Interface } from '@ethersproject/abi'
-import { BigNumber } from '@ethersproject/bignumber'
+import type { Interface } from '@ethersproject/abi'
 import { Zero } from '@ethersproject/constants'
+import { BigNumber } from '@ethersproject/bignumber'
 
 export function getInterfaceID(contractInterface: Interface): string {
   let interfaceID: BigNumber = Zero

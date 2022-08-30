@@ -16,7 +16,7 @@ import {
   SoundFeeRegistry__factory,
 } from '@soundxyz/sound-protocol/typechain/index'
 import { ethers } from 'hardhat'
-import { UINT32_MAX } from '../src/config'
+import { UINT32_MAX, interfaceIds } from '../src/config'
 import { Signer } from '@ethersproject/abstract-signer'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 
@@ -136,5 +136,23 @@ describe('isSoundEdition', () => {
 
     const isEdition = await isSoundEdition(client, { editionAddress: soundEdition.address })
     expect(isEdition).to.be.true
+  })
+})
+
+describe('getInterfaceID', () => {
+  const ids = {
+    ISoundEditionV1: '0x41f5b0cb',
+    IMinterModule: '0x84634360',
+    IFixedPriceSignatureMinter: '0x81ca70f4',
+    IMerkleDropMinter: '0x84b6980c',
+    IRangeEditionMinter: '0xc73d6ffa',
+  }
+
+  it('Correctly computers interface IDs', async () => {
+    Object.keys(ids).forEach((key) => {
+      const expectedId = ids[key]
+      const interfaceId = interfaceIds[key]
+      expect(interfaceId).to.equal(expectedId)
+    })
   })
 })

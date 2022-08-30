@@ -35,10 +35,12 @@ importers:
 
   packages/sdk:
     specifiers:
+      '@ethersproject/abi': ^5.7.0
       '@ethersproject/abstract-provider': ^5.7.0
       '@ethersproject/abstract-signer': ^5.7.0
       '@ethersproject/address': ^5.7.0
       '@ethersproject/bignumber': ^5.7.0
+      '@ethersproject/constants': ^5.7.0
       '@ethersproject/providers': ^5.7.0
       '@ethersproject/sha2': ^5.7.0
       '@ethersproject/units': ^5.7.0
@@ -56,11 +58,13 @@ importers:
       ts-node: ^10.9.1
       tslib: ^2.4.0
     dependencies:
+      '@ethersproject/abi': 5.7.0
       '@ethersproject/abstract-provider': 5.7.0
       '@ethersproject/abstract-signer': 5.7.0
       '@ethersproject/address': 5.7.0
-    devDependencies:
       '@ethersproject/bignumber': 5.7.0
+      '@ethersproject/constants': 5.7.0
+    devDependencies:
       '@ethersproject/providers': 5.7.0
       '@ethersproject/sha2': 5.7.0
       '@ethersproject/units': 5.7.0
@@ -445,7 +449,6 @@ packages:
       '@ethersproject/logger': 5.7.0
       '@ethersproject/properties': 5.7.0
       '@ethersproject/strings': 5.7.0
-    dev: true
 
   /@ethersproject/abstract-provider/5.7.0:
     resolution:
@@ -542,7 +545,6 @@ packages:
       '@ethersproject/logger': 5.7.0
       '@ethersproject/properties': 5.7.0
       '@ethersproject/strings': 5.7.0
-    dev: true
 
   /@ethersproject/hdnode/5.7.0:
     resolution:
