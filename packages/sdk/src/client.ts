@@ -25,7 +25,7 @@ export class SoundClient {
   }
 
   // If the contract address is a SoundEdition contract
-  async isSoundEdition({ editionAddress }: { editionAddress: string }) {
+  async isSoundEdition({ editionAddress }: { editionAddress: string }): Promise<boolean> {
     validateAddress(editionAddress)
     const signerOrProvider = this._requireSignerOrProvider()
 
@@ -76,7 +76,7 @@ export class SoundClient {
     mintInfo: MintInfo
     timestamp?: number
     userAddress: string
-  }) {
+  }): Promise<number> {
     // check valid mint time
     if (timestamp < mintInfo.startTime || timestamp > mintInfo.endTime || mintInfo.mintPaused) {
       return 0
@@ -126,7 +126,7 @@ export class SoundClient {
   }
 
   // Addresses with MINTER_ROLE for a given edition
-  private async _registeredMinters({ editionAddress }: { editionAddress: string }) {
+  private async _registeredMinters({ editionAddress }: { editionAddress: string }): Promise<string[]> {
     const signerOrProvider = this._requireSignerOrProvider()
 
     const editionContract = SoundEditionV1__factory.connect(editionAddress, signerOrProvider)
@@ -206,7 +206,7 @@ export class SoundClient {
     )
   }
 
-  private async _allMintInfos({ editionAddress }: { editionAddress: string }) {
+  private async _allMintInfos({ editionAddress }: { editionAddress: string }): Promise<MintInfo[]> {
     const registeredMinters = await this._registeredMinters({ editionAddress })
 
     const mintInfos = await Promise.all(
@@ -229,7 +229,7 @@ export class SoundClient {
     throw new MissingSignerOrProviderError()
   }
 
-  private async _requireValidSoundEdition({ editionAddress }: { editionAddress: string }) {
+  private async _requireValidSoundEdition({ editionAddress }: { editionAddress: string }): Promise<void> {
     const isEdition = await this.isSoundEdition({ editionAddress })
     if (!isEdition) {
       throw new NotSoundEditionError()
