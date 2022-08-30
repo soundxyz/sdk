@@ -2,7 +2,13 @@ import {
   RangeEditionMinter__factory,
   FixedPriceSignatureMinter__factory,
   MerkleDropMinter__factory,
+  ISoundEditionV1__factory,
+  IRangeEditionMinter__factory,
+  IFixedPriceSignatureMinter__factory,
+  IMerkleDropMinter__factory,
+  IMinterModule__factory,
 } from '@soundxyz/sound-protocol/typechain/index'
+import { getInterfaceID } from './utils/interface'
 
 export type MinterFactoryType =
   | RangeEditionMinter__factory
@@ -24,11 +30,11 @@ export const chainIdToInfo: {
 export const UINT32_MAX = 4294967295
 
 export const interfaceIds = {
-  ISoundEditionV1: '0x41f5b0cb',
-  IMinterModule: '0x84634360',
-  IFixedPriceSignatureMinter: '0x81ca70f4',
-  IMerkleDropMinter: '0x84b6980c',
-  IRangeEditionMinter: '0xc73d6ffa',
+  ISoundEditionV1: getInterfaceID(ISoundEditionV1__factory.createInterface()),
+  IMinterModule: getInterfaceID(IMinterModule__factory.createInterface()),
+  IFixedPriceSignatureMinter: getInterfaceID(IFixedPriceSignatureMinter__factory.createInterface()),
+  IMerkleDropMinter: getInterfaceID(IMerkleDropMinter__factory.createInterface()),
+  IRangeEditionMinter: getInterfaceID(IRangeEditionMinter__factory.createInterface()),
 }
 
 export const minterFactoryMap = {
