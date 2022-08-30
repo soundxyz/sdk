@@ -50,15 +50,12 @@ export class SoundClient {
   // Active minter schedules for a given edition
   async activeMintsForEdition({
     editionAddress,
-    userAddress,
     timestamp = Math.floor(Date.now() / 1000),
   }: {
     editionAddress: string
-    userAddress: string
     timestamp?: number
   }): Promise<MintInfo[]> {
     validateAddress(editionAddress)
-    validateAddress(userAddress)
     this._requireValidSoundEdition({ editionAddress })
 
     const mintInfos = await this._allMintInfos({ editionAddress })
@@ -73,19 +70,25 @@ export class SoundClient {
 
   async eligibleMintQuantity({
     mintInfo,
-    timestamp,
+    timestamp = Math.floor(Date.now() / 1000),
     userAddress,
   }: {
     mintInfo: MintInfo
-    timestamp: number
+    timestamp?: number
     userAddress: string
   }) {
+    // check valid mint time
+    if (timestamp < mintInfo.startTime || timestamp > mintInfo.endTime || mintInfo.mintPaused) {
+      return 0
+    }
+
+    // check max mintable for this schedule
     if (typeof mintInfo.maxMintable === 'object') {
-      // range edition case
+      // handle range edition case
       const maxQty =
         timestamp < mintInfo.maxMintable.closingTime
-          ? mintInfo.maxMintable.maxMintableLower
-          : mintInfo.maxMintable.maxMintableUpper
+          ? mintInfo.maxMintable.maxMintableUpper
+          : mintInfo.maxMintable.maxMintableLower
 
       if (mintInfo.totalMinted >= maxQty) {
         return 0
@@ -95,7 +98,7 @@ export class SoundClient {
     }
 
     const signerOrProvider = this._requireSignerOrProvider()
-
+    // look up max mintable per account and user's already minted tally
     switch (mintInfo.interfaceId) {
       case interfaceIds.IRangeEditionMinter: {
         const userBalanceBigNum = await RangeEditionMinter__factory.connect(
