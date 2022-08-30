@@ -129,7 +129,7 @@ export async function getEligibleMintQuantity(
 
   let eligibleMintQuantity = 0
   for (const mintInfo of eligibleMints) {
-    const minterModule = await minterFactoryMap[mintInfo.interfaceId].connect(mintInfo.address, signerOrProvider)
+    const minterModule = minterFactoryMap[mintInfo.interfaceId].connect(mintInfo.address, signerOrProvider)
 
     // If this minter is sold out, skip it
     if (mintInfo.totalMinted >= mintInfo.maxMintable) {
