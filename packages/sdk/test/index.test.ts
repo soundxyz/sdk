@@ -16,7 +16,7 @@ import {
   RangeEditionMinter,
   SoundFeeRegistry__factory,
 } from '@soundxyz/sound-protocol/typechain/index'
-import hre from 'hardhat'
+import { ethers } from 'hardhat'
 import { UINT32_MAX } from '../src/config'
 import { Signer } from '@ethersproject/abstract-signer'
 import { MerkleTree } from 'merkletreejs'
