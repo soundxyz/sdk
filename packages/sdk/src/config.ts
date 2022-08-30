@@ -1,3 +1,14 @@
+import {
+  RangeEditionMinter__factory,
+  FixedPriceSignatureMinter__factory,
+  MerkleDropMinter__factory,
+} from '@soundxyz/sound-protocol/typechain/index'
+
+export type MinterFactoryType =
+  | RangeEditionMinter__factory
+  | FixedPriceSignatureMinter__factory
+  | MerkleDropMinter__factory
+
 export const chainIdToInfo: {
   [chainId: number]: { [contractName: string]: { address: string; deployedAtBlock?: number } }
 } = {
@@ -10,10 +21,18 @@ export const chainIdToInfo: {
   },
 }
 
+export const UINT32_MAX = 4294967295
+
 export const interfaceIds = {
-  ISoundEditionV1: '0x3b8ebf6f',
-  IMinterModule: '0x41af72ad',
-  IFixedPriceSignatureMinter: '0xc7843744',
-  IMerkleDropMinter: '0x7deee220',
-  IRangeEditionMinter: '0xfd5ca5c9',
+  ISoundEditionV1: '0x41f5b0cb',
+  IMinterModule: '0x84634360',
+  IFixedPriceSignatureMinter: '0x81ca70f4',
+  IMerkleDropMinter: '0x84b6980c',
+  IRangeEditionMinter: '0xc73d6ffa',
+}
+
+export const minterFactoryMap = {
+  [interfaceIds.IRangeEditionMinter]: RangeEditionMinter__factory,
+  [interfaceIds.IFixedPriceSignatureMinter]: FixedPriceSignatureMinter__factory,
+  [interfaceIds.IMerkleDropMinter]: MerkleDropMinter__factory,
 }

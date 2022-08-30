@@ -2,10 +2,9 @@ import type { Provider } from '@ethersproject/abstract-provider'
 import { Signer } from '@ethersproject/abstract-signer'
 import { isAddress } from '@ethersproject/address'
 
-import { SoundEditionV1__factory } from '@soundxyz/sound-protocol'
-import { SoundEditionCreatedEvent } from '@soundxyz/sound-protocol/SoundCreatorV1'
+import { SoundEditionV1__factory } from '@soundxyz/sound-protocol/typechain/index'
 
-import { chainIdToInfo, interfaceIds } from './config'
+import { interfaceIds } from './config'
 
 export type SoundClient = {
   signer: Signer | null
@@ -42,9 +41,9 @@ export function createClient(signerOrProvider: Signer | Provider) {
   }
 }
 
-export async function isSoundEdition(client: SoundClient, params: { address: string }) {
+export async function isSoundEdition(client: SoundClient, params: { editionAddress: string }) {
   await connectClient(client)
-  validateAddress(params.address)
+  validateAddress(params.editionAddress)
 
   const { chainId, signer, provider } = client
   if (chainId === null) throw new Error('Must provide chainId')
@@ -54,7 +53,7 @@ export async function isSoundEdition(client: SoundClient, params: { address: str
 
   let _isSoundEdition = false
 
-  const editionContract = SoundEditionV1__factory.connect(params.address, signerOrProvider)
+  const editionContract = SoundEditionV1__factory.connect(params.editionAddress, signerOrProvider)
 
   try {
     _isSoundEdition = await editionContract.supportsInterface(interfaceIds.ISoundEditionV1)
