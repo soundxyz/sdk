@@ -13,21 +13,15 @@ import { validateAddress } from './utils/helpers'
 
 import type { Signer } from '@ethersproject/abstract-signer'
 
-export class SoundClient {
-  private readonly _provider?: Provider
-  private readonly _signer?: Signer
-  private readonly _apiKey: string
-
-  constructor({ signer, provider, apiKey }: SoundClientConfig) {
-    this._signer = signer
-    this._provider = provider
-    this._apiKey = apiKey
-  }
+export function SoundClient({ signer, provider, apiKey }: SoundClientConfig) {
+  const _provider = provider
+  const _signer = signer
+  const _apiKey = apiKey
 
   // If the contract address is a SoundEdition contract
-  async isSoundEdition({ editionAddress }: { editionAddress: string }): Promise<boolean> {
+  async function isSoundEdition({ editionAddress }: { editionAddress: string }): Promise<boolean> {
     validateAddress(editionAddress)
-    const signerOrProvider = this._requireSignerOrProvider()
+    const signerOrProvider = _requireSignerOrProvider()
 
     const editionContract = SoundEditionV1__factory.connect(editionAddress, signerOrProvider)
 
@@ -40,15 +34,15 @@ export class SoundClient {
   }
 
   // All the minting schedules for a given edition, including past and future
-  async allMintsForEdition({ editionAddress }: { editionAddress: string }): Promise<MintInfo[]> {
+  async function allMintsForEdition({ editionAddress }: { editionAddress: string }): Promise<MintInfo[]> {
     validateAddress(editionAddress)
-    this._requireValidSoundEdition({ editionAddress })
+    _requireValidSoundEdition({ editionAddress })
 
-    return this._allMintInfos({ editionAddress })
+    return _allMintInfos({ editionAddress })
   }
 
   // Active minter schedules for a given edition
-  async activeMintsForEdition({
+  async function activeMintsForEdition({
     editionAddress,
     timestamp = Math.floor(Date.now() / 1000),
   }: {
@@ -56,9 +50,9 @@ export class SoundClient {
     timestamp?: number
   }): Promise<MintInfo[]> {
     validateAddress(editionAddress)
-    this._requireValidSoundEdition({ editionAddress })
+    _requireValidSoundEdition({ editionAddress })
 
-    const mintInfos = await this._allMintInfos({ editionAddress })
+    const mintInfos = await _allMintInfos({ editionAddress })
 
     // Filter mints that are live during the given timestamp
     return mintInfos
@@ -68,7 +62,7 @@ export class SoundClient {
       .sort((a, b) => a.startTime - b.startTime)
   }
 
-  async eligibleMintQuantity({
+  async function eligibleMintQuantity({
     mintInfo,
     timestamp = Math.floor(Date.now() / 1000),
     userAddress,
@@ -126,8 +120,8 @@ export class SoundClient {
   }
 
   // Addresses with MINTER_ROLE for a given edition
-  private async _registeredMinters({ editionAddress }: { editionAddress: string }): Promise<string[]> {
-    const signerOrProvider = this._requireSignerOrProvider()
+  async function _registeredMinters({ editionAddress }: { editionAddress: string }): Promise<string[]> {
+    const signerOrProvider = _requireSignerOrProvider()
 
     const editionContract = SoundEditionV1__factory.connect(editionAddress, signerOrProvider)
     // Get the addresses with MINTER_ROLE
@@ -157,14 +151,14 @@ export class SoundClient {
   }
 
   // Minting information from a minting contract for a given edition
-  private async _mintInfosFromMinter({
+  async function _mintInfosFromMinter({
     editionAddress,
     minterAddress,
   }: {
     editionAddress: string
     minterAddress: string
   }): Promise<MintInfo[]> {
-    const signerOrProvider = this._requireSignerOrProvider()
+    const signerOrProvider = _requireSignerOrProvider()
 
     // Query MintConfigCreated event
     const minterContract = IMinterModule__factory.connect(minterAddress, signerOrProvider)
@@ -206,33 +200,40 @@ export class SoundClient {
     )
   }
 
-  private async _allMintInfos({ editionAddress }: { editionAddress: string }): Promise<MintInfo[]> {
-    const registeredMinters = await this._registeredMinters({ editionAddress })
+  async function _allMintInfos({ editionAddress }: { editionAddress: string }): Promise<MintInfo[]> {
+    const registeredMinters = await _registeredMinters({ editionAddress })
 
     const mintInfos = await Promise.all(
-      registeredMinters.map(async (minterAddress) => this._mintInfosFromMinter({ editionAddress, minterAddress })),
+      registeredMinters.map(async (minterAddress) => _mintInfosFromMinter({ editionAddress, minterAddress })),
     )
 
     return mintInfos.flat().sort((a, b) => a.startTime - b.startTime)
   }
 
-  private _requireSigner(): Signer {
-    if (this._signer) return this._signer
+  function _requireSigner(): Signer {
+    if (_signer) return _signer
 
     throw new MissingSignerError()
   }
 
-  private _requireSignerOrProvider(): SignerOrProvider {
-    if (this._signer) return this._signer
-    if (this._provider) return this._provider
+  function _requireSignerOrProvider(): SignerOrProvider {
+    if (_signer) return _signer
+    if (_provider) return _provider
 
     throw new MissingSignerOrProviderError()
   }
 
-  private async _requireValidSoundEdition({ editionAddress }: { editionAddress: string }): Promise<void> {
-    const isEdition = await this.isSoundEdition({ editionAddress })
+  async function _requireValidSoundEdition({ editionAddress }: { editionAddress: string }): Promise<void> {
+    const isEdition = await isSoundEdition({ editionAddress })
     if (!isEdition) {
       throw new NotSoundEditionError()
     }
+  }
+
+  return {
+    isSoundEdition,
+    allMintsForEdition,
+    activeMintsForEdition,
+    eligibleMintQuantity,
   }
 }
