@@ -6,7 +6,8 @@ import { SignerOrProvider } from './types'
 import { validateAddress } from './utils/helpers'
 
 import type { Signer } from '@ethersproject/abstract-signer'
-import type { Provider } from '@ethersproject/abstract-provider'
+import { Provider } from '@ethersproject/abstract-provider'
+
 type SoundClientConfig = {
   provider?: Provider
   signer?: Signer
@@ -30,7 +31,12 @@ export class SoundClient {
 
     const editionContract = SoundEditionV1__factory.connect(params.editionAddress, signerOrProvider)
 
-    return editionContract.supportsInterface(interfaceIds.ISoundEditionV1)
+    try {
+      return await editionContract.supportsInterface(interfaceIds.ISoundEditionV1)
+    } catch (err) {
+      console.error(err)
+      return false
+    }
   }
 
   private _requireSigner(): Signer {
