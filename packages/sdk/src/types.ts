@@ -19,6 +19,7 @@ export type SoundClientConfig = {
   signer?: Signer
   apiKey: string
 }
+export type RangeEditionMaxMintable = { maxMintableLower: number; maxMintableUpper: number; closingTime: number }
 
 export type MintInfo = {
   interfaceId: string
@@ -29,7 +30,7 @@ export type MintInfo = {
   endTime: number
   mintPaused: boolean
   price: BigNumber
-  maxMintable: number | { maxMintableLower: number; maxMintableUpper: number; closingTime: number }
+  maxMintable: number | RangeEditionMaxMintable
   maxMintablePerAccount: number
   totalMinted: number
 }

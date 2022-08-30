@@ -126,7 +126,7 @@ export class SoundClient {
   }
 
   // Addresses with MINTER_ROLE for a given edition
-  async _registeredMinters({ editionAddress }: { editionAddress: string }) {
+  private async _registeredMinters({ editionAddress }: { editionAddress: string }) {
     const signerOrProvider = this._requireSignerOrProvider()
 
     const editionContract = SoundEditionV1__factory.connect(editionAddress, signerOrProvider)
@@ -157,7 +157,7 @@ export class SoundClient {
   }
 
   // Minting information from a minting contract for a given edition
-  async _mintInfosFromMinter({
+  private async _mintInfosFromMinter({
     editionAddress,
     minterAddress,
   }: {
@@ -206,7 +206,7 @@ export class SoundClient {
     )
   }
 
-  async _allMintInfos({ editionAddress }: { editionAddress: string }) {
+  private async _allMintInfos({ editionAddress }: { editionAddress: string }) {
     const registeredMinters = await this._registeredMinters({ editionAddress })
 
     const mintInfos = await Promise.all(
