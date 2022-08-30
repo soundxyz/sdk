@@ -10,7 +10,7 @@ export const interfaceIds = {
   IFixedPriceSignatureMinter: '0x81ca70f4',
   IMerkleDropMinter: '0x84b6980c',
   IRangeEditionMinter: '0xc73d6ffa',
-}
+} as const
 
 export const minterFactoryMap = {
   [interfaceIds.IRangeEditionMinter]: RangeEditionMinter__factory,

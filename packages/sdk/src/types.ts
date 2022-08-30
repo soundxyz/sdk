@@ -1,7 +1,7 @@
 import { BigNumber } from '@ethersproject/bignumber'
-
 import type { Signer } from '@ethersproject/abstract-signer'
 import type { Provider } from '@ethersproject/abstract-provider'
+import { interfaceIds } from './utils/constants'
 
 const SUPPORTED_CHAIN_IDS = [
   1, // mainnet
@@ -19,10 +19,8 @@ export type SoundClientConfig = {
   signer?: Signer
   apiKey: string
 }
-export type RangeEditionMaxMintable = { maxMintableLower: number; maxMintableUpper: number; closingTime: number }
 
-export type MintInfo = {
-  interfaceId: string
+export type MintInfoBase = {
   editionAddress: string
   minterAddress: string
   mintId: number
@@ -30,7 +28,23 @@ export type MintInfo = {
   endTime: number
   mintPaused: boolean
   price: BigNumber
-  maxMintable: number | RangeEditionMaxMintable
   maxMintablePerAccount: number
   totalMinted: number
 }
+
+export type MinterInterfaceId =
+  | typeof interfaceIds.IMerkleDropMinter
+  | typeof interfaceIds.IFixedPriceSignatureMinter
+  | typeof interfaceIds.IRangeEditionMinter
+
+export type MintInfo =
+  | (MintInfoBase & {
+      interfaceId: typeof interfaceIds.IRangeEditionMinter
+      maxMintableLower: number
+      maxMintableUpper: number
+      closingTime: number
+    })
+  | (MintInfoBase & {
+      interfaceId: typeof interfaceIds.IMerkleDropMinter | typeof interfaceIds.IFixedPriceSignatureMinter
+      maxMintable: number
+    })

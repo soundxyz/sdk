@@ -6,9 +6,9 @@ import {
   SoundEditionV1__factory,
 } from '@soundxyz/sound-protocol/typechain/index'
 
-import { interfaceIds, minterFactoryMap } from './config'
+import { interfaceIds, minterFactoryMap } from './utils/constants'
 import { MissingSignerError, MissingSignerOrProviderError, NotSoundEditionError } from './errors'
-import { MintInfo, SignerOrProvider, SoundClientConfig } from './types'
+import { MinterInterfaceId, MintInfo, SignerOrProvider, SoundClientConfig } from './types'
 import { validateAddress } from './utils/helpers'
 
 import type { Signer } from '@ethersproject/abstract-signer'
@@ -82,19 +82,22 @@ export class SoundClient {
       return 0
     }
 
-    // check max mintable for this schedule
-    if (typeof mintInfo.maxMintable === 'object') {
-      // handle range edition case
-      const maxQty =
-        timestamp < mintInfo.maxMintable.closingTime
-          ? mintInfo.maxMintable.maxMintableUpper
-          : mintInfo.maxMintable.maxMintableLower
+    // Checks for child minter custom logic
+    switch (mintInfo.interfaceId) {
+      case interfaceIds.IRangeEditionMinter: {
+        // handle range edition case
+        const maxQty = timestamp < mintInfo.closingTime ? mintInfo.maxMintableUpper : mintInfo.maxMintableLower
 
-      if (mintInfo.totalMinted >= maxQty) {
-        return 0
+        if (mintInfo.totalMinted >= maxQty) {
+          return 0
+        }
+        break
       }
-    } else if (mintInfo.totalMinted >= mintInfo.maxMintable) {
-      return 0
+      default: {
+        if (mintInfo.totalMinted >= mintInfo.maxMintable) {
+          return 0
+        }
+      }
     }
 
     const signerOrProvider = this._requireSignerOrProvider()
@@ -175,32 +178,45 @@ export class SoundClient {
     return Promise.all(
       mintIds.map(async (mintId) => {
         const minterModule = IMinterModule__factory.connect(minterAddress, signerOrProvider)
-        const interfaceId = await minterModule.moduleInterfaceId()
-        const minterContract = minterFactoryMap[interfaceId].connect(minterAddress, signerOrProvider)
+        const interfaceId = (await minterModule.moduleInterfaceId()) as MinterInterfaceId
 
-        const mintInfo = await minterContract.mintInfo(editionAddress, mintId)
-
-        const maxMintable =
-          'maxMintable' in mintInfo
-            ? mintInfo.maxMintable
-            : {
-                maxMintableLower: mintInfo.maxMintableLower,
-                maxMintableUpper: mintInfo.maxMintableUpper,
-                closingTime: mintInfo.closingTime,
-              }
-
-        return {
-          interfaceId,
-          mintId: mintId.toNumber(),
-          editionAddress,
-          minterAddress,
-          startTime: mintInfo.startTime,
-          endTime: mintInfo.endTime,
-          mintPaused: mintInfo.mintPaused,
-          price: mintInfo.price,
-          maxMintable,
-          maxMintablePerAccount: mintInfo.maxMintablePerAccount,
-          totalMinted: mintInfo.totalMinted,
+        switch (interfaceId) {
+          case interfaceIds.IRangeEditionMinter: {
+            const minterContract = minterFactoryMap[interfaceId].connect(minterAddress, signerOrProvider)
+            const mintInfo = await minterContract.mintInfo(editionAddress, mintId)
+            return {
+              interfaceId,
+              mintId: mintId.toNumber(),
+              editionAddress,
+              minterAddress,
+              startTime: mintInfo.startTime,
+              endTime: mintInfo.endTime,
+              mintPaused: mintInfo.mintPaused,
+              price: mintInfo.price,
+              maxMintableLower: mintInfo.maxMintableLower,
+              maxMintableUpper: mintInfo.maxMintableUpper,
+              closingTime: mintInfo.closingTime,
+              maxMintablePerAccount: mintInfo.maxMintablePerAccount,
+              totalMinted: mintInfo.totalMinted,
+            }
+          }
+          default: {
+            const minterContract = minterFactoryMap[interfaceId].connect(minterAddress, signerOrProvider)
+            const mintInfo = await minterContract.mintInfo(editionAddress, mintId)
+            return {
+              interfaceId,
+              mintId: mintId.toNumber(),
+              editionAddress,
+              minterAddress,
+              startTime: mintInfo.startTime,
+              endTime: mintInfo.endTime,
+              mintPaused: mintInfo.mintPaused,
+              price: mintInfo.price,
+              maxMintable: mintInfo.maxMintable,
+              maxMintablePerAccount: mintInfo.maxMintablePerAccount,
+              totalMinted: mintInfo.totalMinted,
+            }
+          }
         }
       }),
     )
