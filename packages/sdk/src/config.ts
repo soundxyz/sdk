@@ -4,23 +4,6 @@ import {
   MerkleDropMinter__factory,
 } from '@soundxyz/sound-protocol/typechain/index'
 
-export type MinterFactoryType =
-  | RangeEditionMinter__factory
-  | FixedPriceSignatureMinter__factory
-  | MerkleDropMinter__factory
-
-export const chainIdToInfo: {
-  [chainId: number]: { [contractName: string]: { address: string; deployedAtBlock?: number } }
-} = {
-  // goerli
-  5: {
-    SoundCreatorV1: {
-      address: '',
-      deployedAtBlock: 0,
-    },
-  },
-}
-
 const rangeIface = RangeEditionMinter__factory.createInterface()
 // const rangeId = rangeIface
 

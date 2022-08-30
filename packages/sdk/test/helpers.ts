@@ -1,6 +1,6 @@
 import { Signer } from '@ethersproject/abstract-signer'
 import { BigNumber } from '@ethersproject/bignumber'
-import { MerkleDropMinter__factory, RangeEditionMinter__factory } from '@soundxyz/sound-protocol/typechain/index'
+import { MerkleDropMinter__factory, RangeEditionMinter__factory } from '@soundxyz/sound-protocol/typechain'
 
 export const NULL_ADDRESS = '0x0000000000000000000000000000000000000000'
 export const NON_NULL_ADDRESS = '0x0000000000000000000000000000000000000001'
@@ -23,6 +23,7 @@ export async function createRangeMint({
   startTime,
   closingTime,
   endTime,
+  affiliateFeeBPS,
   maxMintableLower,
   maxMintableUpper,
   maxMintablePerAccount,
@@ -33,6 +34,7 @@ export async function createRangeMint({
   startTime: number
   closingTime: number
   endTime: number
+  affiliateFeeBPS: number
   maxMintableLower: number
   maxMintableUpper: number
   maxMintablePerAccount: number
@@ -44,6 +46,7 @@ export async function createRangeMint({
     startTime,
     closingTime,
     endTime,
+    affiliateFeeBPS,
     maxMintableLower,
     maxMintableUpper,
     maxMintablePerAccount,
@@ -66,6 +69,7 @@ export async function createMerkleMint({
   merkleRootHash,
   startTime,
   endTime,
+  affiliateFeeBPS,
   maxMintable,
   maxMintablePerAccount,
 }: {
@@ -75,6 +79,7 @@ export async function createMerkleMint({
   merkleRootHash: string
   startTime: number
   endTime: number
+  affiliateFeeBPS: number
   maxMintable: number
   maxMintablePerAccount: number
 }) {
@@ -85,6 +90,7 @@ export async function createMerkleMint({
     BigNumber.from(PRICE),
     startTime,
     endTime,
+    affiliateFeeBPS,
     maxMintable,
     maxMintablePerAccount,
   )
