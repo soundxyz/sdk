@@ -112,8 +112,8 @@ beforeEach(async () => {
 
 describe('isSoundEdition', () => {
   it("Should throw error if the address isn't valid", async () => {
-    client.isSoundEdition({ editionAddress: '0x123' }).catch((error) => {
-      expect(error.message).to.equal('Invalid edition address')
+    await client.isSoundEdition({ editionAddress: '0x123' }).catch((error) => {
+      expect(error.message).to.equal('Invalid address: 0x123')
     })
   })
 
