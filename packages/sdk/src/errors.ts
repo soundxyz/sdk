@@ -18,3 +18,10 @@ export class InvalidAddressError extends Error {
     this.name = 'InvalidAddressError'
   }
 }
+
+export class NotSoundEditionError extends Error {
+  constructor(message?: string) {
+    super(message || 'Address must be a sound edition contract')
+    this.name = 'NotSoundEditionError'
+  }
+}

@@ -6,7 +6,7 @@
     "allowSyntheticDefaultImports": true,
     "importHelpers": true,
     "experimentalDecorators": true,
-    "target": "es2020",
+    "target": "esnext",
     "module": "commonjs",
     "lib": ["es6", "esnext", "es2015", "dom", "webworker"],
     "suppressImplicitAnyIndexErrors": true,
