@@ -13,11 +13,7 @@ import { validateAddress } from './utils/helpers'
 
 import type { Signer } from '@ethersproject/abstract-signer'
 
-export function SoundClient({ signer, provider, apiKey }: SoundClientConfig) {
-  const _provider = provider
-  const _signer = signer
-  const _apiKey = apiKey
-
+export function SoundClient({ signer, provider, apiKey: _apiKey }: SoundClientConfig) {
   // If the contract address is a SoundEdition contract
   async function isSoundEdition({ editionAddress }: { editionAddress: string }): Promise<boolean> {
     validateAddress(editionAddress)
@@ -211,14 +207,14 @@ export function SoundClient({ signer, provider, apiKey }: SoundClientConfig) {
   }
 
   function _requireSigner(): Signer {
-    if (_signer) return _signer
+    if (signer) return signer
 
     throw new MissingSignerError()
   }
 
   function _requireSignerOrProvider(): SignerOrProvider {
-    if (_signer) return _signer
-    if (_provider) return _provider
+    if (signer) return signer
+    if (provider) return provider
 
     throw new MissingSignerOrProviderError()
   }
