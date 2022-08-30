@@ -1,7 +1,6 @@
 import { expect } from 'chai'
-import { createClient, SoundClient, isSoundEdition } from '../src/index'
+import { SoundClient } from '../src/client'
 import { Wallet } from '@ethersproject/wallet'
-import { BigNumber } from '@ethersproject/bignumber'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 import {
   FixedPriceSignatureMinter__factory,
@@ -16,15 +15,8 @@ import {
   SoundFeeRegistry__factory,
 } from '@soundxyz/sound-protocol/typechain/index'
 import { ethers } from 'hardhat'
-import { UINT32_MAX } from '../src/config'
-import { Signer } from '@ethersproject/abstract-signer'
+import { UINT32_MAX, NULL_ADDRESS, NON_NULL_ADDRESS, SOUND_FEE } from '../src/utils/constants'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
-
-const NULL_ADDRESS = '0x0000000000000000000000000000000000000000'
-const NON_NULL_ADDRESS = '0x0000000000000000000000000000000000000001'
-const ONE_HOUR = 3600
-const PRICE = 420420420
-const SOUND_FEE = 0
 
 /*******************
         SETUP
@@ -91,11 +83,7 @@ async function deployProtocol() {
 
 describe('createClient', () => {
   it('Should create SoundClient', async () => {
-    const client = createClient(ethers.provider)
-
-    expect(client.signer).to.be.null
-    expect(client.provider).to.not.be.undefined
-    expect(client.connect).to.not.be.undefined
+    new SoundClient({ signer: Wallet.createRandom(), apiKey: '123' })
   })
 })
 
@@ -105,13 +93,15 @@ let fixedPriceSignatureMinter: FixedPriceSignatureMinter
 let merkleDropMinter: MerkleDropMinter
 let rangeEditionMinter: RangeEditionMinter
 let signers: SignerWithAddress[]
-let firstSigner: SignerWithAddress
+let artistWallet: SignerWithAddress
+let buyer: SignerWithAddress
 
 beforeEach(async () => {
   signers = await ethers.getSigners()
-  firstSigner = signers[0]
+  artistWallet = signers[0]
+  buyer = signers[1]
 
-  client = createClient(ethers.provider)
+  client = new SoundClient({ provider: ethers.provider, apiKey: '123' })
   const fixture = await loadFixture(deployProtocol)
 
   soundEdition = fixture.soundEdition
@@ -122,7 +112,7 @@ beforeEach(async () => {
 
 describe('isSoundEdition', () => {
   it("Should throw error if the address isn't valid", async () => {
-    isSoundEdition(client, { editionAddress: '0x123' }).catch((error) => {
+    client.isSoundEdition({ editionAddress: '0x123' }).catch((error) => {
       expect(error.message).to.equal('Invalid edition address')
     })
   })
@@ -130,11 +120,11 @@ describe('isSoundEdition', () => {
   it('Correctly identifies SoundEdition addresses', async () => {
     for (let i = 0; i < 10; i++) {
       const wallet = Wallet.createRandom()
-      const isEdition = await isSoundEdition(client, { editionAddress: wallet.address })
+      const isEdition = await client.isSoundEdition({ editionAddress: wallet.address })
       expect(isEdition).to.be.false
     }
 
-    const isEdition = await isSoundEdition(client, { editionAddress: soundEdition.address })
+    const isEdition = await client.isSoundEdition({ editionAddress: soundEdition.address })
     expect(isEdition).to.be.true
   })
 })
