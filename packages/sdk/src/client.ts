@@ -237,3 +237,5 @@ export function SoundClient({ signer, provider, apiKey }: SoundClientConfig) {
     eligibleMintQuantity,
   }
 }
+
+export type SoundClient = ReturnType<typeof SoundClient>
