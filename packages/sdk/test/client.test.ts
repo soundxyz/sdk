@@ -1,26 +1,31 @@
-import { expect } from 'chai'
-import { SoundClient } from '../src/client'
 import { Wallet } from '@ethersproject/wallet'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import {
+  FixedPriceSignatureMinter,
   FixedPriceSignatureMinter__factory,
+  MerkleDropMinter,
   MerkleDropMinter__factory,
+  RangeEditionMinter,
   RangeEditionMinter__factory,
   SoundCreatorV1__factory,
-  SoundEditionV1__factory,
   SoundEditionV1,
-  FixedPriceSignatureMinter,
-  MerkleDropMinter,
-  RangeEditionMinter,
+  SoundEditionV1__factory,
   SoundFeeRegistry__factory,
 } from '@soundxyz/sound-protocol/typechain/index'
+import { expect } from 'chai'
 import { ethers } from 'hardhat'
-import { UINT32_MAX, NULL_ADDRESS, NON_NULL_ADDRESS, SOUND_FEE } from '../src/utils/constants'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
+
+import { SoundClient } from '../src/client'
 
 /*******************
         SETUP
  ******************/
+
+const UINT32_MAX = 4294967295
+const NULL_ADDRESS = '0x0000000000000000000000000000000000000000'
+const NON_NULL_ADDRESS = '0x0000000000000000000000000000000000000001'
+const SOUND_FEE = 0
 
 async function deployProtocol() {
   const [signer1] = await ethers.getSigners()
@@ -80,12 +85,6 @@ async function deployProtocol() {
 /*******************
         TESTS
  ******************/
-
-describe('createClient', () => {
-  it('Should create SoundClient', async () => {
-    new SoundClient({ signer: Wallet.createRandom(), apiKey: '123' })
-  })
-})
 
 let client: SoundClient
 let soundEdition: SoundEditionV1
