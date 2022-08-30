@@ -252,11 +252,11 @@ async function getMintInfo({
     await Promise.allSettled(
       minterAddresses.map(async (minterAddress) => {
         // Query MintConfigCreated event
-        const minterContract = await IMinterModule__factory.connect(minterAddress, signerOrProvider)
+        const minterContract = IMinterModule__factory.connect(minterAddress, signerOrProvider)
         const filter = minterContract.filters.MintConfigCreated(editionAddress)
         const mintConfigEvents = await minterContract.queryFilter(filter)
         const mintIds = mintConfigEvents.map((event) => event.args.mintId)
-        return (mintIdsMap[minterAddress] = mintIds)
+        mintIdsMap[minterAddress] = mintIds
       }),
     )
   ).forEach(handleRejections)
@@ -266,10 +266,10 @@ async function getMintInfo({
   const mintInfoPromises = minterAddresses
     .map((minterAddress) =>
       mintIdsMap[minterAddress].map(async (mintId) => {
-        const minterModule = await IMinterModule__factory.connect(minterAddress, signerOrProvider)
+        const minterModule = IMinterModule__factory.connect(minterAddress, signerOrProvider)
         const interfaceId = await minterModule.moduleInterfaceId()
-        const factory = await minterFactoryMap[interfaceId].connect(minterAddress, signerOrProvider)
-        const mintInfo = await factory.mintInfo(editionAddress, mintId)
+        const minterContract = minterFactoryMap[interfaceId].connect(minterAddress, signerOrProvider)
+        const mintInfo = await minterContract.mintInfo(editionAddress, mintId)
 
         // Get maxMintable
         let maxMintable = 0
