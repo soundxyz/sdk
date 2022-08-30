@@ -81,9 +81,9 @@ async function deployProtocol() {
 
   // Grant minter roles
   const minterRole = await soundEdition.MINTER_ROLE()
-  await soundEdition.grantRoles(fixedPriceSignatureMinter.address, minterRole.toNumber())
-  await soundEdition.grantRoles(merkleDropMinter.address, minterRole.toNumber())
-  await soundEdition.grantRoles(rangeEditionMinter.address, minterRole.toNumber())
+  await soundEdition.grantRoles(fixedPriceSignatureMinter.address, minterRole)
+  await soundEdition.grantRoles(merkleDropMinter.address, minterRole)
+  await soundEdition.grantRoles(rangeEditionMinter.address, minterRole)
 
   return { soundEdition, fixedPriceSignatureMinter, merkleDropMinter, rangeEditionMinter }
 }
