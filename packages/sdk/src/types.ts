@@ -14,11 +14,16 @@ export type ChainId = typeof SUPPORTED_CHAIN_IDS[number]
 
 export type SignerOrProvider = Signer | Provider
 
-export type SoundClientConfig = {
-  provider?: Provider
-  signer?: Signer
-  apiKey: string
-}
+export type SoundClientConfig = (
+  | {
+      provider: Provider
+      signer?: Signer
+    }
+  | {
+      provider?: Provider
+      signer: Signer
+    }
+) & { apiKey: string }
 
 export type MintInfoBase = {
   editionAddress: string
