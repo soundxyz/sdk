@@ -87,7 +87,7 @@ export function SoundClient({ signer, provider, apiKey: _apiKey }: SoundClientCo
       return 0
     }
 
-    const signerOrProvider = this._requireSignerOrProvider()
+    const signerOrProvider = _requireSignerOrProvider()
     // look up max mintable per account and user's already minted tally
     switch (mintInfo.interfaceId) {
       case interfaceIds.IRangeEditionMinter: {

@@ -104,7 +104,7 @@ beforeEach(async () => {
   artistWallet = signers[0]
   buyer = signers[1]
 
-  client = new SoundClient({ provider: ethers.provider, apiKey: '123' })
+  client = SoundClient({ provider: ethers.provider, apiKey: '123' })
   const fixture = await loadFixture(deployProtocol)
 
   soundEdition = fixture.soundEdition
