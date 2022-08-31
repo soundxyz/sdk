@@ -8,7 +8,7 @@ import {
 
 import { interfaceIds, minterFactoryMap } from './utils/constants'
 import { MissingSignerError, MissingSignerOrProviderError, NotSoundEditionError } from './errors'
-import { MinterInterfaceId, MintInfo, SignerOrProvider, SoundClientConfig } from './types'
+import type { MinterInterfaceId, MintInfo, SignerOrProvider, SoundClientConfig } from './types'
 import { validateAddress } from './utils/helpers'
 
 import type { Signer } from '@ethersproject/abstract-signer'

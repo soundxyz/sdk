@@ -5,35 +5,28 @@
     "check": "tsc --pretty --noEmit",
     "test": "hardhat test"
   },
-  "main": "dist/cjs/index.js",
-  "module": "dist/esm/index.js",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
   "exports": {
     ".": {
-      "require": {
-        "types": "./dist/typings/index.d.cts",
-        "default": "./dist/cjs/index.js"
-      },
-      "import": {
-        "types": "./dist/typings/index.d.ts",
-        "default": "./dist/esm/index.js"
-      },
-      "default": {
-        "types": "./dist/typings/index.d.ts",
-        "default": "./dist/esm/index.js"
-      }
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.js",
+      "import": "./dist/index.mjs"
+    },
+    "./*": {
+      "types": "./dist/*.d.ts",
+      "require": "./dist/*.js",
+      "import": "./dist/*.mjs"
     },
     "./package.json": "./package.json"
   },
-  "typings": "dist/typings/index.d.ts",
-  "typescript": {
-    "definition": "dist/typings/index.d.ts"
-  },
+  "types": "./dist/index.d.ts",
   "publishConfig": {
     "directory": "dist",
     "access": "public"
   },
   "sideEffects": false,
-  "author": "Saihajpreet Singh <saihaj@sound.xyz> (https://saihaj.dev/)",
+  "author": "Sound.xyz",
   "license": "MIT",
   "dependencies": {
     "@ethersproject/abstract-provider": "^5.7.0",
@@ -52,11 +45,16 @@
     "@soundxyz/sound-protocol": "0.0.2-alpha-0261e9d.0",
     "@types/chai": "^4.3.3",
     "@types/mocha": "^9.1.1",
+    "@types/node": "18.7.5",
+    "bob-ts": "^4.1.1",
     "chai": "^4.3.6",
     "dotenv": "^16.0.1",
+    "esbuild": "^0.15.6",
+    "ethers": "^5.7.0",
     "hardhat": "^2.10.2",
     "merkletreejs": "^0.2.32",
     "ts-node": "^10.9.1",
-    "tslib": "^2.4.0"
+    "tslib": "^2.4.0",
+    "typescript": "4.7.4"
   }
 }

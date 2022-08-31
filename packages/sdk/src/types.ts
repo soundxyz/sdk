@@ -1,7 +1,7 @@
-import { BigNumber } from '@ethersproject/bignumber'
+import type { BigNumber } from '@ethersproject/bignumber'
 import type { Signer } from '@ethersproject/abstract-signer'
 import type { Provider } from '@ethersproject/abstract-provider'
-import { interfaceIds } from './utils/constants'
+import type { interfaceIds } from './utils/constants'
 
 const SUPPORTED_CHAIN_IDS = [
   1, // mainnet
