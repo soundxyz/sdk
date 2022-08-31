@@ -39,6 +39,7 @@ importers:
       '@ethersproject/abstract-signer': ^5.7.0
       '@ethersproject/address': ^5.7.0
       '@ethersproject/bignumber': ^5.7.0
+      '@ethersproject/contracts': ^5.7.0
       '@ethersproject/providers': ^5.7.0
       '@ethersproject/sha2': ^5.7.0
       '@ethersproject/units': ^5.7.0
@@ -61,6 +62,7 @@ importers:
       '@ethersproject/address': 5.7.0
     devDependencies:
       '@ethersproject/bignumber': 5.7.0
+      '@ethersproject/contracts': 5.7.0
       '@ethersproject/providers': 5.7.0
       '@ethersproject/sha2': 5.7.0
       '@ethersproject/units': 5.7.0
@@ -77,7 +79,6 @@ importers:
       merkletreejs: 0.2.32
       ts-node: 10.9.1
       tslib: 2.4.0
-    publishDirectory: dist
 
 packages:
   /@babel/code-frame/7.16.7:

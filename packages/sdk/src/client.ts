@@ -1,17 +1,20 @@
 import { Provider } from '@ethersproject/abstract-provider'
 import {
+  FixedPriceSignatureMinter__factory,
   IMinterModule__factory,
   MerkleDropMinter__factory,
   RangeEditionMinter__factory,
   SoundEditionV1__factory,
 } from '@soundxyz/sound-protocol/typechain/index'
 
-import { interfaceIds, minterFactoryMap } from './utils/constants'
-import { MissingSignerError, MissingSignerOrProviderError, NotSoundEditionError } from './errors'
+import { interfaceIds, minterFactoryMap, AddressZero } from './utils/constants'
+import { MissingSignerError, MissingSignerOrProviderError, NotSoundEditionError, InvalidQuantityError } from './errors'
 import { MinterInterfaceId, MintInfo, SignerOrProvider, SoundClientConfig } from './types'
 import { validateAddress } from './utils/helpers'
 
 import type { Signer } from '@ethersproject/abstract-signer'
+import { BigNumberish } from '@ethersproject/bignumber'
+import { ContractTransaction } from '@ethersproject/contracts'
 
 export function SoundClient({ signer, provider, apiKey: _apiKey }: SoundClientConfig) {
   // If the contract address is a SoundEdition contract
@@ -111,6 +114,75 @@ export function SoundClient({ signer, provider, apiKey: _apiKey }: SoundClientCo
 
         const userMintedBalance = userBalanceBigNum.toNumber()
         return mintInfo.maxMintablePerAccount - userMintedBalance
+      }
+
+      default:
+        throw new Error('Unimplemented')
+    }
+  }
+
+  async function mint({
+    mintInfo,
+    quantity,
+    affiliate = AddressZero,
+    gasLimit,
+    maxFeePerGas,
+    maxPriorityFeePerGas,
+  }: {
+    mintInfo: MintInfo
+    quantity: number
+    affiliate?: string
+    gasLimit?: BigNumberish
+    maxFeePerGas?: BigNumberish
+    maxPriorityFeePerGas?: BigNumberish
+  }): Promise<ContractTransaction> {
+    validateAddress(mintInfo.editionAddress)
+    _requireValidSoundEdition({ editionAddress: mintInfo.editionAddress })
+    if (quantity <= 0) throw new InvalidQuantityError()
+
+    const signer = _requireSigner()
+    const userAddress = await signer.getAddress()
+
+    const eligibleMintQty = await eligibleMintQuantity({ mintInfo, userAddress })
+    if (eligibleMintQty < quantity) throw new Error('Not eligible to mint')
+
+    const txnOverrides = { gasLimit, maxFeePerGas, maxPriorityFeePerGas }
+
+    switch (mintInfo.interfaceId) {
+      case interfaceIds.IRangeEditionMinter: {
+        return await RangeEditionMinter__factory.connect(mintInfo.minterAddress, signer).mint(
+          mintInfo.editionAddress,
+          mintInfo.mintId,
+          quantity,
+          affiliate,
+          txnOverrides,
+        )
+      }
+
+      case interfaceIds.IMerkleDropMinter: {
+        // TODO: get merkle proof
+        const proof = ['']
+        return await MerkleDropMinter__factory.connect(mintInfo.minterAddress, signer).mint(
+          mintInfo.editionAddress,
+          mintInfo.mintId,
+          quantity,
+          proof,
+          affiliate,
+          txnOverrides,
+        )
+      }
+
+      case interfaceIds.IFixedPriceSignatureMinter: {
+        // TODO: get signature to mint
+        const signature = ''
+        return await FixedPriceSignatureMinter__factory.connect(mintInfo.minterAddress, signer).mint(
+          mintInfo.editionAddress,
+          mintInfo.mintId,
+          quantity,
+          signature,
+          affiliate,
+          txnOverrides,
+        )
       }
 
       default:
@@ -247,6 +319,7 @@ export function SoundClient({ signer, provider, apiKey: _apiKey }: SoundClientCo
     allMintsForEdition,
     activeMintsForEdition,
     eligibleMintQuantity,
+    mint,
   }
 }
 

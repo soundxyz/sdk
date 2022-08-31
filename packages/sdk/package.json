@@ -42,6 +42,7 @@
   },
   "devDependencies": {
     "@ethersproject/bignumber": "^5.7.0",
+    "@ethersproject/contracts": "^5.7.0",
     "@ethersproject/providers": "^5.7.0",
     "@ethersproject/sha2": "^5.7.0",
     "@ethersproject/units": "^5.7.0",

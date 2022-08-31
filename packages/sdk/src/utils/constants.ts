@@ -17,3 +17,5 @@ export const minterFactoryMap = {
   [interfaceIds.IFixedPriceSignatureMinter]: FixedPriceSignatureMinter__factory,
   [interfaceIds.IMerkleDropMinter]: MerkleDropMinter__factory,
 }
+
+export const AddressZero = '0x0000000000000000000000000000000000000000'

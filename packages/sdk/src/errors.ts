@@ -25,3 +25,10 @@ export class NotSoundEditionError extends Error {
     this.name = 'NotSoundEditionError'
   }
 }
+
+export class InvalidQuantityError extends Error {
+  constructor(message?: string) {
+    super(message || 'Must provide valid quantity')
+    this.name = 'InvalidQuantityError'
+  }
+}
