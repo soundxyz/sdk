@@ -10,7 +10,7 @@ import {
 import { interfaceIds, minterFactoryMap, AddressZero } from './utils/constants'
 import { MissingSignerError, MissingSignerOrProviderError, NotSoundEditionError, InvalidQuantityError } from './errors'
 import { MinterInterfaceId, MintInfo, SignerOrProvider, SoundClientConfig } from './types'
-import { validateAddress } from './utils/helpers'
+import { getMerkleProof as _getMerkleProof, validateAddress } from './utils/helpers'
 
 import type { Signer } from '@ethersproject/abstract-signer'
 import { BigNumberish } from '@ethersproject/bignumber'
@@ -125,6 +125,7 @@ export function SoundClient({ signer, provider, apiKey: _apiKey }: SoundClientCo
     mintInfo,
     quantity,
     affiliate = AddressZero,
+    getMerkleProof = _getMerkleProof,
     gasLimit,
     maxFeePerGas,
     maxPriorityFeePerGas,
@@ -132,6 +133,7 @@ export function SoundClient({ signer, provider, apiKey: _apiKey }: SoundClientCo
     mintInfo: MintInfo
     quantity: number
     affiliate?: string
+    getMerkleProof?: (root: string, unhashedLeaf: string) => Promise<string[]>
     gasLimit?: BigNumberish
     maxFeePerGas?: BigNumberish
     maxPriorityFeePerGas?: BigNumberish
@@ -165,9 +167,11 @@ export function SoundClient({ signer, provider, apiKey: _apiKey }: SoundClientCo
       }
 
       case interfaceIds.IMerkleDropMinter: {
-        // TODO: get merkle proof
-        const proof = ['']
-        return await MerkleDropMinter__factory.connect(mintInfo.minterAddress, signer).mint(
+        const merkleDropMinter = MerkleDropMinter__factory.connect(mintInfo.minterAddress, signer)
+        const { merkleRootHash } = await merkleDropMinter.mintInfo(mintInfo.editionAddress, mintInfo.mintId)
+
+        const proof = await getMerkleProof(merkleRootHash, userAddress)
+        return await merkleDropMinter.mint(
           mintInfo.editionAddress,
           mintInfo.mintId,
           quantity,
