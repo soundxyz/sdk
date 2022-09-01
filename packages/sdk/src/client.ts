@@ -1,4 +1,3 @@
-import { Provider } from '@ethersproject/abstract-provider'
 import {
   IMinterModule__factory,
   MerkleDropMinter__factory,
@@ -6,14 +5,20 @@ import {
   SoundEditionV1__factory,
 } from '@soundxyz/sound-protocol/typechain/index'
 
-import { interfaceIds, minterFactoryMap } from './utils/constants'
-import { MissingSignerError, MissingSignerOrProviderError, NotSoundEditionError } from './errors'
+import { MissingSignerError, MissingSignerOrProviderError, NotSoundEditionError, SoundNotFoundError } from './errors'
 import type { MinterInterfaceId, MintInfo, SignerOrProvider, SoundClientConfig } from './types'
+import { interfaceIds, minterFactoryMap } from './utils/constants'
 import { validateAddress } from './utils/helpers'
 
 import type { Signer } from '@ethersproject/abstract-signer'
+import { SoundAPI } from './api/soundApi'
+import { LazyPromise } from './utils/promise'
 
-export function SoundClient({ signer, provider, apiKey: _apiKey }: SoundClientConfig) {
+export function SoundClient({ signer, provider, apiKey }: SoundClientConfig) {
+  const soundApi = SoundAPI({
+    apiKey,
+  })
+
   // If the contract address is a SoundEdition contract
   async function isSoundEdition({ editionAddress }: { editionAddress: string }): Promise<boolean> {
     validateAddress(editionAddress)
@@ -242,11 +247,24 @@ export function SoundClient({ signer, provider, apiKey: _apiKey }: SoundClientCo
     }
   }
 
+  async function soundInfo({ releaseId }: { releaseId: string }) {
+    const { data, errors } = await soundApi.releaseInfo({ id: releaseId })
+
+    const release = data?.release
+    if (!release) throw new SoundNotFoundError({ releaseId, graphqlErrors: errors })
+
+    return {
+      ...release,
+      trackAudio: LazyPromise(() => soundApi.audioFromTrack({ trackId: release.track.id })),
+    }
+  }
+
   return {
     isSoundEdition,
     allMintsForEdition,
     activeMintsForEdition,
     eligibleMintQuantity,
+    soundInfo,
   }
 }
 

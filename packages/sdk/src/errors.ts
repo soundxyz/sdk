@@ -1,4 +1,4 @@
-import type { ZodError } from 'zod'
+import type { GraphQLError } from './types'
 
 export class MissingSignerError extends Error {
   readonly name = 'MissingSignerError'
@@ -32,16 +32,34 @@ export class NotSoundEditionError extends Error {
   }
 }
 
+export class SoundNotFoundError extends Error {
+  readonly name = 'SoundNotFound'
+
+  public readonly releaseId: string
+  public readonly graphqlErrors: readonly GraphQLError[] | undefined
+
+  constructor({ releaseId, graphqlErrors }: { releaseId: string; graphqlErrors: readonly GraphQLError[] | undefined }) {
+    super('Sound could not be found')
+
+    this.releaseId = releaseId
+    this.graphqlErrors = graphqlErrors
+  }
+}
+
 export class UnexpectedApiResponse extends Error {
   readonly name = 'UnexpectedApiResponse'
 
-  readonly zodError: ZodError | null
-  readonly unexpectedError: unknown
+  readonly originalError?: Error
 
-  constructor({ zodError, unexpectedError }: { zodError?: ZodError; unexpectedError: unknown }) {
-    super('Unexpected API Response was found')
+  readonly unexpectedOriginalError?: unknown
 
-    this.zodError = zodError || null
-    this.unexpectedError = unexpectedError
+  constructor(error: unknown) {
+    super('Unexpected API Response')
+
+    if (error instanceof Error) {
+      this.originalError = error
+    } else {
+      this.unexpectedOriginalError = error
+    }
   }
 }

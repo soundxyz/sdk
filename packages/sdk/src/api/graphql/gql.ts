@@ -25,8 +25,7 @@ export type Scalars = {
 }
 
 /** AWS Presigned upload */
-export type AwsPresignedPost = {
-  __typename?: 'AWSPresignedPost'
+export type AWSPresignedPost = {
   /** JSON Fields associated with upload */
   fields: Scalars['JSON']
   /** Upload key of authenticated user */
@@ -48,15 +47,14 @@ export type Allocation = {
 /** Possible options of role update input */
 export const AlterRole = {
   /** Administrator of platform */
-  Admin: 'ADMIN',
+  ADMIN: 'ADMIN',
   /** Member of artist relations team */
-  ArtistRelations: 'ARTIST_RELATIONS',
+  ARTIST_RELATIONS: 'ARTIST_RELATIONS',
 } as const
 
 export type AlterRole = typeof AlterRole[keyof typeof AlterRole]
 /** Artist Entity */
 export type Artist = Node & {
-  __typename?: 'Artist'
   /** Artist contract address (public address) */
   artistContractAddress?: Maybe<Scalars['String']>
   /** Banner image of artist page */
@@ -98,24 +96,23 @@ export type Artist = Node & {
 }
 
 /** Artist Entity */
-export type ArtistCollectorsArgs = {
+export type ArtistcollectorsArgs = {
   pagination?: CursorConnectionArgs
 }
 
 /** Artist Entity */
-export type ArtistMintedReleasesPaginatedArgs = {
+export type ArtistmintedReleasesPaginatedArgs = {
   filter?: InputMaybe<ArtistMintedReleasesFilter>
   pagination?: CursorConnectionArgs
 }
 
 /** Artist Entity */
-export type ArtistNumMintedReleasesArgs = {
+export type ArtistnumMintedReleasesArgs = {
   filter?: InputMaybe<ArtistMintedReleasesFilter>
 }
 
 /** Data for Artist minting auction process */
 export type ArtistAuctionOverrides = {
-  __typename?: 'ArtistAuctionOverrides'
   /** Artist user wallet public address associated to auction options */
   artistAddress: Scalars['String']
   /** Date of creation of options */
@@ -126,7 +123,6 @@ export type ArtistAuctionOverrides = {
 
 /** ArtistCollector */
 export type ArtistCollector = Node & {
-  __typename?: 'ArtistCollector'
   /** Amount of artist nfts owned */
   artistNftsOwned: Scalars['Int']
   /** First artist nft collected by user */
@@ -139,7 +135,6 @@ export type ArtistCollector = Node & {
 
 /** Paginated connection of Artist Collectors */
 export type ArtistCollectorConnection = Connection & {
-  __typename?: 'ArtistCollectorConnection'
   /** Edges of current page */
   edges: Array<ArtistCollectorConnectionEdge>
   /** Pagination helpers information */
@@ -148,7 +143,6 @@ export type ArtistCollectorConnection = Connection & {
 
 /** Edge of Artist Collector Connection */
 export type ArtistCollectorConnectionEdge = Edge & {
-  __typename?: 'ArtistCollectorConnectionEdge'
   /** Cursor to be used for pagination */
   cursor: Scalars['String']
   /** ArtistCollector node */
@@ -171,7 +165,6 @@ export type ArtistCollectorCursorConnectionArgs = {
 
 /** Artist Collectors wrapper entity */
 export type ArtistCollectors = {
-  __typename?: 'ArtistCollectors'
   /** Artist entity */
   artist: Artist
   /** Nft collectors of artist */
@@ -188,7 +181,6 @@ export type ArtistCollectorsInput = {
 
 /** Paginated connection of Artists */
 export type ArtistConnection = Connection & {
-  __typename?: 'ArtistConnection'
   /** Edges of current page */
   edges: Array<ArtistConnectionEdge>
   /** Pagination helpers information */
@@ -197,7 +189,6 @@ export type ArtistConnection = Connection & {
 
 /** Edge of Artist Connection */
 export type ArtistConnectionEdge = Edge & {
-  __typename?: 'ArtistConnectionEdge'
   /** Cursor to be used for pagination */
   cursor: Scalars['String']
   /** Artist node */
@@ -226,14 +217,12 @@ export type ArtistCursorFilterArgs = {
 
 /** Default reference artist minting release options for administration */
 export type ArtistDefaultOptions = {
-  __typename?: 'ArtistDefaultOptions'
   /** Auction options union based on type */
   auction: Array<Auction>
 }
 
 /** Artist invite entity to manage artist invitations */
 export type ArtistInvite = {
-  __typename?: 'ArtistInvite'
   /** Date of invite creation */
   createdAt: Scalars['DateTime']
   /** Artist identifier */
@@ -268,7 +257,6 @@ export type ArtistMintedReleasesFilter = {
 
 /** Artist minting release options */
 export type ArtistReleaseOptions = {
-  __typename?: 'ArtistReleaseOptions'
   /** Auction options union based on type */
   auction: Array<Auction>
   /** Artist has no time restriction for minting */
@@ -279,10 +267,10 @@ export type ArtistReleaseOptions = {
 
 /** Types of seasons for artists */
 export const ArtistSeason = {
-  Genesis: 'GENESIS',
-  SeasonOne: 'SEASON_ONE',
-  SeasonThree: 'SEASON_THREE',
-  SeasonTwo: 'SEASON_TWO',
+  GENESIS: 'GENESIS',
+  SEASON_ONE: 'SEASON_ONE',
+  SEASON_THREE: 'SEASON_THREE',
+  SEASON_TWO: 'SEASON_TWO',
 } as const
 
 export type ArtistSeason = typeof ArtistSeason[keyof typeof ArtistSeason]
@@ -291,7 +279,6 @@ export type Auction = PermissionedAuction | PermissionlessAuction | RangeBoundAu
 
 /** Release info upload step info */
 export type AuctionConfigurationUploadStepInfo = {
-  __typename?: 'AuctionConfigurationUploadStepInfo'
   /** Type of auction */
   auctionType: AuctionType
   /** Min mint supply of auction */
@@ -336,15 +323,14 @@ export type AuctionMetaInput = {
 
 /** Types of release sales */
 export const AuctionType = {
-  Permissioned: 'PERMISSIONED',
-  Permissionless: 'PERMISSIONLESS',
-  RangeBound: 'RANGE_BOUND',
+  PERMISSIONED: 'PERMISSIONED',
+  PERMISSIONLESS: 'PERMISSIONLESS',
+  RANGE_BOUND: 'RANGE_BOUND',
 } as const
 
 export type AuctionType = typeof AuctionType[keyof typeof AuctionType]
 /** Release info upload step info */
 export type AuctionUploadStepInfo = {
-  __typename?: 'AuctionUploadStepInfo'
   /** List of public addresses to allow for auction */
   allowList: Array<Scalars['String']>
   /** Price per mint */
@@ -393,7 +379,6 @@ export type ChangeRoleInput = {
 
 /** Chat Channel entity */
 export type ChatChannel = {
-  __typename?: 'ChatChannel'
   /** Association identifier paired with "type" */
   associationId?: Maybe<Scalars['String']>
   /** Can the authenticated user send messages to the channel */
@@ -412,7 +397,6 @@ export type ChatChannel = {
 
 /** Chat channel member entity */
 export type ChatChannelMember = {
-  __typename?: 'ChatChannelMember'
   /** Date of creation of member in chat channel */
   createdAt: Scalars['DateTime']
   /** Unique identifier of Chat Channel Member entity */
@@ -425,37 +409,36 @@ export type ChatChannelMember = {
 
 /** Member type in chat channels */
 export const ChatChannelMemberType = {
-  Admin: 'ADMIN',
-  Artist: 'ARTIST',
-  Participant: 'PARTICIPANT',
-  ReleaseHolder: 'RELEASE_HOLDER',
+  ADMIN: 'ADMIN',
+  ARTIST: 'ARTIST',
+  PARTICIPANT: 'PARTICIPANT',
+  RELEASE_HOLDER: 'RELEASE_HOLDER',
 } as const
 
 export type ChatChannelMemberType = typeof ChatChannelMemberType[keyof typeof ChatChannelMemberType]
 /** Types of chat channel permissions */
 export const ChatChannelPermissionType = {
-  Admin: 'ADMIN',
-  All: 'ALL',
-  Artist: 'ARTIST',
-  AuthUser: 'AUTH_USER',
-  SoundHolders: 'SOUND_HOLDERS',
+  ADMIN: 'ADMIN',
+  ALL: 'ALL',
+  ARTIST: 'ARTIST',
+  AUTH_USER: 'AUTH_USER',
+  SOUND_HOLDERS: 'SOUND_HOLDERS',
 } as const
 
 export type ChatChannelPermissionType = typeof ChatChannelPermissionType[keyof typeof ChatChannelPermissionType]
 /** Chat Channel Type */
 export const ChatChannelType = {
-  Artist: 'ARTIST',
-  Direct: 'DIRECT',
-  Group: 'GROUP',
-  Homepage: 'HOMEPAGE',
-  Release: 'RELEASE',
-  Unknown: 'UNKNOWN',
+  ARTIST: 'ARTIST',
+  DIRECT: 'DIRECT',
+  GROUP: 'GROUP',
+  HOMEPAGE: 'HOMEPAGE',
+  RELEASE: 'RELEASE',
+  UNKNOWN: 'UNKNOWN',
 } as const
 
 export type ChatChannelType = typeof ChatChannelType[keyof typeof ChatChannelType]
 /** Chat message entity */
 export type ChatMessage = Node & {
-  __typename?: 'ChatMessage'
   /** Shorthand for user's avatar */
   avatar?: Maybe<Media>
   /** Channel identifier */
@@ -480,7 +463,6 @@ export type ChatMessage = Node & {
 
 /** Pagination chat message edge */
 export type ChatMessageConnectionEdge = Edge & {
-  __typename?: 'ChatMessageConnectionEdge'
   /** Pagination cursor */
   cursor: Scalars['String']
   /** Chat message node */
@@ -489,14 +471,13 @@ export type ChatMessageConnectionEdge = Edge & {
 
 /** Chat message status */
 export const ChatMessageStatus = {
-  Hidden: 'HIDDEN',
-  Visible: 'VISIBLE',
+  HIDDEN: 'HIDDEN',
+  VISIBLE: 'VISIBLE',
 } as const
 
 export type ChatMessageStatus = typeof ChatMessageStatus[keyof typeof ChatMessageStatus]
 /** Paginated connection of Chat messages */
 export type ChatMessagesConnection = Connection & {
-  __typename?: 'ChatMessagesConnection'
   /** Edges of current page */
   edges: Array<ChatMessageConnectionEdge>
   /** Pagination helpers information */
@@ -505,7 +486,6 @@ export type ChatMessagesConnection = Connection & {
 
 /** Simplified version of Release entity filtered on the owner public address */
 export type CollectedRelease = Node & {
-  __typename?: 'CollectedRelease'
   /** Artist of release */
   artist: Artist
   /** Cover image of release */
@@ -542,7 +522,6 @@ export type CollectedRelease = Node & {
 
 /** Paginated collected releases connection */
 export type CollectedReleaseConnection = Connection & {
-  __typename?: 'CollectedReleaseConnection'
   /** Edges of current page */
   edges: Array<CollectedReleaseConnectionEdge>
   /** Pagination helpers information */
@@ -551,7 +530,6 @@ export type CollectedReleaseConnection = Connection & {
 
 /** Edge of Collected Release Connection */
 export type CollectedReleaseConnectionEdge = Edge & {
-  __typename?: 'CollectedReleaseConnectionEdge'
   /** Cursor to be used for pagination */
   cursor: Scalars['String']
   /** Collected Release node */
@@ -560,7 +538,6 @@ export type CollectedReleaseConnectionEdge = Edge & {
 
 /** Comment entity */
 export type Comment = {
-  __typename?: 'Comment'
   /** Comment unique identifier */
   id: Scalars['ID']
   /** Comment message content */
@@ -581,19 +558,19 @@ export type Connection = {
 
 /** Contract methods of transactions */
 export const ContractMethod = {
-  ArtistCreatorCreateArtist: 'ARTIST_CREATOR__CREATE_ARTIST',
-  ArtistBuyEdition: 'ARTIST__BUY_EDITION',
-  ArtistCreateEdition: 'ARTIST__CREATE_EDITION',
-  ArtistWithdrawFunds: 'ARTIST__WITHDRAW_FUNDS',
-  SplitMainCreateSplit: 'SPLIT_MAIN__CREATE_SPLIT',
-  SplitMainDistributeEth: 'SPLIT_MAIN__DISTRIBUTE_ETH',
-  SplitMainWithdraw: 'SPLIT_MAIN__WITHDRAW',
+  ARTIST_CREATOR__CREATE_ARTIST: 'ARTIST_CREATOR__CREATE_ARTIST',
+  ARTIST__BUY_EDITION: 'ARTIST__BUY_EDITION',
+  ARTIST__CREATE_EDITION: 'ARTIST__CREATE_EDITION',
+  ARTIST__WITHDRAW_FUNDS: 'ARTIST__WITHDRAW_FUNDS',
+  SPLIT_MAIN__CREATE_SPLIT: 'SPLIT_MAIN__CREATE_SPLIT',
+  SPLIT_MAIN__DISTRIBUTE_ETH: 'SPLIT_MAIN__DISTRIBUTE_ETH',
+  SPLIT_MAIN__WITHDRAW: 'SPLIT_MAIN__WITHDRAW',
 } as const
 
 export type ContractMethod = typeof ContractMethod[keyof typeof ContractMethod]
 /** Contract type, currently the playform only supports "ARTIST" */
 export const ContractType = {
-  Artist: 'ARTIST',
+  ARTIST: 'ARTIST',
 } as const
 
 export type ContractType = typeof ContractType[keyof typeof ContractType]
@@ -655,7 +632,6 @@ export type CreateReleaseInput = {
 
 /** Credit allocation entity */
 export type CreditAllocation = {
-  __typename?: 'CreditAllocation'
   /** Credit split associated with credit allocation */
   creditSplit: CreditSplit
   /** Credit allocation entity identifier */
@@ -670,7 +646,6 @@ export type CreditAllocation = {
 
 /** Credit allocation upload step info */
 export type CreditAllocationUploadStepInfo = {
-  __typename?: 'CreditAllocationUploadStepInfo'
   /** Owner public address of allocation */
   ownerAddress: Scalars['String']
   /** Percent of allocation */
@@ -681,17 +656,16 @@ export type CreditAllocationUploadStepInfo = {
 
 /** Credit role type */
 export const CreditRoleType = {
-  Artist: 'ARTIST',
-  Curator: 'CURATOR',
-  Other: 'OTHER',
-  Producer: 'PRODUCER',
-  Songwriter: 'SONGWRITER',
+  ARTIST: 'ARTIST',
+  CURATOR: 'CURATOR',
+  OTHER: 'OTHER',
+  PRODUCER: 'PRODUCER',
+  SONGWRITER: 'SONGWRITER',
 } as const
 
 export type CreditRoleType = typeof CreditRoleType[keyof typeof CreditRoleType]
 /** Credit split entity */
 export type CreditSplit = {
-  __typename?: 'CreditSplit'
   /** The amount of credit to be withdrawn from the split for the authenticated user. */
   balanceToWithdraw?: Maybe<Scalars['String']>
   /** Credit split creation date */
@@ -712,7 +686,6 @@ export type CreditSplit = {
 
 /** Currencies conversions */
 export type Currencies = {
-  __typename?: 'Currencies'
   ethToUsd: Scalars['Float']
 }
 
@@ -758,7 +731,6 @@ export type Edge = {
 
 /** EggGame Entity */
 export type EggGame = {
-  __typename?: 'EggGame'
   /** Block hash of egg game calculation */
   finalSerialBlockHash: Scalars['String']
   /** EggGame identifier */
@@ -777,16 +749,15 @@ export type Error = {
 
 /** Event type */
 export const EventType = {
-  EditionPurchased: 'EDITION_PURCHASED',
-  OrdersMatched: 'ORDERS_MATCHED',
-  Transfer: 'TRANSFER',
-  Unknown: 'UNKNOWN',
+  EDITION_PURCHASED: 'EDITION_PURCHASED',
+  ORDERS_MATCHED: 'ORDERS_MATCHED',
+  TRANSFER: 'TRANSFER',
+  UNKNOWN: 'UNKNOWN',
 } as const
 
 export type EventType = typeof EventType[keyof typeof EventType]
 /** Event entity */
 export type EventV2 = Node & {
-  __typename?: 'EventV2'
   /** Artist contract address */
   artistContractAddress: Scalars['String']
   /** Timestamp on blockchain of event */
@@ -817,7 +788,6 @@ export type EventV2 = Node & {
 
 /** Feature flag entity to describe flagged functionality */
 export type FeatureFlag = {
-  __typename?: 'FeatureFlag'
   /** Creation date of feature flag */
   createdAt: Scalars['DateTime']
   /** Feature flag UUID */
@@ -832,10 +802,10 @@ export type FeatureFlag = {
 
 /** Type of feature to be set */
 export const FeatureType = {
-  Chat: 'CHAT',
-  Queue: 'QUEUE',
-  Release: 'RELEASE',
-  Splits: 'SPLITS',
+  CHAT: 'CHAT',
+  QUEUE: 'QUEUE',
+  RELEASE: 'RELEASE',
+  SPLITS: 'SPLITS',
 } as const
 
 export type FeatureType = typeof FeatureType[keyof typeof FeatureType]
@@ -847,11 +817,11 @@ export type FilterKeyClients = {
 /** Type of rules flags to be set for presale requirements */
 export const FlagType = {
   /** Whitelist all artist holders */
-  AllArtistHolders: 'ALL_ARTIST_HOLDERS',
+  ALL_ARTIST_HOLDERS: 'ALL_ARTIST_HOLDERS',
   /** Whitelist all sound holders */
-  AllSoundHolders: 'ALL_SOUND_HOLDERS',
+  ALL_SOUND_HOLDERS: 'ALL_SOUND_HOLDERS',
   /** Any user is eligible for whitelist */
-  UnrestrictedWhitelist: 'UNRESTRICTED_WHITELIST',
+  UNRESTRICTED_WHITELIST: 'UNRESTRICTED_WHITELIST',
 } as const
 
 export type FlagType = typeof FlagType[keyof typeof FlagType]
@@ -863,7 +833,6 @@ export type FollowUserInput = {
 
 /** Result of manually synchronizing transactions */
 export type ForceSyncPendingTransactionsInfo = {
-  __typename?: 'ForceSyncPendingTransactionsInfo'
   /** How many transactions updates failed. Check runtime logs for more information */
   failed: Scalars['Int']
   /** How many transactions updates were processed successfully */
@@ -874,7 +843,6 @@ export type ForceSyncPendingTransactionsInfo = {
 
 /** Genre entity */
 export type Genre = {
-  __typename?: 'Genre'
   /** Date of creation */
   createdAt: Scalars['DateTime']
   /** Genre associated UUID */
@@ -887,7 +855,6 @@ export type Genre = {
 
 /** User+Release specific queue status entity */
 export type GetQueueStatus = {
-  __typename?: 'GetQueueStatus'
   /** User UUID */
   id: Scalars['ID']
   /** Is user eligible to join the release queue */
@@ -910,7 +877,6 @@ export type IsFollowingInput = {
 
 /** Client key management entity */
 export type KeyClient = Node & {
-  __typename?: 'KeyClient'
   /** Date of creation */
   createdAt: Scalars['DateTime']
   /** Unique identifier of client key */
@@ -927,7 +893,6 @@ export type KeyClient = Node & {
 
 /** Paginated connection of Key Clients */
 export type KeyClientConnection = Connection & {
-  __typename?: 'KeyClientConnection'
   /** Edges of current page */
   edges: Array<KeyClientConnectionEdge>
   /** Pagination helpers information */
@@ -936,7 +901,6 @@ export type KeyClientConnection = Connection & {
 
 /** Edge of Key Client Connection */
 export type KeyClientConnectionEdge = Edge & {
-  __typename?: 'KeyClientConnectionEdge'
   /** Cursor to be used for pagination */
   cursor: Scalars['String']
   /** Key Client node */
@@ -959,14 +923,13 @@ export type KeyClientCursorConnectionArgs = {
 
 /** Status of Key Client */
 export const KeyClientStatus = {
-  Active: 'ACTIVE',
-  Inactive: 'INACTIVE',
+  ACTIVE: 'ACTIVE',
+  INACTIVE: 'INACTIVE',
 } as const
 
 export type KeyClientStatus = typeof KeyClientStatus[keyof typeof KeyClientStatus]
 /** Paginated latest sales events */
 export type LatestSalesConnection = Connection & {
-  __typename?: 'LatestSalesConnection'
   /** Edges of current page */
   edges: Array<LatestSalesConnectionEdge>
   /** Pagination helpers information */
@@ -975,7 +938,6 @@ export type LatestSalesConnection = Connection & {
 
 /** Edge of LatestSales Connection */
 export type LatestSalesConnectionEdge = Edge & {
-  __typename?: 'LatestSalesConnectionEdge'
   /** Cursor to be used for pagination */
   cursor: Scalars['String']
   /** Event node */
@@ -1012,7 +974,6 @@ export type LatestSalesCursorFilterArgs = {
 
 /** Given string doesn't have the minimum expected length */
 export type LengthError = Error & {
-  __typename?: 'LengthError'
   /** Descriptive message of error */
   message: Scalars['String']
   /** Minimum string length required */
@@ -1021,14 +982,13 @@ export type LengthError = Error & {
 
 /** License for the release */
 export const LicenseType = {
-  AllRightsReserved: 'ALL_RIGHTS_RESERVED',
-  CreativeCommons: 'CREATIVE_COMMONS',
+  ALL_RIGHTS_RESERVED: 'ALL_RIGHTS_RESERVED',
+  CREATIVE_COMMONS: 'CREATIVE_COMMONS',
 } as const
 
 export type LicenseType = typeof LicenseType[keyof typeof LicenseType]
 /** Media entity */
 export type Media = {
-  __typename?: 'Media'
   /** AWS S3 Bucket */
   bucket: Scalars['String']
   /** Media entity identifier */
@@ -1041,20 +1001,19 @@ export type Media = {
 
 /** Type of media entity, either Images or Audio */
 export const MediaType = {
-  ArtistBannerImage: 'ARTIST_BANNER_IMAGE',
-  Audio: 'AUDIO',
-  AudioTranscoded: 'AUDIO_TRANSCODED',
-  AvatarImage: 'AVATAR_IMAGE',
-  ReleaseBannerImage: 'RELEASE_BANNER_IMAGE',
-  ReleaseCoverImage: 'RELEASE_COVER_IMAGE',
-  ReleaseGoldenEggImage: 'RELEASE_GOLDEN_EGG_IMAGE',
-  UserBannerImage: 'USER_BANNER_IMAGE',
+  ARTIST_BANNER_IMAGE: 'ARTIST_BANNER_IMAGE',
+  AUDIO: 'AUDIO',
+  AUDIO_TRANSCODED: 'AUDIO_TRANSCODED',
+  AVATAR_IMAGE: 'AVATAR_IMAGE',
+  RELEASE_BANNER_IMAGE: 'RELEASE_BANNER_IMAGE',
+  RELEASE_COVER_IMAGE: 'RELEASE_COVER_IMAGE',
+  RELEASE_GOLDEN_EGG_IMAGE: 'RELEASE_GOLDEN_EGG_IMAGE',
+  USER_BANNER_IMAGE: 'USER_BANNER_IMAGE',
 } as const
 
 export type MediaType = typeof MediaType[keyof typeof MediaType]
 /** Release info upload step info */
 export type MediaUploadStepInfo = {
-  __typename?: 'MediaUploadStepInfo'
   /** Media type to be uploaded */
   mediaType: MediaType
   /** Upload key received from Query.signedUploadParams */
@@ -1063,7 +1022,6 @@ export type MediaUploadStepInfo = {
 
 /** Merkle tree entity */
 export type MerkleTree = {
-  __typename?: 'MerkleTree'
   /** Upload step creation date */
   createdAt: Scalars['DateTime']
   /** Upload step identifier */
@@ -1078,7 +1036,6 @@ export type MerkleTree = {
 
 /** Merkle tree proof information */
 export type MerkleTreeProof = {
-  __typename?: 'MerkleTreeProof'
   /** Merkle proof */
   proof: Array<Scalars['String']>
   /** Unhashed leaf in merkle tree */
@@ -1087,7 +1044,6 @@ export type MerkleTreeProof = {
 
 /** Release info upload step info */
 export type MetadataUploadStepInfo = {
-  __typename?: 'MetadataUploadStepInfo'
   /** Release beats per minute */
   beatsPerMinute?: Maybe<Scalars['Int']>
   /** Release key */
@@ -1116,8 +1072,8 @@ export type MetadataUploadStepInput = {
 
 /** Mint current time status */
 export const MintTimeStatus = {
-  Past: 'PAST',
-  Upcoming: 'UPCOMING',
+  PAST: 'PAST',
+  UPCOMING: 'UPCOMING',
 } as const
 
 export type MintTimeStatus = typeof MintTimeStatus[keyof typeof MintTimeStatus]
@@ -1159,7 +1115,6 @@ export type MintedReleasesCursorFilterArgs = {
 
 /** Mutations */
 export type Mutation = {
-  __typename?: 'Mutation'
   /** [ADMIN] Accept or reject artist invitation */
   acceptOrRejectArtist: ArtistInvite
   /** [ADMIN] Add sale schedule to specified Presale Configuration */
@@ -1325,437 +1280,436 @@ export type Mutation = {
 }
 
 /** Mutations */
-export type MutationAcceptOrRejectArtistArgs = {
+export type MutationacceptOrRejectArtistArgs = {
   inviteId: Scalars['UUID']
   isAccepted: Scalars['Boolean']
 }
 
 /** Mutations */
-export type MutationAddSaleScheduleArgs = {
+export type MutationaddSaleScheduleArgs = {
   presaleConfigurationId: Scalars['UUID']
   saleSchedule: SaleScheduleInput
 }
 
 /** Mutations */
-export type MutationAddShadowBanAddressArgs = {
+export type MutationaddShadowBanAddressArgs = {
   publicAddress: Scalars['Address']
   reason?: InputMaybe<Scalars['String']>
 }
 
 /** Mutations */
-export type MutationAddSigningKeyArgs = {
+export type MutationaddSigningKeyArgs = {
   artistContractAddress?: InputMaybe<Scalars['Address']>
   privateKey: Scalars['String']
 }
 
 /** Mutations */
-export type MutationArtistAuctionMetaArgs = {
+export type MutationartistAuctionMetaArgs = {
   artistAddress: Scalars['Address']
   metaType?: InputMaybe<AuctionMetaInput>
 }
 
 /** Mutations */
-export type MutationArtistMintingOptionArgs = {
+export type MutationartistMintingOptionArgs = {
   artistAddress: Scalars['Address']
   auctionType: AuctionInputRef
 }
 
 /** Mutations */
-export type MutationChangeRoleForUserArgs = {
+export type MutationchangeRoleForUserArgs = {
   input: ChangeRoleInput
 }
 
 /** Mutations */
-export type MutationClientCreateEditionUpsertArgs = {
+export type MutationclientCreateEditionUpsertArgs = {
   txHash: Scalars['String']
 }
 
 /** Mutations */
-export type MutationClientNftUpsertArgs = {
+export type MutationclientNftUpsertArgs = {
   txHash: Scalars['String']
 }
 
 /** Mutations */
-export type MutationCreateArtistArgs = {
+export type MutationcreateArtistArgs = {
   soundHandle: Scalars['String']
 }
 
 /** Mutations */
-export type MutationCreateChatChannelArgs = {
+export type MutationcreateChatChannelArgs = {
   input: CreateChatChannelInput
 }
 
 /** Mutations */
-export type MutationCreateCreditSplitArgs = {
+export type MutationcreateCreditSplitArgs = {
   creditAllocations: Array<Allocation>
   creditSplitId?: InputMaybe<Scalars['UUID']>
   releaseId: Scalars['UUID']
 }
 
 /** Mutations */
-export type MutationCreateKeyClientArgs = {
+export type MutationcreateKeyClientArgs = {
   input: CreateKeyClient
 }
 
 /** Mutations */
-export type MutationCreatePresaleArgs = {
+export type MutationcreatePresaleArgs = {
   input: CreatePresaleInput
 }
 
 /** Mutations */
-export type MutationCreateReleaseArgs = {
+export type MutationcreateReleaseArgs = {
   input: CreateReleaseInput
 }
 
 /** Mutations */
-export type MutationDeleteSaleScheduleArgs = {
+export type MutationdeleteSaleScheduleArgs = {
   saleScheduleId: Scalars['UUID']
 }
 
 /** Mutations */
-export type MutationDeleteShelfArgs = {
+export type MutationdeleteShelfArgs = {
   input: DeleteShelfInput
 }
 
 /** Mutations */
-export type MutationDeleteUnmintedReleaseArgs = {
+export type MutationdeleteUnmintedReleaseArgs = {
   id: Scalars['UUID']
 }
 
 /** Mutations */
-export type MutationFlushWhitelistRowsArgs = {
+export type MutationflushWhitelistRowsArgs = {
   cutOff?: InputMaybe<Scalars['Int']>
   presaleConfigurationId: Scalars['UUID']
 }
 
 /** Mutations */
-export type MutationFollowUserArgs = {
+export type MutationfollowUserArgs = {
   input: FollowUserInput
 }
 
 /** Mutations */
-export type MutationGenerateAuthChallengeArgs = {
+export type MutationgenerateAuthChallengeArgs = {
   publicAddress: Scalars['String']
 }
 
 /** Mutations */
-export type MutationInvalidateMetadataArgs = {
+export type MutationinvalidateMetadataArgs = {
   artistSoundHandle?: Scalars['String']
 }
 
 /** Mutations */
-export type MutationInviteArtistArgs = {
+export type MutationinviteArtistArgs = {
   twitterHandle: Scalars['String']
 }
 
 /** Mutations */
-export type MutationIsQueueOpenArgs = {
+export type MutationisQueueOpenArgs = {
   presaleId: Scalars['UUID']
 }
 
 /** Mutations */
-export type MutationJoinQueueArgs = {
+export type MutationjoinQueueArgs = {
   captchaCode?: InputMaybe<Scalars['String']>
   releaseId: Scalars['UUID']
 }
 
 /** Mutations */
-export type MutationLeaveQueueArgs = {
+export type MutationleaveQueueArgs = {
   releaseId: Scalars['UUID']
 }
 
 /** Mutations */
-export type MutationMoveShelfDownArgs = {
+export type MutationmoveShelfDownArgs = {
   input: SetShelfOrderInput
 }
 
 /** Mutations */
-export type MutationMoveShelfUpArgs = {
+export type MutationmoveShelfUpArgs = {
   input: SetShelfOrderInput
 }
 
 /** Mutations */
-export type MutationPrepareMintArgs = {
+export type MutationprepareMintArgs = {
   input: PrepareMintInput
 }
 
 /** Mutations */
-export type MutationRegisterBuyEditionTxArgs = {
+export type MutationregisterBuyEditionTxArgs = {
   hash: Scalars['String']
   releaseId: Scalars['UUID']
 }
 
 /** Mutations */
-export type MutationRegisterCreateArtistTxArgs = {
+export type MutationregisterCreateArtistTxArgs = {
   hash: Scalars['String']
 }
 
 /** Mutations */
-export type MutationRegisterCreateSplitTxArgs = {
+export type MutationregisterCreateSplitTxArgs = {
   creditSplitId: Scalars['UUID']
   hash: Scalars['String']
 }
 
 /** Mutations */
-export type MutationRegisterReleaseMintTxArgs = {
+export type MutationregisterReleaseMintTxArgs = {
   hash: Scalars['String']
   releaseId: Scalars['UUID']
 }
 
 /** Mutations */
-export type MutationRegisterReplacementTxArgs = {
+export type MutationregisterReplacementTxArgs = {
   originalHash: Scalars['String']
   replacementHash: Scalars['String']
 }
 
 /** Mutations */
-export type MutationRegisterSplitBalanceTxArgs = {
+export type MutationregisterSplitBalanceTxArgs = {
   creditSplitId: Scalars['UUID']
   hash: Scalars['String']
 }
 
 /** Mutations */
-export type MutationRegisterWithdrawFromSplitTxArgs = {
+export type MutationregisterWithdrawFromSplitTxArgs = {
   hash: Scalars['String']
 }
 
 /** Mutations */
-export type MutationRegisterWithdrawFundsTxArgs = {
+export type MutationregisterWithdrawFundsTxArgs = {
   hash: Scalars['String']
   releaseId: Scalars['UUID']
 }
 
 /** Mutations */
-export type MutationRemoveShadowBanAddressArgs = {
+export type MutationremoveShadowBanAddressArgs = {
   publicAddress: Scalars['Address']
 }
 
 /** Mutations */
-export type MutationReportPlayStoppedArgs = {
+export type MutationreportPlayStoppedArgs = {
   input: ReportPlayStoppedInput
 }
 
 /** Mutations */
-export type MutationSeasonAuctionMetaArgs = {
+export type MutationseasonAuctionMetaArgs = {
   metaType?: InputMaybe<AuctionMetaInput>
   seasonName: Scalars['String']
 }
 
 /** Mutations */
-export type MutationSeasonMintingOptionArgs = {
+export type MutationseasonMintingOptionArgs = {
   auctionType: AuctionInputRef
   seasonName: Scalars['String']
 }
 
 /** Mutations */
-export type MutationSelectSongSlotUsingChainDataArgs = {
+export type MutationselectSongSlotUsingChainDataArgs = {
   input: ChainDataSongSlotSelection
 }
 
 /** Mutations */
-export type MutationSelectSongSlotUsingNftIdArgs = {
+export type MutationselectSongSlotUsingNftIdArgs = {
   nftId: Scalars['UUID']
   songSlot: Scalars['Int']
 }
 
 /** Mutations */
-export type MutationSendChatMessageArgs = {
+export type MutationsendChatMessageArgs = {
   input: SendChatMessageInput
 }
 
 /** Mutations */
-export type MutationSetArtistMetaArgs = {
+export type MutationsetArtistMetaArgs = {
   input: SetArtistMetaInput
 }
 
 /** Mutations */
-export type MutationSetBlockNumberArgs = {
+export type MutationsetBlockNumberArgs = {
   blockNumber: Scalars['String']
 }
 
 /** Mutations */
-export type MutationSetCommentArgs = {
+export type MutationsetCommentArgs = {
   message: Scalars['String']
   nftId: Scalars['UUID']
   signature: Scalars['String']
 }
 
 /** Mutations */
-export type MutationSetContractArgsArgs = {
+export type MutationsetContractArgsArgs = {
   name: Scalars['String']
   tokenSymbol: Scalars['String']
 }
 
 /** Mutations */
-export type MutationSetDisplayNameArgs = {
+export type MutationsetDisplayNameArgs = {
   displayName: Scalars['String']
 }
 
 /** Mutations */
-export type MutationSetEnabledChatUsersArgs = {
+export type MutationsetEnabledChatUsersArgs = {
   channelPermissions: Array<ChatChannelPermissionType>
 }
 
 /** Mutations */
-export type MutationSetFeatureFlagArgs = {
+export type MutationsetFeatureFlagArgs = {
   name: Scalars['String']
   type: FeatureType
   value: Scalars['String']
 }
 
 /** Mutations */
-export type MutationSetFeaturedSoundsArgs = {
+export type MutationsetFeaturedSoundsArgs = {
   releaseIds: Array<Scalars['UUID']>
 }
 
 /** Mutations */
-export type MutationSetInviteLimitArgs = {
+export type MutationsetInviteLimitArgs = {
   artistAddress: Scalars['Address']
   inviteLimit: Scalars['Int']
 }
 
 /** Mutations */
-export type MutationSetMainQueueCaptchaDisabledArgs = {
+export type MutationsetMainQueueCaptchaDisabledArgs = {
   isDisabled: Scalars['Boolean']
   releaseId: Scalars['String']
 }
 
 /** Mutations */
-export type MutationSetNoTimeRestrictionArtistListArgs = {
+export type MutationsetNoTimeRestrictionArtistListArgs = {
   newArtists: Array<Scalars['String']>
   shouldAppend: Scalars['Boolean']
 }
 
 /** Mutations */
-export type MutationSetNumTopCollectorsArgs = {
+export type MutationsetNumTopCollectorsArgs = {
   artistId: Scalars['UUID']
   numTop: Scalars['Int']
 }
 
 /** Mutations */
-export type MutationSetPresaleConfigurationArgs = {
+export type MutationsetPresaleConfigurationArgs = {
   data: PresaleConfigurationInput
 }
 
 /** Mutations */
-export type MutationSetQueueDisabledArtistsArgs = {
+export type MutationsetQueueDisabledArtistsArgs = {
   input: DisabledQueueArtistInput
 }
 
 /** Mutations */
-export type MutationSetReleaseCanBeMintedMoreThanOnceArgs = {
+export type MutationsetReleaseCanBeMintedMoreThanOnceArgs = {
   releaseId: Scalars['UUID']
   value: Scalars['Boolean']
 }
 
 /** Mutations */
-export type MutationSetReleaseDetailsArgs = {
+export type MutationsetReleaseDetailsArgs = {
   input: SetReleaseDetailsInput
 }
 
 /** Mutations */
-export type MutationSetReleaseMetaArgs = {
+export type MutationsetReleaseMetaArgs = {
   input: SetReleaseMetaInput
 }
 
 /** Mutations */
-export type MutationSetReleasesForShelfArgs = {
+export type MutationsetReleasesForShelfArgs = {
   input: SetReleasesForShelfInput
 }
 
 /** Mutations */
-export type MutationSetSeasonForArtistArgs = {
+export type MutationsetSeasonForArtistArgs = {
   artistId: Scalars['UUID']
   season: Scalars['String']
 }
 
 /** Mutations */
-export type MutationSetUserArtistRoleArgs = {
+export type MutationsetUserArtistRoleArgs = {
   hasArtistRole: Scalars['Boolean']
   publicAddress: Scalars['Address']
 }
 
 /** Mutations */
-export type MutationUnfollowUserArgs = {
+export type MutationunfollowUserArgs = {
   input: UnfollowUserInput
 }
 
 /** Mutations */
-export type MutationUpdateArtistOpenseaHandleArgs = {
+export type MutationupdateArtistOpenseaHandleArgs = {
   artistAddress?: InputMaybe<Scalars['Address']>
   openseaCollectionUrl?: InputMaybe<Scalars['URL']>
 }
 
 /** Mutations */
-export type MutationUpdateArtistSpotifyUrlArgs = {
+export type MutationupdateArtistSpotifyUrlArgs = {
   spotifyUrl?: InputMaybe<Scalars['String']>
 }
 
 /** Mutations */
-export type MutationUpdateDescriptionArgs = {
+export type MutationupdateDescriptionArgs = {
   description: Scalars['String']
 }
 
 /** Mutations */
-export type MutationUpdateEmailArgs = {
+export type MutationupdateEmailArgs = {
   email?: InputMaybe<Scalars['EmailAddress']>
 }
 
 /** Mutations */
-export type MutationUpdateKeyClientArgs = {
+export type MutationupdateKeyClientArgs = {
   input: UpdateKeyClient
 }
 
 /** Mutations */
-export type MutationUpdateReleaseArgs = {
+export type MutationupdateReleaseArgs = {
   input: UpdateReleaseInput
 }
 
 /** Mutations */
-export type MutationUpdateSalesScheduleArgs = {
+export type MutationupdateSalesScheduleArgs = {
   input: UpdateSaleScheduleInput
 }
 
 /** Mutations */
-export type MutationUpdateUserInstagramHandleArgs = {
+export type MutationupdateUserInstagramHandleArgs = {
   instagramHandle?: InputMaybe<Scalars['String']>
 }
 
 /** Mutations */
-export type MutationUploadUserMediaArgs = {
+export type MutationuploadUserMediaArgs = {
   content: UploadedMedia
 }
 
 /** Mutations */
-export type MutationUpsertArtistBannerImageArgs = {
+export type MutationupsertArtistBannerImageArgs = {
   bannerImage: UploadedMedia
 }
 
 /** Mutations */
-export type MutationUpsertShelfArgs = {
+export type MutationupsertShelfArgs = {
   input: UpsertShelfInput
 }
 
 /** Mutations */
-export type MutationUpsertUploadStepArgs = {
+export type MutationupsertUploadStepArgs = {
   input: UpsertReleaseUploadStepInput
 }
 
 /** Mutations */
-export type MutationVerifyAuthChallengeArgs = {
+export type MutationverifyAuthChallengeArgs = {
   publicAddress: Scalars['String']
   signedMessage: Scalars['String']
 }
 
 /** Mutations */
-export type MutationVerifyTwitterArgs = {
+export type MutationverifyTwitterArgs = {
   tweetId: Scalars['String']
   twitterHandle: Scalars['String']
 }
 
 /** NFT Entity */
 export type Nft = Node & {
-  __typename?: 'Nft'
   /** Amount paid in Wei for NFT */
   amountPaidInWei: Scalars['String']
   /** Comment set for NFT */
@@ -1790,7 +1744,6 @@ export type Nft = Node & {
 
 /** Paginated NFTs connection */
 export type NftConnection = Connection & {
-  __typename?: 'NftConnection'
   /** Edges of current page */
   edges: Array<NftConnectionEdge>
   /** Pagination helpers information */
@@ -1799,7 +1752,6 @@ export type NftConnection = Connection & {
 
 /** NFT Node edge */
 export type NftConnectionEdge = Edge & {
-  __typename?: 'NftConnectionEdge'
   /** Cursor to be used for pagination */
   cursor: Scalars['String']
   /** NFT Entity */
@@ -1832,7 +1784,6 @@ export type NftCursorConnectionSort = {
 
 /** Simplified version of Nft entity filtered to be with non-nullable comment */
 export type NftWithComment = {
-  __typename?: 'NftWithComment'
   /** Amount paid in Wei for NFT */
   amountPaidInWei: Scalars['String']
   /** Avatar URL of Nft owner */
@@ -1877,7 +1828,6 @@ export type OnChainStartTimeInput = {
 
 /** Require only holders of specific contracts */
 export type OnlyTokenHolders = {
-  __typename?: 'OnlyTokenHolders'
   /** Token Contract Address */
   tokenContractAddress: Scalars['String']
   /** Token Symbol from Contract */
@@ -1908,7 +1858,6 @@ export type OnlyTokenHoldersMediaInput = {
 
 /** Require Top Collectors flag */
 export type OnlyTopCollectors = {
-  __typename?: 'OnlyTopCollectors'
   /** How many of the top collectors are allowed */
   topNum: Scalars['Int']
 }
@@ -1921,7 +1870,6 @@ export type OnlyTopCollectorsInput = {
 
 /** Pagination helper information */
 export type PageInfo = {
-  __typename?: 'PageInfo'
   /** Cursor shorthand of the last node from current page */
   endCursor?: Maybe<Scalars['String']>
   /** Does the current connection have a next page */
@@ -1934,7 +1882,6 @@ export type PageInfo = {
 
 /** Auction options associated with permissioned sales */
 export type PermissionedAuction = {
-  __typename?: 'PermissionedAuction'
   /** List of different eth prices options */
   priceOptions: Array<Scalars['Float']>
   /** List of different quantity options */
@@ -1953,7 +1900,6 @@ export type PermissionedAuctionInput = {
 
 /** Auction options associated with permissionless sales */
 export type PermissionlessAuction = {
-  __typename?: 'PermissionlessAuction'
   /** List of different eth prices options */
   priceOptions: Array<Scalars['Float']>
   /** List of different quantity options */
@@ -1978,7 +1924,6 @@ export type Playlist = {
 
 /** Playlist of tracks of an artist */
 export type PlaylistArtist = Playlist & {
-  __typename?: 'PlaylistArtist'
   artistId: Scalars['ID']
   /** Ephemeral Unique UUID. Since right now the playlists are not being persisted, it's a completely randomly created UUID created on memory */
   id: Scalars['ID']
@@ -1988,7 +1933,6 @@ export type PlaylistArtist = Playlist & {
 
 /** Playlist of tracks of a holder' NFTs */
 export type PlaylistHolder = Playlist & {
-  __typename?: 'PlaylistHolder'
   /** Holder public address */
   holderPublicAddress: Scalars['String']
   /** Ephemeral Unique UUID. Since right now the playlists are not being persisted, it's a completely randomly created UUID created on memory */
@@ -1999,7 +1943,6 @@ export type PlaylistHolder = Playlist & {
 
 /** Playlist used for Homepage and fallback for extra pages */
 export type PlaylistHome = Playlist & {
-  __typename?: 'PlaylistHome'
   createdAt: Scalars['DateTime']
   /** Ephemeral Unique UUID. Since right now the playlists are not being persisted, it's a completely randomly created UUID created on memory */
   id: Scalars['ID']
@@ -2017,7 +1960,6 @@ export type PlaylistInput = {
 
 /** Simplified track entity to only contain identifiers to associated entities */
 export type PlaylistTrack = {
-  __typename?: 'PlaylistTrack'
   /** Artist ID */
   artistId: Scalars['ID']
   /** Track ID */
@@ -2028,9 +1970,9 @@ export type PlaylistTrack = {
 
 /** Currently supported playlists */
 export const PlaylistType = {
-  Artist: 'ARTIST',
-  Holder: 'HOLDER',
-  Home: 'HOME',
+  ARTIST: 'ARTIST',
+  HOLDER: 'HOLDER',
+  HOME: 'HOME',
 } as const
 
 export type PlaylistType = typeof PlaylistType[keyof typeof PlaylistType]
@@ -2044,7 +1986,6 @@ export type PrepareMintInput = {
 
 /** Main configuration entity of release sale */
 export type PresaleConfiguration = {
-  __typename?: 'PresaleConfiguration'
   /** Currently activate sale schedule, loosely-based on requested time */
   currentSaleSchedule?: Maybe<SaleSchedule>
   /** Most recent past sale schedule, loosely-based on requested time */
@@ -2075,7 +2016,6 @@ export type PresaleConfigurationInput = {
 
 /** Presale Media information */
 export type PresaleMediaInfo = {
-  __typename?: 'PresaleMediaInfo'
   /** Collection Name */
   collectionName?: Maybe<Scalars['String']>
   /** Size of collection */
@@ -2103,13 +2043,12 @@ export type PresaleMediaInput = {
 /** Type of presale whitelist algorithm */
 export const PresaleType = {
   /** First in first out */
-  Fifo: 'FIFO',
+  FIFO: 'FIFO',
 } as const
 
 export type PresaleType = typeof PresaleType[keyof typeof PresaleType]
 /** Queries */
 export type Query = {
-  __typename?: 'Query'
   /** [ADMIN | ARTIST_RELATIONS] Get all artist invites of the platform */
   allArtistInvites: Array<ArtistInvite>
   /**
@@ -2209,7 +2148,7 @@ export type Query = {
   /** [ARTIST] Get signature to be used for creating artist contract */
   signature: Scalars['String']
   /** [AUTHENTICATED] Request media upload */
-  signedUploadParams: AwsPresignedPost
+  signedUploadParams: AWSPresignedPost
   /** [ARTIST] Get Signing Address for minting process */
   signingAddress: SigningAddress
   /** [ADMIN | ARTIST_RELATIONS] Get basic stats */
@@ -2241,251 +2180,250 @@ export type Query = {
 }
 
 /** Queries */
-export type QueryAllArtistInvitesArgs = {
+export type QueryallArtistInvitesArgs = {
   pendingOnly?: InputMaybe<Scalars['Boolean']>
 }
 
 /** Queries */
-export type QueryAllMintedReleasesPaginatedArgs = {
+export type QueryallMintedReleasesPaginatedArgs = {
   filter?: InputMaybe<MintedReleasesCursorFilterArgs>
   pagination?: MintedReleasesCursorConnectionArgs
 }
 
 /** Queries */
-export type QueryArtistArgs = {
+export type QueryartistArgs = {
   id: Scalars['UUID']
 }
 
 /** Queries */
-export type QueryArtistByHandleArgs = {
+export type QueryartistByHandleArgs = {
   soundHandle: Scalars['String']
 }
 
 /** Queries */
-export type QueryArtistCollectorsArgs = {
+export type QueryartistCollectorsArgs = {
   input: ArtistCollectorsInput
 }
 
 /** Queries */
-export type QueryArtistDefaultMintingOptionsArgs = {
+export type QueryartistDefaultMintingOptionsArgs = {
   artistAddress: Scalars['Address']
 }
 
 /** Queries */
-export type QueryArtistMintingOptionsArgs = {
+export type QueryartistMintingOptionsArgs = {
   artistId: Scalars['UUID']
 }
 
 /** Queries */
-export type QueryArtistReleaseArgs = {
+export type QueryartistReleaseArgs = {
   releaseId: Scalars['UUID']
 }
 
 /** Queries */
-export type QueryArtistsArgs = {
+export type QueryartistsArgs = {
   filter?: InputMaybe<ArtistCursorFilterArgs>
   pagination?: CursorConnectionArgs
 }
 
 /** Queries */
-export type QueryAudioFromTrackArgs = {
+export type QueryaudioFromTrackArgs = {
   trackId: Scalars['UUID']
 }
 
 /** Queries */
-export type QueryChatMessagesArgs = {
+export type QuerychatMessagesArgs = {
   channelId: Scalars['UUID']
   pagination?: CursorConnectionArgs
 }
 
 /** Queries */
-export type QueryCreditSplitArgs = {
+export type QuerycreditSplitArgs = {
   id: Scalars['UUID']
 }
 
 /** Queries */
-export type QueryDiscoverChatChannelArgs = {
+export type QuerydiscoverChatChannelArgs = {
   input: DiscoverChatChannelInput
 }
 
 /** Queries */
-export type QueryEggGameArgs = {
+export type QueryeggGameArgs = {
   releaseId: Scalars['UUID']
 }
 
 /** Queries */
-export type QueryEligibleUsersForPresaleArgs = {
+export type QueryeligibleUsersForPresaleArgs = {
   presaleConfigurationId: Scalars['UUID']
 }
 
 /** Queries */
-export type QueryIsFollowingArgs = {
+export type QueryisFollowingArgs = {
   input: IsFollowingInput
 }
 
 /** Queries */
-export type QueryIsMainQueueCaptchaDisabledArgs = {
+export type QueryisMainQueueCaptchaDisabledArgs = {
   releaseId: Scalars['String']
 }
 
 /** Queries */
-export type QueryKeyClientsArgs = {
+export type QuerykeyClientsArgs = {
   filter?: InputMaybe<FilterKeyClients>
   pagination?: KeyClientCursorConnectionArgs
 }
 
 /** Queries */
-export type QueryLatestEventsPaginatedArgs = {
+export type QuerylatestEventsPaginatedArgs = {
   filter?: InputMaybe<LatestSalesCursorFilterArgs>
   pagination?: LatestSalesCursorConnectionArgs
 }
 
 /** Queries */
-export type QueryMerkleTreeArgs = {
+export type QuerymerkleTreeArgs = {
   root: Scalars['String']
 }
 
 /** Queries */
-export type QueryMerkleTreeProofArgs = {
+export type QuerymerkleTreeProofArgs = {
   root: Scalars['String']
   unhashedLeaf: Scalars['String']
 }
 
 /** Queries */
-export type QueryMintedReleaseArgs = {
+export type QuerymintedReleaseArgs = {
   releaseSlug: Scalars['String']
   soundHandle: Scalars['String']
 }
 
 /** Queries */
-export type QueryMintedReleasesArgs = {
+export type QuerymintedReleasesArgs = {
   filter: ArtistMintedReleasesCursorFilterArgs
   id: Scalars['UUID']
   pagination?: CursorConnectionArgs
 }
 
 /** Queries */
-export type QueryNowCachedArgs = {
+export type QuerynowCachedArgs = {
   ttlSeconds?: Scalars['Int']
 }
 
 /** Queries */
-export type QueryOnChainStartTimeArgs = {
+export type QueryonChainStartTimeArgs = {
   input: OnChainStartTimeInput
 }
 
 /** Queries */
-export type QueryPastMintedReleasesArgs = {
+export type QuerypastMintedReleasesArgs = {
   filter?: InputMaybe<MintedReleasesCursorFilterArgs>
   pagination?: CursorConnectionArgs
 }
 
 /** Queries */
-export type QueryPlaylistArgs = {
+export type QueryplaylistArgs = {
   input: PlaylistInput
 }
 
 /** Queries */
-export type QueryPresaleConfigurationArgs = {
+export type QuerypresaleConfigurationArgs = {
   releaseId: Scalars['UUID']
 }
 
 /** Queries */
-export type QueryQueueStatusArgs = {
+export type QueryqueueStatusArgs = {
   releaseId: Scalars['UUID']
 }
 
 /** Queries */
-export type QueryReleaseArgs = {
+export type QueryreleaseArgs = {
   id: Scalars['UUID']
 }
 
 /** Queries */
-export type QueryReleaseCanBeMintedMoreThanOnceArgs = {
+export type QueryreleaseCanBeMintedMoreThanOnceArgs = {
   releaseId: Scalars['String']
 }
 
 /** Queries */
-export type QuerySearchArgs = {
+export type QuerysearchArgs = {
   input: SearchInput
 }
 
 /** Queries */
-export type QuerySeasonDefaultMintingOptionsArgs = {
+export type QueryseasonDefaultMintingOptionsArgs = {
   seasonName: Scalars['String']
 }
 
 /** Queries */
-export type QueryShelfArgs = {
+export type QueryshelfArgs = {
   id: Scalars['UUID']
 }
 
 /** Queries */
-export type QuerySignedUploadParamsArgs = {
+export type QuerysignedUploadParamsArgs = {
   uploadRequest: UploadRequest
 }
 
 /** Queries */
-export type QueryTopNftsOwnedCollectorsArgs = {
+export type QuerytopNftsOwnedCollectorsArgs = {
   id: Scalars['UUID']
 }
 
 /** Queries */
-export type QueryTrackArgs = {
+export type QuerytrackArgs = {
   id: Scalars['UUID']
 }
 
 /** Queries */
-export type QueryTrendingArtistInfoArgs = {
+export type QuerytrendingArtistInfoArgs = {
   sort: TrendingArtistsSortEnum
   timePeriod: TimePeriodAggEnum
 }
 
 /** Queries */
-export type QueryTrendingCollectorsArgs = {
+export type QuerytrendingCollectorsArgs = {
   sort: TrendingCollectorsSortEnum
   timePeriod: TimePeriodAggEnum
 }
 
 /** Queries */
-export type QueryUnmintedReleasesPaginatedArgs = {
+export type QueryunmintedReleasesPaginatedArgs = {
   pagination?: CursorConnectionArgs
 }
 
 /** Queries */
-export type QueryUpcomingMintedReleasesArgs = {
+export type QueryupcomingMintedReleasesArgs = {
   filter?: InputMaybe<MintedReleasesCursorFilterArgs>
   pagination?: CursorConnectionArgs
 }
 
 /** Queries */
-export type QueryUploadStepsArgs = {
+export type QueryuploadStepsArgs = {
   releaseId: Scalars['UUID']
 }
 
 /** Queries */
-export type QueryUserArgs = {
+export type QueryuserArgs = {
   id: Scalars['UUID']
 }
 
 /** Queries */
-export type QueryUserByAddressArgs = {
+export type QueryuserByAddressArgs = {
   publicAddress: Scalars['Address']
 }
 
 /** Queries */
-export type QueryUserByArtistHandleArgs = {
+export type QueryuserByArtistHandleArgs = {
   soundHandle: Scalars['String']
 }
 
 /** Queries */
-export type QueryUserRelationStatusesArgs = {
+export type QueryuserRelationStatusesArgs = {
   users: Array<Scalars['UUID']>
 }
 
 /** Queue entity */
 export type Queue = {
-  __typename?: 'Queue'
   id: Scalars['ID']
   presaleConfigurationId: Scalars['ID']
   status: QueueStatus
@@ -2494,7 +2432,6 @@ export type Queue = {
 
 /** Entity for artist with queue feature disabled */
 export type QueueDisabledArtists = {
-  __typename?: 'QueueDisabledArtists'
   /** List of artists with queue feature disabled */
   disabledArtists: Array<Scalars['String']>
 }
@@ -2502,13 +2439,13 @@ export type QueueDisabledArtists = {
 /** Types of Queue Status states */
 export const QueueStatus = {
   /** Queue position timed out */
-  Expired: 'EXPIRED',
+  EXPIRED: 'EXPIRED',
   /** Queue was left manually */
-  LeftQueue: 'LEFT_QUEUE',
+  LEFT_QUEUE: 'LEFT_QUEUE',
   /** Queue position has been transfered to whitelist */
-  TransferredToWhitelist: 'TRANSFERRED_TO_WHITELIST',
+  TRANSFERRED_TO_WHITELIST: 'TRANSFERRED_TO_WHITELIST',
   /** Queue active and waiting for updates */
-  Waiting: 'WAITING',
+  WAITING: 'WAITING',
 } as const
 
 export type QueueStatus = typeof QueueStatus[keyof typeof QueueStatus]
@@ -2522,7 +2459,6 @@ export type QueueStatusSubscriptionInput = {
 
 /** Auction options associated with range bound sales */
 export type RangeBoundAuction = {
-  __typename?: 'RangeBoundAuction'
   /** List of different options of maximum quantity */
   maxOptions: Array<Scalars['Int']>
   /** List of different options of minimum quantity */
@@ -2549,7 +2485,6 @@ export type RangeBoundAuctionInput = {
 
 /** Release entity */
 export type Release = Node & {
-  __typename?: 'Release'
   /** Artist of release */
   artist: Artist
   /** Artist contract address */
@@ -2576,6 +2511,8 @@ export type Release = Node & {
   editionId?: Maybe<Scalars['String']>
   /** EggGame of Release */
   eggGame?: Maybe<EggGame>
+  /** Associated external url */
+  externalUrl?: Maybe<Scalars['String']>
   /** Final quantity for a release. Will be defined once a sale finishes */
   finalQuantity?: Maybe<Scalars['Int']>
   /** Last sale schedule end time as ISO Date String */
@@ -2606,6 +2543,8 @@ export type Release = Node & {
   onChainStartDateTime: Scalars['DateTime']
   /** On blockchain start time in UNIX timestamp */
   onChainStartTime: Scalars['Int']
+  /** Associated opensea url */
+  openseaUrl?: Maybe<Scalars['String']>
   /** Presale listening party start time */
   presaleListeningPartyStart?: Maybe<Scalars['DateTime']>
   /** Presale minting party start time */
@@ -2658,13 +2597,12 @@ export type Release = Node & {
 }
 
 /** Release entity */
-export type ReleaseNftsPaginatedArgs = {
+export type ReleasenftsPaginatedArgs = {
   pagination?: NftCursorConnectionArgs
 }
 
 /** Paginated releases connection */
 export type ReleaseConnection = Connection & {
-  __typename?: 'ReleaseConnection'
   /** Edges of current page */
   edges: Array<ReleaseConnectionEdge>
   /** Pagination helpers information */
@@ -2673,7 +2611,6 @@ export type ReleaseConnection = Connection & {
 
 /** Edge of Release Connection */
 export type ReleaseConnectionEdge = Edge & {
-  __typename?: 'ReleaseConnectionEdge'
   /** Cursor to be used for pagination */
   cursor: Scalars['String']
   /** Release node */
@@ -2700,7 +2637,6 @@ export type ReleaseDetailsInput = {
 
 /** Release info upload step info */
 export type ReleaseInfoUploadStepInfo = {
-  __typename?: 'ReleaseInfoUploadStepInfo'
   /** Behind the music text */
   behindTheMusic: Scalars['String']
   /** Cover image */
@@ -2741,24 +2677,28 @@ export type ReleaseInfoUploadStepInput = {
 
 /** Meta input values for release */
 export type ReleaseMetaInput = {
+  /** Associated external url */
+  externalUrl?: InputMaybe<Scalars['URL']>
   /** Associated laylo.com url */
   layloUrl?: InputMaybe<Scalars['URL']>
+  /** Associated opensea url */
+  openseaUrl?: InputMaybe<Scalars['URL']>
 }
 
 /** Release current status type */
 export const ReleaseStatus = {
-  AvailableToMint: 'AVAILABLE_TO_MINT',
-  SoldOut: 'SOLD_OUT',
+  AVAILABLE_TO_MINT: 'AVAILABLE_TO_MINT',
+  SOLD_OUT: 'SOLD_OUT',
 } as const
 
 export type ReleaseStatus = typeof ReleaseStatus[keyof typeof ReleaseStatus]
 /** Release type, currently the platform only supports "SINGLE" */
 export const ReleaseType = {
-  Album: 'ALBUM',
-  Compilation: 'COMPILATION',
-  Ep: 'EP',
-  Playlist: 'PLAYLIST',
-  Single: 'SINGLE',
+  ALBUM: 'ALBUM',
+  COMPILATION: 'COMPILATION',
+  EP: 'EP',
+  PLAYLIST: 'PLAYLIST',
+  SINGLE: 'SINGLE',
 } as const
 
 export type ReleaseType = typeof ReleaseType[keyof typeof ReleaseType]
@@ -2794,25 +2734,21 @@ export type ReportPlayStoppedInput = {
 
 /** Require Any Sound Holder flag */
 export type RequireAnySoundHolder = {
-  __typename?: 'RequireAnySoundHolder'
   enabled: Scalars['Boolean']
 }
 
 /** Require Artist Sound Holder flag */
 export type RequireArtistSoundHolder = {
-  __typename?: 'RequireArtistSoundHolder'
   enabled: Scalars['Boolean']
 }
 
 /** Require Twitter Verification flag */
 export type RequireTwitterVerification = {
-  __typename?: 'RequireTwitterVerification'
   enabled: Scalars['Boolean']
 }
 
 /** Reward entity */
 export type Reward = {
-  __typename?: 'Reward'
   /** Reward description */
   description: Scalars['String']
   /** Reward identifier */
@@ -2835,7 +2771,6 @@ export type RewardInput = {
 
 /** Release info upload step info */
 export type RewardUploadStepInfo = {
-  __typename?: 'RewardUploadStepInfo'
   /** Reward description */
   description: Scalars['String']
   /** Reward name */
@@ -2844,7 +2779,6 @@ export type RewardUploadStepInfo = {
 
 /** Release info upload step info */
 export type RewardsUploadStepInfo = {
-  __typename?: 'RewardsUploadStepInfo'
   /** Special golden egg image */
   goldenEggImage: MediaUploadStepInfo
   /** Custom rewards */
@@ -2861,7 +2795,6 @@ export type RewardsUploadStepInput = {
 
 /** Single sale schedule information of Release Presale Configuration */
 export type SaleSchedule = {
-  __typename?: 'SaleSchedule'
   /** Amount of people to be allowed to be whitelist at the same time, it's usually better to set it as the same as presaleAmount */
   cohortSize: Scalars['Int']
   /** End Time of Sale Schedule */
@@ -2883,7 +2816,7 @@ export type SaleSchedule = {
 /** Types of Sale Schedule flags */
 export const SaleScheduleFlagType = {
   /** This saleSchedule is an open edition */
-  OpenEditionEnabled: 'OPEN_EDITION_ENABLED',
+  OPEN_EDITION_ENABLED: 'OPEN_EDITION_ENABLED',
 } as const
 
 export type SaleScheduleFlagType = typeof SaleScheduleFlagType[keyof typeof SaleScheduleFlagType]
@@ -2913,7 +2846,6 @@ export type SearchInput = {
 
 /** Search result */
 export type SearchResult = {
-  __typename?: 'SearchResult'
   /** Artists that match the search input, including artists where any of their releases matches the given input */
   artists: Array<Artist>
   /** Unique identifier of search result */
@@ -2924,7 +2856,6 @@ export type SearchResult = {
 
 /** Season auction defaults for sales */
 export type SeasonAuctionDefaults = {
-  __typename?: 'SeasonAuctionDefaults'
   /** Creation date of entity */
   createdAt: Scalars['DateTime']
   /** Season auction defaults entity identifier */
@@ -2935,7 +2866,6 @@ export type SeasonAuctionDefaults = {
 
 /** Default reference season-based auction options for administration */
 export type SeasonDefaultOptions = {
-  __typename?: 'SeasonDefaultOptions'
   /** Auction options union based on type */
   auction: Array<Auction>
 }
@@ -2988,7 +2918,6 @@ export type SetShelfOrderInput = {
 
 /** Shadow banned address */
 export type ShadowBannedAddress = {
-  __typename?: 'ShadowBannedAddress'
   /** Date of ban creation */
   createdAt: Scalars['DateTime']
   /** Public address wallet */
@@ -2999,7 +2928,6 @@ export type ShadowBannedAddress = {
 
 /** Shelf entity */
 export type Shelf = Node & {
-  __typename?: 'Shelf'
   /** Paginated collected releases of shelf */
   collectedReleases: CollectedReleaseConnection
   /** Shelf creation date */
@@ -3027,13 +2955,12 @@ export type Shelf = Node & {
 }
 
 /** Shelf entity */
-export type ShelfCollectedReleasesArgs = {
+export type ShelfcollectedReleasesArgs = {
   pagination?: ShelfStackCursorConnectionArgs
 }
 
 /** Paginated shelves connection */
 export type ShelfConnection = Connection & {
-  __typename?: 'ShelfConnection'
   /** Edges of current page */
   edges: Array<ShelfConnectionEdge>
   /** Pagination helpers information */
@@ -3042,7 +2969,6 @@ export type ShelfConnection = Connection & {
 
 /** Shelf Node edge */
 export type ShelfConnectionEdge = Edge & {
-  __typename?: 'ShelfConnectionEdge'
   /** Cursor to be used for pagination */
   cursor: Scalars['String']
   /** Shelf Entity */
@@ -3071,7 +2997,6 @@ export type ShelfCursorConnectionSort = {
 
 /** Shelf stack entity */
 export type ShelfStack = Node & {
-  __typename?: 'ShelfStack'
   /** Release creation date */
   createdAt: Scalars['DateTime']
   /** Release identifier */
@@ -3086,7 +3011,6 @@ export type ShelfStack = Node & {
 
 /** Paginated shelf stacks connection */
 export type ShelfStackConnection = Connection & {
-  __typename?: 'ShelfStackConnection'
   /** Edges of current page */
   edges: Array<ShelfStackConnectionEdge>
   /** Pagination helpers information */
@@ -3095,7 +3019,6 @@ export type ShelfStackConnection = Connection & {
 
 /** Shelf stack node edge */
 export type ShelfStackConnectionEdge = Edge & {
-  __typename?: 'ShelfStackConnectionEdge'
   /** Cursor to be used for pagination */
   cursor: Scalars['String']
   /** Shelf stack entity */
@@ -3124,20 +3047,18 @@ export type ShelfStackCursorConnectionSort = {
 
 /** Shelf type */
 export const ShelfType = {
-  Default: 'DEFAULT',
+  DEFAULT: 'DEFAULT',
 } as const
 
 export type ShelfType = typeof ShelfType[keyof typeof ShelfType]
 /** Signing Address Entity */
 export type SigningAddress = {
-  __typename?: 'SigningAddress'
   /** Signing Address on chain */
   signingAddress: Scalars['String']
 }
 
 /** Social Links */
 export type SocialLinks = {
-  __typename?: 'SocialLinks'
   /** Instagram Platform */
   instagramLink?: Maybe<Scalars['String']>
   /** OpenSea Platform */
@@ -3158,43 +3079,42 @@ export type SocialLinksInput = {
 
 /** Key the release was written in */
 export const SongKeyType = {
-  Key_1D: 'KEY_1D',
-  Key_1M: 'KEY_1M',
-  Key_2D: 'KEY_2D',
-  Key_2M: 'KEY_2M',
-  Key_3D: 'KEY_3D',
-  Key_3M: 'KEY_3M',
-  Key_4D: 'KEY_4D',
-  Key_4M: 'KEY_4M',
-  Key_5D: 'KEY_5D',
-  Key_5M: 'KEY_5M',
-  Key_6D: 'KEY_6D',
-  Key_6M: 'KEY_6M',
-  Key_7D: 'KEY_7D',
-  Key_7M: 'KEY_7M',
-  Key_8D: 'KEY_8D',
-  Key_8M: 'KEY_8M',
-  Key_9D: 'KEY_9D',
-  Key_9M: 'KEY_9M',
-  Key_10D: 'KEY_10D',
-  Key_10M: 'KEY_10M',
-  Key_11D: 'KEY_11D',
-  Key_11M: 'KEY_11M',
-  Key_12D: 'KEY_12D',
-  Key_12M: 'KEY_12M',
+  KEY_1D: 'KEY_1D',
+  KEY_1M: 'KEY_1M',
+  KEY_2D: 'KEY_2D',
+  KEY_2M: 'KEY_2M',
+  KEY_3D: 'KEY_3D',
+  KEY_3M: 'KEY_3M',
+  KEY_4D: 'KEY_4D',
+  KEY_4M: 'KEY_4M',
+  KEY_5D: 'KEY_5D',
+  KEY_5M: 'KEY_5M',
+  KEY_6D: 'KEY_6D',
+  KEY_6M: 'KEY_6M',
+  KEY_7D: 'KEY_7D',
+  KEY_7M: 'KEY_7M',
+  KEY_8D: 'KEY_8D',
+  KEY_8M: 'KEY_8M',
+  KEY_9D: 'KEY_9D',
+  KEY_9M: 'KEY_9M',
+  KEY_10D: 'KEY_10D',
+  KEY_10M: 'KEY_10M',
+  KEY_11D: 'KEY_11D',
+  KEY_11M: 'KEY_11M',
+  KEY_12D: 'KEY_12D',
+  KEY_12M: 'KEY_12M',
 } as const
 
 export type SongKeyType = typeof SongKeyType[keyof typeof SongKeyType]
 /** Ascending or Descending sort */
 export const SortOrder = {
-  Asc: 'ASC',
-  Desc: 'DESC',
+  ASC: 'ASC',
+  DESC: 'DESC',
 } as const
 
 export type SortOrder = typeof SortOrder[keyof typeof SortOrder]
 /** Splits upload step info */
 export type SplitsUploadStepInfo = {
-  __typename?: 'SplitsUploadStepInfo'
   /** Splits auction configurations */
   splits: Array<CreditAllocationUploadStepInfo>
 }
@@ -3207,7 +3127,6 @@ export type SplitsUploadStepInput = {
 
 /** Basic stats information */
 export type Stats = {
-  __typename?: 'Stats'
   /** Total artists in the platform */
   totalArtists: Scalars['Float']
   /** Total unique collectors in the platform */
@@ -3218,7 +3137,6 @@ export type Stats = {
 
 /** Realtime Subscriptions */
 export type Subscription = {
-  __typename?: 'Subscription'
   /** [PUBLIC] Subscribe to updates of specified chat channel messages */
   chatChannelMessages: ChatMessage
   count: Scalars['Int']
@@ -3237,59 +3155,57 @@ export type Subscription = {
 }
 
 /** Realtime Subscriptions */
-export type SubscriptionChatChannelMessagesArgs = {
+export type SubscriptionchatChannelMessagesArgs = {
   chatChannelId: Scalars['UUID']
 }
 
 /** Realtime Subscriptions */
-export type SubscriptionCountArgs = {
+export type SubscriptioncountArgs = {
   n?: Scalars['Int']
 }
 
 /** Realtime Subscriptions */
-export type SubscriptionQueueStatusArgs = {
+export type SubscriptionqueueStatusArgs = {
   input: QueueStatusSubscriptionInput
 }
 
 /** Realtime Subscriptions */
-export type SubscriptionReleaseArgs = {
+export type SubscriptionreleaseArgs = {
   id: Scalars['UUID']
 }
 
 /** Realtime Subscriptions */
-export type SubscriptionReleaseNftsArgs = {
+export type SubscriptionreleaseNftsArgs = {
   releaseId: Scalars['UUID']
 }
 
 /** Realtime Subscriptions */
-export type SubscriptionReleaseNftsCommentsArgs = {
+export type SubscriptionreleaseNftsCommentsArgs = {
   releaseId: Scalars['UUID']
 }
 
 /** Realtime Subscriptions */
-export type SubscriptionTransactionArgs = {
+export type SubscriptiontransactionArgs = {
   authToken: Scalars['String']
 }
 
 /** Time period to aggregate trending table queries */
 export const TimePeriodAggEnum = {
-  AllTime: 'ALL_TIME',
-  OneDay: 'ONE_DAY',
-  OneMonth: 'ONE_MONTH',
-  SevenDay: 'SEVEN_DAY',
+  ALL_TIME: 'ALL_TIME',
+  ONE_DAY: 'ONE_DAY',
+  ONE_MONTH: 'ONE_MONTH',
+  SEVEN_DAY: 'SEVEN_DAY',
 } as const
 
 export type TimePeriodAggEnum = typeof TimePeriodAggEnum[keyof typeof TimePeriodAggEnum]
 /** Total raised on Ethereum and USD */
 export type TotalRaised = {
-  __typename?: 'TotalRaised'
   eth: Scalars['Float']
   usd: Scalars['Float']
 }
 
 /** Track entity */
 export type Track = {
-  __typename?: 'Track'
   /** Duration in seconds */
   duration: Scalars['Int']
   /** Track identifier */
@@ -3308,7 +3224,6 @@ export type Track = {
 
 /** Track audio */
 export type TrackAudio = {
-  __typename?: 'TrackAudio'
   /** Track audio */
   audio?: Maybe<Media>
   /** Track duration in seconds */
@@ -3337,7 +3252,6 @@ export type TrackUpload = {
 
 /** Release info upload step info */
 export type TrackUploadStepInfo = {
-  __typename?: 'TrackUploadStepInfo'
   /** Duration of track in seconds */
   duration: Scalars['Int']
   /** Details of uploaded track file */
@@ -3350,7 +3264,6 @@ export type TrackUploadStepInfo = {
 
 /** Transaction entity */
 export type Transaction = {
-  __typename?: 'Transaction'
   /** Chain identifier used for transaction */
   chainId: Scalars['Int']
   /** Contract method of transaction */
@@ -3367,7 +3280,6 @@ export type Transaction = {
 
 /** Trending Artist Info */
 export type TrendingArtistInfo = {
-  __typename?: 'TrendingArtistInfo'
   /** Artist entity */
   artist?: Maybe<Artist>
   /** Artist identifier */
@@ -3392,17 +3304,16 @@ export type TrendingArtistInfo = {
 
 /** Type of sort parameter used for trending artists */
 export const TrendingArtistsSortEnum = {
-  NftsSold: 'NFTS_SOLD',
-  PrimarySales: 'PRIMARY_SALES',
-  SecondarySales: 'SECONDARY_SALES',
-  TotalSales: 'TOTAL_SALES',
-  UniqueCollectors: 'UNIQUE_COLLECTORS',
+  NFTS_SOLD: 'NFTS_SOLD',
+  PRIMARY_SALES: 'PRIMARY_SALES',
+  SECONDARY_SALES: 'SECONDARY_SALES',
+  TOTAL_SALES: 'TOTAL_SALES',
+  UNIQUE_COLLECTORS: 'UNIQUE_COLLECTORS',
 } as const
 
 export type TrendingArtistsSortEnum = typeof TrendingArtistsSortEnum[keyof typeof TrendingArtistsSortEnum]
 /** Trending Collector information */
 export type TrendingCollectorInfo = {
-  __typename?: 'TrendingCollectorInfo'
   /** Amount of unique creators supported */
   creatorsSupported: Scalars['Int']
   /** Amount of NFTs bought */
@@ -3419,15 +3330,15 @@ export type TrendingCollectorInfo = {
 
 /** Type of sort paratemer used for trending collectors */
 export const TrendingCollectorsSortEnum = {
-  CreatorsSupported: 'CREATORS_SUPPORTED',
-  NftsBought: 'NFTS_BOUGHT',
-  TotalSpent: 'TOTAL_SPENT',
+  CREATORS_SUPPORTED: 'CREATORS_SUPPORTED',
+  NFTS_BOUGHT: 'NFTS_BOUGHT',
+  TOTAL_SPENT: 'TOTAL_SPENT',
 } as const
 
 export type TrendingCollectorsSortEnum = typeof TrendingCollectorsSortEnum[keyof typeof TrendingCollectorsSortEnum]
 /** User relation type */
 export const TypeOfRelation = {
-  Following: 'FOLLOWING',
+  FOLLOWING: 'FOLLOWING',
 } as const
 
 export type TypeOfRelation = typeof TypeOfRelation[keyof typeof TypeOfRelation]
@@ -3499,7 +3410,6 @@ export type UploadRequest = {
 
 /** Upload step entity */
 export type UploadStep = {
-  __typename?: 'UploadStep'
   /** Upload step creation date */
   createdAt: Scalars['DateTime']
   /** Upload step identifier */
@@ -3556,7 +3466,6 @@ export type UpsertShelfInput = {
 
 /** User entity */
 export type User = Node & {
-  __typename?: 'User'
   /** Optional artist entity for users with artist profile */
   artist?: Maybe<Artist>
   /** From how many unique artists the users holds nfts */
@@ -3626,34 +3535,33 @@ export type User = Node & {
 }
 
 /** User entity */
-export type UserCollectedReleasesArgs = {
+export type UsercollectedReleasesArgs = {
   pagination?: CursorConnectionArgs
 }
 
 /** User entity */
-export type UserFollowersArgs = {
+export type UserfollowersArgs = {
   pagination?: CursorConnectionArgs
 }
 
 /** User entity */
-export type UserFollowingArgs = {
+export type UserfollowingArgs = {
   pagination?: CursorConnectionArgs
 }
 
 /** User entity */
-export type UserNftsPaginatedArgs = {
+export type UsernftsPaginatedArgs = {
   filter?: InputMaybe<UserNftsConnectionFilters>
   pagination?: NftCursorConnectionArgs
 }
 
 /** User entity */
-export type UserShelvesArgs = {
+export type UsershelvesArgs = {
   pagination?: ShelfCursorConnectionArgs
 }
 
 /** Paginated connection of Users */
 export type UserConnection = Connection & {
-  __typename?: 'UserConnection'
   /** Edges of current page */
   edges: Array<UserConnectionEdge>
   /** Pagination helpers information */
@@ -3662,7 +3570,6 @@ export type UserConnection = Connection & {
 
 /** Edge of User Connection */
 export type UserConnectionEdge = Edge & {
-  __typename?: 'UserConnectionEdge'
   /** Cursor to be used for pagination */
   cursor: Scalars['String']
   /** User node */
@@ -3693,7 +3600,6 @@ export type UserNftsConnectionFilters = {
 
 /** User relation entity */
 export type UserRelation = Node & {
-  __typename?: 'UserRelation'
   /** User relation creation date */
   createdAt: Scalars['DateTime']
   /** User relation identifier */
@@ -3708,7 +3614,6 @@ export type UserRelation = Node & {
 
 /** Paginated user relation connection */
 export type UserRelationConnection = Connection & {
-  __typename?: 'UserRelationConnection'
   /** Edges of current page */
   edges: Array<UserRelationConnectionEdge>
   /** Pagination helpers information */
@@ -3717,7 +3622,6 @@ export type UserRelationConnection = Connection & {
 
 /** User Relation Node edge */
 export type UserRelationConnectionEdge = Edge & {
-  __typename?: 'UserRelationConnectionEdge'
   /** Cursor to be used for pagination */
   cursor: Scalars['String']
   /** User Relation Entity */
@@ -3726,7 +3630,6 @@ export type UserRelationConnectionEdge = Edge & {
 
 /** User Relation Status */
 export type UserRelationStatus = {
-  __typename?: 'UserRelationStatus'
   /** Is the authenticated user following the target user */
   isFollowing: Scalars['Boolean']
   /** ID of target user */
@@ -3735,7 +3638,6 @@ export type UserRelationStatus = {
 
 /** Roles available for users */
 export type UserRoles = {
-  __typename?: 'UserRoles'
   /** Administrator of platform */
   isAdmin: Scalars['Boolean']
   /** Member of artist relations team */
@@ -3744,14 +3646,12 @@ export type UserRoles = {
 
 /** Exchanged ammounts pretty equivalents */
 export type ValueExchangedPrettyType = {
-  __typename?: 'ValueExchangedPrettyType'
   /** Formatted Ethereum value */
   eth: Scalars['String']
 }
 
 /** Whitelist position of user */
 export type WhitelistObj = {
-  __typename?: 'WhitelistObj'
   /** Expiry time of whitelist position */
   expiryTime: Scalars['DateTime']
   /** Mint signature associated with whitelist position */
@@ -3782,8 +3682,61 @@ export type WhitelistRules =
   | RequireArtistSoundHolder
   | RequireTwitterVerification
 
+export type ReleaseInfoQueryVariables = Exact<{
+  releaseId: Scalars['UUID']
+}>
+
+export type ReleaseInfoQuery = {
+  release?: {
+    id: string
+    artistContractAddress: string
+    editionId?: string | null
+    externalUrl?: string | null
+    finalQuantity?: number | null
+    mintStartTime: number
+    openseaUrl?: string | null
+    title: string
+    season?: string | null
+    quantity: number
+    quantityLowerBound: number
+    quantityUpperBound: number
+    totalRaised: string
+    totalRaisedPrimaryUsd: number
+    totalRaisedSecondaryUsd: number
+    genre: { id: string; name: string }
+    track: { id: string; duration: number }
+    artist: { id: string; user: { id: string; publicAddress: string } }
+    coverImage: { id: string; url: string }
+    eggGame?: {
+      id: string
+      winningSerialNum: number
+      finalSerialBlockHash: string
+      nft: {
+        id: string
+        songSlot?: number | null
+        tokenId: string
+        updatedAtBlockNum: number
+        isPresaleNft: boolean
+        amountPaidInWei: string
+        comment?: { id: string; message: string } | null
+        owner: { id: string; publicAddress: string }
+      }
+    } | null
+  } | null
+}
+
+export type AudioFromTrackQueryVariables = Exact<{
+  trackId: Scalars['UUID']
+}>
+
+export type AudioFromTrackQuery = {
+  audioFromTrack: { id: string; duration: number; revealTime: number; audio?: { id: string; url: string } | null }
+}
+
 export type TestQueryVariables = Exact<{ [key: string]: never }>
 
 export type TestQuery = { __typename: 'Query' }
 
+export const ReleaseInfo = `query ReleaseInfo($releaseId:UUID!){release:release(id:$releaseId){id artistContractAddress editionId externalUrl finalQuantity mintStartTime openseaUrl title season quantity quantityLowerBound quantityUpperBound totalRaised totalRaisedPrimaryUsd totalRaisedSecondaryUsd genre{id name}track{id duration}artist{id user{id publicAddress}}coverImage{id url}eggGame{id winningSerialNum finalSerialBlockHash nft{id songSlot tokenId updatedAtBlockNum isPresaleNft amountPaidInWei comment{id message}owner{id publicAddress}}}}}`
+export const AudioFromTrack = `query AudioFromTrack($trackId:UUID!){audioFromTrack(trackId:$trackId){id duration audio{id url}revealTime}}`
 export const Test = `query Test{__typename}`

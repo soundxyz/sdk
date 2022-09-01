@@ -1,0 +1,71 @@
+query ReleaseInfo($releaseId: UUID!) {
+  release: release(id: $releaseId) {
+    id
+    artistContractAddress
+    editionId
+    externalUrl
+    finalQuantity
+    mintStartTime
+    openseaUrl
+    title
+    season
+    quantity
+    quantityLowerBound
+    quantityUpperBound
+    totalRaised
+    totalRaisedPrimaryUsd
+    totalRaisedSecondaryUsd
+    genre {
+      id
+      name
+    }
+    track {
+      id
+      duration
+    }
+    artist {
+      id
+      user {
+        id
+        publicAddress
+      }
+    }
+    coverImage {
+      id
+      url
+    }
+    eggGame {
+      id
+      winningSerialNum
+      finalSerialBlockHash
+      nft {
+        id
+        songSlot
+        tokenId
+        updatedAtBlockNum
+        isPresaleNft
+        amountPaidInWei
+        comment {
+          id
+          message
+        }
+        owner {
+          id
+          publicAddress
+        }
+      }
+    }
+  }
+}
+
+query AudioFromTrack($trackId: UUID!) {
+  audioFromTrack(trackId: $trackId) {
+    id
+    duration
+    audio {
+      id
+      url
+    }
+    revealTime
+  }
+}

@@ -4,6 +4,10 @@ import { buildCode } from 'bob-ts'
 import { execSync } from 'child_process'
 import { writeFile, readFile } from 'fs/promises'
 
+execSync('pnpm graphql-codegen', {
+  stdio: 'inherit',
+})
+
 await buildCode({
   entryPoints: ['src'],
   clean: true,

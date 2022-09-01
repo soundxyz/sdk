@@ -10,6 +10,8 @@ generates:
     config:
       useTypeImports: true
       enumsAsConst: true
+      skipTypename: true
+      namingConvention: 'keep'
       scalars:
         DateTime: 'string'
         NonNegativeInt: 'number'
@@ -24,6 +26,9 @@ generates:
         EmailAddress: 'string'
         Address: 'string'
       documentMode: 'string'
+  schema.graphql:
+    plugins:
+      - schema-ast
 hooks:
   afterAllFileWrite:
     - pnpm prettier --write

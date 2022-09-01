@@ -49,6 +49,7 @@ importers:
       '@ethersproject/wallet': ^5.7.0
       '@graphql-codegen/cli': ^2.11.7
       '@graphql-codegen/core': ^2.6.2
+      '@graphql-codegen/schema-ast': ^2.5.1
       '@graphql-codegen/typescript': ^2.7.3
       '@graphql-codegen/typescript-document-nodes': ^2.3.3
       '@graphql-codegen/typescript-operations': ^2.5.3
@@ -60,6 +61,7 @@ importers:
       '@types/mocha': ^9.1.1
       '@types/node': 18.7.5
       bob-ts: ^4.1.1
+      bob-tsm: ^1.1.2
       chai: ^4.3.6
       dotenv: ^16.0.1
       esbuild: ^0.15.6
@@ -85,6 +87,7 @@ importers:
       '@ethersproject/wallet': 5.7.0
       '@graphql-codegen/cli': 2.11.7_chwpj3ghb45o435nnzmdr5tmna
       '@graphql-codegen/core': 2.6.2_graphql@16.6.0
+      '@graphql-codegen/schema-ast': 2.5.1_graphql@16.6.0
       '@graphql-codegen/typescript': 2.7.3_graphql@16.6.0
       '@graphql-codegen/typescript-document-nodes': 2.3.3_graphql@16.6.0
       '@graphql-codegen/typescript-operations': 2.5.3_graphql@16.6.0
@@ -96,6 +99,7 @@ importers:
       '@types/mocha': 9.1.1
       '@types/node': 18.7.5
       bob-ts: 4.1.1_rwsjmcfjsdzek4ch244lh2hyqq
+      bob-tsm: 1.1.2_wolzmn7gzmfk36j3glpmygauce
       chai: 4.3.6
       dotenv: 16.0.1
       esbuild: 0.15.6
@@ -2718,6 +2722,23 @@ packages:
       esbuild: 0.15.6
       rollup: 2.79.0
       typescript: 4.7.4
+    dev: true
+
+  /bob-tsm/1.1.2_wolzmn7gzmfk36j3glpmygauce:
+    resolution: {integrity: sha512-5H6wIDpQTop5rt/5JRvtssmpiTkIqi1EBkpSy19GfReOed6QoeD+iJIRjNgyiI7ZsX1ogETxgN7KiW5Wx6pUEQ==}
+    engines: {node: '>=14.13.1'}
+    hasBin: true
+    peerDependencies:
+      esbuild: '>=0.14.39'
+      typescript: '>=4.7.4'
+    peerDependenciesMeta:
+      typescript:
+        optional: true
+    dependencies:
+      esbuild: 0.15.6
+      typescript: 4.7.4
+    optionalDependencies:
+      fsevents: 2.3.2
     dev: true
 
   /brace-expansion/1.1.11:
