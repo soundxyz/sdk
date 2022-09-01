@@ -374,3 +374,46 @@ describe('getEligibleMintQuantity: single RangeEditionMinter instance', () => {
     expect(eligibleQuantity2).to.equal(mint2MaxMintablePerAccount)
   })
 })
+
+describe('mint', () => {
+  describe('RangeEditionMinter', () => {
+    beforeEach(async () => {
+      const startTime = now()
+
+      await createRangeMint({
+        startTime,
+        closingTime: startTime + ONE_HOUR,
+        endTime: startTime + ONE_HOUR * 2,
+        affiliateFeeBPS: 0,
+        maxMintablePerAccount: 2,
+        maxMintableLower: 4,
+        maxMintableUpper: 5,
+        signer: artistWallet,
+        minterAddress: rangeEditionMinter.address,
+        editionAddress: soundEdition.address,
+      })
+      client = SoundClient({ provider: ethers.provider, signer: buyer, apiKey: '123' })
+    })
+
+    it(`Successfully mints via RangeEditionMinter`, async () => {
+      client = SoundClient({ provider: ethers.provider, signer: buyer, apiKey: '123' })
+      const mintInfos = await client.activeMintsForEdition({ editionAddress: soundEdition.address })
+
+      const quantity = 2
+      const initialBalance = await soundEdition.balanceOf(buyer.address)
+      await client.mint({ mintInfo: mintInfos[0], quantity })
+      const finalBalance = await soundEdition.balanceOf(buyer.address)
+
+      expect(finalBalance.sub(initialBalance)).to.eq(quantity)
+    })
+
+    it(`Should throw error if more than EligibleMintQuantity requested`, async () => {
+      const mintInfos = await client.activeMintsForEdition({ editionAddress: soundEdition.address })
+
+      const quantity = 5
+      await client.mint({ mintInfo: mintInfos[0], quantity }).catch((error) => {
+        expect(error.message).to.equal('Not eligible to mint')
+      })
+    })
+  })
+})

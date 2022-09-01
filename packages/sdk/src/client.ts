@@ -146,7 +146,12 @@ export function SoundClient({ signer, provider, apiKey: _apiKey }: SoundClientCo
     const eligibleMintQty = await eligibleMintQuantity({ mintInfo, userAddress })
     if (eligibleMintQty < quantity) throw new Error('Not eligible to mint')
 
-    const txnOverrides = { gasLimit, maxFeePerGas, maxPriorityFeePerGas }
+    const txnOverrides = {
+      value: mintInfo.price.mul(quantity),
+      gasLimit,
+      maxFeePerGas,
+      maxPriorityFeePerGas,
+    }
 
     switch (mintInfo.interfaceId) {
       case interfaceIds.IRangeEditionMinter: {
