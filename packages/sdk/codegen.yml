@@ -24,3 +24,6 @@ generates:
         EmailAddress: 'string'
         Address: 'string'
       documentMode: 'string'
+hooks:
+  afterAllFileWrite:
+    - pnpm prettier --write
