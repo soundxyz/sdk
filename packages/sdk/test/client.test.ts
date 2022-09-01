@@ -18,6 +18,7 @@ import { expect } from 'chai'
 import { ethers } from 'hardhat'
 
 import { SoundClient } from '../src/client'
+import { MintInfo } from '../src/types'
 import { createRangeMint, now } from './helpers'
 
 /*******************
@@ -377,9 +378,9 @@ describe('getEligibleMintQuantity: single RangeEditionMinter instance', () => {
 
 describe('mint', () => {
   describe('RangeEditionMinter', () => {
+    let mintInfos: MintInfo[] = []
     beforeEach(async () => {
       const startTime = now()
-
       await createRangeMint({
         startTime,
         closingTime: startTime + ONE_HOUR,
@@ -393,23 +394,28 @@ describe('mint', () => {
         editionAddress: soundEdition.address,
       })
       client = SoundClient({ provider: ethers.provider, signer: buyer, apiKey: '123' })
+
+      mintInfos = await client.activeMintsForEdition({ editionAddress: soundEdition.address })
     })
 
     it(`Successfully mints via RangeEditionMinter`, async () => {
-      client = SoundClient({ provider: ethers.provider, signer: buyer, apiKey: '123' })
-      const mintInfos = await client.activeMintsForEdition({ editionAddress: soundEdition.address })
-
       const quantity = 2
       const initialBalance = await soundEdition.balanceOf(buyer.address)
-      await client.mint({ mintInfo: mintInfos[0], quantity })
-      const finalBalance = await soundEdition.balanceOf(buyer.address)
 
+      await client.mint({ mintInfo: mintInfos[0], quantity })
+
+      const finalBalance = await soundEdition.balanceOf(buyer.address)
       expect(finalBalance.sub(initialBalance)).to.eq(quantity)
     })
 
-    it(`Should throw error if more than EligibleMintQuantity requested`, async () => {
-      const mintInfos = await client.activeMintsForEdition({ editionAddress: soundEdition.address })
+    it(`Should throw error if invalid quantity requested`, async () => {
+      const quantity = 0
+      await client.mint({ mintInfo: mintInfos[0], quantity }).catch((error) => {
+        expect(error.message).to.equal('Must provide valid quantity')
+      })
+    })
 
+    it(`Should throw error if more than EligibleMintQuantity requested`, async () => {
       const quantity = 5
       await client.mint({ mintInfo: mintInfos[0], quantity }).catch((error) => {
         expect(error.message).to.equal('Not eligible to mint')
