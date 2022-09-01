@@ -1,7 +1,7 @@
 import { BigNumber } from '@ethersproject/bignumber'
 import { Wallet } from '@ethersproject/wallet'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
+import type { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import {
   FixedPriceSignatureMinter,
   FixedPriceSignatureMinter__factory,

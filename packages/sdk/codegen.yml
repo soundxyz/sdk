@@ -2,7 +2,7 @@ schema: 'https://staging.api.sound.xyz/graphql'
 documents:
   - './graphql/**/*.gql'
 generates:
-  ./src/graphql/gql.ts:
+  ./src/api/graphql/gql.ts:
     plugins:
       - typescript
       - typescript-operations

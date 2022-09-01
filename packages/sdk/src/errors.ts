@@ -1,3 +1,5 @@
+import type { ZodError } from 'zod'
+
 export class MissingSignerError extends Error {
   readonly name = 'MissingSignerError'
 
@@ -27,5 +29,19 @@ export class NotSoundEditionError extends Error {
 
   constructor(message?: string) {
     super(message || 'Address must be a sound edition contract')
+  }
+}
+
+export class UnexpectedApiResponse extends Error {
+  readonly name = 'UnexpectedApiResponse'
+
+  readonly zodError: ZodError | null
+  readonly unexpectedError: unknown
+
+  constructor({ zodError, unexpectedError }: { zodError?: ZodError; unexpectedError: unknown }) {
+    super('Unexpected API Response was found')
+
+    this.zodError = zodError || null
+    this.unexpectedError = unexpectedError
   }
 }
