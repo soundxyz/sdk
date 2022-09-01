@@ -1,0 +1,26 @@
+schema: 'https://staging.api.sound.xyz/graphql'
+documents:
+  - './graphql/**/*.gql'
+generates:
+  ./src/graphql/gql.ts:
+    plugins:
+      - typescript
+      - typescript-operations
+      - typescript-document-nodes
+    config:
+      useTypeImports: true
+      enumsAsConst: true
+      scalars:
+        DateTime: 'string'
+        NonNegativeInt: 'number'
+        PositiveInt: 'number'
+        JSON: 'unknown'
+        Timestamp: 'number'
+        Void: 'null'
+        UUID: 'string'
+        CountryCode: 'string'
+        NonEmptyString: 'string'
+        URL: 'string'
+        EmailAddress: 'string'
+        Address: 'string'
+      documentMode: 'string'
