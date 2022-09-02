@@ -29,6 +29,7 @@ import {
   ADDRESS_ZERO,
   supportedNetworks,
   soundCreatorAddresses,
+  supportedChainIds,
 } from './utils/constants'
 import { validateAddress, getMerkleProof as _getMerkleProof } from './utils/helpers'
 import { hexZeroPad, hexlify } from '@ethersproject/bytes'
@@ -216,21 +217,29 @@ export function SoundClient({ signer, provider, apiKey, environment = 'productio
   async function createSoundAndMints({
     editionConfig,
     mintConfigs,
+    soundCreatorAddress,
   }: {
     editionConfig: EditionConfig
     mintConfigs: MintConfig[]
+    soundCreatorAddress?: string
   }) {
     const { signer, chainId, userAddress } = await _requireSigner()
 
     const randomInt = Math.floor(Math.random() * 1_000_000_000_000)
     const DEFAULT_SALT = hexZeroPad(hexlify(randomInt), 32)
 
-    const editionAddress = await SoundCreatorV1__factory.connect(
-      soundCreatorAddresses[chainId],
-      signer,
-    ).soundEditionAddress(userAddress, DEFAULT_SALT)
+    let soundCreator: string
+    if (chainId === supportedChainIds.HARDHAT || chainId === supportedChainIds.HARDHAT_ALT) {
+      if (!soundCreatorAddress) throw new Error('soundCreatorAddress is required in development mode')
+      soundCreator = soundCreatorAddress
+    } else {
+      soundCreator = soundCreatorAddresses[chainId]
+    }
 
-    console.log({ editionAddress })
+    const editionAddress = await SoundCreatorV1__factory.connect(soundCreator, signer).soundEditionAddress(
+      userAddress,
+      DEFAULT_SALT,
+    )
 
     // const editionContract = SoundEditionV1__factory.connect(editionAddress, signer)
 
