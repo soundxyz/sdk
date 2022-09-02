@@ -131,7 +131,7 @@ export function SoundClient({ signer, provider, apiKey: _apiKey }: SoundClientCo
     mintInfo: MintInfo
     quantity: number
     affiliate?: string
-    getMerkleProof?: (root: string, unhashedLeaf: string) => Promise<string[]>
+    getMerkleProof?: (root: string, unhashedLeaf: string) => Promise<string[] | null>
     gasLimit?: BigNumberish
     maxFeePerGas?: BigNumberish
     maxPriorityFeePerGas?: BigNumberish
@@ -168,6 +168,8 @@ export function SoundClient({ signer, provider, apiKey: _apiKey }: SoundClientCo
         const { merkleRootHash } = await merkleDropMinter.mintInfo(mintInfo.editionAddress, mintInfo.mintId)
 
         const proof = await getMerkleProof(merkleRootHash, userAddress)
+        if (!proof) throw new Error('Unable to fetch merkle proof')
+
         return await merkleDropMinter.mint(
           mintInfo.editionAddress,
           mintInfo.mintId,
