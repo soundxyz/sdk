@@ -23,6 +23,10 @@ import type { MintInfo } from '../src/types'
 import { interfaceIds, MINTER_ROLE } from '../src/utils/constants'
 import { now, MerkleHelper } from './helpers'
 
+/*******************
+        SETUP
+ ******************/
+
 const UINT32_MAX = 4294967295
 const NULL_ADDRESS = '0x0000000000000000000000000000000000000000'
 const NON_NULL_ADDRESS = '0x0000000000000000000000000000000000000001'
@@ -89,9 +93,31 @@ async function deployProtocol() {
     100, // mintRandomnessTokenThreshold
     100, // mintRandomnessTimeThreshold
   ]
-  const iface = new ethers.utils.Interface(SoundEditionV1__factory.abi)
-  const editionInitData = iface.encodeFunctionData('initialize', initArgs)
-  await soundCreator.createSoundAndMints(salt, editionInitData, [], [])
+  const editionInterface = new ethers.utils.Interface(SoundEditionV1__factory.abi)
+  const editionInitData = editionInterface.encodeFunctionData('initialize', initArgs)
+  const editionAddress = await soundCreator.soundEditionAddress(artistWallet.address, salt)
+
+  const contractCalls = [
+    {
+      contractAddress: editionAddress,
+      calldata: editionInterface.encodeFunctionData('grantRoles', [fixedPriceSignatureMinter.address, MINTER_ROLE]),
+    },
+    {
+      contractAddress: editionAddress,
+      calldata: editionInterface.encodeFunctionData('grantRoles', [merkleDropMinter.address, MINTER_ROLE]),
+    },
+    {
+      contractAddress: editionAddress,
+      calldata: editionInterface.encodeFunctionData('grantRoles', [rangeEditionMinter.address, MINTER_ROLE]),
+    },
+  ]
+
+  await soundCreator.createSoundAndMints(
+    salt,
+    editionInitData,
+    contractCalls.map((d) => d.contractAddress),
+    contractCalls.map((d) => d.calldata),
+  )
 
   // Get edition address
   const filter = soundCreator.filters.SoundEditionCreated(undefined, signer1.address)

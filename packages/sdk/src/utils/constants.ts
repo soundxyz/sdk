@@ -28,6 +28,7 @@ export const ApiEndpointsMap = {
 
 export type ApiEnvironments = keyof typeof ApiEndpointsMap
 
+// This is hardcoded on the contract so we always know its 2
 export const MINTER_ROLE = 2
 
 export const supportedChainIds = {
