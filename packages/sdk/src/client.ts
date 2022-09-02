@@ -143,7 +143,8 @@ export function SoundClient({ signer, provider, apiKey: _apiKey }: SoundClientCo
     const userAddress = await signer.getAddress()
 
     const eligibleMintQty = await eligibleMintQuantity({ mintInfo, userAddress })
-    if (eligibleMintQty < quantity) throw new Error('Not eligible to mint')
+    if (eligibleMintQty < quantity)
+      throw new Error(`Not eligible to mint ${quantity}. Eligible quantity: ${eligibleMintQty}`)
 
     const txnOverrides = {
       value: mintInfo.price.mul(quantity),

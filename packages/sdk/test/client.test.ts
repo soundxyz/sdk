@@ -417,8 +417,12 @@ describe('mint', () => {
 
     it(`Should throw error if more than EligibleMintQuantity requested`, async () => {
       const quantity = 5
+      const eligibleMintQuantity = await client.eligibleMintQuantity({
+        mintInfo: mintInfos[0],
+        userAddress: buyer.address,
+      })
       await client.mint({ mintInfo: mintInfos[0], quantity }).catch((error) => {
-        expect(error.message).to.equal('Not eligible to mint')
+        expect(error.message).to.equal(`Not eligible to mint ${quantity}. Eligible quantity: ${eligibleMintQuantity}`)
       })
     })
   })
