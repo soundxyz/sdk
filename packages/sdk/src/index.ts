@@ -1,0 +1,1 @@
+export { SoundClient } from './client'

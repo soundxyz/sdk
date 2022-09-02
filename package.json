@@ -8,7 +8,8 @@
     "pretty-quick": "pretty-quick --staged",
     "release": "pnpm -r --access=public publish",
     "test": "pnpm -r --filter=sdk test",
-    "tsc": "tsc -p tsconfig.check.json"
+    "tsc": "tsc -p tsconfig.check.json",
+    "changeset": "changeset"
   },
   "license": "MIT",
   "repository": {
