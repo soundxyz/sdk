@@ -1,7 +1,7 @@
 import type { BigNumber } from '@ethersproject/bignumber'
 import type { Signer } from '@ethersproject/abstract-signer'
 import type { Provider } from '@ethersproject/abstract-provider'
-import type { interfaceIds } from './utils/constants'
+import type { ApiEnvironments, interfaceIds } from './utils/constants'
 
 const SUPPORTED_CHAIN_IDS = [
   1, // mainnet
@@ -23,7 +23,13 @@ export type SoundClientConfig = (
       provider?: Provider
       signer: Signer
     }
-) & { apiKey: string }
+) & {
+  apiKey: string
+  /**
+   * @default "production"
+   */
+  environment?: ApiEnvironments
+}
 
 export type MintInfoBase = {
   editionAddress: string
