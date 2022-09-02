@@ -6,7 +6,7 @@
     "check": "pnpm check -r",
     "postinstall": "husky install",
     "pretty-quick": "pretty-quick --staged",
-    "release": "pnpm -r publish",
+    "release": "pnpm -r --access=public publish",
     "test": "pnpm -r --filter=sdk test",
     "tsc": "tsc -p tsconfig.check.json"
   },

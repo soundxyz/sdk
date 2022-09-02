@@ -26,7 +26,7 @@ const [pkgString] = await Promise.all([
 ])
 
 /**
- * @type {{name: string, version: string, exports: Record<string,{types: string; require: string; import: string} | string>; main: string; module: string; types: string; sideEffects: false; author: string, license: string, dependencies: Record<string,string>; peerDependencies: Record<string,string>}}
+ * @type {{name: string, version: string, exports: Record<string,{types: string; require: string; import: string} | string>; main: string; module: string; types: string; sideEffects: false; author: string, license: string, dependencies: Record<string,string>; peerDependencies: Record<string,string>} & Record<string, unknown>}
  */
 const {
   name,
@@ -40,6 +40,10 @@ const {
   dependencies,
   peerDependencies,
   license,
+  scripts,
+  devDependencies,
+  publishConfig,
+  ...rest
 } = JSON.parse(pkgString)
 
 const exports = {}
@@ -80,6 +84,7 @@ await writeFile(
       license,
       dependencies,
       peerDependencies,
+      ...rest,
     },
     null,
     2,

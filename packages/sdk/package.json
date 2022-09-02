@@ -1,6 +1,12 @@
 {
   "name": "@soundxyz/sdk",
   "version": "0.0.3",
+  "homepage": "https://www.sound.xyz",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/soundxyz/sdk",
+    "directory": "packages/sdk"
+  },
   "license": "MIT",
   "author": "Sound.xyz",
   "sideEffects": false,
@@ -23,6 +29,7 @@
   "scripts": {
     "check": "tsc --pretty --noEmit",
     "prepack": "node build.mjs",
+    "postpublish": "gh-release",
     "test": "hardhat test"
   },
   "dependencies": {
@@ -56,9 +63,10 @@
     "bob-ts": "^4.1.1",
     "bob-tsm": "^1.1.2",
     "chai": "^4.3.6",
+    "changesets-github-release": "^0.1.0",
     "dotenv": "^16.0.1",
-    "ethereum-waffle": "^3.2.0",
     "esbuild": "^0.15.6",
+    "ethereum-waffle": "^3.2.0",
     "ethers": "^5.7.0",
     "graphql": "^16.6.0",
     "hardhat": "^2.10.2",

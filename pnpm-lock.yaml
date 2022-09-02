@@ -66,6 +66,7 @@ importers:
       bob-ts: ^4.1.1
       bob-tsm: ^1.1.2
       chai: ^4.3.6
+      changesets-github-release: ^0.1.0
       dotenv: ^16.0.1
       esbuild: ^0.15.6
       ethereum-waffle: ^3.2.0
@@ -109,6 +110,7 @@ importers:
       bob-ts: 4.1.1_rwsjmcfjsdzek4ch244lh2hyqq
       bob-tsm: 1.1.2_wolzmn7gzmfk36j3glpmygauce
       chai: 4.3.6
+      changesets-github-release: 0.1.0
       dotenv: 16.0.1
       esbuild: 0.15.6
       ethereum-waffle: 3.4.4_typescript@4.7.4
@@ -1002,7 +1004,7 @@ packages:
     dependencies:
       '@resolver-engine/imports': 0.3.3
       '@resolver-engine/imports-fs': 0.3.3
-      '@typechain/ethers-v5': 2.0.0_typechain@3.0.0
+      '@typechain/ethers-v5': 2.0.0_nencdbwvihrvhes5lxff7r5ypq
       '@types/mkdirp': 0.5.2
       '@types/node-fetch': 2.6.2
       ethers: 5.7.0
@@ -2280,16 +2282,14 @@ packages:
     resolution: {integrity: sha512-yOlFc+7UtL/89t2ZhjPvvB/DeAr3r+Dq58IgzsFkOAvVC6NMJXmCGjbptdXdR9qsX7pKcTL+s87FtYREi2dEEQ==}
     dev: true
 
-  /@typechain/ethers-v5/2.0.0_typechain@3.0.0:
+  /@typechain/ethers-v5/2.0.0_nencdbwvihrvhes5lxff7r5ypq:
     resolution: {integrity: sha512-0xdCkyGOzdqh4h5JSf+zoWx85IusEjDcPIwNEHP8mrWSnCae4rvrqB+/gtpdNfX7zjlFlZiMeePn2r63EI3Lrw==}
     peerDependencies:
+      ethers: ^5.0.0
       typechain: ^3.0.0
     dependencies:
       ethers: 5.7.0
       typechain: 3.0.0_typescript@4.7.4
-    transitivePeerDependencies:
-      - bufferutil
-      - utf-8-validate
     dev: true
 
   /@types/abstract-leveldown/7.2.0:
@@ -4137,6 +4137,11 @@ packages:
       sentence-case: 3.0.4
       snake-case: 3.0.4
       tslib: 2.4.0
+    dev: true
+
+  /changesets-github-release/0.1.0:
+    resolution: {integrity: sha512-ai++eLjlEjW4flLKExS8Li2a5qocO+N3YTR13aZCAwt4bgj6MYXgPfdoukLktaQXs3QUmaHz5dG2ISot/hZD5g==}
+    hasBin: true
     dev: true
 
   /chardet/0.7.0:
