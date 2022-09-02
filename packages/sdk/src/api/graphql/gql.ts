@@ -619,7 +619,7 @@ export type CreateReleaseInput = {
   /** Release genre */
   genre: Scalars['String']
   /** Special golden egg image */
-  goldenEggImage: UploadedMedia
+  goldenEggImage?: InputMaybe<UploadedMedia>
   /** Custom rewards */
   rewards?: InputMaybe<Array<RewardInput>>
   /** Title of release */
@@ -3369,7 +3369,7 @@ export type UpdateReleaseInput = {
   /** Release genre */
   genre: Scalars['String']
   /** Special golden egg image */
-  goldenEggImage: UploadedMedia
+  goldenEggImage?: InputMaybe<UploadedMedia>
   /** Release identifier */
   id: Scalars['UUID']
   /** Custom rewards */

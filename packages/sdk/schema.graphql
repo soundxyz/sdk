@@ -1160,7 +1160,7 @@ input CreateReleaseInput {
   """
   Special golden egg image
   """
-  goldenEggImage: UploadedMedia!
+  goldenEggImage: UploadedMedia
 
   """
   Custom rewards
@@ -6176,7 +6176,7 @@ input UpdateReleaseInput {
   """
   Special golden egg image
   """
-  goldenEggImage: UploadedMedia!
+  goldenEggImage: UploadedMedia
 
   """
   Release identifier
