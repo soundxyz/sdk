@@ -643,6 +643,13 @@ input AuctionUploadStepInput {
 }
 
 """
+Returned when the user attempts to access a resource they are not authorized for
+"""
+type AuthorizationError implements IError {
+  message: String!
+}
+
+"""
 Input for selectSongSlotUsingChainData mutation
 """
 input ChainDataSongSlotSelection {
@@ -1652,6 +1659,13 @@ type GetQueueStatus {
 }
 
 """
+The base error type that every other error object extends from
+"""
+interface IError {
+  message: String!
+}
+
+"""
 Input field to check if auth user is following
 """
 input IsFollowingInput {
@@ -1878,6 +1892,15 @@ enum LicenseType {
 }
 
 """
+Returned when the input is above the maximum tolerated value
+"""
+type MaxValueError implements IError {
+  actual: Int!
+  max: Int!
+  message: String!
+}
+
+"""
 Media entity
 """
 type Media {
@@ -2034,6 +2057,15 @@ input MetadataUploadStepInput {
   Release lyrics
   """
   lyrics: String
+}
+
+"""
+Returned when the input is below the minimum tolerated value
+"""
+type MinValueError implements IError {
+  actual: Int!
+  message: String!
+  min: Int!
 }
 
 """
@@ -2631,7 +2663,7 @@ type Mutation {
     Chosen song slot
     """
     songSlot: Int!
-  ): Nft!
+  ): MutationSelectSongSlotUsingNftIdResult!
 
   """
   [AUTHENTICATED] Send chat message to specified channel if allowed
@@ -3057,6 +3089,24 @@ type Mutation {
     """
     twitterHandle: String!
   ): User!
+}
+
+"""
+Auto-generated result union type for the mutation or query with the same name
+"""
+union MutationSelectSongSlotUsingNftIdResult =
+    AuthorizationError
+  | MaxValueError
+  | MinValueError
+  | MutationSelectSongSlotUsingNftIdSuccess
+  | UnexpectedValueError
+  | UniqueConstraintError
+
+"""
+Auto-generated success type for the mutation or query with the same name
+"""
+type MutationSelectSongSlotUsingNftIdSuccess {
+  data: Nft!
 }
 
 """
@@ -4161,6 +4211,21 @@ type Query {
     """
     releaseId: String!
   ): Boolean!
+
+  """
+  [PUBLIC] Get release by contract address
+  """
+  releaseContract(
+    """
+    Contract address
+    """
+    contractAddress: Address!
+
+    """
+    Optional editionId of release
+    """
+    editionId: String
+  ): Release!
 
   """
   [PUBLIC] List of genres that have at least 1 past minted release
@@ -6120,6 +6185,13 @@ UUID v4
 scalar UUID
 
 """
+Returned when a value on an entity is not within the expected range for the operation to succeed
+"""
+type UnexpectedValueError implements IError {
+  message: String!
+}
+
+"""
 Input fields to unfollow user
 """
 input UnfollowUserInput {
@@ -6127,6 +6199,14 @@ input UnfollowUserInput {
   User id to unfollow
   """
   user: UUID!
+}
+
+"""
+Returned when a unique constraint is violated
+"""
+type UniqueConstraintError implements IError {
+  fields: [String!]!
+  message: String!
 }
 
 """

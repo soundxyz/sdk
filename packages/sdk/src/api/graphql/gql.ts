@@ -353,6 +353,11 @@ export type AuctionUploadStepInput = {
   startTime: Scalars['Int']
 }
 
+/** Returned when the user attempts to access a resource they are not authorized for */
+export type AuthorizationError = IError & {
+  message: Scalars['String']
+}
+
 /** Input for selectSongSlotUsingChainData mutation */
 export type ChainDataSongSlotSelection = {
   /** Amount paid in Wei */
@@ -869,6 +874,11 @@ export type GetQueueStatus = {
   whitelistInfo?: Maybe<WhitelistObj>
 }
 
+/** The base error type that every other error object extends from */
+export type IError = {
+  message: Scalars['String']
+}
+
 /** Input field to check if auth user is following */
 export type IsFollowingInput = {
   /** User id to check if auth user is following */
@@ -987,6 +997,13 @@ export const LicenseType = {
 } as const
 
 export type LicenseType = typeof LicenseType[keyof typeof LicenseType]
+/** Returned when the input is above the maximum tolerated value */
+export type MaxValueError = IError & {
+  actual: Scalars['Int']
+  max: Scalars['Int']
+  message: Scalars['String']
+}
+
 /** Media entity */
 export type Media = {
   /** AWS S3 Bucket */
@@ -1068,6 +1085,13 @@ export type MetadataUploadStepInput = {
   location?: InputMaybe<Scalars['CountryCode']>
   /** Release lyrics */
   lyrics?: InputMaybe<Scalars['String']>
+}
+
+/** Returned when the input is below the minimum tolerated value */
+export type MinValueError = IError & {
+  actual: Scalars['Int']
+  message: Scalars['String']
+  min: Scalars['Int']
 }
 
 /** Mint current time status */
@@ -1204,7 +1228,7 @@ export type Mutation = {
   /** [AUTHENTICATED] Select song slot using chain data instead of NFT identifier */
   selectSongSlotUsingChainData: Nft
   /** [AUTHENTICATED] Select song slot for owned NFT */
-  selectSongSlotUsingNftId: Nft
+  selectSongSlotUsingNftId: MutationSelectSongSlotUsingNftIdResult
   /** [AUTHENTICATED] Send chat message to specified channel if allowed */
   sendChatMessage: Scalars['ID']
   /** [ARTIST_RELATIONS | ADMIN] Set artist metadata */
@@ -1708,6 +1732,20 @@ export type MutationverifyTwitterArgs = {
   twitterHandle: Scalars['String']
 }
 
+/** Auto-generated result union type for the mutation or query with the same name */
+export type MutationSelectSongSlotUsingNftIdResult =
+  | AuthorizationError
+  | MaxValueError
+  | MinValueError
+  | MutationSelectSongSlotUsingNftIdSuccess
+  | UnexpectedValueError
+  | UniqueConstraintError
+
+/** Auto-generated success type for the mutation or query with the same name */
+export type MutationSelectSongSlotUsingNftIdSuccess = {
+  data: Nft
+}
+
 /** NFT Entity */
 export type Nft = Node & {
   /** Amount paid in Wei for NFT */
@@ -2135,6 +2173,8 @@ export type Query = {
   release?: Maybe<Release>
   /** [PUBLIC] Can the specified release be minted more than once */
   releaseCanBeMintedMoreThanOnce: Scalars['Boolean']
+  /** [PUBLIC] Get release by contract address */
+  releaseContract: Release
   /** [PUBLIC] List of genres that have at least 1 past minted release */
   releaseGenres: Array<Genre>
   /** Search releases or artists based on text inputs */
@@ -2342,6 +2382,12 @@ export type QueryreleaseArgs = {
 /** Queries */
 export type QueryreleaseCanBeMintedMoreThanOnceArgs = {
   releaseId: Scalars['String']
+}
+
+/** Queries */
+export type QueryreleaseContractArgs = {
+  contractAddress: Scalars['Address']
+  editionId?: InputMaybe<Scalars['String']>
 }
 
 /** Queries */
@@ -3342,10 +3388,21 @@ export const TypeOfRelation = {
 } as const
 
 export type TypeOfRelation = typeof TypeOfRelation[keyof typeof TypeOfRelation]
+/** Returned when a value on an entity is not within the expected range for the operation to succeed */
+export type UnexpectedValueError = IError & {
+  message: Scalars['String']
+}
+
 /** Input fields to unfollow user */
 export type UnfollowUserInput = {
   /** User id to unfollow */
   user: Scalars['UUID']
+}
+
+/** Returned when a unique constraint is violated */
+export type UniqueConstraintError = IError & {
+  fields: Array<Scalars['String']>
+  message: Scalars['String']
 }
 
 /** Input for updateKeyClient */
