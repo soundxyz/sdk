@@ -18,8 +18,8 @@ import { interfaceIds, minterFactoryMap, ADDRESS_ZERO } from './utils/constants'
 import { validateAddress, getMerkleProof as _getMerkleProof } from './utils/helpers'
 
 import type { Signer } from '@ethersproject/abstract-signer'
-import { BigNumberish } from '@ethersproject/bignumber'
-import { ContractTransaction } from '@ethersproject/contracts'
+import type { BigNumberish } from '@ethersproject/bignumber'
+import type { ContractTransaction } from '@ethersproject/contracts'
 import { SoundAPI } from './api/soundApi'
 import { LazyPromise } from './utils/promise'
 
@@ -193,14 +193,18 @@ export function SoundClient({ signer, provider, apiKey }: SoundClientConfig) {
       }
 
       case interfaceIds.IFixedPriceSignatureMinter: {
-        // TODO: get signature to mint
+        // TODO: get signature, signedQuantity, claimTicket
+        const signedQuantity = quantity
         const signature = ''
+        const claimTicket = 0
         return await FixedPriceSignatureMinter__factory.connect(mintInfo.minterAddress, signer).mint(
           mintInfo.editionAddress,
           mintInfo.mintId,
           quantity,
-          signature,
+          signedQuantity,
           affiliate,
+          signature,
+          claimTicket,
           txnOverrides,
         )
       }

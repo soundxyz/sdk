@@ -16,10 +16,11 @@ import {
 } from '@soundxyz/sound-protocol/typechain/index'
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
-import MerkleTree from 'merkletreejs'
+import type MerkleTree from 'merkletreejs'
 
 import { SoundClient } from '../src/client'
-import { MintInfo } from '../src/types'
+import type { MintInfo } from '../src/types'
+import { interfaceIds } from '../src/utils/constants'
 import { createRangeMint, now, MerkleHelper } from './helpers'
 
 /*******************
@@ -398,6 +399,7 @@ describe('mint', () => {
       // provide signer to the sdk
       client = SoundClient({ provider: ethers.provider, signer: buyer, apiKey: '123' })
       mintInfos = await client.activeMintsForEdition({ editionAddress: soundEdition.address })
+      expect(mintInfos[0].interfaceId).to.eq(interfaceIds.IRangeEditionMinter)
     })
 
     it(`Successfully mints via RangeEditionMinter`, async () => {
@@ -440,19 +442,11 @@ describe('mint', () => {
 
       const minter = MerkleDropMinter__factory.connect(merkleDropMinter.address, artistWallet)
       const startTime = now()
-      await minter.createEditionMint(
-        soundEdition.address,
-        merkleRoot,
-        PRICE,
-        startTime,
-        startTime + ONE_HOUR * 2,
-        0,
-        5,
-        1,
-      )
+      await minter.createEditionMint(soundEdition.address, merkleRoot, PRICE, startTime, startTime + ONE_HOUR, 0, 5, 1)
       // provide signer to the sdk
       client = SoundClient({ provider: ethers.provider, signer: buyer, apiKey: '123' })
       mintInfos = await client.activeMintsForEdition({ editionAddress: soundEdition.address })
+      expect(mintInfos[0].interfaceId).to.eq(interfaceIds.IMerkleDropMinter)
     })
 
     it(`Successfully mints via MerkleDropMinter`, async () => {
