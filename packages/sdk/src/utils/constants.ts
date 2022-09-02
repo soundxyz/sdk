@@ -38,4 +38,8 @@ export const supportedChainIds = {
   HARDHAT_ALT: 31337, // hardhat
 } as const
 
+export const soundCreatorAddresses = {
+  [supportedChainIds.MAINNET]: '0x8a9c67fee641579deba04928c4bc45f66e26343a',
+}
+
 export const supportedNetworks = Object.values(supportedChainIds)

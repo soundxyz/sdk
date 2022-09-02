@@ -28,7 +28,7 @@ const NON_NULL_ADDRESS = '0x0000000000000000000000000000000000000001'
 const SOUND_FEE = 0
 const ONE_HOUR = 3600
 const PRICE = 420420420
-const randomInt = Math.floor(Math.random() * 1000000)
+const randomInt = Math.floor(Math.random() * 1_000_000_000_000)
 const DEFAULT_SALT = ethers.utils.hexZeroPad(ethers.utils.hexlify(randomInt), 32)
 
 let client: SoundClient

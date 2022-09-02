@@ -59,12 +59,68 @@ export type MintInfo =
       maxMintable: number
     })
 
+/**
+ * The arguments required by SoundEdition.initialize
+ */
+export type EditionConfig = {
+  name: string
+  symbol: string
+  metadataModule: string
+  baseURI: string
+  contractURI: string
+  fundingRecipient: string
+  royaltyBPS: number
+  editionMaxMintable: number
+  mintRandomnessTokenThreshold: number
+  mintRandomnessTimeThreshold: number
+}
+
+enum minterNames {
+  'RangeEditionMinter',
+  'FixedPriceSignatureMinter',
+  'MerkleDropMinter',
+}
+
+/**
+ * The arguments required for all minter calls.
+ */
+export type MintConfigBase = {
+  edition: string
+  minter: string
+  price: number
+  startTime: number
+  endTime: number
+  affiliateFeeBPS: number
+}
+
+/**
+ * The custom arguments required by each minter
+ */
+export type MintConfig =
+  | (MintConfigBase & {
+      name: minterNames.RangeEditionMinter
+      closingTime: number
+      maxMintableLower: number
+      maxMintableUpper: number
+      maxMintablePerAccount: number
+    })
+  | (MintConfigBase & {
+      name: minterNames.MerkleDropMinter
+      merkleRootHash: string
+      maxMintable: number
+      maxMintablePerAccount: number
+    })
+  | (MintConfigBase & {
+      name: minterNames.FixedPriceSignatureMinter
+      signer: string
+      maxMintable: number
+    })
+
 /*********************************************************
                     API TYPES
  ********************************************************/
 
 export type GraphQLExecutionErrors = readonly [GraphQLError, ...Array<GraphQLError>]
-
 export interface ExecutionResult<
   TData extends Record<string, unknown> = Record<string, unknown>,
   TExtensions extends Record<string, unknown> = Record<string, unknown>,

@@ -2,6 +2,7 @@ import {
   IMinterModule__factory,
   MerkleDropMinter__factory,
   RangeEditionMinter__factory,
+  SoundCreatorV1__factory,
   SoundEditionV1__factory,
 } from '@soundxyz/sound-protocol/typechain/index'
 
@@ -13,10 +14,24 @@ import {
   SoundNotFoundError,
   UnsupportedNetworkError,
 } from './errors'
-import type { MinterInterfaceId, MintInfo, SignerOrProvider, SoundClientConfig, ChainId } from './types'
-import { ADDRESS_ZERO, interfaceIds, minterFactoryMap, supportedNetworks } from './utils/constants'
-import { getMerkleProof as _getMerkleProof, validateAddress } from './utils/helpers'
-
+import type {
+  MinterInterfaceId,
+  MintInfo,
+  SignerOrProvider,
+  SoundClientConfig,
+  EditionConfig,
+  MintConfig,
+  ChainId,
+} from './types'
+import {
+  interfaceIds,
+  minterFactoryMap,
+  ADDRESS_ZERO,
+  supportedNetworks,
+  soundCreatorAddresses,
+} from './utils/constants'
+import { validateAddress, getMerkleProof as _getMerkleProof } from './utils/helpers'
+import { hexZeroPad, hexlify } from '@ethersproject/bytes'
 import type { Signer } from '@ethersproject/abstract-signer'
 import type { BigNumberish } from '@ethersproject/bignumber'
 import type { ContractTransaction } from '@ethersproject/contracts'
@@ -198,6 +213,40 @@ export function SoundClient({ signer, provider, apiKey, environment = 'productio
     }
   }
 
+  async function createSoundAndMints({
+    editionConfig,
+    mintConfigs,
+  }: {
+    editionConfig: EditionConfig
+    mintConfigs: MintConfig[]
+  }) {
+    const { signer, chainId, userAddress } = await _requireSigner()
+
+    const randomInt = Math.floor(Math.random() * 1_000_000_000_000)
+    const DEFAULT_SALT = hexZeroPad(hexlify(randomInt), 32)
+
+    const editionAddress = await SoundCreatorV1__factory.connect(
+      soundCreatorAddresses[chainId],
+      signer,
+    ).soundEditionAddress(userAddress, DEFAULT_SALT)
+
+    console.log({ editionAddress })
+
+    // const editionContract = SoundEditionV1__factory.connect(editionAddress, signer)
+
+    // const mintInfos: MintInfo[] = []
+    // for (const mintConfig of mintConfigs) {
+    //   const mintInfo = await createMint({ editionAddress, mintConfig })
+    //   mintInfos.push(mintInfo)
+    // }
+
+    return { editionAddress }
+  }
+
+  /*********************************************************
+                  INTERNAL FUNCTIONS
+ ********************************************************/
+
   // Addresses with MINTER_ROLE for a given edition
   async function _registeredMinters({ editionAddress }: { editionAddress: string }): Promise<string[]> {
     const { signerOrProvider } = await _requireSignerOrProvider()
@@ -363,6 +412,7 @@ export function SoundClient({ signer, provider, apiKey, environment = 'productio
     eligibleMintQuantity,
     mint,
     soundInfo,
+    createSoundAndMints,
   }
 }
 

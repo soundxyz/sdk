@@ -43,6 +43,7 @@ importers:
       '@ethersproject/abstract-signer': ^5.7.0
       '@ethersproject/address': ^5.7.0
       '@ethersproject/bignumber': ^5.7.0
+      '@ethersproject/bytes': ^5.7.0
       '@ethersproject/contracts': ^5.7.0
       '@ethersproject/providers': ^5.7.0
       '@ethersproject/sha2': ^5.7.0
@@ -59,7 +60,7 @@ importers:
       '@nomicfoundation/hardhat-network-helpers': ^1.0.4
       '@nomiclabs/hardhat-ethers': ^2.1.1
       '@nomiclabs/hardhat-waffle': ^2.0.3
-      '@soundxyz/sound-protocol': 0.1.0-alpha-73306e3.0
+      '@soundxyz/sound-protocol': 0.1.0-alpha-8beb046.0
       '@types/chai': ^4.3.3
       '@types/mocha': ^9.1.1
       '@types/node': 18.7.5
@@ -87,6 +88,7 @@ importers:
       zod: 3.18.0
     devDependencies:
       '@ethersproject/bignumber': 5.7.0
+      '@ethersproject/bytes': 5.7.0
       '@ethersproject/contracts': 5.7.0
       '@ethersproject/providers': 5.7.0
       '@ethersproject/sha2': 5.7.0
@@ -103,7 +105,7 @@ importers:
       '@nomicfoundation/hardhat-network-helpers': 1.0.4_hardhat@2.10.2
       '@nomiclabs/hardhat-ethers': 2.1.1_lc7o4ykyrnccnzpoyzs6m3zzsq
       '@nomiclabs/hardhat-waffle': 2.0.3_eldzggq4rzrujjvlywbx6zhlvq
-      '@soundxyz/sound-protocol': 0.1.0-alpha-73306e3.0
+      '@soundxyz/sound-protocol': 0.1.0-alpha-8beb046.0
       '@types/chai': 4.3.3
       '@types/mocha': 9.1.1
       '@types/node': 18.7.5
@@ -2242,8 +2244,8 @@ packages:
       antlr4ts: 0.5.0-alpha.4
     dev: true
 
-  /@soundxyz/sound-protocol/0.1.0-alpha-73306e3.0:
-    resolution: {integrity: sha512-VPX+ahitDE62n6gcqq7XiKvcyHyh0HxIqDa5Wy+umQdbWmXq8c6dziUHNSyKwrHkXZdqtCgpAxlkRsJKZWu5kw==}
+  /@soundxyz/sound-protocol/0.1.0-alpha-8beb046.0:
+    resolution: {integrity: sha512-Vc/iZfdDJ9covgmHqPr0T6h9/8ZQmP6Z02rsB3A3qbNivk7jcZEhDAtKy6SXwOq6KXJTxFRQfBBhs0C7Tx++1g==}
     dependencies:
       '@ethersproject/abi': 5.7.0
       '@ethersproject/providers': 5.7.0
