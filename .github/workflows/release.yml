@@ -19,7 +19,7 @@ jobs:
       - name: Setup PNPM
         uses: pnpm/action-setup@v2.0.1
         with:
-          version: ^7.3.0
+          version: ^7.9.5
 
       - name: Use Node
         uses: actions/setup-node@v3
@@ -28,10 +28,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install Dependencies
-        run: pnpm install --no-frozen-lockfile
-
-      - name: Test ESM & CJS integrity
-        run: pnpm bob check
+        run: pnpm install
 
       - name: Set version variables
         id: vars
@@ -50,5 +47,5 @@ jobs:
           createGithubReleases: ${{ inputs.createGithubReleases }}
           githubReleaseName: ${{ steps.vars.outputs.date }}
         env:
-          NPM_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

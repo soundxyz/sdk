@@ -1,8 +1,0 @@
-{
-  "mode": "pre",
-  "tag": "beta",
-  "initialVersions": {
-    "@soundxyz/sdk": "0.0.0"
-  },
-  "changesets": []
-}
