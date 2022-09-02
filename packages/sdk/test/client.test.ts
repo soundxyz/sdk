@@ -395,7 +395,7 @@ describe('mint', () => {
         editionAddress: soundEdition.address,
       })
 
-      // provider signer to the sdk
+      // provide signer to the sdk
       client = SoundClient({ provider: ethers.provider, signer: buyer, apiKey: '123' })
       mintInfos = await client.activeMintsForEdition({ editionAddress: soundEdition.address })
     })
@@ -450,7 +450,7 @@ describe('mint', () => {
         5,
         1,
       )
-      // provider signer to the sdk
+      // provide signer to the sdk
       client = SoundClient({ provider: ethers.provider, signer: buyer, apiKey: '123' })
       mintInfos = await client.activeMintsForEdition({ editionAddress: soundEdition.address })
     })
