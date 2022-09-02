@@ -1,4 +1,3 @@
-import { BigNumber } from '@ethersproject/bignumber'
 import { Wallet } from '@ethersproject/wallet'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 import type { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
@@ -22,10 +21,6 @@ import { SoundClient } from '../src/client'
 import type { MintInfo } from '../src/types'
 import { interfaceIds, MINTER_ROLE } from '../src/utils/constants'
 import { now, MerkleHelper } from './helpers'
-
-/*******************
-        SETUP
- ******************/
 
 const UINT32_MAX = 4294967295
 const NULL_ADDRESS = '0x0000000000000000000000000000000000000000'
@@ -75,57 +70,6 @@ async function deployProtocol() {
 
   // Get precomputed edition address using default salt
   const precomputedEditionAddress = await soundCreator.soundEditionAddress(signer1.address, DEFAULT_SALT)
-  const abiCoder = ethers.utils.defaultAbiCoder
-
-  // Create salt used for precalculating edition addresses
-  const randomInt = Math.floor(Math.random() * 1000000)
-  const salt = ethers.utils.hexZeroPad(ethers.utils.hexlify(randomInt), 32)
-
-  const initArgs = [
-    'Song Name',
-    'SYMBOL',
-    NULL_ADDRESS,
-    'https://baseURI.com',
-    'https://contractURI.com',
-    NON_NULL_ADDRESS,
-    0, //royaltyBPS,
-    UINT32_MAX, // editionMaxMintable
-    100, // mintRandomnessTokenThreshold
-    100, // mintRandomnessTimeThreshold
-  ]
-  const editionInterface = new ethers.utils.Interface(SoundEditionV1__factory.abi)
-  const editionInitData = editionInterface.encodeFunctionData('initialize', initArgs)
-  const editionAddress = await soundCreator.soundEditionAddress(artistWallet.address, salt)
-
-  const contractCalls = [
-    {
-      contractAddress: editionAddress,
-      calldata: editionInterface.encodeFunctionData('grantRoles', [fixedPriceSignatureMinter.address, MINTER_ROLE]),
-    },
-    {
-      contractAddress: editionAddress,
-      calldata: editionInterface.encodeFunctionData('grantRoles', [merkleDropMinter.address, MINTER_ROLE]),
-    },
-    {
-      contractAddress: editionAddress,
-      calldata: editionInterface.encodeFunctionData('grantRoles', [rangeEditionMinter.address, MINTER_ROLE]),
-    },
-  ]
-
-  await soundCreator.createSoundAndMints(
-    salt,
-    editionInitData,
-    contractCalls.map((d) => d.contractAddress),
-    contractCalls.map((d) => d.calldata),
-  )
-
-  // Get edition address
-  const filter = soundCreator.filters.SoundEditionCreated(undefined, signer1.address)
-  const roleEvents = await soundCreator.queryFilter(filter)
-
-  if (!roleEvents[0].args.soundEdition) {
-    throw new Error('No sound edition created')
-  }
 
   return { soundCreator, precomputedEditionAddress, fixedPriceSignatureMinter, merkleDropMinter, rangeEditionMinter }
 }
@@ -153,7 +97,7 @@ export async function createSoundAndMints({
   minterCalls?: { contractAddress: string; calldata: string }[]
 }) {
   const salt = customSalt || DEFAULT_SALT
-  const editionInitArgs = [
+  const initArgs = [
     'Song Name',
     'SYMBOL',
     NULL_ADDRESS,
@@ -166,10 +110,10 @@ export async function createSoundAndMints({
     100, // mintRandomnessTimeThreshold
   ]
   const editionInterface = new ethers.utils.Interface(SoundEditionV1__factory.abi)
-  const editionInitData = editionInterface.encodeFunctionData('initialize', editionInitArgs)
+  const editionInitData = editionInterface.encodeFunctionData('initialize', initArgs)
   const editionAddress = await soundCreator.soundEditionAddress(artistWallet.address, salt)
 
-  const grantRolesCalls = [
+  const grantRoleCalls = [
     {
       contractAddress: editionAddress,
       calldata: editionInterface.encodeFunctionData('grantRoles', [fixedPriceSignatureMinter.address, MINTER_ROLE]),
@@ -184,7 +128,7 @@ export async function createSoundAndMints({
     },
   ]
 
-  const allContractCalls = [...grantRolesCalls, ...minterCalls]
+  const allContractCalls = [...grantRoleCalls, ...minterCalls]
 
   await soundCreator.createSoundAndMints(
     salt,
