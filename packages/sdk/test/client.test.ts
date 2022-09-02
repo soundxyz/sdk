@@ -98,7 +98,7 @@ export async function createSoundAndMints({
   minterCalls?: { contractAddress: string; calldata: string }[]
 }) {
   const salt = customSalt || DEFAULT_SALT
-  const initArgs = [
+  const editionInitArgs = [
     'Song Name',
     'SYMBOL',
     NULL_ADDRESS,
@@ -111,10 +111,10 @@ export async function createSoundAndMints({
     100, // mintRandomnessTimeThreshold
   ]
   const editionInterface = new ethers.utils.Interface(SoundEditionV1__factory.abi)
-  const editionInitData = editionInterface.encodeFunctionData('initialize', initArgs)
+  const editionInitData = editionInterface.encodeFunctionData('initialize', editionInitArgs)
   const editionAddress = await soundCreator.soundEditionAddress(salt)
 
-  const grantRoleCalls = [
+  const grantRolesCalls = [
     {
       contractAddress: editionAddress,
       calldata: editionInterface.encodeFunctionData('grantRoles', [fixedPriceSignatureMinter.address, MINTER_ROLE]),
@@ -129,7 +129,7 @@ export async function createSoundAndMints({
     },
   ]
 
-  const allContractCalls = [...grantRoleCalls, ...minterCalls]
+  const allContractCalls = [...grantRolesCalls, ...minterCalls]
 
   await soundCreator.createSoundAndMints(
     salt,
@@ -152,11 +152,11 @@ describe('isSoundEdition', () => {
 
   it('Correctly identifies SoundEdition addresses', async () => {
     await createSoundAndMints({})
-    // for (let i = 0; i < 10; i++) {
-    //   const wallet = Wallet.createRandom()
-    //   const isEdition = await client.isSoundEdition({ editionAddress: wallet.address })
-    //   expect(isEdition).to.be.false
-    // }
+    for (let i = 0; i < 10; i++) {
+      const wallet = Wallet.createRandom()
+      const isEdition = await client.isSoundEdition({ editionAddress: wallet.address })
+      expect(isEdition).to.be.false
+    }
 
     const isEdition = await client.isSoundEdition({ editionAddress: precomputedEditionAddress })
     expect(isEdition).to.be.true
