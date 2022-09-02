@@ -1,5 +1,4 @@
 import {
-  FixedPriceSignatureMinter__factory,
   IMinterModule__factory,
   MerkleDropMinter__factory,
   RangeEditionMinter__factory,
@@ -188,23 +187,6 @@ export function SoundClient({ signer, provider, apiKey }: SoundClientConfig) {
           quantity,
           proof,
           affiliate,
-          txnOverrides,
-        )
-      }
-
-      case interfaceIds.IFixedPriceSignatureMinter: {
-        // TODO: get signature, signedQuantity, claimTicket
-        const signedQuantity = quantity
-        const signature = ''
-        const claimTicket = 0
-        return await FixedPriceSignatureMinter__factory.connect(mintInfo.minterAddress, signer).mint(
-          mintInfo.editionAddress,
-          mintInfo.mintId,
-          quantity,
-          signedQuantity,
-          affiliate,
-          signature,
-          claimTicket,
           txnOverrides,
         )
       }
