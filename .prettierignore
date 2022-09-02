@@ -1,3 +1,4 @@
 **/dist/**
 coverage/
 .pnp.*
+pnpm-lock.yaml

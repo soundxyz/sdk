@@ -1,4 +1,3 @@
-import { Provider } from '@ethersproject/abstract-provider'
 import {
   FixedPriceSignatureMinter__factory,
   IMinterModule__factory,
@@ -7,16 +6,28 @@ import {
   SoundEditionV1__factory,
 } from '@soundxyz/sound-protocol/typechain/index'
 
+import {
+  MissingSignerError,
+  MissingSignerOrProviderError,
+  NotSoundEditionError,
+  SoundNotFoundError,
+  InvalidQuantityError,
+} from './errors'
+import type { MinterInterfaceId, MintInfo, SignerOrProvider, SoundClientConfig } from './types'
 import { interfaceIds, minterFactoryMap, ADDRESS_ZERO } from './utils/constants'
-import { MissingSignerError, MissingSignerOrProviderError, NotSoundEditionError, InvalidQuantityError } from './errors'
-import { MinterInterfaceId, MintInfo, SignerOrProvider, SoundClientConfig } from './types'
-import { getMerkleProof as _getMerkleProof, validateAddress } from './utils/helpers'
+import { validateAddress, getMerkleProof as _getMerkleProof } from './utils/helpers'
 
 import type { Signer } from '@ethersproject/abstract-signer'
 import { BigNumberish } from '@ethersproject/bignumber'
 import { ContractTransaction } from '@ethersproject/contracts'
+import { SoundAPI } from './api/soundApi'
+import { LazyPromise } from './utils/promise'
 
-export function SoundClient({ signer, provider, apiKey: _apiKey }: SoundClientConfig) {
+export function SoundClient({ signer, provider, apiKey }: SoundClientConfig) {
+  const soundApi = SoundAPI({
+    apiKey,
+  })
+
   // If the contract address is a SoundEdition contract
   async function isSoundEdition({ editionAddress }: { editionAddress: string }): Promise<boolean> {
     validateAddress(editionAddress)
@@ -324,12 +335,25 @@ export function SoundClient({ signer, provider, apiKey: _apiKey }: SoundClientCo
     }
   }
 
+  async function soundInfo({ releaseId }: { releaseId: string }) {
+    const { data, errors } = await soundApi.releaseInfo({ id: releaseId })
+
+    const release = data?.release
+    if (!release) throw new SoundNotFoundError({ releaseId, graphqlErrors: errors })
+
+    return {
+      ...release,
+      trackAudio: LazyPromise(() => soundApi.audioFromTrack({ trackId: release.track.id })),
+    }
+  }
+
   return {
     isSoundEdition,
     allMintsForEdition,
     activeMintsForEdition,
     eligibleMintQuantity,
     mint,
+    soundInfo,
   }
 }
 
