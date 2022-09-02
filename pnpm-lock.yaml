@@ -46,7 +46,7 @@ importers:
       '@nomicfoundation/hardhat-chai-matchers': ^1.0.3
       '@nomicfoundation/hardhat-network-helpers': ^1.0.4
       '@nomiclabs/hardhat-ethers': ^2.1.1
-      '@soundxyz/sound-protocol': 0.1.0-alpha-35ceaa7.0
+      '@soundxyz/sound-protocol': 0.0.2-alpha-0261e9d.0
       '@types/chai': ^4.3.3
       '@types/mocha': ^9.1.1
       chai: ^4.3.6
@@ -68,7 +68,7 @@ importers:
       '@nomicfoundation/hardhat-chai-matchers': 1.0.3_yjbwlpkretnkiutoh65dywxigy
       '@nomicfoundation/hardhat-network-helpers': 1.0.4_hardhat@2.10.2
       '@nomiclabs/hardhat-ethers': 2.1.1_hardhat@2.10.2
-      '@soundxyz/sound-protocol': 0.1.0-alpha-35ceaa7.0
+      '@soundxyz/sound-protocol': 0.0.2-alpha-0261e9d.0
       '@types/chai': 4.3.3
       '@types/mocha': 9.1.1
       chai: 4.3.6
@@ -910,16 +910,6 @@ packages:
       hardhat: 2.10.2_ts-node@10.9.1
     dev: true
 
-  /@openzeppelin/contracts-upgradeable/4.7.3:
-    resolution:
-      { integrity: sha512-+wuegAMaLcZnLCJIvrVUDzA9z/Wp93f0Dla/4jJvIhijRrPabjQbZe6fWiECLaJyfn5ci9fqf9vTw3xpQOad2A== }
-    dev: true
-
-  /@openzeppelin/contracts/4.7.3:
-    resolution:
-      { integrity: sha512-dGRS0agJzu8ybo44pCIf3xBaPQN/65AIXNgK8+4gzKd5kbvlqyxryUYVLJv7fK98Seyd2hDZzVEHSWAh0Bt1Yw== }
-    dev: true
-
   /@rollup/plugin-json/4.1.0_rollup@2.78.0:
     resolution:
       { integrity: sha512-yfLbTdNS6amI/2OpmbiBoW12vngr5NW2jCJVZSBEz+H5KfUJZ2M7sDjk0U6GOOdCWFVScShte29o9NezJ53TPw== }
@@ -1074,17 +1064,13 @@ packages:
       antlr4ts: 0.5.0-alpha.4
     dev: true
 
-  /@soundxyz/sound-protocol/0.1.0-alpha-35ceaa7.0:
+  /@soundxyz/sound-protocol/0.0.2-alpha-0261e9d.0:
     resolution:
-      { integrity: sha512-a+khQbshubcSe695jk5rxDJQa2rqygiCMeVxGjhHg8ufxWjPWEo1mOYrziyQtgiSfcvNI4ifv/xnQsTzLleCdQ== }
+      { integrity: sha512-ssbdmE7cBzWv8u0syYo3qROG4IqX8YusQ3msUnmOclG+VqgkWn0hBR9mq2V/2udI48LEN1sjKUEEan+XlMO5cg== }
     dependencies:
       '@ethersproject/abi': 5.7.0
       '@ethersproject/providers': 5.7.0
-      '@openzeppelin/contracts': 4.7.3
-      '@openzeppelin/contracts-upgradeable': 4.7.3
-      erc721a-upgradeable: 4.2.2
       ethers: 5.7.0
-      solady: 0.0.18
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
@@ -2382,11 +2368,6 @@ packages:
     resolution:
       { integrity: sha512-+h1lkLKhZMTYjog1VEpJNG7NZJWcuc2DDk/qsqSTRRCOXiLjeQ1d1/udrUGhqMxUgAlwKNZ0cf2uqan5GLuS2A== }
     engines: { node: '>=6' }
-    dev: true
-
-  /erc721a-upgradeable/4.2.2:
-    resolution:
-      { integrity: sha512-STEkDBS3aVUXTog+044rvh8BqNfIbytkzgp8k11cXvK0WVbT1ssi56aFmOv2FKm25pHVlHZYBLKq6nE+HklB9g== }
     dev: true
 
   /errno/0.1.8:
@@ -5330,11 +5311,6 @@ packages:
       strip-ansi: 6.0.1
       wcwidth: 1.0.1
       yargs: 15.3.1
-    dev: true
-
-  /solady/0.0.18:
-    resolution:
-      { integrity: sha512-Bcdzme+rr9Y0A4pt1j271j1VRrByFgqFZWY53B4VAKlDb2+GQ9RmtudV8Gb7YEnxu2dmmBkg/ZkBlZTdp+fUng== }
     dev: true
 
   /solc/0.7.3_debug@4.3.4:

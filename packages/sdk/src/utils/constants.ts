@@ -5,9 +5,9 @@ import {
 } from '@soundxyz/sound-protocol/typechain/index'
 
 export const interfaceIds = {
-  ISoundEditionV1: '0x41f5b0cb',
-  IMinterModule: '0x84634360',
-  IFixedPriceSignatureMinter: '0x81ca70f4',
+  ISoundEditionV1: '0x7c4a8a95',
+  IMinterModule: '0x37c74bd8',
+  IFixedPriceSignatureMinter: '0x110099e0',
   IMerkleDropMinter: '0x84b6980c',
   IRangeEditionMinter: '0xc73d6ffa',
 } as const
