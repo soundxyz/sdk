@@ -35,13 +35,24 @@ export class NotSoundEditionError extends Error {
 export class SoundNotFoundError extends Error {
   readonly name = 'SoundNotFound'
 
-  readonly releaseId: string
+  readonly contractAddress: string
+  readonly editionId: string | null
   readonly graphqlErrors: readonly GraphQLError[] | undefined
 
-  constructor({ releaseId, graphqlErrors }: { releaseId: string; graphqlErrors: readonly GraphQLError[] | undefined }) {
+  constructor({
+    contractAddress,
+    editionId = null,
+    graphqlErrors,
+  }: {
+    contractAddress: string
+    editionId?: string | null
+    graphqlErrors: readonly GraphQLError[] | undefined
+  }) {
     super('Sound could not be found')
 
-    this.releaseId = releaseId
+    this.contractAddress = contractAddress
+    this.editionId = editionId
+
     this.graphqlErrors = graphqlErrors
   }
 }

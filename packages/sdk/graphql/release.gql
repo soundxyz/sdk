@@ -1,5 +1,5 @@
-query ReleaseInfo($releaseId: UUID!) {
-  release: release(id: $releaseId) {
+query ReleaseInfo($contractAddress: Address!, $editionId: String) {
+  release: releaseContract(contractAddress: $contractAddress, editionId: $editionId) {
     id
     artistContractAddress
     editionId

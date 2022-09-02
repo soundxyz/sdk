@@ -3753,11 +3753,12 @@ export type VerifyAuthChallengeMutationVariables = Exact<{
 export type VerifyAuthChallengeMutation = { verifyAuthChallenge: string }
 
 export type ReleaseInfoQueryVariables = Exact<{
-  releaseId: Scalars['UUID']
+  contractAddress: Scalars['Address']
+  editionId?: InputMaybe<Scalars['String']>
 }>
 
 export type ReleaseInfoQuery = {
-  release?: {
+  release: {
     id: string
     artistContractAddress: string
     editionId?: string | null
@@ -3792,7 +3793,7 @@ export type ReleaseInfoQuery = {
         owner: { id: string; publicAddress: string }
       }
     } | null
-  } | null
+  }
 }
 
 export type AudioFromTrackQueryVariables = Exact<{
@@ -3809,6 +3810,6 @@ export type TestQuery = { __typename: 'Query' }
 
 export const GenerateAuthChallenge = `mutation GenerateAuthChallenge($publicAddress:String!){generateAuthChallenge(publicAddress:$publicAddress)}`
 export const VerifyAuthChallenge = `mutation VerifyAuthChallenge($publicAddress:String!$signedMessage:String!){verifyAuthChallenge(publicAddress:$publicAddress signedMessage:$signedMessage)}`
-export const ReleaseInfo = `query ReleaseInfo($releaseId:UUID!){release:release(id:$releaseId){id artistContractAddress editionId externalUrl finalQuantity mintStartTime openseaUrl title season quantity quantityLowerBound quantityUpperBound totalRaised totalRaisedPrimaryUsd totalRaisedSecondaryUsd genre{id name}track{id duration}artist{id user{id publicAddress}}coverImage{id url}eggGame{id winningSerialNum finalSerialBlockHash nft{id songSlot tokenId updatedAtBlockNum isPresaleNft amountPaidInWei comment{id message}owner{id publicAddress}}}}}`
+export const ReleaseInfo = `query ReleaseInfo($contractAddress:Address!$editionId:String){release:releaseContract(contractAddress:$contractAddress editionId:$editionId){id artistContractAddress editionId externalUrl finalQuantity mintStartTime openseaUrl title season quantity quantityLowerBound quantityUpperBound totalRaised totalRaisedPrimaryUsd totalRaisedSecondaryUsd genre{id name}track{id duration}artist{id user{id publicAddress}}coverImage{id url}eggGame{id winningSerialNum finalSerialBlockHash nft{id songSlot tokenId updatedAtBlockNum isPresaleNft amountPaidInWei comment{id message}owner{id publicAddress}}}}}`
 export const AudioFromTrack = `query AudioFromTrack($trackId:UUID!){audioFromTrack(trackId:$trackId){id duration audio{id url}revealTime}}`
 export const Test = `query Test{__typename}`

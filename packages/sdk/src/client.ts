@@ -6,19 +6,20 @@ import {
 } from '@soundxyz/sound-protocol/typechain/index'
 
 import {
+  InvalidQuantityError,
   MissingSignerError,
   MissingSignerOrProviderError,
   NotSoundEditionError,
   SoundNotFoundError,
-  InvalidQuantityError,
 } from './errors'
 import type { MinterInterfaceId, MintInfo, SignerOrProvider, SoundClientConfig } from './types'
-import { interfaceIds, minterFactoryMap, ADDRESS_ZERO, MINTER_ROLE } from './utils/constants'
-import { validateAddress, getMerkleProof as _getMerkleProof } from './utils/helpers'
+import { ADDRESS_ZERO, interfaceIds, minterFactoryMap, MINTER_ROLE } from './utils/constants'
+import { getMerkleProof as _getMerkleProof, validateAddress } from './utils/helpers'
 
 import type { Signer } from '@ethersproject/abstract-signer'
 import type { BigNumberish } from '@ethersproject/bignumber'
 import type { ContractTransaction } from '@ethersproject/contracts'
+import type { ReleaseInfoQueryVariables } from './api/graphql/gql'
 import { SoundAPI } from './api/soundApi'
 import { LazyPromise } from './utils/promise'
 
@@ -323,11 +324,11 @@ export function SoundClient({ signer, provider, apiKey, environment = 'productio
     }
   }
 
-  async function soundInfo({ releaseId }: { releaseId: string }) {
-    const { data, errors } = await soundApi.releaseInfo({ id: releaseId })
+  async function soundInfo(soundParams: ReleaseInfoQueryVariables) {
+    const { data, errors } = await soundApi.releaseInfo(soundParams)
 
     const release = data?.release
-    if (!release) throw new SoundNotFoundError({ releaseId, graphqlErrors: errors })
+    if (!release) throw new SoundNotFoundError({ ...soundParams, graphqlErrors: errors })
 
     return {
       ...release,
