@@ -59,7 +59,7 @@ importers:
       '@nomicfoundation/hardhat-network-helpers': ^1.0.4
       '@nomiclabs/hardhat-ethers': ^2.1.1
       '@nomiclabs/hardhat-waffle': ^2.0.3
-      '@soundxyz/sound-protocol': 0.0.2-alpha-0261e9d.0
+      '@soundxyz/sound-protocol': 0.1.0-alpha-73306e3.0
       '@types/chai': ^4.3.3
       '@types/mocha': ^9.1.1
       '@types/node': 18.7.5
@@ -103,7 +103,7 @@ importers:
       '@nomicfoundation/hardhat-network-helpers': 1.0.4_hardhat@2.10.2
       '@nomiclabs/hardhat-ethers': 2.1.1_lc7o4ykyrnccnzpoyzs6m3zzsq
       '@nomiclabs/hardhat-waffle': 2.0.3_eldzggq4rzrujjvlywbx6zhlvq
-      '@soundxyz/sound-protocol': 0.0.2-alpha-0261e9d.0
+      '@soundxyz/sound-protocol': 0.1.0-alpha-73306e3.0
       '@types/chai': 4.3.3
       '@types/mocha': 9.1.1
       '@types/node': 18.7.5
@@ -2242,8 +2242,8 @@ packages:
       antlr4ts: 0.5.0-alpha.4
     dev: true
 
-  /@soundxyz/sound-protocol/0.0.2-alpha-0261e9d.0:
-    resolution: {integrity: sha512-ssbdmE7cBzWv8u0syYo3qROG4IqX8YusQ3msUnmOclG+VqgkWn0hBR9mq2V/2udI48LEN1sjKUEEan+XlMO5cg==}
+  /@soundxyz/sound-protocol/0.1.0-alpha-73306e3.0:
+    resolution: {integrity: sha512-VPX+ahitDE62n6gcqq7XiKvcyHyh0HxIqDa5Wy+umQdbWmXq8c6dziUHNSyKwrHkXZdqtCgpAxlkRsJKZWu5kw==}
     dependencies:
       '@ethersproject/abi': 5.7.0
       '@ethersproject/providers': 5.7.0
