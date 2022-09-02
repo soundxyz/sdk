@@ -1,7 +1,7 @@
-import type { BigNumber } from '@ethersproject/bignumber'
+import type { BigNumber, BigNumberish } from '@ethersproject/bignumber'
 import type { Signer } from '@ethersproject/abstract-signer'
 import type { Provider } from '@ethersproject/abstract-provider'
-import type { ApiEnvironments, interfaceIds, supportedChainIds } from './utils/constants'
+import type { ApiEnvironments, interfaceIds, supportedChainIds, minterNames } from './utils/constants'
 
 /*********************************************************
                 PROTOCOL TYPES
@@ -75,22 +75,16 @@ export type EditionConfig = {
   mintRandomnessTimeThreshold: number
 }
 
-enum minterNames {
-  'RangeEditionMinter',
-  'FixedPriceSignatureMinter',
-  'MerkleDropMinter',
-}
-
+export type minterNames = ValueOf<typeof minterNames>
 /**
  * The arguments required for all minter calls.
  */
 export type MintConfigBase = {
-  edition: string
-  minter: string
-  price: number
-  startTime: number
-  endTime: number
-  affiliateFeeBPS: number
+  minterAddress: string
+  price: BigNumberish
+  startTime: BigNumberish
+  endTime: BigNumberish
+  affiliateFeeBPS: BigNumberish
 }
 
 /**
@@ -98,23 +92,28 @@ export type MintConfigBase = {
  */
 export type MintConfig =
   | (MintConfigBase & {
-      name: minterNames.RangeEditionMinter
-      closingTime: number
-      maxMintableLower: number
-      maxMintableUpper: number
-      maxMintablePerAccount: number
+      name: 'RangeEditionMinter'
+      closingTime: BigNumberish
+      maxMintableLower: BigNumberish
+      maxMintableUpper: BigNumberish
+      maxMintablePerAccount: BigNumberish
     })
   | (MintConfigBase & {
-      name: minterNames.MerkleDropMinter
+      name: 'MerkleDropMinter'
       merkleRootHash: string
-      maxMintable: number
-      maxMintablePerAccount: number
+      maxMintable: BigNumberish
+      maxMintablePerAccount: BigNumberish
     })
   | (MintConfigBase & {
-      name: minterNames.FixedPriceSignatureMinter
+      name: 'FixedPriceSignatureMinter'
       signer: string
-      maxMintable: number
+      maxMintable: BigNumberish
     })
+
+export type ContractCall = {
+  contractAddress: string
+  calldata: string
+}
 
 /*********************************************************
                     API TYPES

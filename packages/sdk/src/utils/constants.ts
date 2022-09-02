@@ -26,7 +26,7 @@ export const ApiEndpointsMap = {
   preview: 'https://preview.api.sound.xyz/graphql',
 } as const
 
-export type ApiEnvironments = keyof typeof ApiEndpointsMap | 'development'
+export type ApiEnvironments = keyof typeof ApiEndpointsMap
 
 // This is hardcoded on the contract so we always know its 2
 export const MINTER_ROLE = 2
@@ -41,6 +41,12 @@ export const supportedChainIds = {
 export const soundCreatorAddresses = {
   [supportedChainIds.MAINNET]: 'TODO',
   [supportedChainIds.GOERLI]: 'TODO',
+}
+
+export const minterNames = {
+  MerkleDropMinter: 'MerkleDropMinter',
+  FixedPriceSignatureMinter: 'FixedPriceSignatureMinter',
+  RangeEditionMinter: 'RangeEditionMinter',
 }
 
 export const supportedNetworks = Object.values(supportedChainIds)

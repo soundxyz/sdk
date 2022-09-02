@@ -35,6 +35,14 @@ export class InvalidAddressError extends Error {
   }
 }
 
+export class UnsupportedMinterError extends Error {
+  readonly name = 'UnsupportedMinterError'
+
+  constructor(message?: string) {
+    super(message || 'Must provide valid minter name')
+  }
+}
+
 export class NotSoundEditionError extends Error {
   readonly name = 'NotSoundEditionError'
 
