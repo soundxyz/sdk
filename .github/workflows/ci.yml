@@ -24,7 +24,5 @@ jobs:
         run: pnpm install
       - name: Type Check
         run: pnpm tsc
-      - name: Test ESM & CJS integrity
-        run: pnpm bob check
       - name: Run tests
         run: pnpm test

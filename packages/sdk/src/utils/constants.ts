@@ -16,4 +16,12 @@ export const minterFactoryMap = {
   [interfaceIds.IRangeEditionMinter]: RangeEditionMinter__factory,
   [interfaceIds.IFixedPriceSignatureMinter]: FixedPriceSignatureMinter__factory,
   [interfaceIds.IMerkleDropMinter]: MerkleDropMinter__factory,
-}
+} as const
+
+export const ApiEndpointsMap = {
+  production: 'https://api.sound.xyz/graphql',
+  staging: 'https://staging.api.sound.xyz/graphql',
+  preview: 'https://preview.api.sound.xyz/graphql',
+} as const
+
+export type ApiEnvironments = keyof typeof ApiEndpointsMap

@@ -7,7 +7,7 @@
     "importHelpers": true,
     "experimentalDecorators": true,
     "target": "esnext",
-    "module": "commonjs",
+    "module": "node16",
     "lib": ["es6", "esnext", "es2015", "dom", "webworker"],
     "suppressImplicitAnyIndexErrors": true,
     "moduleResolution": "node",
@@ -21,10 +21,8 @@
     "noUnusedLocals": false,
     "resolveJsonModule": true,
     "skipLibCheck": true,
-    "paths": {
-      "@soundxyz/*": ["packages/*/src/index.ts"]
-    },
-    "jsx": "preserve"
+    "jsx": "preserve",
+    "importsNotUsedAsValues": "error"
   },
   "include": ["packages"],
   "exclude": ["**/dist", "**/temp"]

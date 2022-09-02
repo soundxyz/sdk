@@ -1,0 +1,6810 @@
+"""
+AWS Presigned upload
+"""
+type AWSPresignedPost {
+  """
+  JSON Fields associated with upload
+  """
+  fields: JSON!
+
+  """
+  Upload key of authenticated user
+  """
+  uploadKey: String!
+
+  """
+  Target URL for upload process
+  """
+  url: String!
+}
+
+"""
+Ethereum address
+"""
+scalar Address
+
+"""
+Allocation input for credit split creation
+"""
+input Allocation {
+  """
+  Owner address of allocation
+  """
+  ownerAddress: Address!
+
+  """
+  Percent of allocation
+  """
+  percent: Float!
+
+  """
+  Roles associated with credit allocation
+  """
+  roles: [String!]!
+}
+
+"""
+Possible options of role update input
+"""
+enum AlterRole {
+  """
+  Administrator of platform
+  """
+  ADMIN
+
+  """
+  Member of artist relations team
+  """
+  ARTIST_RELATIONS
+}
+
+"""
+Artist Entity
+"""
+type Artist implements Node {
+  """
+  Artist contract address (public address)
+  """
+  artistContractAddress: String
+
+  """
+  Banner image of artist page
+  """
+  bannerImage: Media
+
+  """
+  Paginated collectors of artist.
+  """
+  collectors(
+    """
+    Pagination parameters
+    """
+    pagination: CursorConnectionArgs! = { first: 10, sort: ASC }
+  ): ArtistCollectorConnection!
+
+  """
+  Contract artist id (acumulative unique id)
+  """
+  contractArtistId: String
+
+  """
+  Creation date of artist entity
+  """
+  createdAt: DateTime!
+
+  """
+  Gem Collection URL
+  """
+  gemCollectionUrl: String
+
+  """
+  Artist identifier
+  """
+  id: ID!
+
+  """
+  Invite limit
+  """
+  inviteLimit: Int!
+
+  """
+  Paginated minted releases of artist.
+  """
+  mintedReleasesPaginated(
+    """
+    Filter the artist releases
+    """
+    filter: ArtistMintedReleasesFilter
+
+    """
+    Pagination parameters
+    """
+    pagination: CursorConnectionArgs! = { first: 10, sort: DESC }
+  ): ReleaseConnection!
+
+  """
+  Name of artist
+  """
+  name: String
+
+  """
+  Number of unique nft collectors of artist
+  """
+  numCollectors: Int!
+
+  """
+  How many minted releases for artist
+  """
+  numMintedReleases(
+    """
+    Filter the releases to be counted
+    """
+    filter: ArtistMintedReleasesFilter
+  ): Int!
+
+  """
+  OpenSea Collection URL
+  """
+  openseaCollectionUrl: String
+
+  """
+  Genres of artist releases, with the most common genres first
+  """
+  releasesGenres: [String!]!
+
+  """
+  Season associated with artist
+  """
+  season: String
+
+  """
+  Sound handle to be used on URLs
+  """
+  soundHandle: String
+
+  """
+  Spotify URL
+  """
+  spotifyUrl: String
+
+  """
+  Token symbol of contract
+  """
+  tokenSymbol: String
+
+  """
+  User entity of artist
+  """
+  user: User!
+}
+
+"""
+Data for Artist minting auction process
+"""
+type ArtistAuctionOverrides {
+  """
+  Artist user wallet public address associated to auction options
+  """
+  artistAddress: String!
+
+  """
+  Date of creation of options
+  """
+  createdAt: DateTime!
+
+  """
+  Identifier of options entity
+  """
+  id: ID!
+}
+
+"""
+ArtistCollector
+"""
+type ArtistCollector implements Node {
+  """
+  Amount of artist nfts owned
+  """
+  artistNftsOwned: Int!
+
+  """
+  First artist nft collected by user
+  """
+  firstNftCollected: Nft
+
+  """
+  Id of first artist nft collected by user
+  """
+  id: ID!
+
+  """
+  Collector user
+  """
+  user: User!
+}
+
+"""
+Paginated connection of Artist Collectors
+"""
+type ArtistCollectorConnection implements Connection {
+  """
+  Edges of current page
+  """
+  edges: [ArtistCollectorConnectionEdge!]!
+
+  """
+  Pagination helpers information
+  """
+  pageInfo: PageInfo!
+}
+
+"""
+Edge of Artist Collector Connection
+"""
+type ArtistCollectorConnectionEdge implements Edge {
+  """
+  Cursor to be used for pagination
+  """
+  cursor: String!
+
+  """
+  ArtistCollector node
+  """
+  node: ArtistCollector!
+}
+
+"""
+Cursor connection paramaters
+"""
+input ArtistCollectorCursorConnectionArgs {
+  """
+  Start forwards pagination since "after" cursor
+  """
+  after: String
+
+  """
+  Start backwards pagination since "before" cursor
+  """
+  before: String
+
+  """
+  Limit the amount of nodes to be fetched, to be used with "after", with a maximum of 50 nodes.
+  """
+  first: NonNegativeInt
+
+  """
+  Limit the amount of nodes to be fetched, to be used with "before", with a maximum of 50 nodes.
+  """
+  last: NonNegativeInt
+
+  """
+  Sort the artist collectors ascending or descending relative to the user creation date
+  """
+  sort: SortOrder! = ASC
+}
+
+"""
+Artist Collectors wrapper entity
+"""
+type ArtistCollectors {
+  """
+  Artist entity
+  """
+  artist: Artist!
+
+  """
+  Nft collectors of artist
+  """
+  collectors: UserConnection!
+}
+
+"""
+Input for artistCollectors query
+"""
+input ArtistCollectorsInput {
+  """
+  Artist unique identifier
+  """
+  artistId: UUID!
+
+  """
+  Cursor connection paramaters
+  """
+  pagination: UserCursorConnectionArgs! = { after: null, first: 20, sort: ASC }
+}
+
+"""
+Paginated connection of Artists
+"""
+type ArtistConnection implements Connection {
+  """
+  Edges of current page
+  """
+  edges: [ArtistConnectionEdge!]!
+
+  """
+  Pagination helpers information
+  """
+  pageInfo: PageInfo!
+}
+
+"""
+Edge of Artist Connection
+"""
+type ArtistConnectionEdge implements Edge {
+  """
+  Cursor to be used for pagination
+  """
+  cursor: String!
+
+  """
+  Artist node
+  """
+  node: Artist!
+}
+
+"""
+Cursor connection paramaters
+"""
+input ArtistCursorConnectionArgs {
+  """
+  Start forwards pagination since "after" cursor
+  """
+  after: String
+
+  """
+  Start backwards pagination since "before" cursor
+  """
+  before: String
+
+  """
+  Limit the amount of nodes to be fetched, to be used with "after", with a maximum of 50 nodes.
+  """
+  first: NonNegativeInt
+
+  """
+  Limit the amount of nodes to be fetched, to be used with "before", with a maximum of 50 nodes.
+  """
+  last: NonNegativeInt
+}
+
+"""
+Filter for paginated artists
+"""
+input ArtistCursorFilterArgs {
+  """
+  Specify whether artist already has at least one minted release
+  """
+  hasMintedRelease: Boolean
+
+  """
+  Specify season to be filtered
+  """
+  season: ArtistSeason
+}
+
+"""
+Default reference artist minting release options for administration
+"""
+type ArtistDefaultOptions {
+  """
+  Auction options union based on type
+  """
+  auction: [Auction!]!
+}
+
+"""
+Artist invite entity to manage artist invitations
+"""
+type ArtistInvite {
+  """
+  Date of invite creation
+  """
+  createdAt: DateTime!
+
+  """
+  Artist identifier
+  """
+  id: ID!
+
+  """
+  User that receives invitation
+  """
+  invitee: User!
+
+  """
+  User that sent invitation
+  """
+  inviter: Artist!
+
+  """
+  Status of invitation
+  """
+  status: String!
+}
+
+"""
+Artist meta configuration input
+"""
+input ArtistMetaInput {
+  """
+  Gem Collection URL
+  """
+  gemCollectionUrl: URL
+}
+
+"""
+Filter artist minted releases based on whether artist uploaded release or artist is credited on a split
+"""
+input ArtistMintedReleasesCursorFilterArgs {
+  """
+  Includes songs where that artist has a split
+  """
+  appearsOn: Boolean
+
+  """
+  Includes songs uploaded by artist
+  """
+  sounds: Boolean
+}
+
+"""
+Filter for artist minted releases
+"""
+input ArtistMintedReleasesFilter {
+  """
+  Filter if the release has credit splits
+  """
+  hasCreditSplits: Boolean
+}
+
+"""
+Artist minting release options
+"""
+type ArtistReleaseOptions {
+  """
+  Auction options union based on type
+  """
+  auction: [Auction!]!
+
+  """
+  Artist has no time restriction for minting
+  """
+  hasNoTimeRestriction: Boolean!
+
+  """
+  Does the artist have access to splits functionality
+  """
+  hasSplitsAccess: Boolean!
+}
+
+"""
+Types of seasons for artists
+"""
+enum ArtistSeason {
+  GENESIS
+  SEASON_ONE
+  SEASON_THREE
+  SEASON_TWO
+}
+
+"""
+Union of auction sale types
+"""
+union Auction = PermissionedAuction | PermissionlessAuction | RangeBoundAuction
+
+"""
+Release info upload step info
+"""
+type AuctionConfigurationUploadStepInfo {
+  """
+  Type of auction
+  """
+  auctionType: AuctionType!
+
+  """
+  Min mint supply of auction
+  """
+  minQuantity: Int!
+
+  """
+  Max mint supply of auction
+  """
+  permissionedQuantity: Int!
+
+  """
+  Presale mint auction configurations
+  """
+  presaleMint: AuctionUploadStepInfo
+
+  """
+  Public mint auction configurations
+  """
+  publicMint: AuctionUploadStepInfo!
+}
+
+"""
+Release auction configuration upload step input values
+"""
+input AuctionConfigurationUploadStepInput {
+  """
+  Type of auction
+  """
+  auctionType: AuctionType!
+
+  """
+  Min mint supply of auction
+  """
+  minQuantity: Int!
+
+  """
+  Max mint supply of auction
+  """
+  permissionedQuantity: Int!
+
+  """
+  Presale mint auction configurations
+  """
+  presaleMint: AuctionUploadStepInput
+
+  """
+  Public mint auction configurations
+  """
+  publicMint: AuctionUploadStepInput!
+}
+
+"""
+Customize auction options based on type of sale
+"""
+input AuctionInputRef {
+  """
+  Permissioned sales
+  """
+  permissioned: PermissionedAuctionInput
+
+  """
+  Permissionless sales
+  """
+  permissionless: PermissionlessAuctionInput
+
+  """
+  Range bound sales
+  """
+  rangeBound: RangeBoundAuctionInput
+}
+
+"""
+Special meta options relation to auction
+"""
+input AuctionMetaInput {
+  """
+  Allow split functionality
+  """
+  hasSplitsAccess: Boolean!
+}
+
+"""
+Types of release sales
+"""
+enum AuctionType {
+  PERMISSIONED
+  PERMISSIONLESS
+  RANGE_BOUND
+}
+
+"""
+Release info upload step info
+"""
+type AuctionUploadStepInfo {
+  """
+  List of public addresses to allow for auction
+  """
+  allowList: [String!]!
+
+  """
+  Price per mint
+  """
+  price: Float!
+
+  """
+  Max supply for auction
+  """
+  quantity: Int!
+
+  """
+  Start time of auction
+  """
+  startTime: Int!
+}
+
+"""
+Release rewards upload step input values
+"""
+input AuctionUploadStepInput {
+  """
+  List of public addresses to allow for auction
+  """
+  allowList: [Address!]!
+
+  """
+  Price per mint
+  """
+  price: Float!
+
+  """
+  Max supply for auction
+  """
+  quantity: Int!
+
+  """
+  Auction start time
+  """
+  startTime: Int!
+}
+
+"""
+Input for selectSongSlotUsingChainData mutation
+"""
+input ChainDataSongSlotSelection {
+  """
+  Amount paid in Wei
+  """
+  amountPaidInWei: String!
+
+  """
+  Block number of NFT
+  """
+  blockNumber: Int!
+
+  """
+  Contract address of release
+  """
+  contractAddress: Address!
+
+  """
+  Chosen song slot
+  """
+  songSlot: Int!
+
+  """
+  Chain token identifier
+  """
+  tokenId: String!
+}
+
+"""
+Input of "changeRoleForUser" mutation
+"""
+input ChangeRoleInput {
+  """
+  Wallet public address of user
+  """
+  publicAddress: Address!
+
+  """
+  Role to be set for specified user
+  """
+  role: AlterRole!
+
+  """
+  Set if specified role is going to be enabled or disabled
+  """
+  value: Boolean!
+}
+
+"""
+Chat Channel entity
+"""
+type ChatChannel {
+  """
+  Association identifier paired with "type"
+  """
+  associationId: String
+
+  """
+  Can the authenticated user send messages to the channel
+  """
+  canSendMessage: Boolean!
+
+  """
+  Date of creation of chat channel
+  """
+  createdAt: DateTime!
+
+  """
+  Unique identifier of chat channel
+  """
+  id: ID!
+
+  """
+  Members of chat channel
+  """
+  members: [ChatChannelMember!]!
+
+  """
+  Name of chat channel
+  """
+  name: String!
+
+  """
+  Type of chat channel
+  """
+  type: ChatChannelType!
+}
+
+"""
+Chat channel member entity
+"""
+type ChatChannelMember {
+  """
+  Date of creation of member in chat channel
+  """
+  createdAt: DateTime!
+
+  """
+  Unique identifier of Chat Channel Member entity
+  """
+  id: ID!
+
+  """
+  Role of member in chat channel
+  """
+  role: String!
+
+  """
+  User entity of member
+  """
+  user: User!
+}
+
+"""
+Member type in chat channels
+"""
+enum ChatChannelMemberType {
+  ADMIN
+  ARTIST
+  PARTICIPANT
+  RELEASE_HOLDER
+}
+
+"""
+Types of chat channel permissions
+"""
+enum ChatChannelPermissionType {
+  ADMIN
+  ALL
+  ARTIST
+  AUTH_USER
+  SOUND_HOLDERS
+}
+
+"""
+Chat Channel Type
+"""
+enum ChatChannelType {
+  ARTIST
+  DIRECT
+  GROUP
+  HOMEPAGE
+  RELEASE
+  UNKNOWN
+}
+
+"""
+Chat message entity
+"""
+type ChatMessage implements Node {
+  """
+  Shorthand for user's avatar
+  """
+  avatar: Media
+
+  """
+  Channel identifier
+  """
+  channelId: ID!
+
+  """
+  Date of creation of message
+  """
+  createdAt: DateTime!
+
+  """
+  Unique identifier
+  """
+  id: ID!
+
+  """
+  Is message sent by an artist
+  """
+  isArtist: Boolean!
+
+  """
+  Message content
+  """
+  message: String!
+
+  """
+  Metadata associated with message
+  """
+  meta: [String!]!
+
+  """
+  Current status of message
+  """
+  status: ChatMessageStatus!
+
+  """
+  Message creator user
+  """
+  user: User!
+
+  """
+  Message creator user identifier
+  """
+  userId: ID!
+}
+
+"""
+Pagination chat message edge
+"""
+type ChatMessageConnectionEdge implements Edge {
+  """
+  Pagination cursor
+  """
+  cursor: String!
+
+  """
+  Chat message node
+  """
+  node: ChatMessage!
+}
+
+"""
+Chat message status
+"""
+enum ChatMessageStatus {
+  HIDDEN
+  VISIBLE
+}
+
+"""
+Paginated connection of Chat messages
+"""
+type ChatMessagesConnection implements Connection {
+  """
+  Edges of current page
+  """
+  edges: [ChatMessageConnectionEdge!]!
+
+  """
+  Pagination helpers information
+  """
+  pageInfo: PageInfo!
+}
+
+"""
+Simplified version of Release entity filtered on the owner public address
+"""
+type CollectedRelease implements Node {
+  """
+  Artist of release
+  """
+  artist: Artist!
+
+  """
+  Cover image of release
+  """
+  coverImage: Media!
+
+  """
+  Release creation date
+  """
+  createdAt: DateTime!
+
+  """
+  Final quantity for a release. Will be defined once a sale finishes
+  """
+  finalQuantity: Int
+
+  """
+  Last sale schedule end time as number of milliseconds since the ECMAScript epoch.
+  """
+  finalSaleScheduleEndTimestamp: Timestamp
+
+  """
+  First backed nft of collected release
+  """
+  firstNftOwned: Nft
+
+  """
+  Returns golden egg if user owns, otherwise null
+  """
+  goldenEgg: EggGame
+
+  """
+  Special golden egg image
+  """
+  goldenEggImage: Media
+
+  """
+  Unique identifier of release
+  """
+  id: ID!
+
+  """
+  List of owned nft serial numbers in ascending serial number order
+  """
+  ownedSerialNumbers: [Int!]!
+
+  """
+  Public listening party start time
+  """
+  publicListeningPartyStart: DateTime!
+
+  """
+  Lower bound quantity for a releases main sale.
+  """
+  quantityLowerBound: Int!
+
+  """
+  Upper bound quantity for a releases main sale.
+  """
+  quantityUpperBound: Int!
+
+  """
+  Release title
+  """
+  title: String!
+
+  """
+  Release title slug
+  """
+  titleSlug: String!
+
+  """
+  Track of release
+  """
+  track: Track!
+}
+
+"""
+Paginated collected releases connection
+"""
+type CollectedReleaseConnection implements Connection {
+  """
+  Edges of current page
+  """
+  edges: [CollectedReleaseConnectionEdge!]!
+
+  """
+  Pagination helpers information
+  """
+  pageInfo: PageInfo!
+}
+
+"""
+Edge of Collected Release Connection
+"""
+type CollectedReleaseConnectionEdge implements Edge {
+  """
+  Cursor to be used for pagination
+  """
+  cursor: String!
+
+  """
+  Collected Release node
+  """
+  node: CollectedRelease!
+}
+
+"""
+Comment entity
+"""
+type Comment {
+  """
+  Comment unique identifier
+  """
+  id: ID!
+
+  """
+  Comment message content
+  """
+  message: String!
+
+  """
+  Comment chain signature
+  """
+  signature: String!
+
+  """
+  Last update date of comment
+  """
+  updatedAt: DateTime!
+}
+
+"""
+Base connection for paginated results
+"""
+interface Connection {
+  """
+  Edges of current page
+  """
+  edges: [Edge!]!
+
+  """
+  Pagination helpers information
+  """
+  pageInfo: PageInfo!
+}
+
+"""
+Contract methods of transactions
+"""
+enum ContractMethod {
+  ARTIST_CREATOR__CREATE_ARTIST
+  ARTIST__BUY_EDITION
+  ARTIST__CREATE_EDITION
+  ARTIST__WITHDRAW_FUNDS
+  SPLIT_MAIN__CREATE_SPLIT
+  SPLIT_MAIN__DISTRIBUTE_ETH
+  SPLIT_MAIN__WITHDRAW
+}
+
+"""
+Contract type, currently the playform only supports "ARTIST"
+"""
+enum ContractType {
+  ARTIST
+}
+
+"""
+A string that cannot be passed as an empty value
+"""
+scalar CountryCode
+
+"""
+Input for createChatChannel mutation
+"""
+input CreateChatChannelInput {
+  """
+  Optional associationId to be paired with "type"
+  """
+  associationId: UUID
+
+  """
+  Name for new chat channel
+  """
+  name: String!
+
+  """
+  Type of new chat channel
+  """
+  type: ChatChannelType!
+}
+
+"""
+Input for createKeyClient mutation
+"""
+input CreateKeyClient {
+  """
+  Human-readable name of Key Client to be created
+  """
+  name: NonEmptyString!
+
+  """
+  Set the initial status of the specified Key Client
+  """
+  status: KeyClientStatus! = ACTIVE
+}
+
+"""
+Input for createPresale mutation
+"""
+input CreatePresaleInput {
+  """
+  How many minutes before the public sale
+  """
+  minutesBefore: Int!
+
+  """
+  Customize how many seconds of buffer are given to whitelist transactions expirations
+  """
+  pendingTxSecondsBuffer: Int
+
+  """
+  How many NFTs to be sold for presale
+  """
+  presaleAmount: Int!
+
+  """
+  Presale Configuration identifier
+  """
+  presaleConfigurationId: UUID!
+
+  """
+  Media associated with new Presale
+  """
+  presaleMedia: [PresaleMediaInput!]
+
+  """
+  Whitelist rules for new presale
+  """
+  whitelistRule: [WhitelistRuleInput!]!
+}
+
+"""
+Input for createRelease mutation
+"""
+input CreateReleaseInput {
+  """
+  Behind the music text
+  """
+  behindTheMusic: String!
+
+  """
+  Cover image
+  """
+  coverImage: UploadedMedia!
+
+  """
+  Release description
+  """
+  description: String
+
+  """
+  Release genre
+  """
+  genre: String!
+
+  """
+  Special golden egg image
+  """
+  goldenEggImage: UploadedMedia
+
+  """
+  Custom rewards
+  """
+  rewards: [RewardInput!]
+
+  """
+  Title of release
+  """
+  title: String!
+
+  """
+  Uploaded tracks
+  """
+  tracks: [TrackUpload!]!
+
+  """
+  Release type
+  """
+  type: ReleaseType!
+}
+
+"""
+Credit allocation entity
+"""
+type CreditAllocation {
+  """
+  Credit split associated with credit allocation
+  """
+  creditSplit: CreditSplit!
+
+  """
+  Credit allocation entity identifier
+  """
+  id: ID!
+
+  """
+  Owner of credit allocation
+  """
+  owner: User!
+
+  """
+  Percent of allocation
+  """
+  percent: Float!
+
+  """
+  Roles associated with credit allocation
+  """
+  roles: [String!]!
+}
+
+"""
+Credit allocation upload step info
+"""
+type CreditAllocationUploadStepInfo {
+  """
+  Owner public address of allocation
+  """
+  ownerAddress: String!
+
+  """
+  Percent of allocation
+  """
+  percent: Float!
+
+  """
+  Roles associated with credit allocation
+  """
+  roles: [CreditRoleType!]!
+}
+
+"""
+Credit role type
+"""
+enum CreditRoleType {
+  ARTIST
+  CURATOR
+  OTHER
+  PRODUCER
+  SONGWRITER
+}
+
+"""
+Credit split entity
+"""
+type CreditSplit {
+  """
+  The amount of credit to be withdrawn from the split for the authenticated user.
+  """
+  balanceToWithdraw: String
+
+  """
+  Credit split creation date
+  """
+  createdAt: DateTime!
+
+  """
+  Credit allocation of credit split
+  """
+  creditAllocations: [CreditAllocation!]!
+
+  """
+  Credit split identifier
+  """
+  id: ID!
+
+  """
+  Releases associated with credit split that are minted
+  """
+  mintedReleases: [Release!]!
+
+  """
+  Releases associated with credit split
+  """
+  releases: [Release!]!
+
+  """
+  Split contract address
+  """
+  splitAddress: String
+
+  """
+  Last update date of credit split entity
+  """
+  updatedAt: DateTime!
+}
+
+"""
+Currencies conversions
+"""
+type Currencies {
+  ethToUsd: Float!
+}
+
+"""
+Base cursor connection arguments
+"""
+input CursorConnectionArgs {
+  """
+  Start forwards pagination since "after" cursor
+  """
+  after: String
+
+  """
+  Start backwards pagination since "before" cursor
+  """
+  before: String
+
+  """
+  Limit the amount of nodes to be fetched, to be used with "after", with a maximum of 50 nodes.
+  """
+  first: NonNegativeInt
+
+  """
+  Limit the amount of nodes to be fetched, to be used with "before", with a maximum of 50 nodes.
+  """
+  last: NonNegativeInt
+
+  """
+  Sort the connection ascending or descending
+  """
+  sort: SortOrder! = DESC
+}
+
+"""
+A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar.
+"""
+scalar DateTime
+
+"""
+Input fields to delete shelf
+"""
+input DeleteShelfInput {
+  """
+  Shelf id to delete
+  """
+  shelfId: UUID!
+}
+
+"""
+Input for setQueueDisabledArtists mutation
+"""
+input DisabledQueueArtistInput {
+  """
+  List of artists to disable queue functionality
+  """
+  artists: [String!]!
+}
+
+"""
+Input for discoverChatChannel query
+"""
+input DiscoverChatChannelInput {
+  associationId: UUID
+  type: ChatChannelType!
+}
+
+"""
+Container of Node and the Cursor from the Node
+"""
+interface Edge {
+  """
+  Cursor to be used for pagination
+  """
+  cursor: String!
+
+  """
+  Node entity
+  """
+  node: Node!
+}
+
+"""
+EggGame Entity
+"""
+type EggGame {
+  """
+  Block hash of egg game calculation
+  """
+  finalSerialBlockHash: String!
+
+  """
+  EggGame identifier
+  """
+  id: ID!
+
+  """
+  Nft of egg game winner
+  """
+  nft: Nft!
+
+  """
+  Serial number of nft with egg game
+  """
+  winningSerialNum: Int!
+}
+
+"""
+A field whose value conforms to the standard internet email address format as specified in RFC822: https://www.w3.org/Protocols/rfc822/.
+"""
+scalar EmailAddress
+
+"""
+Base Error
+"""
+interface Error {
+  """
+  Descriptive message of error
+  """
+  message: String!
+}
+
+"""
+Event type
+"""
+enum EventType {
+  EDITION_PURCHASED
+  ORDERS_MATCHED
+  TRANSFER
+  UNKNOWN
+}
+
+"""
+Event entity
+"""
+type EventV2 implements Node {
+  """
+  Artist contract address
+  """
+  artistContractAddress: String!
+
+  """
+  Timestamp on blockchain of event
+  """
+  blockTimestamp: DateTime!
+
+  """
+  Date of creation of event entity
+  """
+  createdAt: DateTime!
+
+  """
+  Event type
+  """
+  eventType: EventType!
+
+  """
+  Source public address
+  """
+  fromAddress: String
+
+  """
+  User associated to source public address
+  """
+  fromAddressUser: User
+
+  """
+  Event identifier
+  """
+  id: ID!
+
+  """
+  Release associated with event
+  """
+  release: Release
+
+  """
+  Target public address
+  """
+  toAddress: String
+
+  """
+  User associated to target public address
+  """
+  toAddressUser: User
+
+  """
+  Token ID of associated NFT
+  """
+  tokenId: String!
+
+  """
+  Value exchanged in Wei
+  """
+  valueExchanged: String!
+
+  """
+  Formatted version of value exchanged
+  """
+  valueExchangedPretty: ValueExchangedPrettyType!
+}
+
+"""
+Feature flag entity to describe flagged functionality
+"""
+type FeatureFlag {
+  """
+  Creation date of feature flag
+  """
+  createdAt: DateTime!
+
+  """
+  Feature flag UUID
+  """
+  id: ID!
+
+  """
+  Name of feature flag
+  """
+  name: String!
+
+  """
+  Last update of feature flag value
+  """
+  updatedAt: DateTime!
+
+  """
+  Arbitrary string value, it could be need to be parsed stringified json
+  """
+  value: String!
+}
+
+"""
+Type of feature to be set
+"""
+enum FeatureType {
+  CHAT
+  QUEUE
+  RELEASE
+  SPLITS
+}
+
+"""
+Filter Key Clients pagination
+"""
+input FilterKeyClients {
+  status: [KeyClientStatus!]
+}
+
+"""
+Type of rules flags to be set for presale requirements
+"""
+enum FlagType {
+  """
+  Whitelist all artist holders
+  """
+  ALL_ARTIST_HOLDERS
+
+  """
+  Whitelist all sound holders
+  """
+  ALL_SOUND_HOLDERS
+
+  """
+  Any user is eligible for whitelist
+  """
+  UNRESTRICTED_WHITELIST
+}
+
+"""
+Input fields to follow user
+"""
+input FollowUserInput {
+  """
+  User id to follow
+  """
+  user: UUID!
+}
+
+"""
+Result of manually synchronizing transactions
+"""
+type ForceSyncPendingTransactionsInfo {
+  """
+  How many transactions updates failed. Check runtime logs for more information
+  """
+  failed: Int!
+
+  """
+  How many transactions updates were processed successfully
+  """
+  ok: Int!
+
+  """
+  Hash of transactions found as pending
+  """
+  transactionHashes: [String!]!
+}
+
+"""
+Genre entity
+"""
+type Genre {
+  """
+  Date of creation
+  """
+  createdAt: DateTime!
+
+  """
+  Genre associated UUID
+  """
+  id: ID!
+
+  """
+  Genre name
+  """
+  name: String!
+
+  """
+  Date of last update of genre
+  """
+  updatedAt: DateTime!
+}
+
+"""
+User+Release specific queue status entity
+"""
+type GetQueueStatus {
+  """
+  User UUID
+  """
+  id: ID!
+
+  """
+  Is user eligible to join the release queue
+  """
+  isEligible: Boolean
+
+  """
+  Is user currently in waiting queue
+  """
+  isInQueue: Boolean!
+
+  """
+  Is current queue sale schedule sold out
+  """
+  isSoldOut: Boolean
+
+  """
+  Presale configuration associated with queue status
+  """
+  presaleConfig: PresaleConfiguration
+
+  """
+  Whitelist information if queue has been transfered to whitelist
+  """
+  whitelistInfo: WhitelistObj
+}
+
+"""
+Input field to check if auth user is following
+"""
+input IsFollowingInput {
+  """
+  User id to check if auth user is following
+  """
+  user: UUID!
+}
+
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSON
+
+"""
+Client key management entity
+"""
+type KeyClient implements Node {
+  """
+  Date of creation
+  """
+  createdAt: DateTime!
+
+  """
+  Unique identifier of client key
+  """
+  id: ID!
+
+  """
+  Key associated to client for authentication process
+  """
+  key: String!
+
+  """
+  Human-readable identifier of key client
+  """
+  name: String!
+
+  """
+  Status of Key Client
+  """
+  status: KeyClientStatus!
+
+  """
+  Date of last update
+  """
+  updatedAt: DateTime!
+}
+
+"""
+Paginated connection of Key Clients
+"""
+type KeyClientConnection implements Connection {
+  """
+  Edges of current page
+  """
+  edges: [KeyClientConnectionEdge!]!
+
+  """
+  Pagination helpers information
+  """
+  pageInfo: PageInfo!
+}
+
+"""
+Edge of Key Client Connection
+"""
+type KeyClientConnectionEdge implements Edge {
+  """
+  Cursor to be used for pagination
+  """
+  cursor: String!
+
+  """
+  Key Client node
+  """
+  node: KeyClient!
+}
+
+"""
+Cursor connection paramaters
+"""
+input KeyClientCursorConnectionArgs {
+  """
+  Start forwards pagination since "after" cursor
+  """
+  after: String
+
+  """
+  Start backwards pagination since "before" cursor
+  """
+  before: String
+
+  """
+  Limit the amount of nodes to be fetched, to be used with "after", with a maximum of 50 nodes.
+  """
+  first: NonNegativeInt
+
+  """
+  Limit the amount of nodes to be fetched, to be used with "before", with a maximum of 50 nodes.
+  """
+  last: NonNegativeInt
+
+  """
+  Sort the key clients ascending or descending relative to the entity creation date
+  """
+  sort: SortOrder! = ASC
+}
+
+"""
+Status of Key Client
+"""
+enum KeyClientStatus {
+  ACTIVE
+  INACTIVE
+}
+
+"""
+Paginated latest sales events
+"""
+type LatestSalesConnection implements Connection {
+  """
+  Edges of current page
+  """
+  edges: [LatestSalesConnectionEdge!]!
+
+  """
+  Pagination helpers information
+  """
+  pageInfo: PageInfo!
+}
+
+"""
+Edge of LatestSales Connection
+"""
+type LatestSalesConnectionEdge implements Edge {
+  """
+  Cursor to be used for pagination
+  """
+  cursor: String!
+
+  """
+  Event node
+  """
+  node: EventV2!
+}
+
+"""
+Pagination parameters for Latest Sales connection
+"""
+input LatestSalesCursorConnectionArgs {
+  """
+  Start forwards pagination since "after" cursor
+  """
+  after: String
+
+  """
+  Start backwards pagination since "before" cursor
+  """
+  before: String
+
+  """
+  Limit the amount of nodes to be fetched, to be used with "after", with a maximum of 50 nodes.
+  """
+  first: NonNegativeInt
+
+  """
+  Limit the amount of nodes to be fetched, to be used with "before", with a maximum of 50 nodes.
+  """
+  last: NonNegativeInt
+
+  """
+  Customize sorting latest sales
+  """
+  sort: LatestSalesCursorConnectionSort! = { blockTimestamp: DESC }
+}
+
+"""
+Customize sorting latest sales
+"""
+input LatestSalesCursorConnectionSort {
+  """
+  Sort by blockchain timestamp
+  """
+  blockTimestamp: SortOrder
+
+  """
+  Sort by date of creation of event entity
+  """
+  createdAt: SortOrder
+}
+
+"""
+Filter for paginated latest sales
+"""
+input LatestSalesCursorFilterArgs {
+  """
+  Specify event types to be filtered
+  """
+  eventTypes: [EventType!]
+}
+
+"""
+Given string doesn't have the minimum expected length
+"""
+type LengthError implements Error {
+  """
+  Descriptive message of error
+  """
+  message: String!
+
+  """
+  Minimum string length required
+  """
+  minLength: Int!
+}
+
+"""
+License for the release
+"""
+enum LicenseType {
+  ALL_RIGHTS_RESERVED
+  CREATIVE_COMMONS
+}
+
+"""
+Media entity
+"""
+type Media {
+  """
+  AWS S3 Bucket
+  """
+  bucket: String!
+
+  """
+  Media entity identifier
+  """
+  id: ID!
+
+  """
+  AWS S3 File key
+  """
+  key: String!
+
+  """
+  CDN Url
+  """
+  url: String!
+}
+
+"""
+Type of media entity, either Images or Audio
+"""
+enum MediaType {
+  ARTIST_BANNER_IMAGE
+  AUDIO
+  AUDIO_TRANSCODED
+  AVATAR_IMAGE
+  RELEASE_BANNER_IMAGE
+  RELEASE_COVER_IMAGE
+  RELEASE_GOLDEN_EGG_IMAGE
+  USER_BANNER_IMAGE
+}
+
+"""
+Release info upload step info
+"""
+type MediaUploadStepInfo {
+  """
+  Media type to be uploaded
+  """
+  mediaType: MediaType!
+
+  """
+  Upload key received from Query.signedUploadParams
+  """
+  uploadKey: String!
+}
+
+"""
+Merkle tree entity
+"""
+type MerkleTree {
+  """
+  Upload step creation date
+  """
+  createdAt: DateTime!
+
+  """
+  Upload step identifier
+  """
+  id: ID!
+
+  """
+  Number of leaves for merkle tree
+  """
+  leafCount: Int!
+
+  """
+  Merkle tree root
+  """
+  root: String!
+
+  """
+  List of unhashed leaves for merkle tree
+  """
+  unhashedLeaves: [String!]!
+}
+
+"""
+Merkle tree proof information
+"""
+type MerkleTreeProof {
+  """
+  Merkle proof
+  """
+  proof: [String!]!
+
+  """
+  Unhashed leaf in merkle tree
+  """
+  unhashedLeaf: String
+}
+
+"""
+Release info upload step info
+"""
+type MetadataUploadStepInfo {
+  """
+  Release beats per minute
+  """
+  beatsPerMinute: Int
+
+  """
+  Release key
+  """
+  key: SongKeyType
+
+  """
+  License for the release
+  """
+  license: LicenseType
+
+  """
+  Location where the release was created
+  """
+  location: CountryCode
+
+  """
+  Release lyrics
+  """
+  lyrics: String
+}
+
+"""
+Release metadata upload step input values
+"""
+input MetadataUploadStepInput {
+  """
+  Release beats per minute
+  """
+  beatsPerMinute: Int
+
+  """
+  Release key
+  """
+  key: SongKeyType
+
+  """
+  License for the release
+  """
+  license: LicenseType
+
+  """
+  Location where the release was created
+  """
+  location: CountryCode
+
+  """
+  Release lyrics
+  """
+  lyrics: String
+}
+
+"""
+Mint current time status
+"""
+enum MintTimeStatus {
+  PAST
+  UPCOMING
+}
+
+"""
+Pagination parameters for Minted Releases connection
+"""
+input MintedReleasesCursorConnectionArgs {
+  """
+  Start forwards pagination since "after" cursor
+  """
+  after: String
+
+  """
+  Start backwards pagination since "before" cursor
+  """
+  before: String
+
+  """
+  Limit the amount of nodes to be fetched, to be used with "after", with a maximum of 50 nodes.
+  """
+  first: NonNegativeInt
+
+  """
+  Limit the amount of nodes to be fetched, to be used with "before", with a maximum of 50 nodes.
+  """
+  last: NonNegativeInt
+
+  """
+  Customize sort behavior of minted releases pagination
+  """
+  sort: MintedReleasesCursorConnectionSort! = { mintStartTime: DESC }
+}
+
+"""
+Customize sort behavior of minted releases pagination
+"""
+input MintedReleasesCursorConnectionSort {
+  """
+  Sort by createdAt of release
+  """
+  createdAt: SortOrder
+
+  """
+  Sort by mintStartTime of release
+  """
+  mintStartTime: SortOrder
+}
+
+"""
+Filter minted releases
+"""
+input MintedReleasesCursorFilterArgs {
+  """
+  Only get releases from specified genres
+  """
+  genre: [String!]
+
+  """
+  Remove currently-featured releases from results
+  """
+  hideFeatured: Boolean
+
+  """
+  Only get release with specified mint time status
+  """
+  mintTimeStatus: [MintTimeStatus!]
+
+  """
+  Only get release with specified status
+  """
+  releaseStatus: [ReleaseStatus!]
+
+  """
+  Only get releases from specified seasons
+  """
+  season: [ArtistSeason!]
+}
+
+"""
+Mutations
+"""
+type Mutation {
+  """
+  [ADMIN] Accept or reject artist invitation
+  """
+  acceptOrRejectArtist(
+    """
+    Invitation entity identifier
+    """
+    inviteId: UUID!
+
+    """
+    Is the invitation accepted
+    """
+    isAccepted: Boolean!
+  ): ArtistInvite!
+
+  """
+  [ADMIN] Add sale schedule to specified Presale Configuration
+  """
+  addSaleSchedule(
+    """
+    Presale Configuration identifier
+    """
+    presaleConfigurationId: UUID!
+
+    """
+    New sale schedule input
+    """
+    saleSchedule: SaleScheduleInput!
+  ): SaleSchedule!
+
+  """
+  [ADMIN] Add a public address as shadow banned
+  """
+  addShadowBanAddress(
+    """
+    Public address wallet
+    """
+    publicAddress: Address!
+
+    """
+    Optional reason behind ban
+    """
+    reason: String
+  ): [ShadowBannedAddress!]!
+
+  """
+  [ADMIN] Add Signing Key to specified artist contract
+  """
+  addSigningKey(
+    """
+    Artist contract public address
+    """
+    artistContractAddress: Address
+
+    """
+    Private key of signing key address
+    """
+    privateKey: String!
+  ): Void
+
+  """
+  [ADMIN | ARTIST_RELATIONS] Configure auction meta options of specific artist
+  """
+  artistAuctionMeta(
+    """
+    Artist public address or Artist contract address
+    """
+    artistAddress: Address!
+
+    """
+    Auction meta options
+    """
+    metaType: AuctionMetaInput
+  ): ArtistAuctionOverrides!
+
+  """
+  [ADMIN | ARTIST_RELATIONS] Configure specific artist minting options
+  """
+  artistMintingOption(
+    """
+    Artist user wallet public address or artist contract address
+    """
+    artistAddress: Address!
+
+    """
+    Auction sale types to configure
+    """
+    auctionType: AuctionInputRef!
+  ): ArtistAuctionOverrides!
+
+  """
+  [ADMIN] Change the role of a specified user
+  """
+  changeRoleForUser(input: ChangeRoleInput!): UserRoles!
+
+  """
+  [ARTIST] Upsert release mint edition creation from the client-side. An alternative to wait until the transaction is completed and automatically acknowledged on background processes.
+  """
+  clientCreateEditionUpsert(txHash: String!): Release!
+
+  """
+  [AUTHENTICATED] Upsert bought NFT entity from the client-side. An alternative to wait until the transaction is completed and automatically acknowledged on background processes
+  """
+  clientNftUpsert(
+    """
+    Transaction hash associated to operation
+    """
+    txHash: String!
+  ): Nft
+
+  """
+  [AUTHENTICATED] Create artist entity for authenticated user, User has to be allowed to create artist profile beforehand
+  """
+  createArtist(
+    """
+    New unique artist sound handle
+    """
+    soundHandle: String!
+  ): User!
+
+  """
+  [ADMIN] Create chat channel
+  """
+  createChatChannel(
+    """
+    Input for createChatChannel
+    """
+    input: CreateChatChannelInput!
+  ): ChatChannel!
+
+  """
+  [ARTIST] Create credit split for specified release
+  """
+  createCreditSplit(
+    """
+    Credit allocations of credit split
+    """
+    creditAllocations: [Allocation!]!
+
+    """
+    Optional existing credit split id to update instead of creating a new credit split
+    """
+    creditSplitId: UUID
+
+    """
+    Release identifier
+    """
+    releaseId: UUID!
+  ): CreditSplit!
+
+  """
+  [ADMIN] Create Key Client
+  """
+  createKeyClient(
+    """
+    Data of new Key Client to be created
+    """
+    input: CreateKeyClient!
+  ): KeyClient!
+
+  """
+  [ADMIN | ARTIST] Create a new presale for specified Presale Configuration
+  """
+  createPresale(
+    """
+    Input of createPresale
+    """
+    input: CreatePresaleInput!
+  ): SaleSchedule!
+
+  """
+  [ARTIST] Create release
+  """
+  createRelease(
+    """
+    New release data
+    """
+    input: CreateReleaseInput!
+  ): Release!
+
+  """
+  [ADMIN] Delete specified sale schedule
+  """
+  deleteSaleSchedule(
+    """
+    Sale schedule identifier
+    """
+    saleScheduleId: UUID!
+  ): Void!
+
+  """
+  [AUTHENTICATED] Delete shelf for user
+  """
+  deleteShelf(
+    """
+    Delete shelf input
+    """
+    input: DeleteShelfInput!
+  ): Void
+
+  """
+  [ARTIST] Delete unminted release
+  """
+  deleteUnmintedRelease(
+    """
+    Release identifier
+    """
+    id: UUID!
+  ): Release!
+
+  """
+  [ADMIN] Flush all the PENDING whitelist rows to be set as FAILED
+  """
+  flushWhitelistRows(cutOff: Int, presaleConfigurationId: UUID!): Void
+
+  """
+  [AUTHENTICATED] Follow user of input userId
+  """
+  followUser(
+    """
+    Follow user inputs
+    """
+    input: FollowUserInput!
+  ): UserRelation!
+
+  """
+  [ADMIN] Manually sync pending transactions
+  """
+  forceSyncPendingTransactions: ForceSyncPendingTransactionsInfo!
+
+  """
+  [PUBLIC] Generate auth challenge for given public address and give back new nonce
+  """
+  generateAuthChallenge(publicAddress: String!): Int!
+
+  """
+  [ADMIN] Invalidate API Metadata of specified artist
+  """
+  invalidateMetadata(
+    """
+    If no value or "*" is defined, all the artists metadata cache is invalidated
+    """
+    artistSoundHandle: String! = "*"
+  ): Void
+
+  """
+  [ARTIST] Invite another user to be artist on the platform
+  """
+  inviteArtist(
+    """
+    Twitter handle of target user
+    """
+    twitterHandle: String!
+  ): ArtistInvite!
+
+  """
+  [PUBLIC] Check if specified queue is open
+  """
+  isQueueOpen(
+    """
+    Presale configuration identifier
+    """
+    presaleId: UUID!
+  ): Boolean
+
+  """
+  [AUTHENTICATED] Join the queue of specified release. If the release sale hasn't started yet it fails. Please use "isQueueOpen" mutation to prevent issues with timing of mutation
+  """
+  joinQueue(
+    """
+    Captcha code generated from webapp. If the sale requires it, it has to be specified
+    """
+    captchaCode: String
+
+    """
+    Release identifier
+    """
+    releaseId: UUID!
+  ): Queue!
+
+  """
+  [AUTHENTICATED] Leave the queue of specified release
+  """
+  leaveQueue(
+    """
+    Release identifier
+    """
+    releaseId: UUID!
+  ): Queue
+
+  """
+  [AUTHENTICATED] Move shelf index down and swap
+  """
+  moveShelfDown(
+    """
+    setShelfOrder inputs
+    """
+    input: SetShelfOrderInput!
+  ): [Shelf!]!
+
+  """
+  [AUTHENTICATED] Move shelf index up and swap
+  """
+  moveShelfUp(
+    """
+    setShelfOrder inputs
+    """
+    input: SetShelfOrderInput!
+  ): [Shelf!]!
+
+  """
+  [ARTIST] Prepare release to be minted, pinning media files
+  """
+  prepareMint(
+    """
+    Release to prepare
+    """
+    input: PrepareMintInput!
+  ): Release!
+
+  """
+  [AUTHENTICATED] Manually register transaction of nft buy
+  """
+  registerBuyEditionTx(
+    """
+    Transaction hash
+    """
+    hash: String!
+
+    """
+    Release identifier
+    """
+    releaseId: UUID!
+  ): Transaction!
+
+  """
+  [ARTIST] Manually register transaction of artist contract creation
+  """
+  registerCreateArtistTx(
+    """
+    Transaction hash
+    """
+    hash: String!
+  ): Transaction!
+
+  """
+  [ARTIST] Manually register split transaction
+  """
+  registerCreateSplitTx(
+    """
+    Credit split entity identifier
+    """
+    creditSplitId: UUID!
+
+    """
+    Transaction hash
+    """
+    hash: String!
+  ): Transaction!
+
+  """
+  [ARTIST] Manually register transaction of minted release
+  """
+  registerReleaseMintTx(
+    """
+    Transaction hash
+    """
+    hash: String!
+
+    """
+    Release identifier
+    """
+    releaseId: UUID!
+  ): Transaction!
+
+  """
+  [AUTHENTICATED] Register transaction replacement
+  """
+  registerReplacementTx(
+    """
+    Original transaction hash
+    """
+    originalHash: String!
+
+    """
+    New transaction hash
+    """
+    replacementHash: String!
+  ): Transaction!
+
+  """
+  [AUTHENTICATED] Register split balance distribution transaction
+  """
+  registerSplitBalanceTx(
+    """
+    Credit split entity identifier
+    """
+    creditSplitId: UUID!
+
+    """
+    Transaction hash
+    """
+    hash: String!
+  ): Transaction!
+
+  """
+  [AUTHENTICATED] Register withdraw from split transaction
+  """
+  registerWithdrawFromSplitTx(
+    """
+    Transaction hash
+    """
+    hash: String!
+  ): Transaction!
+
+  """
+  [AUTHENTICATED] Manually register transaction to withdraw funds
+  """
+  registerWithdrawFundsTx(
+    """
+    Transaction hash
+    """
+    hash: String!
+
+    """
+    Release identifier
+    """
+    releaseId: UUID!
+  ): Transaction!
+
+  """
+  [ADMIN] Remove public address from shadow ban list
+  """
+  removeShadowBanAddress(
+    """
+    Public address wallet
+    """
+    publicAddress: Address!
+  ): [ShadowBannedAddress!]!
+
+  """
+  [PUBLIC] Report a track play session stop
+  """
+  reportPlayStopped(
+    """
+    Input for reportPlayStopped
+    """
+    input: ReportPlayStoppedInput!
+  ): Void
+
+  """
+  [AUTHENTICATED] Reset twitter handle of authenticated user
+  """
+  resetTwitter: User!
+
+  """
+  [ADMIN] Configure season-based meta-auction options
+  """
+  seasonAuctionMeta(
+    """
+    Meta options
+    """
+    metaType: AuctionMetaInput
+
+    """
+    Season to configure
+    """
+    seasonName: String!
+  ): SeasonAuctionDefaults!
+
+  """
+  [ADMIN] Change season-based auction options
+  """
+  seasonMintingOption(
+    """
+    Auction sale types to customize
+    """
+    auctionType: AuctionInputRef!
+
+    """
+    Season to customize minting options
+    """
+    seasonName: String!
+  ): SeasonAuctionDefaults!
+
+  """
+  [AUTHENTICATED] Select song slot using chain data instead of NFT identifier
+  """
+  selectSongSlotUsingChainData(
+    """
+    Song slot selection
+    """
+    input: ChainDataSongSlotSelection!
+  ): Nft!
+
+  """
+  [AUTHENTICATED] Select song slot for owned NFT
+  """
+  selectSongSlotUsingNftId(
+    """
+    NFT identifier
+    """
+    nftId: UUID!
+
+    """
+    Chosen song slot
+    """
+    songSlot: Int!
+  ): Nft!
+
+  """
+  [AUTHENTICATED] Send chat message to specified channel if allowed
+  """
+  sendChatMessage(
+    """
+    Input for sendChatMessage mutation
+    """
+    input: SendChatMessageInput!
+  ): ID!
+
+  """
+  [ARTIST_RELATIONS | ADMIN] Set artist metadata
+  """
+  setArtistMeta(
+    """
+    Input for setArtistMeta mutation
+    """
+    input: SetArtistMetaInput!
+  ): Artist!
+
+  """
+  [ADMIN] Manually set the last processed block number, used primarily by sound.xyz watcher
+  """
+  setBlockNumber(blockNumber: String!): String!
+
+  """
+  [AUTHENTICATED] Set comment for specified Nft
+  """
+  setComment(
+    """
+    Comment message
+    """
+    message: String!
+
+    """
+    Nft identifier
+    """
+    nftId: UUID!
+
+    """
+    Comment chain signature
+    """
+    signature: String!
+  ): Nft!
+
+  """
+  [ARTIST] Set special configurations into artist entity
+  """
+  setContractArgs(
+    """
+    Name of artist
+    """
+    name: String!
+
+    """
+    Token symbol related to contract
+    """
+    tokenSymbol: String!
+  ): Artist!
+
+  """
+  [AUTHENTICATED] Update authenticated user display name
+  """
+  setDisplayName(
+    """
+    New user display name
+    """
+    displayName: String!
+  ): User!
+
+  """
+  [ADMIN] Set the currently enabled users with chat
+  """
+  setEnabledChatUsers(
+    """
+    Types of chat channel permissions
+    """
+    channelPermissions: [ChatChannelPermissionType!]!
+  ): [ChatChannelPermissionType!]!
+
+  """
+  [ADMIN] Set specified feature flag as defined
+  """
+  setFeatureFlag(
+    """
+    Name of feature flag to be set
+    """
+    name: String!
+
+    """
+    Type of feature type related to flag funcionality
+    """
+    type: FeatureType!
+
+    """
+    Value of feature flag
+    """
+    value: String!
+  ): FeatureFlag!
+
+  """
+  [AUTHENTICATED] Update releases to be returned in featured sounds
+  """
+  setFeaturedSounds(
+    """
+    List of releases that can not exceed length of 1
+    """
+    releaseIds: [UUID!]!
+  ): User!
+
+  """
+  [ADMIN] Set the invite limit for specified artist
+  """
+  setInviteLimit(
+    """
+    Artist public address or Artist contract address
+    """
+    artistAddress: Address!
+
+    """
+    Invite limit
+    """
+    inviteLimit: Int!
+  ): User!
+
+  """
+  [ADMIN] Set if Queue Captcha is disabled for specified release
+  """
+  setMainQueueCaptchaDisabled(
+    """
+    Flag to define if queue captcha is enabled or disabled
+    """
+    isDisabled: Boolean!
+
+    """
+    Release identifier
+    """
+    releaseId: String!
+  ): Boolean!
+
+  """
+  [ADMIN] Set the whitelisted artists to have no time restrictions for minting
+  """
+  setNoTimeRestrictionArtistList(
+    """
+    List of artists identifiers
+    """
+    newArtists: [String!]!
+
+    """
+    Flag to define if given artists should be appended instead of replace the existing whitelisted artists
+    """
+    shouldAppend: Boolean!
+  ): [String!]!
+
+  """
+  [ADMIN] Set the number of top collectors of specified artist
+  """
+  setNumTopCollectors(
+    """
+    Artist identifier
+    """
+    artistId: UUID!
+
+    """
+    Number of top collectors
+    """
+    numTop: Int!
+  ): Void
+
+  """
+  [ARTIST | ADMIN] Set the release presale configuration (Doesn't include presales, for presales "createPresale" mutation)
+  """
+  setPresaleConfiguration(
+    """
+    Input of presale configuration
+    """
+    data: PresaleConfigurationInput!
+  ): PresaleConfiguration!
+
+  """
+  [ADMIN] Set the currently-disabled list of artist without queue
+  """
+  setQueueDisabledArtists(
+    """
+    Input for setQueueDisabledArtists mutation
+    """
+    input: DisabledQueueArtistInput!
+  ): QueueDisabledArtists!
+
+  """
+  [ADMIN] Set if the release can be minted more than once
+  """
+  setReleaseCanBeMintedMoreThanOnce(
+    """
+    Release identifier
+    """
+    releaseId: UUID!
+
+    """
+    Can the release be minted more than once
+    """
+    value: Boolean!
+  ): Boolean!
+
+  """
+  [ADMIN | ARTIST_RELATIONS] Set details of release
+  """
+  setReleaseDetails(
+    """
+    Release details info
+    """
+    input: SetReleaseDetailsInput!
+  ): Release!
+
+  """
+  [ADMIN | ARTIST_RELATIONS] Set special metadata of release
+  """
+  setReleaseMeta(
+    """
+    Metadata info
+    """
+    input: SetReleaseMetaInput!
+  ): Release!
+
+  """
+  [AUTHENTICATED] Set input list of releaseIds to input shelfId
+  """
+  setReleasesForShelf(
+    """
+    SetReleasesForShelf inputs
+    """
+    input: SetReleasesForShelfInput!
+  ): Shelf!
+
+  """
+  [ADMIN] Set season for specified artist
+  """
+  setSeasonForArtist(
+    """
+    Artist identifier
+    """
+    artistId: UUID!
+
+    """
+    Artist season
+    """
+    season: String!
+  ): Artist!
+
+  """
+  [ADMIN | ARTIST_RELATIONS] Set artist role to specified public address
+  """
+  setUserArtistRole(
+    """
+    Set artist role value for user
+    """
+    hasArtistRole: Boolean!
+
+    """
+    User public address
+    """
+    publicAddress: Address!
+  ): User!
+
+  """
+  [AUTHENTICATED] Unfollow user of input userId
+  """
+  unfollowUser(
+    """
+    Unfollow user inputs
+    """
+    input: UnfollowUserInput!
+  ): UserRelation!
+
+  """
+  [ARTIST | ARTIST_RELATIONS | ADMIN] Update specified/authenticated artist OpenSea collection URL
+  """
+  updateArtistOpenseaHandle(
+    """
+    Artist public address or Artist contract address to update the OpenSea Collection URL, it can only be used for ARTIST_RELATIONS or ADMIN
+    """
+    artistAddress: Address
+
+    """
+    OpenSea Collection URL
+    """
+    openseaCollectionUrl: URL
+  ): User!
+
+  """
+  [ARTIST] Update authenticated artist Spotify URL
+  """
+  updateArtistSpotifyUrl(
+    """
+    Spotify URL
+    """
+    spotifyUrl: String
+  ): Artist!
+
+  """
+  [AUTHENTICATED] Update authenticated user description
+  """
+  updateDescription(
+    """
+    New user description
+    """
+    description: String!
+  ): User!
+
+  """
+  [AUTHENTICATED] Update authenticated user email
+  """
+  updateEmail(
+    """
+    New user email
+    """
+    email: EmailAddress
+  ): User!
+
+  """
+  [ADMIN] Update existing Key Client
+  """
+  updateKeyClient(
+    """
+    Data of Key Client to be updated
+    """
+    input: UpdateKeyClient!
+  ): KeyClient!
+
+  """
+  [ARTIST] Update release
+  """
+  updateRelease(
+    """
+    Release to update
+    """
+    input: UpdateReleaseInput!
+  ): Release!
+
+  """
+  [ADMIN] Update the specified sale schedule
+  """
+  updateSalesSchedule(
+    """
+    Input for updateSalesSchedule mutation
+    """
+    input: UpdateSaleScheduleInput!
+  ): SaleSchedule!
+
+  """
+  [AUTHENTICATED] Update authenticated user Instagram handle
+  """
+  updateUserInstagramHandle(
+    """
+    Instagram handle
+    """
+    instagramHandle: String
+  ): User!
+
+  """
+  [AUTHENTICATED] Upload media content for authenticated user's profile
+  """
+  uploadUserMedia(content: UploadedMedia!): User!
+
+  """
+  [ARTIST] Upsert artist banner image
+  """
+  upsertArtistBannerImage(
+    """
+    Uploaded banner image
+    """
+    bannerImage: UploadedMedia!
+  ): Artist!
+
+  """
+  [AUTHENTICATED] Upsert shelf for user. If id is passed in as input, mutation will update shelf. Otherwise, mutation will create new shelf
+  """
+  upsertShelf(
+    """
+    Upsert shelf inputs
+    """
+    input: UpsertShelfInput!
+  ): Shelf!
+
+  """
+  [ARTIST] Update or create upload step of release
+  """
+  upsertUploadStep(
+    """
+    Release upload step input
+    """
+    input: UpsertReleaseUploadStepInput!
+  ): UploadStep!
+
+  """
+  [PUBLIC] Verify given auth challenge
+  """
+  verifyAuthChallenge(
+    """
+    User public address
+    """
+    publicAddress: String!
+
+    """
+    Signed message by wallet
+    """
+    signedMessage: String!
+  ): String!
+
+  """
+  [AUTHENTICATED] Verify twitter handle
+  """
+  verifyTwitter(
+    """
+    Tweet identifier
+    """
+    tweetId: String!
+
+    """
+    Twitter handler
+    """
+    twitterHandle: String!
+  ): User!
+}
+
+"""
+NFT Entity
+"""
+type Nft implements Node {
+  """
+  Amount paid in Wei for NFT
+  """
+  amountPaidInWei: String!
+
+  """
+  Comment set for NFT
+  """
+  comment: Comment
+
+  """
+  Date of creation of NFT entity
+  """
+  createdAt: DateTime!
+
+  """
+  Block number of the nft mint
+  """
+  createdAtBlockNum: Int!
+
+  """
+  Blockchain created date of NFT
+  """
+  createdAtBlockTime: DateTime
+
+  """
+  Nft UUID
+  """
+  id: ID!
+
+  """
+  Is the NFT a golden egg
+  """
+  isGoldenEgg: Boolean!
+
+  """
+  Was the NFT bought on a presale
+  """
+  isPresaleNft: Boolean!
+
+  """
+  Owner of NFT
+  """
+  owner: User!
+
+  """
+  Release associated with NFT
+  """
+  release: Release!
+
+  """
+  Acumulative serial number
+  """
+  serialNumber: Int!
+
+  """
+  Song slot reserved by NFT
+  """
+  songSlot: Int
+
+  """
+  Unique chain token identifier
+  """
+  tokenId: ID!
+
+  """
+  Last update date of NFT
+  """
+  updatedAt: DateTime!
+
+  """
+  Block number of the last transfer state
+  """
+  updatedAtBlockNum: Int!
+}
+
+"""
+Paginated NFTs connection
+"""
+type NftConnection implements Connection {
+  """
+  Edges of current page
+  """
+  edges: [NftConnectionEdge!]!
+
+  """
+  Pagination helpers information
+  """
+  pageInfo: PageInfo!
+}
+
+"""
+NFT Node edge
+"""
+type NftConnectionEdge implements Edge {
+  """
+  Cursor to be used for pagination
+  """
+  cursor: String!
+
+  """
+  NFT Entity
+  """
+  node: Nft!
+}
+
+"""
+Cursor connection parameters for NFTs
+"""
+input NftCursorConnectionArgs {
+  """
+  Start forwards pagination since "after" cursor
+  """
+  after: String
+
+  """
+  Start backwards pagination since "before" cursor
+  """
+  before: String
+
+  """
+  Limit the amount of nodes to be fetched, to be used with "after", with a maximum of 50 nodes.
+  """
+  first: NonNegativeInt
+
+  """
+  Limit the amount of nodes to be fetched, to be used with "before", with a maximum of 50 nodes.
+  """
+  last: NonNegativeInt
+
+  """
+  Customize sort behavior
+  """
+  sort: NftCursorConnectionSort! = { secondarySaleDate: DESC }
+}
+
+"""
+Customize the sort behavior of Nfts pagination
+"""
+input NftCursorConnectionSort {
+  """
+  Sort by date of primary sale
+  """
+  primarySaleDate: SortOrder
+
+  """
+  Sort by date of last secondary sale with default value of primary sale date
+  """
+  secondarySaleDate: SortOrder
+
+  """
+  Sort by serial number
+  """
+  serialNumber: SortOrder
+}
+
+"""
+Simplified version of Nft entity filtered to be with non-nullable comment
+"""
+type NftWithComment {
+  """
+  Amount paid in Wei for NFT
+  """
+  amountPaidInWei: String!
+
+  """
+  Avatar URL of Nft owner
+  """
+  avatarUrl: String
+
+  """
+  Comment of NFT
+  """
+  comment: Comment!
+
+  """
+  Unique identifier of Nft
+  """
+  id: ID!
+
+  """
+  Was the NFT bought on a presale
+  """
+  isPresaleNft: Boolean!
+
+  """
+  If the Nft owner is an artist, returns the name of the artist
+  """
+  ownerArtistName: String
+
+  """
+  Public wallet address of owner
+  """
+  ownerPublicAddress: String!
+
+  """
+  Twitter handle of owner
+  """
+  ownerTwitterHandle: String
+
+  """
+  Timestamp of purchased date
+  """
+  purchasedAt: Timestamp!
+
+  """
+  Acumulative serial number
+  """
+  serialNumber: Int!
+
+  """
+  Song slot reserved by NFT
+  """
+  songSlot: Int!
+
+  """
+  Unique chain token identifier
+  """
+  tokenId: String!
+}
+
+"""
+Base node
+"""
+interface Node {
+  """
+  Node identifier
+  """
+  id: ID!
+}
+
+"""
+A string that cannot be passed as an empty value
+"""
+scalar NonEmptyString
+
+"""
+Integers that will have a value of 0 or more.
+"""
+scalar NonNegativeInt
+
+"""
+Input for onChainStartTime query
+"""
+input OnChainStartTimeInput {
+  """
+  Type of auction type to be used as reference
+  """
+  auctionType: AuctionType!
+
+  """
+  Release listening party start date to be used as reference
+  """
+  listeningPartyStartDate: DateTime!
+
+  """
+  Release identifier
+  """
+  releaseId: UUID!
+}
+
+"""
+Require only holders of specific contracts
+"""
+type OnlyTokenHolders {
+  """
+  Token Contract Address
+  """
+  tokenContractAddress: String!
+
+  """
+  Token Symbol from Contract
+  """
+  tokenSymbol: String
+
+  """
+  Token Threshold to qualify on whitelist
+  """
+  tokenThresholdToQualify: String!
+}
+
+"""
+Input to define configuration for OnlyTokenHolders whitelist rule
+"""
+input OnlyTokenHoldersInput {
+  """
+  Token Contract public address
+  """
+  tokenContractAddress: Address
+
+  """
+  Token threshold to qualify
+  """
+  tokenThresholdToQualify: String
+}
+
+"""
+Input to define configuration for OnlyTokenHolders Media
+"""
+input OnlyTokenHoldersMediaInput {
+  """
+  Collection Name
+  """
+  collectionName: String
+
+  """
+  URI for Icon Overlay
+  """
+  iconOverlayURI: String
+
+  """
+  List of custom Image URIs
+  """
+  imageURIs: [String!]
+
+  """
+  Social Links
+  """
+  socialLinks: SocialLinksInput
+}
+
+"""
+Require Top Collectors flag
+"""
+type OnlyTopCollectors {
+  """
+  How many of the top collectors are allowed
+  """
+  topNum: Int!
+}
+
+"""
+Input to define configuration for OnlyTopCollectors whitelist rule
+"""
+input OnlyTopCollectorsInput {
+  """
+  How many of the first top collectors are allowed for the whitelist rule
+  """
+  topNum: Int
+}
+
+"""
+Pagination helper information
+"""
+type PageInfo {
+  """
+  Cursor shorthand of the last node from current page
+  """
+  endCursor: String
+
+  """
+  Does the current connection have a next page
+  """
+  hasNextPage: Boolean!
+
+  """
+  Does the current connection have a previous page
+  """
+  hasPreviousPage: Boolean!
+
+  """
+  Cursor shorthand of the first node from current page
+  """
+  startCursor: String
+}
+
+"""
+Auction options associated with permissioned sales
+"""
+type PermissionedAuction {
+  """
+  List of different eth prices options
+  """
+  priceOptions: [Float!]!
+
+  """
+  List of different quantity options
+  """
+  quantityOptions: [Int!]!
+
+  """
+  Signing address for minting process
+  """
+  signingAddress: String!
+}
+
+"""
+Input options to customize permissioned auctions
+"""
+input PermissionedAuctionInput {
+  """
+  List of different eth prices options
+  """
+  priceOptions: [Float!]!
+
+  """
+  List of different quantity options
+  """
+  quantityOptions: [Int!]!
+}
+
+"""
+Auction options associated with permissionless sales
+"""
+type PermissionlessAuction {
+  """
+  List of different eth prices options
+  """
+  priceOptions: [Float!]!
+
+  """
+  List of different quantity options
+  """
+  quantityOptions: [Int!]!
+}
+
+"""
+Input options to customize permisionless auctions
+"""
+input PermissionlessAuctionInput {
+  """
+  List of different eth prices options
+  """
+  priceOptions: [Float!]!
+
+  """
+  List of different quantity options
+  """
+  quantityOptions: [Int!]!
+}
+
+"""
+Playlist entity that contains tracks
+"""
+interface Playlist {
+  """
+  Ephemeral Unique UUID. Since right now the playlists are not being persisted, it's a completely randomly created UUID created on memory
+  """
+  id: ID!
+
+  """
+  Track list
+  """
+  tracks: [PlaylistTrack!]!
+}
+
+"""
+Playlist of tracks of an artist
+"""
+type PlaylistArtist implements Playlist {
+  artistId: ID!
+
+  """
+  Ephemeral Unique UUID. Since right now the playlists are not being persisted, it's a completely randomly created UUID created on memory
+  """
+  id: ID!
+
+  """
+  Track list
+  """
+  tracks: [PlaylistTrack!]!
+}
+
+"""
+Playlist of tracks of a holder' NFTs
+"""
+type PlaylistHolder implements Playlist {
+  """
+  Holder public address
+  """
+  holderPublicAddress: String!
+
+  """
+  Ephemeral Unique UUID. Since right now the playlists are not being persisted, it's a completely randomly created UUID created on memory
+  """
+  id: ID!
+
+  """
+  Track list
+  """
+  tracks: [PlaylistTrack!]!
+}
+
+"""
+Playlist used for Homepage and fallback for extra pages
+"""
+type PlaylistHome implements Playlist {
+  createdAt: DateTime!
+
+  """
+  Ephemeral Unique UUID. Since right now the playlists are not being persisted, it's a completely randomly created UUID created on memory
+  """
+  id: ID!
+
+  """
+  Track list
+  """
+  tracks: [PlaylistTrack!]!
+}
+
+"""
+Playlist input
+"""
+input PlaylistInput {
+  """
+  Association ID based on type of playlist
+  """
+  associationId: String
+
+  """
+  Type of playlist
+  """
+  type: PlaylistType!
+}
+
+"""
+Simplified track entity to only contain identifiers to associated entities
+"""
+type PlaylistTrack {
+  """
+  Artist ID
+  """
+  artistId: ID!
+
+  """
+  Track ID
+  """
+  id: ID!
+
+  """
+  Release ID
+  """
+  releaseId: ID!
+}
+
+"""
+Currently supported playlists
+"""
+enum PlaylistType {
+  ARTIST
+  HOLDER
+  HOME
+}
+
+"""
+Integers that will have a value greater than 0.
+"""
+scalar PositiveInt
+
+"""
+Input for updateRelease mutation
+"""
+input PrepareMintInput {
+  """
+  Auction type
+  """
+  auctionType: AuctionType!
+
+  """
+  Release identifier
+  """
+  releaseId: UUID!
+}
+
+"""
+Main configuration entity of release sale
+"""
+type PresaleConfiguration {
+  """
+  Currently activate sale schedule, loosely-based on requested time
+  """
+  currentSaleSchedule: SaleSchedule
+
+  """
+  Most recent past sale schedule, loosely-based on requested time
+  """
+  getMostRecentSaleSchedule: SaleSchedule
+
+  """
+  Entity UUID
+  """
+  id: ID!
+
+  """
+  Release UUID of Presale Configuration
+  """
+  releaseId: ID!
+
+  """
+  List of sale schedule information of Release
+  """
+  saleSchedules: [SaleSchedule!]!
+
+  """
+  Signing key UUID
+  """
+  signingKeyId: String!
+}
+
+"""
+Main input of "setPresaleConfiguration" mutation
+"""
+input PresaleConfigurationInput {
+  """
+  End time of public release sale
+  """
+  endTime: DateTime!
+
+  """
+  Amount to be set available on public release drop
+  """
+  presaleAmount: String!
+
+  """
+  Release identifier
+  """
+  releaseId: UUID!
+
+  """
+  Start time of public release sale
+  """
+  startTime: DateTime!
+
+  """
+  Custom rules to be set for whitelisting process
+  """
+  whitelistRule: [WhitelistRuleInput!]
+}
+
+"""
+Presale Media information
+"""
+type PresaleMediaInfo {
+  """
+  Collection Name
+  """
+  collectionName: String
+
+  """
+  Size of collection
+  """
+  collectionSize: Int
+
+  """
+  Contract Address
+  """
+  contractAddress: String
+
+  """
+  Custom description
+  """
+  description: String
+
+  """
+  Icon Overlay URIs
+  """
+  iconOverlayURI: String
+
+  """
+  Image URIs
+  """
+  imageURIs: [String!]
+
+  """
+  Social Links of Sale
+  """
+  socialLinks: SocialLinks
+
+  """
+  Amount of unique holders
+  """
+  uniqueHolders: Int
+}
+
+"""
+Sale Schedule media configuration
+"""
+input PresaleMediaInput {
+  """
+  Media applied used for onlyTokenHolders whitelist rule
+  """
+  onlyTokenHolders: OnlyTokenHoldersMediaInput
+}
+
+"""
+Type of presale whitelist algorithm
+"""
+enum PresaleType {
+  """
+  First in first out
+  """
+  FIFO
+}
+
+"""
+Queries
+"""
+type Query {
+  """
+  [ADMIN | ARTIST_RELATIONS] Get all artist invites of the platform
+  """
+  allArtistInvites(
+    """
+    Only get pending invitations
+    """
+    pendingOnly: Boolean
+  ): [ArtistInvite!]!
+
+  """
+  [PUBLIC] Get all minted releases. Warning, this query is going to be removed soon, use paginated queries instead
+  """
+  allMintedReleases: [Release!]! @deprecated(reason: "Use paginated queries instead")
+
+  """
+  [PUBLIC] Get all minted releases
+  """
+  allMintedReleasesPaginated(
+    """
+    Filter releases
+    """
+    filter: MintedReleasesCursorFilterArgs
+
+    """
+    Pagination parameters
+    """
+    pagination: MintedReleasesCursorConnectionArgs! = { first: 10, sort: { mintStartTime: DESC } }
+  ): ReleaseConnection!
+
+  """
+  [ARTIST] Get all unminted releases of authenticated artist
+  """
+  allUnmintedReleases: [Release!]!
+    @deprecated(reason: "Use `unmintedReleasesPaginated` instead. Will be removed on September 27, 2022")
+
+  """
+  [PUBLIC] Artist by UUID
+  """
+  artist(
+    """
+    Artist identifier
+    """
+    id: UUID!
+  ): Artist
+
+  """
+  [PUBLIC] Artist by handle
+  """
+  artistByHandle(
+    """
+    Artist handle
+    """
+    soundHandle: String!
+  ): Artist
+
+  """
+  Get the nft collectors of the specified artist
+  """
+  artistCollectors(
+    """
+    Input for artistCollectors query
+    """
+    input: ArtistCollectorsInput!
+  ): ArtistCollectors!
+
+  """
+  [ADMIN | ARTIST_RELATIONS] Default reference artist minting release options of specified artist
+  """
+  artistDefaultMintingOptions(
+    """
+    Artist user wallet public address or artist contract address
+    """
+    artistAddress: Address!
+  ): ArtistDefaultOptions!
+
+  """
+  [ARTIST] Get all artist invites sent by authenticated artist
+  """
+  artistInvites: [ArtistInvite!]!
+
+  """
+  [ARTIST] Get artist minting options of authenticated artist. Given artist id has to match authenticated artist
+  """
+  artistMintingOptions(artistId: UUID!): ArtistReleaseOptions!
+
+  """
+  [ARTIST] Get specified release regardless of mint status. If specified release is not created by authenticated artist, it fails.
+  """
+  artistRelease(
+    """
+    Release identifier
+    """
+    releaseId: UUID!
+  ): Release!
+
+  """
+  [PUBLIC] Get all artists of platform.
+  """
+  artists(
+    """
+    Paginated artists filters
+    """
+    filter: ArtistCursorFilterArgs
+
+    """
+    Pagination parameters
+    """
+    pagination: CursorConnectionArgs! = { first: 10, sort: DESC }
+  ): ArtistConnection!
+
+  """
+  [PUBLIC] Get audio from track
+  """
+  audioFromTrack(
+    """
+    Track identifier
+    """
+    trackId: UUID!
+  ): TrackAudio!
+
+  """
+  [PUBLIC] Get authenticated user information, if any
+  """
+  authUser: User
+
+  """
+  [PUBLIC] Get chat messages of specified chat channel
+  """
+  chatMessages(
+    """
+    Chat channel id
+    """
+    channelId: UUID!
+
+    """
+    Pagination parameters
+    """
+    pagination: CursorConnectionArgs! = { first: 10, sort: DESC }
+  ): ChatMessagesConnection!
+
+  """
+  [PUBLIC] Get credit split by id
+  """
+  creditSplit(
+    """
+    Credit split identifier
+    """
+    id: UUID!
+  ): CreditSplit
+
+  """
+  [PUBLIC] Get currencies conversions
+  """
+  currencies: Currencies!
+
+  """
+  [PUBLIC] Check if specified chat channel type+id is available for specified authenticated user
+  """
+  discoverChatChannel(
+    """
+    Combination of type + associationId to discover chat channel entity if available
+    """
+    input: DiscoverChatChannelInput!
+  ): ChatChannel
+
+  """
+  [PUBLIC] Get EggGame of specified release
+  """
+  eggGame(
+    """
+    Release identifier
+    """
+    releaseId: UUID!
+  ): EggGame
+
+  """
+  [PUBLIC] Get eligible users for presale on specified presale configuration
+  """
+  eligibleUsersForPresale(
+    """
+    Presale configuration identifier
+    """
+    presaleConfigurationId: UUID!
+  ): [User!]!
+
+  """
+  [PUBLIC] Get currently-featured releases
+  """
+  featuredReleases: [Release!]!
+
+  """
+  [AUTHENTICATED] Returns whether auth user is following input userId
+  """
+  isFollowing(
+    """
+    isFollowing inputs
+    """
+    input: IsFollowingInput!
+  ): Boolean!
+
+  """
+  [PUBLIC] Check if Queue Captcha is disabled for specified release
+  """
+  isMainQueueCaptchaDisabled(
+    """
+    Release identifier
+    """
+    releaseId: String!
+  ): Boolean
+
+  """
+  [ADMIN] Get all the existing Key Clients
+  """
+  keyClients(
+    """
+    Filter paginated results
+    """
+    filter: FilterKeyClients
+
+    """
+    Pagination parameters
+    """
+    pagination: KeyClientCursorConnectionArgs! = { after: null, first: 20, sort: ASC }
+  ): KeyClientConnection!
+
+  """
+  [PUBLIC] Get the latest events
+  """
+  latestEventsPaginated(
+    """
+    Paginated latest sales filters
+    """
+    filter: LatestSalesCursorFilterArgs
+
+    """
+    Pagination parameters
+    """
+    pagination: LatestSalesCursorConnectionArgs! = { first: 10, sort: { blockTimestamp: DESC } }
+  ): LatestSalesConnection!
+
+  """
+  [PUBLIC] Get merkle tree information
+  """
+  merkleTree(
+    """
+    Merkle tree root input
+    """
+    root: String!
+  ): MerkleTree!
+
+  """
+  [PUBLIC] Get merkle tree information
+  """
+  merkleTreeProof(
+    """
+    Merkle tree root input
+    """
+    root: String!
+
+    """
+    Merkle tree unhashed leaf input for proof
+    """
+    unhashedLeaf: String!
+  ): MerkleTreeProof
+
+  """
+  [PUBLIC] Get minted release by Artist sound handle and release title slug
+  """
+  mintedRelease(
+    """
+    Release title slug
+    """
+    releaseSlug: String!
+
+    """
+    Artist sound handle
+    """
+    soundHandle: String!
+  ): Release
+
+  """
+  [PUBLIC] Get all minted releases of an artist
+  """
+  mintedReleases(
+    """
+    Filter artist releases
+    """
+    filter: ArtistMintedReleasesCursorFilterArgs!
+
+    """
+    Artist identifier
+    """
+    id: UUID!
+
+    """
+    Pagination parameters
+    """
+    pagination: CursorConnectionArgs! = { first: 10, sort: DESC }
+  ): ReleaseConnection!
+
+  """
+  [PUBLIC] Current UNIX date to test caching
+  """
+  now: Int!
+
+  """
+  [PUBLIC] Test query to get the date of calculation of resolver based using response cache
+  """
+  nowCached(
+    """
+    Amount of seconds for the response to be cached
+    """
+    ttlSeconds: Int! = 3
+  ): Timestamp!
+
+  """
+  [ARTIST] Get the amount of top collectors associated with authenticated artist
+  """
+  numTopCollectors: Int
+
+  """
+  [ARTIST] Get onChainStartTime of specified release
+  """
+  onChainStartTime(
+    """
+    Input for onChainStartTime query
+    """
+    input: OnChainStartTimeInput!
+  ): DateTime!
+
+  """
+  [PUBLIC] Past minted releases
+  """
+  pastMintedReleases(
+    """
+    Filter past minted releases
+    """
+    filter: MintedReleasesCursorFilterArgs
+
+    """
+    Pagination parameters
+    """
+    pagination: CursorConnectionArgs! = { first: 10, sort: DESC }
+  ): ReleaseConnection!
+
+  """
+  [PUBLIC] Get playlist based on given type and associationId
+  """
+  playlist(
+    """
+    Input for playlist query
+    """
+    input: PlaylistInput!
+  ): Playlist
+
+  """
+  [PUBLIC] Presale Configuration of specified Release
+  """
+  presaleConfiguration(
+    """
+    Release identifier
+    """
+    releaseId: UUID!
+  ): PresaleConfiguration
+
+  """
+  [AUTHENTICATED] Get list of artists with queue feature disabled
+  """
+  queueDisabledArtists: QueueDisabledArtists
+
+  """
+  [AUTHENTICATED] Queue status of authenticated user on specified release
+  """
+  queueStatus(
+    """
+    Indentifier of release to get queue status
+    """
+    releaseId: UUID!
+  ): GetQueueStatus
+
+  """
+  [PUBLIC] Get release by id
+  """
+  release(
+    """
+    Release identifier
+    """
+    id: UUID!
+  ): Release
+
+  """
+  [PUBLIC] Can the specified release be minted more than once
+  """
+  releaseCanBeMintedMoreThanOnce(
+    """
+    Release identifier
+    """
+    releaseId: String!
+  ): Boolean!
+
+  """
+  [PUBLIC] List of genres that have at least 1 past minted release
+  """
+  releaseGenres: [Genre!]!
+
+  """
+  Search releases or artists based on text inputs
+  """
+  search(input: SearchInput!): SearchResult!
+
+  """
+  [ADMIN | ARTIST_RELATIONS] Get default reference season-based auction options
+  """
+  seasonDefaultMintingOptions(
+    """
+    Season for default minting options
+    """
+    seasonName: String!
+  ): SeasonDefaultOptions!
+
+  """
+  [ADMIN] Get currently shadow-banned public addresses
+  """
+  shadowBanAddresses: [ShadowBannedAddress!]!
+
+  """
+  [PUBLIC] Get specified shelf by id
+  """
+  shelf(
+    """
+    Shelf identifier
+    """
+    id: UUID!
+  ): Shelf!
+
+  """
+  [ARTIST] Get signature to be used for creating artist contract
+  """
+  signature: String!
+
+  """
+  [AUTHENTICATED] Request media upload
+  """
+  signedUploadParams(
+    """
+    Upload request information
+    """
+    uploadRequest: UploadRequest!
+  ): AWSPresignedPost!
+
+  """
+  [ARTIST] Get Signing Address for minting process
+  """
+  signingAddress: SigningAddress!
+
+  """
+  [ADMIN | ARTIST_RELATIONS] Get basic stats
+  """
+  stats: Stats!
+
+  """
+  [PUBLIC] Top collectors of artist by number of nfts owned
+  """
+  topNftsOwnedCollectors(
+    """
+    Artist id
+    """
+    id: UUID!
+  ): [ArtistCollector!]
+
+  """
+  [PUBLIC] Get total raised of the whole platform
+  """
+  totalRaised: TotalRaised!
+
+  """
+  [PUBLIC] Get track by id
+  """
+  track(
+    """
+    Track identifier
+    """
+    id: UUID!
+  ): Track
+
+  """
+  [PUBLIC] Get trending artists information
+  """
+  trendingArtistInfo(
+    """
+    Sort logic used
+    """
+    sort: TrendingArtistsSortEnum!
+
+    """
+    For what time period the data should come from
+    """
+    timePeriod: TimePeriodAggEnum!
+  ): [TrendingArtistInfo!]!
+
+  """
+  [PUBLIC] Get trending collectors information
+  """
+  trendingCollectors(
+    """
+    Sort logic used
+    """
+    sort: TrendingCollectorsSortEnum!
+
+    """
+    For what time period the data should come from
+    """
+    timePeriod: TimePeriodAggEnum!
+  ): [TrendingCollectorInfo!]!
+
+  """
+  [ARTIST] Get paginated unminted releases of authenticated artist
+  """
+  unmintedReleasesPaginated(
+    """
+    Pagination parameters
+    """
+    pagination: CursorConnectionArgs! = { first: 10, sort: DESC }
+  ): ReleaseConnection!
+
+  """
+  [PUBLIC] Upcoming minted releases
+  """
+  upcomingMintedReleases(
+    """
+    Filter upcoming minted releases
+    """
+    filter: MintedReleasesCursorFilterArgs
+
+    """
+    Pagination parameters
+    """
+    pagination: CursorConnectionArgs! = { first: 10, sort: DESC }
+  ): ReleaseConnection!
+
+  """
+  [ARTIST] Get upload steps of specified release
+  """
+  uploadSteps(
+    """
+    Release identifier
+    """
+    releaseId: UUID!
+  ): [UploadStep!]!
+
+  """
+  [PUBLIC] Get specified user by id
+  """
+  user(
+    """
+    User identifier
+    """
+    id: UUID!
+  ): User
+
+  """
+  [PUBLIC] Get specified user by public address
+  """
+  userByAddress(
+    """
+    User public address
+    """
+    publicAddress: Address!
+  ): User
+
+  """
+  [PUBLIC] Get specified user by sound handle
+  """
+  userByArtistHandle(soundHandle: String!): User
+
+  """
+  [AUTHENTICATED] Check status of relationship of authenticated user with specified users
+  """
+  userRelationStatuses(
+    """
+    User id to check if auth user is following
+    """
+    users: [UUID!]!
+  ): [UserRelationStatus!]!
+}
+
+"""
+Queue entity
+"""
+type Queue {
+  id: ID!
+  presaleConfigurationId: ID!
+  status: QueueStatus!
+  userId: ID!
+}
+
+"""
+Entity for artist with queue feature disabled
+"""
+type QueueDisabledArtists {
+  """
+  List of artists with queue feature disabled
+  """
+  disabledArtists: [String!]!
+}
+
+"""
+Types of Queue Status states
+"""
+enum QueueStatus {
+  """
+  Queue position timed out
+  """
+  EXPIRED
+
+  """
+  Queue was left manually
+  """
+  LEFT_QUEUE
+
+  """
+  Queue position has been transfered to whitelist
+  """
+  TRANSFERRED_TO_WHITELIST
+
+  """
+  Queue active and waiting for updates
+  """
+  WAITING
+}
+
+"""
+Input for queueStatus subscription
+"""
+input QueueStatusSubscriptionInput {
+  """
+  Authentication token of user
+  """
+  authToken: String!
+
+  """
+  Release identifier of queue status to get queue status updates from
+  """
+  releaseId: UUID!
+}
+
+"""
+Auction options associated with range bound sales
+"""
+type RangeBoundAuction {
+  """
+  List of different options of maximum quantity
+  """
+  maxOptions: [Int!]!
+
+  """
+  List of different options of minimum quantity
+  """
+  minOptions: [Int!]!
+
+  """
+  Minting period duration in minutes
+  """
+  mintingPeriodMins: Int!
+
+  """
+  List of different eth prices options
+  """
+  priceOptions: [Float!]!
+
+  """
+  Signing address for minting process
+  """
+  signingAddress: String!
+}
+
+"""
+Input options to customize range bound auctions
+"""
+input RangeBoundAuctionInput {
+  """
+  List of different options of maximum quantity
+  """
+  maxOptions: [Int!]!
+
+  """
+  List of different options of minimum quantity
+  """
+  minOptions: [Int!]!
+
+  """
+  Minting period duration in minutes
+  """
+  mintingPeriodMins: Int!
+
+  """
+  List of different eth prices options
+  """
+  priceOptions: [Float!]!
+}
+
+"""
+Release entity
+"""
+type Release implements Node {
+  """
+  Artist of release
+  """
+  artist: Artist!
+
+  """
+  Artist contract address
+  """
+  artistContractAddress: String!
+
+  """
+  Available balance to withdraw for an edition
+  """
+  balanceToWithdraw: String
+
+  """
+  Behind the music text
+  """
+  behindTheMusic: String!
+
+  """
+  Currently claimed song slots
+  """
+  claimedSongSlots: [Int!]!
+
+  """
+  Cover image of release
+  """
+  coverImage: Media!
+
+  """
+  Release creation date
+  """
+  createdAt: DateTime!
+
+  """
+  Credit split associated with release, if any
+  """
+  creditSplit: CreditSplit
+
+  """
+  Users with credits of release
+  """
+  credits: [User!]!
+
+  """
+  The current maximum quantity for a sale.
+  """
+  currentMaxQuantity: Int!
+
+  """
+  Description of release
+  """
+  description: String
+
+  """
+  Edition ID
+  """
+  editionId: String
+
+  """
+  EggGame of Release
+  """
+  eggGame: EggGame
+
+  """
+  Associated external url
+  """
+  externalUrl: String
+
+  """
+  Final quantity for a release. Will be defined once a sale finishes
+  """
+  finalQuantity: Int
+
+  """
+  Last sale schedule end time as ISO Date String
+  """
+  finalSaleScheduleEndTime: DateTime
+
+  """
+  Last sale schedule end time as number of milliseconds since the ECMAScript epoch.
+  """
+  finalSaleScheduleEndTimestamp: Timestamp
+
+  """
+  Public address of address to receive the transactions funds
+  """
+  fundingRecipient: String!
+
+  """
+  Genre of Release
+  """
+  genre: Genre!
+
+  """
+  Special golden egg image
+  """
+  goldenEggImage: Media!
+
+  """
+  Is the release a range bound edition
+  """
+  hasRangeBoundSale: Boolean!
+
+  """
+  Release identifier
+  """
+  id: ID!
+
+  """
+  Is release sold out relative to the final quantity
+  """
+  isFinalSoldOut: Boolean!
+
+  """
+  Associated laylo.com url
+  """
+  layloUrl: String
+
+  """
+  Public sale start time in UNIX timestamp
+  """
+  mintStartTime: Int!
+
+  """
+  NFTs of Release
+  """
+  nftsPaginated(
+    """
+    Pagination parameters
+    """
+    pagination: NftCursorConnectionArgs! = { after: null, first: 30, sort: { secondarySaleDate: DESC } }
+  ): NftConnection!
+
+  """
+  Amount of sold NFTs
+  """
+  numSold: Int!
+
+  """
+  On blockchain start time
+  """
+  onChainStartDateTime: DateTime!
+
+  """
+  On blockchain start time in UNIX timestamp
+  """
+  onChainStartTime: Int!
+
+  """
+  Associated opensea url
+  """
+  openseaUrl: String
+
+  """
+  Presale listening party start time
+  """
+  presaleListeningPartyStart: DateTime
+
+  """
+  Presale minting party start time
+  """
+  presaleMintStart: DateTime
+
+  """
+  Max Quantity for a releases presale.
+  """
+  presaleUpperBound: Int
+
+  """
+  Price in Wei
+  """
+  price: String!
+
+  """
+  Public listening party timestamp
+  """
+  publicListeningParty: Timestamp
+
+  """
+  Public listening party start time
+  """
+  publicListeningPartyStart: DateTime!
+
+  """
+  Public minting start time
+  """
+  publicMintStart: DateTime!
+
+  """
+  Quantity of available NFTs
+  """
+  quantity: Int!
+
+  """
+  Lower bound quantity for a releases main sale.
+  """
+  quantityLowerBound: Int!
+
+  """
+  Upper bound quantity for a releases main sale.
+  """
+  quantityUpperBound: Int!
+
+  """
+  Rewards of Release
+  """
+  rewards: [Reward!]!
+
+  """
+  Season associated to release
+  """
+  season: String
+
+  """
+  Release title
+  """
+  title: String!
+
+  """
+  Slugified title
+  """
+  titleSlug: String!
+
+  """
+  Top 100 Nfts with comment, ordered by serial number ascendingly
+  """
+  topNftsWithComment: [NftWithComment!]!
+
+  """
+  Total raised in Wei
+  """
+  totalRaised: String!
+
+  """
+  Total amount raised from primary sales converted from eth to usd
+  """
+  totalRaisedPrimaryUsd: Float!
+
+  """
+  Total amount raised from primary sales converted from eth to usd
+  """
+  totalRaisedSecondaryUsd: Float!
+
+  """
+  Track of release
+  """
+  track: Track!
+
+  """
+  Tracks of release
+  """
+  tracks: [Track!]! @deprecated(reason: "Prefer using Release.track instead")
+
+  """
+  Type of Release
+  """
+  type: ReleaseType!
+
+  """
+  Total number of upload steps
+  """
+  uploadSteps: Int!
+
+  """
+  Number of upload steps already complete
+  """
+  uploadStepsComplete: Int!
+}
+
+"""
+Paginated releases connection
+"""
+type ReleaseConnection implements Connection {
+  """
+  Edges of current page
+  """
+  edges: [ReleaseConnectionEdge!]!
+
+  """
+  Pagination helpers information
+  """
+  pageInfo: PageInfo!
+}
+
+"""
+Edge of Release Connection
+"""
+type ReleaseConnectionEdge implements Edge {
+  """
+  Cursor to be used for pagination
+  """
+  cursor: String!
+
+  """
+  Release node
+  """
+  node: Release!
+}
+
+"""
+Input values for release admin update
+"""
+input ReleaseDetailsInput {
+  """
+  Artist story of release
+  """
+  behindTheMusic: String
+
+  """
+  Description of release
+  """
+  description: String
+
+  """
+  Description of golden egg
+  """
+  eggDescription: String
+
+  """
+  Season of release
+  """
+  season: String
+
+  """
+  Title of release
+  """
+  title: String
+
+  """
+  Title slug of release
+  """
+  titleSlug: String
+
+  """
+  E.g. Playlist, Album, EP, Single, Compilation
+  """
+  type: String
+}
+
+"""
+Release info upload step info
+"""
+type ReleaseInfoUploadStepInfo {
+  """
+  Behind the music text
+  """
+  behindTheMusic: String!
+
+  """
+  Cover image
+  """
+  coverImage: MediaUploadStepInfo!
+
+  """
+  Genre
+  """
+  genre: String!
+
+  """
+  Title
+  """
+  title: String!
+
+  """
+  Token symbol
+  """
+  tokenSymbol: String!
+
+  """
+  Uploaded tracks
+  """
+  tracks: [TrackUploadStepInfo!]!
+
+  """
+  Release type
+  """
+  type: String!
+
+  """
+  Text to introduce song to supporters
+  """
+  welcomeComment: String!
+}
+
+"""
+Release info upload step input values
+"""
+input ReleaseInfoUploadStepInput {
+  """
+  Behind the music text
+  """
+  behindTheMusic: String!
+
+  """
+  Cover image
+  """
+  coverImage: UploadedMedia!
+
+  """
+  Release genre
+  """
+  genre: String!
+
+  """
+  Title
+  """
+  title: String!
+
+  """
+  Token symbol
+  """
+  tokenSymbol: String!
+
+  """
+  Uploaded tracks
+  """
+  tracks: [TrackUpload!]!
+
+  """
+  Release type
+  """
+  type: ReleaseType!
+
+  """
+  Text to introduce song to supporters
+  """
+  welcomeComment: String!
+}
+
+"""
+Meta input values for release
+"""
+input ReleaseMetaInput {
+  """
+  Associated external url
+  """
+  externalUrl: URL
+
+  """
+  Associated laylo.com url
+  """
+  layloUrl: URL
+
+  """
+  Associated opensea url
+  """
+  openseaUrl: URL
+}
+
+"""
+Release current status type
+"""
+enum ReleaseStatus {
+  AVAILABLE_TO_MINT
+  SOLD_OUT
+}
+
+"""
+Release type, currently the platform only supports "SINGLE"
+"""
+enum ReleaseType {
+  ALBUM
+  COMPILATION
+  EP
+  PLAYLIST
+  SINGLE
+}
+
+"""
+Different upload steps for a release
+"""
+input ReleaseUploadStepInput {
+  """
+  Auction configuration inputs
+  """
+  auctionConfiguration: AuctionConfigurationUploadStepInput
+
+  """
+  Release metadata upload step inputs
+  """
+  metadata: MetadataUploadStepInput
+
+  """
+  Release info upload step inputs
+  """
+  releaseInfo: ReleaseInfoUploadStepInput
+
+  """
+  Rewards upload step inputs
+  """
+  rewards: RewardsUploadStepInput
+
+  """
+  Credit allocations of credit split
+  """
+  splits: SplitsUploadStepInput
+}
+
+"""
+Input for reportPlayStopped mutation
+"""
+input ReportPlayStoppedInput {
+  """
+  End of play session
+  """
+  finish: Timestamp!
+
+  """
+  Duration of play in seconds
+  """
+  listenDuration: Int!
+
+  """
+  Amount of pauses on the same session
+  """
+  pauseCount: Int!
+
+  """
+  Start of play session
+  """
+  start: Timestamp!
+
+  """
+  Track UUID
+  """
+  trackId: UUID!
+
+  """
+  Random UUID generated by client-side
+  """
+  uuid: String!
+}
+
+"""
+Require Any Sound Holder flag
+"""
+type RequireAnySoundHolder {
+  enabled: Boolean!
+}
+
+"""
+Require Artist Sound Holder flag
+"""
+type RequireArtistSoundHolder {
+  enabled: Boolean!
+}
+
+"""
+Require Twitter Verification flag
+"""
+type RequireTwitterVerification {
+  enabled: Boolean!
+}
+
+"""
+Reward entity
+"""
+type Reward {
+  """
+  Reward description
+  """
+  description: String!
+
+  """
+  Reward identifier
+  """
+  id: ID!
+
+  """
+  Amount of backers of reward
+  """
+  numOfBackers: Int!
+
+  """
+  Price of reward
+  """
+  price: String!
+
+  """
+  Reward title
+  """
+  title: String!
+}
+
+"""
+Custom rewards input
+"""
+input RewardInput {
+  """
+  Reward description
+  """
+  description: String!
+
+  """
+  Reward name
+  """
+  title: String!
+}
+
+"""
+Release info upload step info
+"""
+type RewardUploadStepInfo {
+  """
+  Reward description
+  """
+  description: String!
+
+  """
+  Reward name
+  """
+  title: String!
+}
+
+"""
+Release info upload step info
+"""
+type RewardsUploadStepInfo {
+  """
+  Special golden egg image
+  """
+  goldenEggImage: MediaUploadStepInfo!
+
+  """
+  Custom rewards
+  """
+  rewards: [RewardUploadStepInfo!]!
+}
+
+"""
+Release rewards upload step input values
+"""
+input RewardsUploadStepInput {
+  """
+  Special golden egg image
+  """
+  goldenEggImage: UploadedMedia!
+
+  """
+  Custom rewards
+  """
+  rewards: [RewardInput!]
+}
+
+"""
+Single sale schedule information of Release Presale Configuration
+"""
+type SaleSchedule {
+  """
+  Amount of people to be allowed to be whitelist at the same time, it's usually better to set it as the same as presaleAmount
+  """
+  cohortSize: Int!
+
+  """
+  End Time of Sale Schedule
+  """
+  endTime: DateTime!
+
+  """
+  UUID of Sale Schedule entity
+  """
+  id: ID!
+
+  """
+  Is the current sale schedule presale
+  """
+  isPresale: Boolean!
+
+  """
+  Special information related to onlyTokenHolders whitelist rule if present
+  """
+  onlyTokenHoldersInfo: [PresaleMediaInfo!]!
+
+  """
+  Presale amount to be sold
+  """
+  presaleAmount: Int!
+
+  """
+  Start Time of Sale Schedule
+  """
+  startTime: DateTime!
+
+  """
+  Whitelist Rules of sale schedule
+  """
+  whitelistRulesParsed: [WhitelistRules!]!
+}
+
+"""
+Types of Sale Schedule flags
+"""
+enum SaleScheduleFlagType {
+  """
+  This saleSchedule is an open edition
+  """
+  OPEN_EDITION_ENABLED
+}
+
+"""
+Input configuration of sale schedule creation and updates
+"""
+input SaleScheduleInput {
+  """
+  Amount of people to be allowed to be whitelist at the same time, it's usually better to set it as the same as presaleAmount
+  """
+  cohortSize: Int!
+
+  """
+  End time of sale schedule
+  """
+  endTime: DateTime!
+
+  """
+  Amount to be allowed to be sold for sale schedule
+  """
+  presaleAmount: Int!
+
+  """
+  Custom presale media
+  """
+  presaleMedia: [PresaleMediaInput!]
+
+  """
+  Start time of sale schedule
+  """
+  startTime: DateTime!
+
+  """
+  Custom whitelist rules
+  """
+  whitelistRules: [WhitelistRuleInput!]
+}
+
+"""
+Input for "search" query
+"""
+input SearchInput {
+  """
+  How many entities to be fetched, maximum of 20
+  """
+  limit: PositiveInt! = 5
+
+  """
+  Text search
+  """
+  text: String!
+}
+
+"""
+Search result
+"""
+type SearchResult {
+  """
+  Artists that match the search input, including artists where any of their releases matches the given input
+  """
+  artists: [Artist!]!
+
+  """
+  Unique identifier of search result
+  """
+  id: ID!
+
+  """
+  Releases that match the search input, including releases where the artist name matches the given input
+  """
+  releases: [Release!]!
+}
+
+"""
+Season auction defaults for sales
+"""
+type SeasonAuctionDefaults {
+  """
+  Creation date of entity
+  """
+  createdAt: DateTime!
+
+  """
+  Season auction defaults entity identifier
+  """
+  id: ID!
+
+  """
+  Default season
+  """
+  season: String!
+}
+
+"""
+Default reference season-based auction options for administration
+"""
+type SeasonDefaultOptions {
+  """
+  Auction options union based on type
+  """
+  auction: [Auction!]!
+}
+
+"""
+Input for sendChatMessage mutation
+"""
+input SendChatMessageInput {
+  asAdmin: Boolean
+  channelId: UUID!
+  message: String!
+  randomUUID: UUID!
+}
+
+"""
+Input for setArtistMeta mutation
+"""
+input SetArtistMetaInput {
+  """
+  Artist identifier
+  """
+  artistId: String!
+
+  """
+  Artist meta configuration data
+  """
+  metaType: ArtistMetaInput
+}
+
+"""
+Input for setReleaseDetails mutation
+"""
+input SetReleaseDetailsInput {
+  """
+  Release details input values
+  """
+  releaseDetails: ReleaseDetailsInput!
+
+  """
+  Release identifier
+  """
+  releaseId: String!
+}
+
+"""
+Input for setReleaseMeta mutation
+"""
+input SetReleaseMetaInput {
+  """
+  Meta input values
+  """
+  metaType: ReleaseMetaInput
+
+  """
+  Release identifier
+  """
+  releaseId: String!
+}
+
+"""
+Input fields to set releases to shelf
+"""
+input SetReleasesForShelfInput {
+  """
+  List of releaseIds to set to shelf
+  """
+  releaseIds: [UUID!]!
+
+  """
+  Shelf id to set releases to
+  """
+  shelfId: UUID!
+}
+
+"""
+Input fields to set index values of user shelves
+"""
+input SetShelfOrderInput {
+  """
+  ShelfId to set index ordering
+  """
+  shelfId: UUID!
+}
+
+"""
+Shadow banned address
+"""
+type ShadowBannedAddress {
+  """
+  Date of ban creation
+  """
+  createdAt: DateTime!
+
+  """
+  Public address wallet
+  """
+  publicAddress: String!
+
+  """
+  Optional reason behind ban
+  """
+  reason: String
+}
+
+"""
+Shelf entity
+"""
+type Shelf implements Node {
+  """
+  Paginated collected releases of shelf
+  """
+  collectedReleases(
+    """
+    Pagination parameters
+    """
+    pagination: ShelfStackCursorConnectionArgs! = { after: null, first: 5, sort: { index: ASC } }
+  ): CollectedReleaseConnection!
+
+  """
+  Shelf creation date
+  """
+  createdAt: DateTime!
+
+  """
+  Shelf deletion date
+  """
+  deletedAt: DateTime
+
+  """
+  Description of shelf
+  """
+  description: String
+
+  """
+  Shelf identifier
+  """
+  id: ID!
+
+  """
+  Relative ordering of the shelves for each user
+  """
+  index: Int!
+
+  """
+  Shelf name
+  """
+  name: String!
+
+  """
+  Total play time of all releases in a shelf in seconds
+  """
+  playTimeInSeconds: Int!
+
+  """
+  Number of releases in a shelf
+  """
+  releaseCount: Int!
+
+  """
+  List of trackIds in a shelf
+  """
+  trackIds: [UUID!]!
+
+  """
+  Type of shelf
+  """
+  type: ShelfType!
+
+  """
+  Owner of shelf
+  """
+  user: User!
+}
+
+"""
+Paginated shelves connection
+"""
+type ShelfConnection implements Connection {
+  """
+  Edges of current page
+  """
+  edges: [ShelfConnectionEdge!]!
+
+  """
+  Pagination helpers information
+  """
+  pageInfo: PageInfo!
+}
+
+"""
+Shelf Node edge
+"""
+type ShelfConnectionEdge implements Edge {
+  """
+  Cursor to be used for pagination
+  """
+  cursor: String!
+
+  """
+  Shelf Entity
+  """
+  node: Shelf!
+}
+
+"""
+Cursor connection parameters for shelves
+"""
+input ShelfCursorConnectionArgs {
+  """
+  Start forwards pagination since "after" cursor
+  """
+  after: String
+
+  """
+  Start backwards pagination since "before" cursor
+  """
+  before: String
+
+  """
+  Limit the amount of nodes to be fetched, to be used with "after", with a maximum of 50 nodes.
+  """
+  first: NonNegativeInt
+
+  """
+  Limit the amount of nodes to be fetched, to be used with "before", with a maximum of 50 nodes.
+  """
+  last: NonNegativeInt
+
+  """
+  Customize sort behavior
+  """
+  sort: ShelfCursorConnectionSort! = { index: ASC }
+}
+
+"""
+Customize the sort behavior of Nfts pagination
+"""
+input ShelfCursorConnectionSort {
+  """
+  Sort by shelf index value
+  """
+  index: SortOrder
+}
+
+"""
+Shelf stack entity
+"""
+type ShelfStack implements Node {
+  """
+  Release creation date
+  """
+  createdAt: DateTime!
+
+  """
+  Release identifier
+  """
+  id: ID!
+
+  """
+  Release creation date
+  """
+  index: Int!
+
+  """
+  NFTs of Shelf stack
+  """
+  nfts: [Nft!]!
+
+  """
+  Release of the shelf stack
+  """
+  release: Release!
+}
+
+"""
+Paginated shelf stacks connection
+"""
+type ShelfStackConnection implements Connection {
+  """
+  Edges of current page
+  """
+  edges: [ShelfStackConnectionEdge!]!
+
+  """
+  Pagination helpers information
+  """
+  pageInfo: PageInfo!
+}
+
+"""
+Shelf stack node edge
+"""
+type ShelfStackConnectionEdge implements Edge {
+  """
+  Cursor to be used for pagination
+  """
+  cursor: String!
+
+  """
+  Shelf stack entity
+  """
+  node: ShelfStack!
+}
+
+"""
+Cursor connection parameters for shelf stacks
+"""
+input ShelfStackCursorConnectionArgs {
+  """
+  Start forwards pagination since "after" cursor
+  """
+  after: String
+
+  """
+  Start backwards pagination since "before" cursor
+  """
+  before: String
+
+  """
+  Limit the amount of nodes to be fetched, to be used with "after", with a maximum of 50 nodes.
+  """
+  first: NonNegativeInt
+
+  """
+  Limit the amount of nodes to be fetched, to be used with "before", with a maximum of 50 nodes.
+  """
+  last: NonNegativeInt
+
+  """
+  Customize sort behavior
+  """
+  sort: ShelfStackCursorConnectionSort! = { index: ASC }
+}
+
+"""
+Customize the sort behavior of Nfts pagination
+"""
+input ShelfStackCursorConnectionSort {
+  """
+  Sort by shelf index value
+  """
+  index: SortOrder
+}
+
+"""
+Shelf type
+"""
+enum ShelfType {
+  DEFAULT
+}
+
+"""
+Signing Address Entity
+"""
+type SigningAddress {
+  """
+  Signing Address on chain
+  """
+  signingAddress: String!
+}
+
+"""
+Social Links
+"""
+type SocialLinks {
+  """
+  Instagram Platform
+  """
+  instagramLink: String
+
+  """
+  OpenSea Platform
+  """
+  openseaLink: String
+
+  """
+  Twitter Platform
+  """
+  twitterLink: String
+}
+
+"""
+Input for customizing social links
+"""
+input SocialLinksInput {
+  """
+  Instagram Platform
+  """
+  instagramLink: String
+
+  """
+  OpenSea Platform
+  """
+  openseaLink: String
+
+  """
+  Twitter Platform
+  """
+  twitterLink: String
+}
+
+"""
+Key the release was written in
+"""
+enum SongKeyType {
+  KEY_1D
+  KEY_1M
+  KEY_2D
+  KEY_2M
+  KEY_3D
+  KEY_3M
+  KEY_4D
+  KEY_4M
+  KEY_5D
+  KEY_5M
+  KEY_6D
+  KEY_6M
+  KEY_7D
+  KEY_7M
+  KEY_8D
+  KEY_8M
+  KEY_9D
+  KEY_9M
+  KEY_10D
+  KEY_10M
+  KEY_11D
+  KEY_11M
+  KEY_12D
+  KEY_12M
+}
+
+"""
+Ascending or Descending sort
+"""
+enum SortOrder {
+  ASC
+  DESC
+}
+
+"""
+Splits upload step info
+"""
+type SplitsUploadStepInfo {
+  """
+  Splits auction configurations
+  """
+  splits: [CreditAllocationUploadStepInfo!]!
+}
+
+"""
+Splits upload step input values
+"""
+input SplitsUploadStepInput {
+  """
+  Credit allocations of credit split
+  """
+  splits: [Allocation!]!
+}
+
+"""
+Basic stats information
+"""
+type Stats {
+  """
+  Total artists in the platform
+  """
+  totalArtists: Float!
+
+  """
+  Total unique collectors in the platform
+  """
+  totalUniqueCollectors: Float!
+
+  """
+  Total users in the platform
+  """
+  totalUsers: Float!
+}
+
+"""
+Realtime Subscriptions
+"""
+type Subscription {
+  """
+  [PUBLIC] Subscribe to updates of specified chat channel messages
+  """
+  chatChannelMessages(chatChannelId: UUID!): ChatMessage!
+  count(n: Int! = 5): Int!
+
+  """
+  [AUTHENTICATED] Receive queue status updates. When release is sold out, the subscription is closed earlier.
+  """
+  queueStatus(
+    """
+    Input for queueStatus subscription
+    """
+    input: QueueStatusSubscriptionInput!
+  ): GetQueueStatus!
+
+  """
+  [PUBLIC] Subscribe to release updates
+  """
+  release(
+    """
+    Release identifier
+    """
+    id: UUID!
+  ): Release!
+
+  """
+  [PUBLIC] Subscribe to updates of release nfts
+  """
+  releaseNfts(
+    """
+    Release identifier
+    """
+    releaseId: UUID!
+  ): Nft!
+
+  """
+  [PUBLIC] Subscribe to updates of release nfts comments
+  """
+  releaseNftsComments(
+    """
+    Release identifier
+    """
+    releaseId: UUID!
+  ): NftWithComment!
+
+  """
+  [PUBLIC] Subscribe to the latest token sales updates
+  """
+  tokenSales: EventV2!
+
+  """
+  [AUTHENTICATED] Subscribe to transactions related to authenticated user
+  """
+  transaction(
+    """
+    Authentication token
+    """
+    authToken: String!
+  ): Transaction!
+}
+
+"""
+Time period to aggregate trending table queries
+"""
+enum TimePeriodAggEnum {
+  ALL_TIME
+  ONE_DAY
+  ONE_MONTH
+  SEVEN_DAY
+}
+
+"""
+The javascript `Date` as integer. Type represents date and time as number of milliseconds from start of UNIX epoch.
+"""
+scalar Timestamp
+
+"""
+Total raised on Ethereum and USD
+"""
+type TotalRaised {
+  eth: Float!
+  usd: Float!
+}
+
+"""
+Track entity
+"""
+type Track {
+  """
+  Duration in seconds
+  """
+  duration: Int!
+
+  """
+  Track identifier
+  """
+  id: ID!
+
+  """
+  Normalized peaks of song
+  """
+  normalizedPeaks: [Int!]!
+
+  """
+  Track's Release
+  """
+  release: Release!
+
+  """
+  Release Identifier
+  """
+  releaseId: ID!
+
+  """
+  Track title
+  """
+  title: String!
+
+  """
+  Track number relative to other tracks (unused)
+  """
+  trackNumber: Int!
+}
+
+"""
+Track audio
+"""
+type TrackAudio {
+  """
+  Track audio
+  """
+  audio: Media
+
+  """
+  Track duration in seconds
+  """
+  duration: Int!
+
+  """
+  Track identifier
+  """
+  id: ID!
+
+  """
+  Release entity of track
+  """
+  release: Release!
+
+  """
+  Release identifier
+  """
+  releaseId: ID!
+
+  """
+  Reveal time in UNIX timestamp of track based on authenticated user (if authenticated)
+  """
+  revealTime: Int!
+}
+
+"""
+Uploaded track information
+"""
+input TrackUpload {
+  """
+  Duration of track in seconds
+  """
+  duration: Int!
+
+  """
+  Details of uploaded track file
+  """
+  fileDetail: UploadedMedia!
+
+  """
+  Normalized peaks of track
+  """
+  normalizedPeaks: [Int!]!
+
+  """
+  Title of track
+  """
+  title: String!
+}
+
+"""
+Release info upload step info
+"""
+type TrackUploadStepInfo {
+  """
+  Duration of track in seconds
+  """
+  duration: Int!
+
+  """
+  Details of uploaded track file
+  """
+  fileDetail: MediaUploadStepInfo!
+
+  """
+  Normalized peaks of track
+  """
+  normalizedPeaks: [Int!]!
+
+  """
+  Title
+  """
+  title: String!
+}
+
+"""
+Transaction entity
+"""
+type Transaction {
+  """
+  Chain identifier used for transaction
+  """
+  chainId: Int!
+
+  """
+  Contract method of transaction
+  """
+  contractMethod: ContractMethod!
+
+  """
+  Transaction hash on chain
+  """
+  hash: String!
+
+  """
+  Transaction identifier
+  """
+  id: ID!
+
+  """
+  Release identifier
+  """
+  releaseId: String
+
+  """
+  Transaction status, "pending", "failed" or "confirmed")
+  """
+  status: String!
+}
+
+"""
+Trending Artist Info
+"""
+type TrendingArtistInfo {
+  """
+  Artist entity
+  """
+  artist: Artist
+
+  """
+  Artist identifier
+  """
+  artistId: ID!
+
+  """
+  Amount of NFTs sold
+  """
+  nftsSold: Int!
+
+  """
+  Primary sales of artist in Wei
+  """
+  primarySales: String!
+
+  """
+  Primary sales of artist in USD
+  """
+  primarySalesUsd: Float!
+
+  """
+  Secondary sales of artist in Wei
+  """
+  secondarySales: String!
+
+  """
+  Secondary sales of artist in USD
+  """
+  secondarySalesUsd: Float!
+
+  """
+  Sum of primary and secondary sales in Wei
+  """
+  totalSales: String!
+
+  """
+  Sum of primary and secondary sales in USD
+  """
+  totalSalesUsd: Float!
+
+  """
+  Amount of unique collectors
+  """
+  uniqueCollectors: Int!
+}
+
+"""
+Type of sort parameter used for trending artists
+"""
+enum TrendingArtistsSortEnum {
+  NFTS_SOLD
+  PRIMARY_SALES
+  SECONDARY_SALES
+  TOTAL_SALES
+  UNIQUE_COLLECTORS
+}
+
+"""
+Trending Collector information
+"""
+type TrendingCollectorInfo {
+  """
+  Amount of unique creators supported
+  """
+  creatorsSupported: Int!
+
+  """
+  Amount of NFTs bought
+  """
+  nftsBought: Int!
+
+  """
+  Total spent in Wei
+  """
+  totalSpent: String!
+
+  """
+  Total spent in USD
+  """
+  totalSpentUsd: Float!
+
+  """
+  Collector user entity
+  """
+  user: User
+
+  """
+  User public address of the collector
+  """
+  userAddress: String!
+}
+
+"""
+Type of sort paratemer used for trending collectors
+"""
+enum TrendingCollectorsSortEnum {
+  CREATORS_SUPPORTED
+  NFTS_BOUGHT
+  TOTAL_SPENT
+}
+
+"""
+User relation type
+"""
+enum TypeOfRelation {
+  FOLLOWING
+}
+
+"""
+A field whose value conforms to the standard URL format as specified in RFC3986: https://www.ietf.org/rfc/rfc3986.txt.
+"""
+scalar URL
+
+"""
+UUID v4
+"""
+scalar UUID
+
+"""
+Input fields to unfollow user
+"""
+input UnfollowUserInput {
+  """
+  User id to unfollow
+  """
+  user: UUID!
+}
+
+"""
+Input for updateKeyClient
+"""
+input UpdateKeyClient {
+  """
+  Identifier of existing Key Client
+  """
+  id: UUID!
+
+  """
+  Change the name of the specified Key Client
+  """
+  name: NonEmptyString
+
+  """
+  Change the status of the specified Key Client
+  """
+  status: KeyClientStatus
+}
+
+"""
+Input for updateRelease mutation
+"""
+input UpdateReleaseInput {
+  """
+  Behind the music text
+  """
+  behindTheMusic: String!
+
+  """
+  Cover image
+  """
+  coverImage: UploadedMedia!
+
+  """
+  Release description
+  """
+  description: String
+
+  """
+  Release genre
+  """
+  genre: String!
+
+  """
+  Special golden egg image
+  """
+  goldenEggImage: UploadedMedia
+
+  """
+  Release identifier
+  """
+  id: UUID!
+
+  """
+  Custom rewards
+  """
+  rewards: [RewardInput!]
+
+  """
+  Title of release
+  """
+  title: String!
+
+  """
+  Uploaded tracks
+  """
+  tracks: [TrackUpload!]!
+
+  """
+  Release type
+  """
+  type: ReleaseType!
+}
+
+"""
+Input for updateSalesSchedule mutation
+"""
+input UpdateSaleScheduleInput {
+  """
+  Sale Schedule Flags to be set
+  """
+  flags: [SaleScheduleFlagType!]
+
+  """
+  End time to be set
+  """
+  newEndTime: DateTime
+
+  """
+  Presale amount to be set
+  """
+  newPresaleAmount: Int
+
+  """
+  Start time to be set
+  """
+  newStartTime: DateTime
+
+  """
+  Presale Media configuration
+  """
+  presaleMedia: [PresaleMediaInput!]
+
+  """
+  Sale Schedule identifier
+  """
+  saleScheduleId: UUID!
+
+  """
+  Whitelist Rules for Sale Schedule
+  """
+  whitelistRules: [WhitelistRuleInput!]
+}
+
+"""
+Input for signedUploadParams mutation
+"""
+input UploadRequest {
+  """
+  File name of media to be uploaded
+  """
+  fileName: String!
+
+  """
+  Media type to be uploaded
+  """
+  mediaType: MediaType!
+}
+
+"""
+Upload step entity
+"""
+type UploadStep {
+  """
+  Upload step creation date
+  """
+  createdAt: DateTime!
+
+  """
+  Upload step identifier
+  """
+  id: ID!
+
+  """
+  Is release step already completed
+  """
+  isComplete: Boolean!
+
+  """
+  Upload step name
+  """
+  name: String!
+
+  """
+  Corresponding release of upload step
+  """
+  release: Release!
+
+  """
+  Upload step number
+  """
+  step: Int!
+
+  """
+  Step info
+  """
+  stepInfo: UploadStepInfo
+}
+
+"""
+Union of different upload step infos
+"""
+union UploadStepInfo =
+    AuctionConfigurationUploadStepInfo
+  | MetadataUploadStepInfo
+  | ReleaseInfoUploadStepInfo
+  | RewardsUploadStepInfo
+  | SplitsUploadStepInfo
+
+"""
+Media to be uploaded
+"""
+input UploadedMedia {
+  """
+  Media type to be uploaded
+  """
+  mediaType: MediaType!
+
+  """
+  Upload key received from Query.signedUploadParams
+  """
+  uploadKey: String!
+}
+
+"""
+Input for upsertUploadStep mutation
+"""
+input UpsertReleaseUploadStepInput {
+  """
+  Upload step info input
+  """
+  info: ReleaseUploadStepInput!
+
+  """
+  Release identifier
+  """
+  releaseId: String!
+
+  """
+  Step number
+  """
+  step: Int!
+}
+
+"""
+Input fields to upsert shelf
+"""
+input UpsertShelfInput {
+  """
+  Upsert shelf description
+  """
+  description: String
+
+  """
+  Shelf id to update
+  """
+  id: UUID
+
+  """
+  Upsert shelf name
+  """
+  name: String
+
+  """
+  Upsert shelf type
+  """
+  type: ShelfType
+}
+
+"""
+User entity
+"""
+type User implements Node {
+  """
+  Optional artist entity for users with artist profile
+  """
+  artist: Artist
+
+  """
+  From how many unique artists the users holds nfts
+  """
+  artistsBacked: Float!
+
+  """
+  The user's aggregated available balance on fully-owned releases + their SplitMain balance
+  """
+  availableToWithdraw: String!
+
+  """
+  User avatar
+  """
+  avatar: Media
+
+  """
+  Banner image for user profile
+  """
+  bannerImage: Media
+
+  """
+  Paginated collected releases of user
+  """
+  collectedReleases(
+    """
+    Pagination parameters
+    """
+    pagination: CursorConnectionArgs! = { first: 10, sort: DESC }
+  ): CollectedReleaseConnection!
+
+  """
+  Rank of user for number of bought nfts
+  """
+  collectorPosition: Int
+
+  """
+  User entity creation
+  """
+  createdAt: DateTime!
+
+  """
+  Credit allocations associated with user
+  """
+  creditAllocations: [CreditAllocation!]!
+
+  """
+  User custom description
+  """
+  description: String
+
+  """
+  Custom display name
+  """
+  displayName: String
+
+  """
+  Optional user email
+  """
+  email: String
+
+  """
+  User's ethereum name service domain
+  """
+  ens: String
+
+  """
+  List of releases in featured sounds
+  """
+  featuredSounds: [CollectedRelease!]!
+
+  """
+  How many followers a user has
+  """
+  followerCount: Int!
+
+  """
+  Paginated followers of user
+  """
+  followers(
+    """
+    Pagination parameters
+    """
+    pagination: CursorConnectionArgs! = { first: 10, sort: DESC }
+  ): UserRelationConnection!
+
+  """
+  Paginated following of user
+  """
+  following(
+    """
+    Pagination parameters
+    """
+    pagination: CursorConnectionArgs! = { first: 10, sort: DESC }
+  ): UserRelationConnection!
+
+  """
+  How many users a user is following
+  """
+  followingCount: Int!
+
+  """
+  Does the user have the artist role to be able to have an artist profile
+  """
+  hasArtistRole: Boolean!
+
+  """
+  Returns whether user has at least one shelf with at least one release
+  """
+  hasShelfWithItems: Boolean!
+
+  """
+  User UUID
+  """
+  id: ID!
+
+  """
+  User instagram handle
+  """
+  instagramHandle: String
+
+  """
+  How many nfts a user owns
+  """
+  nftsOwned: Int!
+
+  """
+  Paginated NFTs owned by user
+  """
+  nftsPaginated(
+    """
+    Filter the NFTs to be requested
+    """
+    filter: UserNftsConnectionFilters
+
+    """
+    Pagination parameters
+    """
+    pagination: NftCursorConnectionArgs! = { after: null, first: 30, sort: { secondarySaleDate: DESC } }
+  ): NftConnection!
+
+  """
+  Nonce for authentication purposes
+  """
+  nonce: Int!
+
+  """
+  Wallet public address
+  """
+  publicAddress: String!
+
+  """
+  Possible roles for user
+  """
+  roles: UserRoles!
+
+  """
+  Paginated shelves of user
+  """
+  shelves(
+    """
+    Pagination parameters
+    """
+    pagination: ShelfCursorConnectionArgs! = { after: null, first: 5, sort: { index: ASC } }
+  ): ShelfConnection!
+
+  """
+  Should the user show the splits feature
+  """
+  showSplitsFeature: Boolean!
+
+  """
+  The user's aggregated balance on the 0xSplits SplitMain contract
+  """
+  splitBalance: String!
+
+  """
+  List of pending transactions associated with user
+  """
+  transactions: [Transaction!]!
+
+  """
+  Verifier twitter handle
+  """
+  twitterHandle: String
+
+  """
+  The total amount of Sound revenue the user has fully withdrawn
+  """
+  withdrawnAmount: String!
+}
+
+"""
+Paginated connection of Users
+"""
+type UserConnection implements Connection {
+  """
+  Edges of current page
+  """
+  edges: [UserConnectionEdge!]!
+
+  """
+  Pagination helpers information
+  """
+  pageInfo: PageInfo!
+}
+
+"""
+Edge of User Connection
+"""
+type UserConnectionEdge implements Edge {
+  """
+  Cursor to be used for pagination
+  """
+  cursor: String!
+
+  """
+  User node
+  """
+  node: User!
+}
+
+"""
+Cursor connection paramaters
+"""
+input UserCursorConnectionArgs {
+  """
+  Start forwards pagination since "after" cursor
+  """
+  after: String
+
+  """
+  Start backwards pagination since "before" cursor
+  """
+  before: String
+
+  """
+  Limit the amount of nodes to be fetched, to be used with "after", with a maximum of 50 nodes.
+  """
+  first: NonNegativeInt
+
+  """
+  Limit the amount of nodes to be fetched, to be used with "before", with a maximum of 50 nodes.
+  """
+  last: NonNegativeInt
+
+  """
+  Sort the users ascending or descending relative to the user creation date
+  """
+  sort: SortOrder! = ASC
+}
+
+"""
+Filter the NFTs of User
+"""
+input UserNftsConnectionFilters {
+  """
+  Only include Nfts that are already in a user shelf
+  """
+  isInShelf: Boolean
+
+  """
+  Only include Nfts from specified releases
+  """
+  releases: [UUID!]
+}
+
+"""
+User relation entity
+"""
+type UserRelation implements Node {
+  """
+  User relation creation date
+  """
+  createdAt: DateTime!
+
+  """
+  User relation identifier
+  """
+  id: ID!
+
+  """
+  Type of user relation
+  """
+  relation: TypeOfRelation!
+
+  """
+  UserA of relation
+  """
+  userA: User!
+
+  """
+  UserB of relation
+  """
+  userB: User!
+}
+
+"""
+Paginated user relation connection
+"""
+type UserRelationConnection implements Connection {
+  """
+  Edges of current page
+  """
+  edges: [UserRelationConnectionEdge!]!
+
+  """
+  Pagination helpers information
+  """
+  pageInfo: PageInfo!
+}
+
+"""
+User Relation Node edge
+"""
+type UserRelationConnectionEdge implements Edge {
+  """
+  Cursor to be used for pagination
+  """
+  cursor: String!
+
+  """
+  User Relation Entity
+  """
+  node: UserRelation!
+}
+
+"""
+User Relation Status
+"""
+type UserRelationStatus {
+  """
+  Is the authenticated user following the target user
+  """
+  isFollowing: Boolean!
+
+  """
+  ID of target user
+  """
+  userId: String!
+}
+
+"""
+Roles available for users
+"""
+type UserRoles {
+  """
+  Administrator of platform
+  """
+  isAdmin: Boolean!
+
+  """
+  Member of artist relations team
+  """
+  isArtistRelations: Boolean!
+}
+
+"""
+Exchanged ammounts pretty equivalents
+"""
+type ValueExchangedPrettyType {
+  """
+  Formatted Ethereum value
+  """
+  eth: String!
+}
+
+"""
+Represents NULL values
+"""
+scalar Void
+
+"""
+Whitelist position of user
+"""
+type WhitelistObj {
+  """
+  Expiry time of whitelist position
+  """
+  expiryTime: DateTime!
+
+  """
+  Mint signature associated with whitelist position
+  """
+  signatureToMint: String
+
+  """
+  Exclusive ticket number associated with whitelist position (To be re-used if whitelist position expires)
+  """
+  ticketNumber: Int!
+}
+
+"""
+Input to define whitelist rules to be set for the new sale schedule
+"""
+input WhitelistRuleInput {
+  """
+  Require to hold NFTs from a specific address with a custom threshold
+  """
+  onlyTokenHolders: OnlyTokenHoldersInput
+
+  """
+  Require to be classified as a top collector of the platform, with custom parameters
+  """
+  onlyTopCollectors: OnlyTopCollectorsInput
+
+  """
+  Require to hold any other NFT from the Sound.xyz platform
+  """
+  requireAnySoundHolder: Boolean
+
+  """
+  Require to hold any other NFT from the same artist
+  """
+  requireArtistSoundHolder: Boolean
+
+  """
+  Require Twitter verification to be whitelisted
+  """
+  requireTwitterVerification: Boolean
+}
+
+"""
+Union of different types of whitelist rules
+"""
+union WhitelistRules =
+    OnlyTokenHolders
+  | OnlyTopCollectors
+  | RequireAnySoundHolder
+  | RequireArtistSoundHolder
+  | RequireTwitterVerification
