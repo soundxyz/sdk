@@ -34,7 +34,6 @@ export function SoundClient({ signer, provider, apiKey: _apiKey }: SoundClientCo
 
   // All the minting schedules for a given edition, including past and future
   async function allMintsForEdition({ editionAddress }: { editionAddress: string }): Promise<MintInfo[]> {
-    validateAddress(editionAddress)
     _requireValidSoundEdition({ editionAddress })
 
     return _allMintInfos({ editionAddress })
@@ -48,7 +47,6 @@ export function SoundClient({ signer, provider, apiKey: _apiKey }: SoundClientCo
     editionAddress: string
     timestamp?: number
   }): Promise<MintInfo[]> {
-    validateAddress(editionAddress)
     _requireValidSoundEdition({ editionAddress })
 
     const mintInfos = await _allMintInfos({ editionAddress })
@@ -138,7 +136,6 @@ export function SoundClient({ signer, provider, apiKey: _apiKey }: SoundClientCo
     maxFeePerGas?: BigNumberish
     maxPriorityFeePerGas?: BigNumberish
   }): Promise<ContractTransaction> {
-    validateAddress(mintInfo.editionAddress)
     _requireValidSoundEdition({ editionAddress: mintInfo.editionAddress })
     if (quantity <= 0) throw new InvalidQuantityError()
 
@@ -317,6 +314,7 @@ export function SoundClient({ signer, provider, apiKey: _apiKey }: SoundClientCo
   }
 
   async function _requireValidSoundEdition({ editionAddress }: { editionAddress: string }): Promise<void> {
+    validateAddress(editionAddress)
     const isEdition = await isSoundEdition({ editionAddress })
     if (!isEdition) {
       throw new NotSoundEditionError()
