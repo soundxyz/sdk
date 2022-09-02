@@ -58,7 +58,7 @@ export interface ExecutionResult<
   TData extends Record<string, unknown> = Record<string, unknown>,
   TExtensions extends Record<string, unknown> = Record<string, unknown>,
 > {
-  errors?: ReadonlyArray<GraphQLError>
+  errors?: readonly [GraphQLError, ...Array<GraphQLError>]
   data?: TData | null
   extensions?: TExtensions
 }
