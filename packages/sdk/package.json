@@ -45,6 +45,7 @@
     "@ethersproject/contracts": "^5.7.0",
     "@ethersproject/providers": "^5.7.0",
     "@ethersproject/sha2": "^5.7.0",
+    "@ethersproject/solidity": "^5.7.0",
     "@ethersproject/units": "^5.7.0",
     "@ethersproject/wallet": "^5.7.0",
     "@nomicfoundation/hardhat-chai-matchers": "^1.0.3",
@@ -58,6 +59,7 @@
     "dotenv": "^16.0.1",
     "ethereum-waffle": "^3.2.0",
     "hardhat": "^2.10.2",
+    "keccak256": "^1.0.6",
     "merkletreejs": "^0.2.32",
     "ts-node": "^10.9.1",
     "tslib": "^2.4.0"

@@ -42,6 +42,7 @@ importers:
       '@ethersproject/contracts': ^5.7.0
       '@ethersproject/providers': ^5.7.0
       '@ethersproject/sha2': ^5.7.0
+      '@ethersproject/solidity': ^5.7.0
       '@ethersproject/units': ^5.7.0
       '@ethersproject/wallet': ^5.7.0
       '@nomicfoundation/hardhat-chai-matchers': ^1.0.3
@@ -55,6 +56,7 @@ importers:
       dotenv: ^16.0.1
       ethereum-waffle: ^3.2.0
       hardhat: ^2.10.2
+      keccak256: ^1.0.6
       merkletreejs: ^0.2.32
       ts-node: ^10.9.1
       tslib: ^2.4.0
@@ -67,6 +69,7 @@ importers:
       '@ethersproject/contracts': 5.7.0
       '@ethersproject/providers': 5.7.0
       '@ethersproject/sha2': 5.7.0
+      '@ethersproject/solidity': 5.7.0
       '@ethersproject/units': 5.7.0
       '@ethersproject/wallet': 5.7.0
       '@nomicfoundation/hardhat-chai-matchers': 1.0.3_yjbwlpkretnkiutoh65dywxigy
@@ -80,6 +83,7 @@ importers:
       dotenv: 16.0.1
       ethereum-waffle: 3.4.4
       hardhat: 2.10.2_ts-node@10.9.1
+      keccak256: 1.0.6
       merkletreejs: 0.2.32
       ts-node: 10.9.1
       tslib: 2.4.0
@@ -2983,6 +2987,14 @@ packages:
   /buffer/5.7.1:
     resolution:
       { integrity: sha512-EHcyIPBQ4BSGlvjB16k5KgAJ27CIsHY/2JBmCRReo48y9rQ3MaUzWX3KVlBa4U7MyX02HdVj0K7C3WaB3ju7FQ== }
+    dependencies:
+      base64-js: 1.5.1
+      ieee754: 1.2.1
+    dev: true
+
+  /buffer/6.0.3:
+    resolution:
+      { integrity: sha512-FTiCpNxtwiZZHEZbcbTIcZjERVICn9yq/pDFkTl95/AxzD1naBctN7YO68riM/gLSDY7sdrMby8hofADYuuqOA== }
     dependencies:
       base64-js: 1.5.1
       ieee754: 1.2.1
@@ -6997,6 +7009,15 @@ packages:
       node-addon-api: 2.0.2
       node-gyp-build: 4.5.0
       readable-stream: 3.6.0
+    dev: true
+
+  /keccak256/1.0.6:
+    resolution:
+      { integrity: sha512-8GLiM01PkdJVGUhR1e6M/AvWnSqYS0HaERI+K/QtStGDGlSTx2B1zTqZk4Zlqu5TxHJNTxWAdP9Y+WI50OApUw== }
+    dependencies:
+      bn.js: 5.2.1
+      buffer: 6.0.3
+      keccak: 3.0.2
     dev: true
 
   /keyv/3.1.0:
