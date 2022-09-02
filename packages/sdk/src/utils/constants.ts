@@ -18,4 +18,4 @@ export const minterFactoryMap = {
   [interfaceIds.IMerkleDropMinter]: MerkleDropMinter__factory,
 }
 
-export const AddressZero = '0x0000000000000000000000000000000000000000'
+export const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000'

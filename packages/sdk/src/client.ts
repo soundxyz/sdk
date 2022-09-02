@@ -7,7 +7,7 @@ import {
   SoundEditionV1__factory,
 } from '@soundxyz/sound-protocol/typechain/index'
 
-import { interfaceIds, minterFactoryMap, AddressZero } from './utils/constants'
+import { interfaceIds, minterFactoryMap, ADDRESS_ZERO } from './utils/constants'
 import { MissingSignerError, MissingSignerOrProviderError, NotSoundEditionError, InvalidQuantityError } from './errors'
 import { MinterInterfaceId, MintInfo, SignerOrProvider, SoundClientConfig } from './types'
 import { getMerkleProof as _getMerkleProof, validateAddress } from './utils/helpers'
@@ -122,7 +122,7 @@ export function SoundClient({ signer, provider, apiKey: _apiKey }: SoundClientCo
   async function mint({
     mintInfo,
     quantity,
-    affiliate = AddressZero,
+    affiliate = ADDRESS_ZERO,
     getMerkleProof = _getMerkleProof,
     gasLimit,
     maxFeePerGas,
