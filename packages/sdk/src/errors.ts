@@ -1,4 +1,4 @@
-import type { GraphQLError } from './types'
+import type { GraphQLExecutionErrors } from './types'
 
 export class MissingSignerError extends Error {
   readonly name = 'MissingSignerError'
@@ -37,7 +37,7 @@ export class SoundNotFoundError extends Error {
 
   readonly contractAddress: string
   readonly editionId: string | null
-  readonly graphqlErrors: readonly GraphQLError[] | undefined
+  readonly graphqlErrors: GraphQLExecutionErrors | undefined
 
   constructor({
     contractAddress,
@@ -46,7 +46,7 @@ export class SoundNotFoundError extends Error {
   }: {
     contractAddress: string
     editionId?: string | null
-    graphqlErrors: readonly GraphQLError[] | undefined
+    graphqlErrors: GraphQLExecutionErrors | undefined
   }) {
     super('Sound could not be found')
 
@@ -61,14 +61,14 @@ export class SoundAPILoginError extends Error {
   readonly name = 'SoundAPILoginError'
 
   readonly publicAddress: string
-  readonly graphqlErrors: readonly GraphQLError[] | undefined
+  readonly graphqlErrors: GraphQLExecutionErrors | undefined
 
   constructor({
     publicAddress,
     graphqlErrors,
   }: {
     publicAddress: string
-    graphqlErrors: readonly GraphQLError[] | undefined
+    graphqlErrors: GraphQLExecutionErrors | undefined
   }) {
     super('Error while trying to login into Sound.xyz API')
 
