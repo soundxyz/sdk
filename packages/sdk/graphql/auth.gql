@@ -1,0 +1,7 @@
+mutation GenerateAuthChallenge($publicAddress: String!) {
+  generateAuthChallenge(publicAddress: $publicAddress)
+}
+
+mutation VerifyAuthChallenge($publicAddress: String!, $signedMessage: String!) {
+  verifyAuthChallenge(publicAddress: $publicAddress, signedMessage: $signedMessage)
+}

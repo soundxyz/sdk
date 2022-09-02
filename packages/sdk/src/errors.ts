@@ -35,13 +35,33 @@ export class NotSoundEditionError extends Error {
 export class SoundNotFoundError extends Error {
   readonly name = 'SoundNotFound'
 
-  public readonly releaseId: string
-  public readonly graphqlErrors: readonly GraphQLError[] | undefined
+  readonly releaseId: string
+  readonly graphqlErrors: readonly GraphQLError[] | undefined
 
   constructor({ releaseId, graphqlErrors }: { releaseId: string; graphqlErrors: readonly GraphQLError[] | undefined }) {
     super('Sound could not be found')
 
     this.releaseId = releaseId
+    this.graphqlErrors = graphqlErrors
+  }
+}
+
+export class SoundAPILoginError extends Error {
+  readonly name = 'SoundAPILoginError'
+
+  readonly publicAddress: string
+  readonly graphqlErrors: readonly GraphQLError[] | undefined
+
+  constructor({
+    publicAddress,
+    graphqlErrors,
+  }: {
+    publicAddress: string
+    graphqlErrors: readonly GraphQLError[] | undefined
+  }) {
+    super('Error while trying to login into Sound.xyz API')
+
+    this.publicAddress = publicAddress
     this.graphqlErrors = graphqlErrors
   }
 }
