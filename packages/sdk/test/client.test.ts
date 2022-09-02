@@ -20,7 +20,7 @@ import type MerkleTree from 'merkletreejs'
 
 import { SoundClient } from '../src/client'
 import type { MintInfo } from '../src/types'
-import { interfaceIds } from '../src/utils/constants'
+import { interfaceIds, MINTER_ROLE } from '../src/utils/constants'
 import { createRangeMint, now, MerkleHelper } from './helpers'
 
 /*******************
@@ -75,9 +75,31 @@ async function deployProtocol() {
     100, // mintRandomnessTokenThreshold
     100, // mintRandomnessTimeThreshold
   ]
-  const iface = new ethers.utils.Interface(SoundEditionV1__factory.abi)
-  const editionInitData = iface.encodeFunctionData('initialize', initArgs)
-  await soundCreator.createSoundAndMints(salt, editionInitData, [], [])
+  const editionInterface = new ethers.utils.Interface(SoundEditionV1__factory.abi)
+  const editionInitData = editionInterface.encodeFunctionData('initialize', initArgs)
+  const editionAddress = await soundCreator.soundEditionAddress(salt)
+
+  const contractCalls = [
+    {
+      contractAddress: editionAddress,
+      calldata: editionInterface.encodeFunctionData('grantRoles', [fixedPriceSignatureMinter.address, MINTER_ROLE]),
+    },
+    {
+      contractAddress: editionAddress,
+      calldata: editionInterface.encodeFunctionData('grantRoles', [merkleDropMinter.address, MINTER_ROLE]),
+    },
+    {
+      contractAddress: editionAddress,
+      calldata: editionInterface.encodeFunctionData('grantRoles', [rangeEditionMinter.address, MINTER_ROLE]),
+    },
+  ]
+
+  await soundCreator.createSoundAndMints(
+    salt,
+    editionInitData,
+    contractCalls.map((d) => d.contractAddress),
+    contractCalls.map((d) => d.calldata),
+  )
 
   // Get edition address
   const filter = soundCreator.filters.SoundEditionCreated(undefined, signer1.address)
@@ -86,15 +108,8 @@ async function deployProtocol() {
   if (!roleEvents[0].args.soundEdition) {
     throw new Error('No sound edition created')
   }
-  const soundEdition = SoundEditionV1__factory.connect(roleEvents[0].args.soundEdition, signer1)
 
-  // Grant minter roles
-  const minterRole = await soundEdition.MINTER_ROLE()
-  await soundEdition.grantRoles(fixedPriceSignatureMinter.address, minterRole)
-  await soundEdition.grantRoles(merkleDropMinter.address, minterRole)
-  await soundEdition.grantRoles(rangeEditionMinter.address, minterRole)
-
-  return { soundEdition, fixedPriceSignatureMinter, merkleDropMinter, rangeEditionMinter }
+  return { editionAddress, fixedPriceSignatureMinter, merkleDropMinter, rangeEditionMinter }
 }
 
 /*******************
@@ -102,7 +117,7 @@ async function deployProtocol() {
  ******************/
 
 let client: SoundClient
-let soundEdition: SoundEditionV1
+let editionAddress: string
 let fixedPriceSignatureMinter: FixedPriceSignatureMinter
 let merkleDropMinter: MerkleDropMinter
 let rangeEditionMinter: RangeEditionMinter
@@ -118,10 +133,12 @@ beforeEach(async () => {
   client = SoundClient({ provider: ethers.provider, apiKey: '123' })
   const fixture = await loadFixture(deployProtocol)
 
-  soundEdition = fixture.soundEdition
+  editionAddress = fixture.editionAddress
   fixedPriceSignatureMinter = fixture.fixedPriceSignatureMinter
   merkleDropMinter = fixture.merkleDropMinter
   rangeEditionMinter = fixture.rangeEditionMinter
+
+  console.log({ editionAddress })
 })
 
 describe('isSoundEdition', () => {
@@ -132,13 +149,13 @@ describe('isSoundEdition', () => {
   })
 
   it('Correctly identifies SoundEdition addresses', async () => {
-    for (let i = 0; i < 10; i++) {
-      const wallet = Wallet.createRandom()
-      const isEdition = await client.isSoundEdition({ editionAddress: wallet.address })
-      expect(isEdition).to.be.false
-    }
+    // for (let i = 0; i < 10; i++) {
+    //   const wallet = Wallet.createRandom()
+    //   const isEdition = await client.isSoundEdition({ editionAddress: wallet.address })
+    //   expect(isEdition).to.be.false
+    // }
 
-    const isEdition = await client.isSoundEdition({ editionAddress: soundEdition.address })
+    const isEdition = await client.isSoundEdition({ editionAddress })
     expect(isEdition).to.be.true
   })
 })
@@ -157,11 +174,13 @@ describe('getEligibleMintQuantity: single RangeEditionMinter instance', () => {
       maxMintableUpper: 5,
       signer: artistWallet,
       minterAddress: rangeEditionMinter.address,
-      editionAddress: soundEdition.address,
+      editionAddress,
     })
 
     // shows single active mint
-    const mints = await client.activeMintsForEdition({ editionAddress: soundEdition.address })
+    const mints = await client.activeMintsForEdition({ editionAddress })
+
+    console.log({ mints })
     expect(mints.length).to.equal(1)
 
     // eligible for 2
@@ -173,7 +192,7 @@ describe('getEligibleMintQuantity: single RangeEditionMinter instance', () => {
 
     // Test balances decreases after minting
     const minter = RangeEditionMinter__factory.connect(rangeEditionMinter.address, buyer)
-    await minter.mint(soundEdition.address, mintId, 1, NULL_ADDRESS, {
+    await minter.mint(editionAddress, mintId, 1, NULL_ADDRESS, {
       value: BigNumber.from(PRICE),
     })
 
@@ -207,10 +226,10 @@ describe('getEligibleMintQuantity: single RangeEditionMinter instance', () => {
       maxMintableUpper: 101,
       signer: artistWallet,
       minterAddress: rangeEditionMinter.address,
-      editionAddress: soundEdition.address,
+      editionAddress,
     })
 
-    const mints = await client.activeMintsForEdition({ editionAddress: soundEdition.address })
+    const mints = await client.activeMintsForEdition({ editionAddress })
     expect(mints.length).to.equal(1)
 
     const eligibleQuantityBeforeStart = await client.eligibleMintQuantity({
@@ -249,12 +268,12 @@ describe('getEligibleMintQuantity: single RangeEditionMinter instance', () => {
       maxMintableUpper,
       signer: artistWallet,
       minterAddress: rangeEditionMinter.address,
-      editionAddress: soundEdition.address,
+      editionAddress,
     })
 
     for (let i = 0; i < maxMintableUpper; i++) {
       const minter = RangeEditionMinter__factory.connect(rangeEditionMinter.address, signers[i])
-      minter.mint(soundEdition.address, mintId, 1, NULL_ADDRESS, { value: BigNumber.from(PRICE) })
+      minter.mint(editionAddress, mintId, 1, NULL_ADDRESS, { value: BigNumber.from(PRICE) })
     }
 
     // Check that all users have zero eligible balance
@@ -262,7 +281,7 @@ describe('getEligibleMintQuantity: single RangeEditionMinter instance', () => {
       const randomSigner = Wallet.createRandom()
       randomSigner.connect(ethers.provider)
 
-      const mints = await client.activeMintsForEdition({ editionAddress: soundEdition.address })
+      const mints = await client.activeMintsForEdition({ editionAddress })
       expect(mints.length).to.equal(1)
 
       const eligibleQuantity = await client.eligibleMintQuantity({
@@ -290,16 +309,16 @@ describe('getEligibleMintQuantity: single RangeEditionMinter instance', () => {
       maxMintableUpper: 10,
       signer: signers[0],
       minterAddress: rangeEditionMinter.address,
-      editionAddress: soundEdition.address,
+      editionAddress,
     })
 
     // Mint lower range limit
     for (let i = 0; i < maxMintableLower; i++) {
       const minter = RangeEditionMinter__factory.connect(rangeEditionMinter.address, signers[i])
-      minter.mint(soundEdition.address, mintId, 1, NULL_ADDRESS, { value: BigNumber.from(PRICE) })
+      minter.mint(editionAddress, mintId, 1, NULL_ADDRESS, { value: BigNumber.from(PRICE) })
     }
 
-    const mints = await client.activeMintsForEdition({ editionAddress: soundEdition.address })
+    const mints = await client.activeMintsForEdition({ editionAddress })
     expect(mints.length).to.equal(1)
 
     // Check that random users still have an eligible quantity at current time
@@ -347,7 +366,7 @@ describe('getEligibleMintQuantity: single RangeEditionMinter instance', () => {
       maxMintableUpper: 100,
       signer: artistWallet,
       minterAddress: rangeEditionMinter.address,
-      editionAddress: soundEdition.address,
+      editionAddress,
     })
 
     await createRangeMint({
@@ -360,14 +379,14 @@ describe('getEligibleMintQuantity: single RangeEditionMinter instance', () => {
       maxMintableUpper: 100,
       signer: artistWallet,
       minterAddress: rangeEditionMinter.address,
-      editionAddress: soundEdition.address,
+      editionAddress,
     })
 
     // 1 active mint
-    const activeMints = await client.activeMintsForEdition({ editionAddress: soundEdition.address })
+    const activeMints = await client.activeMintsForEdition({ editionAddress })
     expect(activeMints.length).to.equal(1)
     // 2 total mints (1 in the future)
-    const allMints = await client.allMintsForEdition({ editionAddress: soundEdition.address })
+    const allMints = await client.allMintsForEdition({ editionAddress })
     expect(allMints.length).to.equal(2)
 
     const eligibleQuantity1 = await client.eligibleMintQuantity({
@@ -401,22 +420,26 @@ describe('mint', () => {
         maxMintableUpper: 5,
         signer: artistWallet,
         minterAddress: rangeEditionMinter.address,
-        editionAddress: soundEdition.address,
+        editionAddress,
       })
 
       // provide signer to the sdk
       client = SoundClient({ provider: ethers.provider, signer: buyer, apiKey: '123' })
-      mintInfos = await client.activeMintsForEdition({ editionAddress: soundEdition.address })
+      mintInfos = await client.activeMintsForEdition({ editionAddress })
       expect(mintInfos[0].interfaceId).to.eq(interfaceIds.IRangeEditionMinter)
     })
 
     it(`Successfully mints via RangeEditionMinter`, async () => {
       const quantity = 2
-      const initialBalance = await soundEdition.balanceOf(buyer.address)
+      const initialBalance = await SoundEditionV1__factory.connect(editionAddress, ethers.provider).balanceOf(
+        buyer.address,
+      )
 
       await client.mint({ mintInfo: mintInfos[0], quantity })
 
-      const finalBalance = await soundEdition.balanceOf(buyer.address)
+      const finalBalance = await SoundEditionV1__factory.connect(editionAddress, ethers.provider).balanceOf(
+        buyer.address,
+      )
       expect(finalBalance.sub(initialBalance)).to.eq(quantity)
     })
 
@@ -450,16 +473,18 @@ describe('mint', () => {
 
       const minter = MerkleDropMinter__factory.connect(merkleDropMinter.address, artistWallet)
       const startTime = now()
-      await minter.createEditionMint(soundEdition.address, merkleRoot, PRICE, startTime, startTime + ONE_HOUR, 0, 5, 1)
+      await minter.createEditionMint(editionAddress, merkleRoot, PRICE, startTime, startTime + ONE_HOUR, 0, 5, 1)
       // provide signer to the sdk
       client = SoundClient({ provider: ethers.provider, signer: buyer, apiKey: '123' })
-      mintInfos = await client.activeMintsForEdition({ editionAddress: soundEdition.address })
+      mintInfos = await client.activeMintsForEdition({ editionAddress })
       expect(mintInfos[0].interfaceId).to.eq(interfaceIds.IMerkleDropMinter)
     })
 
     it(`Successfully mints via MerkleDropMinter`, async () => {
       const quantity = 1
-      const initialBalance = await soundEdition.balanceOf(buyer.address)
+      const initialBalance = await SoundEditionV1__factory.connect(editionAddress, ethers.provider).balanceOf(
+        buyer.address,
+      )
 
       await client.mint({
         mintInfo: mintInfos[0],
@@ -467,7 +492,9 @@ describe('mint', () => {
         getMerkleProof: async (root, unhashedLeaf) => merkleHelper.getProof({ merkleTree, address: unhashedLeaf }),
       })
 
-      const finalBalance = await soundEdition.balanceOf(buyer.address)
+      const finalBalance = await SoundEditionV1__factory.connect(editionAddress, ethers.provider).balanceOf(
+        buyer.address,
+      )
       expect(finalBalance.sub(initialBalance)).to.eq(quantity)
     })
 

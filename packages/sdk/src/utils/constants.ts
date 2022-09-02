@@ -27,3 +27,5 @@ export const ApiEndpointsMap = {
 } as const
 
 export type ApiEnvironments = keyof typeof ApiEndpointsMap
+
+export const MINTER_ROLE = 2

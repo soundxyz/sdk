@@ -13,7 +13,7 @@ import {
   InvalidQuantityError,
 } from './errors'
 import type { MinterInterfaceId, MintInfo, SignerOrProvider, SoundClientConfig } from './types'
-import { interfaceIds, minterFactoryMap, ADDRESS_ZERO } from './utils/constants'
+import { interfaceIds, minterFactoryMap, ADDRESS_ZERO, MINTER_ROLE } from './utils/constants'
 import { validateAddress, getMerkleProof as _getMerkleProof } from './utils/helpers'
 
 import type { Signer } from '@ethersproject/abstract-signer'
@@ -223,8 +223,9 @@ export function SoundClient({ signer, provider, apiKey }: SoundClientConfig) {
         }
       }),
     )
-
-    return minters.filter((x): x is string => x !== null)
+    // This list may contain duplicates if MINTER_ROLE was granted multiple times
+    const allMinters = minters.filter((minter) => minter !== null) as string[]
+    return [...new Set(allMinters)]
   }
 
   // Minting information from a minting contract for a given edition
