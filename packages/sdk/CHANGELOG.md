@@ -1,5 +1,11 @@
 # @soundxyz/sdk
 
+## 0.0.3
+
+### Patch Changes
+
+- [`1d218b9`](https://github.com/soundxyz/sdk/commit/1d218b951fbebcb2f0d4974463082d4ed9368e01) Thanks [@vigneshka](https://github.com/vigneshka)! - Adding mint function to sdk
+
 ## 0.0.2
 
 ### Patch Changes
