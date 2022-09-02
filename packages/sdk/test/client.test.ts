@@ -21,7 +21,7 @@ import type MerkleTree from 'merkletreejs'
 import { SoundClient } from '../src/client'
 import type { MintInfo } from '../src/types'
 import { interfaceIds, MINTER_ROLE } from '../src/utils/constants'
-import { createRangeMint, now, MerkleHelper } from './helpers'
+import { now, MerkleHelper } from './helpers'
 
 const UINT32_MAX = 4294967295
 const NULL_ADDRESS = '0x0000000000000000000000000000000000000000'
