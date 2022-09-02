@@ -60,11 +60,13 @@ export type MintInfo =
       maxMintable: number
     })
 
+export type GraphQLExecutionErrors = readonly [GraphQLError, ...Array<GraphQLError>]
+
 export interface ExecutionResult<
   TData extends Record<string, unknown> = Record<string, unknown>,
   TExtensions extends Record<string, unknown> = Record<string, unknown>,
 > {
-  errors?: readonly [GraphQLError, ...Array<GraphQLError>]
+  errors?: GraphQLExecutionErrors
   data?: TData | null
   extensions?: TExtensions
 }

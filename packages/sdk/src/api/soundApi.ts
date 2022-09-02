@@ -94,11 +94,12 @@ export function SoundAPI({
 
       return response.errors ? { errors: response.errors } : null
     },
-    releaseInfo({ id: releaseId }: { id: string }) {
+    releaseInfo({ contractAddress, editionId = null }: ReleaseInfoQueryVariables) {
       return graphqlRequest<ReleaseInfoQuery, ReleaseInfoQueryVariables>({
         query: ReleaseInfo,
         variables: {
-          releaseId,
+          contractAddress,
+          editionId,
         },
       })
     },
