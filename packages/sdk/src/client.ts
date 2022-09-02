@@ -22,9 +22,10 @@ import type { ContractTransaction } from '@ethersproject/contracts'
 import { SoundAPI } from './api/soundApi'
 import { LazyPromise } from './utils/promise'
 
-export function SoundClient({ signer, provider, apiKey }: SoundClientConfig) {
+export function SoundClient({ signer, provider, apiKey, environment = 'production' }: SoundClientConfig) {
   const soundApi = SoundAPI({
     apiKey,
+    environment,
   })
 
   // If the contract address is a SoundEdition contract
