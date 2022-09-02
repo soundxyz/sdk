@@ -57,19 +57,27 @@ async function deployProtocol() {
   const RangeEditionMinter = new RangeEditionMinter__factory()
   const rangeEditionMinter = await RangeEditionMinter.connect(signer1).deploy(feeRegistry.address)
 
-  // Deploy edition proxy
-  await soundCreator.createSound(
-    'SDK Test',
-    'SDK',
-    NULL_ADDRESS, // golden egg module
-    'baseURI',
-    'contractURI',
-    NON_NULL_ADDRESS, // fundingRecipient
-    0, // royaltyBPS
+  const abiCoder = ethers.utils.defaultAbiCoder
+
+  // Create salt used for precalculating edition addresses
+  const randomInt = Math.floor(Math.random() * 1000000)
+  const salt = ethers.utils.hexZeroPad(ethers.utils.hexlify(randomInt), 32)
+
+  const initArgs = [
+    'Song Name',
+    'SYMBOL',
+    NULL_ADDRESS,
+    'https://baseURI.com',
+    'https://contractURI.com',
+    NON_NULL_ADDRESS,
+    0, //royaltyBPS,
     UINT32_MAX, // editionMaxMintable
     100, // mintRandomnessTokenThreshold
     100, // mintRandomnessTimeThreshold
-  )
+  ]
+  const iface = new ethers.utils.Interface(SoundEditionV1__factory.abi)
+  const editionInitData = iface.encodeFunctionData('initialize', initArgs)
+  await soundCreator.createSoundAndMints(salt, editionInitData, [], [])
 
   // Get edition address
   const filter = soundCreator.filters.SoundEditionCreated(undefined, signer1.address)
