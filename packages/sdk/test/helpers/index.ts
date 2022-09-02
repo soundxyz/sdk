@@ -1,6 +1,7 @@
 import type { Signer } from '@ethersproject/abstract-signer'
 import { BigNumber } from '@ethersproject/bignumber'
 import { RangeEditionMinter__factory } from '@soundxyz/sound-protocol/typechain/index'
+import { MerkleHelper } from './merkle'
 
 const PRICE = 420420420
 
@@ -53,3 +54,5 @@ export async function createRangeMint({
   }
   return { mintId }
 }
+
+export { MerkleHelper }

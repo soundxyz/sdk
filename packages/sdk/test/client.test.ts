@@ -16,9 +16,12 @@ import {
 } from '@soundxyz/sound-protocol/typechain/index'
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
+import type MerkleTree from 'merkletreejs'
 
 import { SoundClient } from '../src/client'
-import { createRangeMint, now } from './helpers'
+import type { MintInfo } from '../src/types'
+import { interfaceIds } from '../src/utils/constants'
+import { createRangeMint, now, MerkleHelper } from './helpers'
 
 /*******************
         SETUP
@@ -372,5 +375,104 @@ describe('getEligibleMintQuantity: single RangeEditionMinter instance', () => {
 
     expect(eligibleQuantity1).to.equal(mint1MaxMintablePerAccount)
     expect(eligibleQuantity2).to.equal(mint2MaxMintablePerAccount)
+  })
+})
+
+describe('mint', () => {
+  describe('RangeEditionMinter', () => {
+    let mintInfos: MintInfo[] = []
+    beforeEach(async () => {
+      const startTime = now()
+      await createRangeMint({
+        startTime,
+        closingTime: startTime + ONE_HOUR,
+        endTime: startTime + ONE_HOUR * 2,
+        affiliateFeeBPS: 0,
+        maxMintablePerAccount: 2,
+        maxMintableLower: 4,
+        maxMintableUpper: 5,
+        signer: artistWallet,
+        minterAddress: rangeEditionMinter.address,
+        editionAddress: soundEdition.address,
+      })
+
+      // provide signer to the sdk
+      client = SoundClient({ provider: ethers.provider, signer: buyer, apiKey: '123' })
+      mintInfos = await client.activeMintsForEdition({ editionAddress: soundEdition.address })
+      expect(mintInfos[0].interfaceId).to.eq(interfaceIds.IRangeEditionMinter)
+    })
+
+    it(`Successfully mints via RangeEditionMinter`, async () => {
+      const quantity = 2
+      const initialBalance = await soundEdition.balanceOf(buyer.address)
+
+      await client.mint({ mintInfo: mintInfos[0], quantity })
+
+      const finalBalance = await soundEdition.balanceOf(buyer.address)
+      expect(finalBalance.sub(initialBalance)).to.eq(quantity)
+    })
+
+    it(`Should throw error if invalid quantity requested`, async () => {
+      const quantity = 0
+      await client.mint({ mintInfo: mintInfos[0], quantity }).catch((error) => {
+        expect(error.message).to.equal('Must provide valid quantity')
+      })
+    })
+
+    it(`Should throw error if more than EligibleMintQuantity requested`, async () => {
+      const quantity = 5
+      const eligibleMintQuantity = await client.eligibleMintQuantity({
+        mintInfo: mintInfos[0],
+        userAddress: buyer.address,
+      })
+      await client.mint({ mintInfo: mintInfos[0], quantity }).catch((error) => {
+        expect(error.message).to.equal(`Not eligible to mint ${quantity}. Eligible quantity: ${eligibleMintQuantity}`)
+      })
+    })
+  })
+
+  describe('MerkleDropMinter', () => {
+    const merkleHelper = MerkleHelper()
+    let merkleTree: MerkleTree
+    let mintInfos: MintInfo[] = []
+
+    beforeEach(async () => {
+      merkleTree = merkleHelper.getMerkleTree()
+      const merkleRoot = merkleHelper.getMerkleRoot(merkleTree)
+
+      const minter = MerkleDropMinter__factory.connect(merkleDropMinter.address, artistWallet)
+      const startTime = now()
+      await minter.createEditionMint(soundEdition.address, merkleRoot, PRICE, startTime, startTime + ONE_HOUR, 0, 5, 1)
+      // provide signer to the sdk
+      client = SoundClient({ provider: ethers.provider, signer: buyer, apiKey: '123' })
+      mintInfos = await client.activeMintsForEdition({ editionAddress: soundEdition.address })
+      expect(mintInfos[0].interfaceId).to.eq(interfaceIds.IMerkleDropMinter)
+    })
+
+    it(`Successfully mints via MerkleDropMinter`, async () => {
+      const quantity = 1
+      const initialBalance = await soundEdition.balanceOf(buyer.address)
+
+      await client.mint({
+        mintInfo: mintInfos[0],
+        quantity,
+        getMerkleProof: async (root, unhashedLeaf) => merkleHelper.getProof({ merkleTree, address: unhashedLeaf }),
+      })
+
+      const finalBalance = await soundEdition.balanceOf(buyer.address)
+      expect(finalBalance.sub(initialBalance)).to.eq(quantity)
+    })
+
+    it('Should throw error if merkle proof is null', async () => {
+      await client
+        .mint({
+          mintInfo: mintInfos[0],
+          quantity: 1,
+          getMerkleProof: async (root, unhashedLeaf) => null,
+        })
+        .catch((error) => {
+          expect(error.message).to.equal('Unable to fetch merkle proof')
+        })
+    })
   })
 })

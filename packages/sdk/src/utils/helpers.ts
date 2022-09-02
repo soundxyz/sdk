@@ -7,3 +7,8 @@ export function validateAddress(contractAddress: string) {
     throw new InvalidAddressError(`Invalid address: ${contractAddress}`)
   }
 }
+
+export async function getMerkleProof(root: string, userAddress: string): Promise<string[] | null> {
+  // TODO: get merkle proof
+  return ['']
+}

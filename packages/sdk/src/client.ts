@@ -5,12 +5,20 @@ import {
   SoundEditionV1__factory,
 } from '@soundxyz/sound-protocol/typechain/index'
 
-import { MissingSignerError, MissingSignerOrProviderError, NotSoundEditionError, SoundNotFoundError } from './errors'
+import {
+  MissingSignerError,
+  MissingSignerOrProviderError,
+  NotSoundEditionError,
+  SoundNotFoundError,
+  InvalidQuantityError,
+} from './errors'
 import type { MinterInterfaceId, MintInfo, SignerOrProvider, SoundClientConfig } from './types'
-import { interfaceIds, minterFactoryMap } from './utils/constants'
-import { validateAddress } from './utils/helpers'
+import { interfaceIds, minterFactoryMap, ADDRESS_ZERO } from './utils/constants'
+import { validateAddress, getMerkleProof as _getMerkleProof } from './utils/helpers'
 
 import type { Signer } from '@ethersproject/abstract-signer'
+import type { BigNumberish } from '@ethersproject/bignumber'
+import type { ContractTransaction } from '@ethersproject/contracts'
 import { SoundAPI } from './api/soundApi'
 import { LazyPromise } from './utils/promise'
 
@@ -36,7 +44,6 @@ export function SoundClient({ signer, provider, apiKey }: SoundClientConfig) {
 
   // All the minting schedules for a given edition, including past and future
   async function allMintsForEdition({ editionAddress }: { editionAddress: string }): Promise<MintInfo[]> {
-    validateAddress(editionAddress)
     _requireValidSoundEdition({ editionAddress })
 
     return _allMintInfos({ editionAddress })
@@ -50,7 +57,6 @@ export function SoundClient({ signer, provider, apiKey }: SoundClientConfig) {
     editionAddress: string
     timestamp?: number
   }): Promise<MintInfo[]> {
-    validateAddress(editionAddress)
     _requireValidSoundEdition({ editionAddress })
 
     const mintInfos = await _allMintInfos({ editionAddress })
@@ -116,6 +122,73 @@ export function SoundClient({ signer, provider, apiKey }: SoundClientConfig) {
 
         const userMintedBalance = userBalanceBigNum.toNumber()
         return mintInfo.maxMintablePerAccount - userMintedBalance
+      }
+
+      default:
+        throw new Error('Unimplemented')
+    }
+  }
+
+  async function mint({
+    mintInfo,
+    quantity,
+    affiliate = ADDRESS_ZERO,
+    getMerkleProof = _getMerkleProof,
+    gasLimit,
+    maxFeePerGas,
+    maxPriorityFeePerGas,
+  }: {
+    mintInfo: MintInfo
+    quantity: number
+    affiliate?: string
+    getMerkleProof?: (root: string, unhashedLeaf: string) => Promise<string[] | null>
+    gasLimit?: BigNumberish
+    maxFeePerGas?: BigNumberish
+    maxPriorityFeePerGas?: BigNumberish
+  }): Promise<ContractTransaction> {
+    _requireValidSoundEdition({ editionAddress: mintInfo.editionAddress })
+    if (quantity <= 0) throw new InvalidQuantityError()
+
+    const signer = _requireSigner()
+    const userAddress = await signer.getAddress()
+
+    const eligibleMintQty = await eligibleMintQuantity({ mintInfo, userAddress })
+    if (eligibleMintQty < quantity)
+      throw new Error(`Not eligible to mint ${quantity}. Eligible quantity: ${eligibleMintQty}`)
+
+    const txnOverrides = {
+      value: mintInfo.price.mul(quantity),
+      gasLimit,
+      maxFeePerGas,
+      maxPriorityFeePerGas,
+    }
+
+    switch (mintInfo.interfaceId) {
+      case interfaceIds.IRangeEditionMinter: {
+        return await RangeEditionMinter__factory.connect(mintInfo.minterAddress, signer).mint(
+          mintInfo.editionAddress,
+          mintInfo.mintId,
+          quantity,
+          affiliate,
+          txnOverrides,
+        )
+      }
+
+      case interfaceIds.IMerkleDropMinter: {
+        const merkleDropMinter = MerkleDropMinter__factory.connect(mintInfo.minterAddress, signer)
+        const { merkleRootHash } = await merkleDropMinter.mintInfo(mintInfo.editionAddress, mintInfo.mintId)
+
+        const proof = await getMerkleProof(merkleRootHash, userAddress)
+        if (!proof) throw new Error('Unable to fetch merkle proof')
+
+        return await merkleDropMinter.mint(
+          mintInfo.editionAddress,
+          mintInfo.mintId,
+          quantity,
+          proof,
+          affiliate,
+          txnOverrides,
+        )
       }
 
       default:
@@ -241,6 +314,7 @@ export function SoundClient({ signer, provider, apiKey }: SoundClientConfig) {
   }
 
   async function _requireValidSoundEdition({ editionAddress }: { editionAddress: string }): Promise<void> {
+    validateAddress(editionAddress)
     const isEdition = await isSoundEdition({ editionAddress })
     if (!isEdition) {
       throw new NotSoundEditionError()
@@ -264,6 +338,7 @@ export function SoundClient({ signer, provider, apiKey }: SoundClientConfig) {
     allMintsForEdition,
     activeMintsForEdition,
     eligibleMintQuantity,
+    mint,
     soundInfo,
   }
 }
