@@ -1,5 +1,5 @@
 ---
-'@soundxyz/sdk': minor
+'@soundxyz/sdk': patch
 ---
 
 Adds network chainId validation
