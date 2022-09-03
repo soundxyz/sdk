@@ -319,12 +319,12 @@ export function SoundClient({ signer, provider, apiKey, environment = 'productio
 
   async function _requireSignerOrProvider(): Promise<{ signerOrProvider: SignerOrProvider; chainId: ChainId }> {
     if (signer) {
-      const chainId = await signer?.getChainId()
+      const chainId = await signer.getChainId()
       if (chainId in supportedNetworks) throw new UnsupportedNetworkError({ chainId })
       return { signerOrProvider: signer, chainId: chainId as ChainId }
     }
     if (provider) {
-      const chainId = await provider?.getNetwork().then((network) => network.chainId)
+      const chainId = await provider.getNetwork().then((network) => network.chainId)
       if (chainId in supportedNetworks) throw new UnsupportedNetworkError({ chainId })
       return { signerOrProvider: provider, chainId: chainId as ChainId }
     }

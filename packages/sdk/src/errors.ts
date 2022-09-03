@@ -21,7 +21,7 @@ export class UnsupportedNetworkError extends Error {
 
   readonly chainId: number
   constructor({ chainId }: { chainId: number }) {
-    super('Unsupported network chainId')
+    super('Unsupported network chain ID')
 
     this.chainId = chainId
   }

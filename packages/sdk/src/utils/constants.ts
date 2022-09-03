@@ -37,9 +37,4 @@ export const supportedChainIds = {
   HARDHAT_ALT: 31337, // hardhat
 } as const
 
-export const soundCreatorAddresses = {
-  [supportedChainIds.MAINNET]: 'TODO',
-  [supportedChainIds.GOERLI]: 'TODO',
-}
-
 export const supportedNetworks = Object.values(supportedChainIds)
