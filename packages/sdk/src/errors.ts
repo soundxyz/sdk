@@ -16,6 +16,17 @@ export class MissingSignerOrProviderError extends Error {
   }
 }
 
+export class UnsupportedNetworkError extends Error {
+  readonly name = 'UnsupportedNetworkError'
+
+  readonly chainId: number
+  constructor({ chainId }: { chainId: number }) {
+    super('Unsupported network chain ID')
+
+    this.chainId = chainId
+  }
+}
+
 export class InvalidAddressError extends Error {
   readonly name = 'InvalidAddressError'
 

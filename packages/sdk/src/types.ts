@@ -1,16 +1,15 @@
 import type { BigNumber } from '@ethersproject/bignumber'
 import type { Signer } from '@ethersproject/abstract-signer'
 import type { Provider } from '@ethersproject/abstract-provider'
-import type { ApiEnvironments, interfaceIds } from './utils/constants'
+import type { ApiEnvironments, interfaceIds, supportedChainIds } from './utils/constants'
 
-const SUPPORTED_CHAIN_IDS = [
-  1, // mainnet
-  5, // goerli
-  1337, // hardhat
-  31337, // hardhat
-] as const
+/*********************************************************
+                PROTOCOL TYPES
+ ********************************************************/
 
-export type ChainId = typeof SUPPORTED_CHAIN_IDS[number]
+type ValueOf<T> = T[keyof T]
+
+export type ChainId = ValueOf<typeof supportedChainIds>
 
 export type SignerOrProvider = Signer | Provider
 
@@ -59,6 +58,10 @@ export type MintInfo =
       interfaceId: typeof interfaceIds.IMerkleDropMinter | typeof interfaceIds.IFixedPriceSignatureMinter
       maxMintable: number
     })
+
+/*********************************************************
+                    API TYPES
+ ********************************************************/
 
 export type GraphQLExecutionErrors = readonly [GraphQLError, ...Array<GraphQLError>]
 

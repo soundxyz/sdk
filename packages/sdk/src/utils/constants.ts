@@ -28,5 +28,13 @@ export const ApiEndpointsMap = {
 
 export type ApiEnvironments = keyof typeof ApiEndpointsMap
 
-// This is hardcoded on the contract so we always know its 2
 export const MINTER_ROLE = 2
+
+export const supportedChainIds = {
+  MAINNET: 1, // mainnet
+  GOERLI: 5, // goerli
+  HARDHAT: 1337, // hardhat
+  HARDHAT_ALT: 31337, // hardhat
+} as const
+
+export const supportedNetworks = Object.values(supportedChainIds)
