@@ -16,6 +16,14 @@ export class MissingSignerOrProviderError extends Error {
   }
 }
 
+export class UnsupportedNetworkError extends Error {
+  readonly name = 'UnsupportedNetworkError'
+
+  constructor(message?: string) {
+    super(message || 'Unsupported network')
+  }
+}
+
 export class InvalidAddressError extends Error {
   readonly name = 'InvalidAddressError'
 

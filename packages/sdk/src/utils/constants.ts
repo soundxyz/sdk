@@ -26,7 +26,20 @@ export const ApiEndpointsMap = {
   preview: 'https://preview.api.sound.xyz/graphql',
 } as const
 
-export type ApiEnvironments = keyof typeof ApiEndpointsMap
+export type ApiEnvironments = keyof typeof ApiEndpointsMap | 'development'
 
-// This is hardcoded on the contract so we always know its 2
 export const MINTER_ROLE = 2
+
+export const supportedChainIds = {
+  MAINNET: 1, // mainnet
+  GOERLI: 5, // goerli
+  HARDHAT: 1337, // hardhat
+  HARDHAT_ALT: 31337, // hardhat
+} as const
+
+export const soundCreatorAddresses = {
+  [supportedChainIds.MAINNET]: 'TODO',
+  [supportedChainIds.GOERLI]: 'TODO',
+}
+
+export const supportedNetworks = Object.values(supportedChainIds)

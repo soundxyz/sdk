@@ -11,9 +11,10 @@ import {
   MissingSignerOrProviderError,
   NotSoundEditionError,
   SoundNotFoundError,
+  UnsupportedNetworkError,
 } from './errors'
-import type { MinterInterfaceId, MintInfo, SignerOrProvider, SoundClientConfig } from './types'
-import { ADDRESS_ZERO, interfaceIds, minterFactoryMap, MINTER_ROLE } from './utils/constants'
+import type { MinterInterfaceId, MintInfo, SignerOrProvider, SoundClientConfig, ChainId } from './types'
+import { ADDRESS_ZERO, interfaceIds, minterFactoryMap, supportedNetworks } from './utils/constants'
 import { getMerkleProof as _getMerkleProof, validateAddress } from './utils/helpers'
 
 import type { Signer } from '@ethersproject/abstract-signer'
@@ -32,7 +33,7 @@ export function SoundClient({ signer, provider, apiKey, environment = 'productio
   // If the contract address is a SoundEdition contract
   async function isSoundEdition({ editionAddress }: { editionAddress: string }): Promise<boolean> {
     validateAddress(editionAddress)
-    const signerOrProvider = _requireSignerOrProvider()
+    const { signerOrProvider } = await _requireSignerOrProvider()
 
     const editionContract = SoundEditionV1__factory.connect(editionAddress, signerOrProvider)
 
@@ -103,7 +104,7 @@ export function SoundClient({ signer, provider, apiKey, environment = 'productio
       }
     }
 
-    const signerOrProvider = _requireSignerOrProvider()
+    const { signerOrProvider } = await _requireSignerOrProvider()
     // look up max mintable per account and user's already minted tally
     switch (mintInfo.interfaceId) {
       case interfaceIds.IRangeEditionMinter: {
@@ -151,8 +152,7 @@ export function SoundClient({ signer, provider, apiKey, environment = 'productio
     _requireValidSoundEdition({ editionAddress: mintInfo.editionAddress })
     if (quantity <= 0) throw new InvalidQuantityError()
 
-    const signer = _requireSigner()
-    const userAddress = await signer.getAddress()
+    const { signer, userAddress } = await _requireSigner()
 
     const eligibleMintQty = await eligibleMintQuantity({ mintInfo, userAddress })
     if (eligibleMintQty < quantity)
@@ -200,7 +200,7 @@ export function SoundClient({ signer, provider, apiKey, environment = 'productio
 
   // Addresses with MINTER_ROLE for a given edition
   async function _registeredMinters({ editionAddress }: { editionAddress: string }): Promise<string[]> {
-    const signerOrProvider = _requireSignerOrProvider()
+    const { signerOrProvider } = await _requireSignerOrProvider()
 
     const editionContract = SoundEditionV1__factory.connect(editionAddress, signerOrProvider)
     // Get the addresses with MINTER_ROLE
@@ -238,7 +238,7 @@ export function SoundClient({ signer, provider, apiKey, environment = 'productio
     editionAddress: string
     minterAddress: string
   }): Promise<MintInfo[]> {
-    const signerOrProvider = _requireSignerOrProvider()
+    const { signerOrProvider } = await _requireSignerOrProvider()
 
     // Query MintConfigCreated event
     const minterContract = IMinterModule__factory.connect(minterAddress, signerOrProvider)
@@ -303,15 +303,31 @@ export function SoundClient({ signer, provider, apiKey, environment = 'productio
     return mintInfos.flat().sort((a, b) => a.startTime - b.startTime)
   }
 
-  function _requireSigner(): Signer {
-    if (signer) return signer
+  async function _requireSigner(): Promise<{ signer: Signer; chainId: ChainId; userAddress: string }> {
+    if (signer) {
+      const chainId = await signer?.getChainId()
+
+      if (chainId in supportedNetworks) throw new UnsupportedNetworkError()
+
+      const userAddress = await signer?.getAddress()
+
+      return { signer, chainId: chainId as ChainId, userAddress }
+    }
 
     throw new MissingSignerError()
   }
 
-  function _requireSignerOrProvider(): SignerOrProvider {
-    if (signer) return signer
-    if (provider) return provider
+  async function _requireSignerOrProvider(): Promise<{ signerOrProvider: SignerOrProvider; chainId: ChainId }> {
+    if (signer) {
+      const chainId = await signer?.getChainId()
+      if (chainId in supportedNetworks) throw new UnsupportedNetworkError()
+      return { signerOrProvider: signer, chainId: chainId as ChainId }
+    }
+    if (provider) {
+      const chainId = await provider?.getNetwork().then((network) => network.chainId)
+      if (chainId in supportedNetworks) throw new UnsupportedNetworkError()
+      return { signerOrProvider: provider, chainId: chainId as ChainId }
+    }
 
     throw new MissingSignerOrProviderError()
   }
