@@ -258,7 +258,7 @@ export function SoundClient({ signer, provider, apiKey, environment = 'productio
     const contractCalls: ContractCall[] = []
     for (const mintConfig of mintConfigs) {
       if (!(mintConfig.name in minterNames)) {
-        throw new UnsupportedMinterError(`"${mintConfig.name}" is not a supported minter.`)
+        throw new UnsupportedMinterError({ minterName: mintConfig.name })
       }
 
       /**
