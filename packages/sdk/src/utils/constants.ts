@@ -26,7 +26,7 @@ export const ApiEndpointsMap = {
   preview: 'https://preview.api.sound.xyz/graphql',
 } as const
 
-export type ApiEnvironments = keyof typeof ApiEndpointsMap | 'development'
+export type ApiEnvironments = keyof typeof ApiEndpointsMap
 
 export const MINTER_ROLE = 2
 
