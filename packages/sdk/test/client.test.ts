@@ -565,7 +565,7 @@ describe('mint', () => {
       await client.mint({
         mintInfo: mintInfos[0],
         quantity,
-        getMerkleProof: async (root, unhashedLeaf) => merkleHelper.getProof({ merkleTree, address: unhashedLeaf }),
+        getMerkleProof: async (_root, unhashedLeaf) => merkleHelper.getProof({ merkleTree, address: unhashedLeaf }),
       })
 
       const finalBalance = await SoundEditionV1__factory.connect(precomputedEditionAddress, ethers.provider).balanceOf(
@@ -579,7 +579,7 @@ describe('mint', () => {
         .mint({
           mintInfo: mintInfos[0],
           quantity: 1,
-          getMerkleProof: async (root, unhashedLeaf) => null,
+          getMerkleProof: async (_root, _unhashedLeaf) => null,
         })
         .catch((error) => {
           expect(error.message).to.equal('Unable to fetch merkle proof')
