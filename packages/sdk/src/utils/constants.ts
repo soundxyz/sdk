@@ -5,9 +5,9 @@ import {
 } from '@soundxyz/sound-protocol/typechain/index'
 
 export const interfaceIds = {
-  ISoundEditionV1: '0x0cce1bc1',
+  ISoundEditionV1: '0x3a8afed4',
   IMinterModule: '0x37c74bd8',
-  IFixedPriceSignatureMinter: '0x27447cf5',
+  IFixedPriceSignatureMinter: '0x110099e0',
   IMerkleDropMinter: '0x84b6980c',
   IRangeEditionMinter: '0xc73d6ffa',
 } as const
@@ -34,13 +34,15 @@ export const MINTER_ROLE = 2
 export const supportedChainIds = {
   MAINNET: 1, // mainnet
   GOERLI: 5, // goerli
-  HARDHAT: 1337, // hardhat
-  HARDHAT_ALT: 31337, // hardhat
+  LOCAL: 1337, // hardhat or anvil
+  LOCAL_ALT: 31337, // hardhat
 } as const
 
 export const soundCreatorAddresses = {
-  [supportedChainIds.MAINNET]: 'TODO',
-  [supportedChainIds.GOERLI]: 'TODO',
+  // [supportedChainIds.MAINNET]: 'TODO',
+  [supportedChainIds.GOERLI]: '0x063df381b76207fa7ef94bc7f81f68cb6708ee0e',
+  [supportedChainIds.LOCAL]: '0x0eb59c82c28d91497a5fbbc45a0f00c3bf97eead',
+  [supportedChainIds.LOCAL_ALT]: '0x0eb59c82c28d91497a5fbbc45a0f00c3bf97eead',
 }
 
 export const minterNames = {

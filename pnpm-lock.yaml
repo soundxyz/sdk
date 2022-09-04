@@ -1,10 +1,5 @@
 lockfileVersion: 5.4
 
-patchedDependencies:
-  '@graphql-codegen/visitor-plugin-common@2.12.1':
-    hash: zgfx63s4ecurjftrvxf7hfldnu
-    path: patches/@graphql-codegen__visitor-plugin-common@2.12.1.patch
-
 importers:
 
   .:
@@ -60,7 +55,7 @@ importers:
       '@nomicfoundation/hardhat-network-helpers': ^1.0.4
       '@nomiclabs/hardhat-ethers': ^2.1.1
       '@nomiclabs/hardhat-waffle': ^2.0.3
-      '@soundxyz/sound-protocol': 0.1.0-alpha-8beb046.0
+      '@soundxyz/sound-protocol': 0.0.2-alpha-42fddc8.0
       '@types/chai': ^4.3.3
       '@types/mocha': ^9.1.1
       '@types/node': 18.7.5
@@ -105,7 +100,7 @@ importers:
       '@nomicfoundation/hardhat-network-helpers': 1.0.4_hardhat@2.10.2
       '@nomiclabs/hardhat-ethers': 2.1.1_lc7o4ykyrnccnzpoyzs6m3zzsq
       '@nomiclabs/hardhat-waffle': 2.0.3_eldzggq4rzrujjvlywbx6zhlvq
-      '@soundxyz/sound-protocol': 0.1.0-alpha-8beb046.0
+      '@soundxyz/sound-protocol': 0.0.2-alpha-42fddc8.0
       '@types/chai': 4.3.3
       '@types/mocha': 9.1.1
       '@types/node': 18.7.5
@@ -125,7 +120,6 @@ importers:
       ts-node: 10.9.1_7se4izhtmlozvpvgaax5rnuwve
       tslib: 2.4.0
       typescript: 4.7.4
-    publishDirectory: dist
 
 packages:
 
@@ -1538,7 +1532,7 @@ packages:
       graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
     dependencies:
       '@graphql-codegen/plugin-helpers': 2.7.0_graphql@16.6.0
-      '@graphql-codegen/visitor-plugin-common': 2.12.1_zgfx63s4ecurjftrvxf7hfldnu_graphql@16.6.0
+      '@graphql-codegen/visitor-plugin-common': 2.12.1_graphql@16.6.0
       auto-bind: 4.0.0
       graphql: 16.6.0
       tslib: 2.4.0
@@ -1554,7 +1548,7 @@ packages:
     dependencies:
       '@graphql-codegen/plugin-helpers': 2.7.0_graphql@16.6.0
       '@graphql-codegen/typescript': 2.7.3_graphql@16.6.0
-      '@graphql-codegen/visitor-plugin-common': 2.12.1_zgfx63s4ecurjftrvxf7hfldnu_graphql@16.6.0
+      '@graphql-codegen/visitor-plugin-common': 2.12.1_graphql@16.6.0
       auto-bind: 4.0.0
       graphql: 16.6.0
       tslib: 2.4.0
@@ -1570,7 +1564,7 @@ packages:
     dependencies:
       '@graphql-codegen/plugin-helpers': 2.7.0_graphql@16.6.0
       '@graphql-codegen/schema-ast': 2.5.1_graphql@16.6.0
-      '@graphql-codegen/visitor-plugin-common': 2.12.1_zgfx63s4ecurjftrvxf7hfldnu_graphql@16.6.0
+      '@graphql-codegen/visitor-plugin-common': 2.12.1_graphql@16.6.0
       auto-bind: 4.0.0
       graphql: 16.6.0
       tslib: 2.4.0
@@ -1579,7 +1573,7 @@ packages:
       - supports-color
     dev: true
 
-  /@graphql-codegen/visitor-plugin-common/2.12.1_zgfx63s4ecurjftrvxf7hfldnu_graphql@16.6.0:
+  /@graphql-codegen/visitor-plugin-common/2.12.1_graphql@16.6.0:
     resolution: {integrity: sha512-dIUrX4+i/uazyPQqXyQ8cqykgNFe1lknjnfDWFo0gnk2W8+ruuL2JpSrj/7efzFHxbYGMQrCABDCUTVLi3DcVA==}
     peerDependencies:
       graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
@@ -1599,7 +1593,6 @@ packages:
       - encoding
       - supports-color
     dev: true
-    patched: true
 
   /@graphql-tools/apollo-engine-loader/7.3.10_graphql@16.6.0:
     resolution: {integrity: sha512-JqUqKBo/DsZA7QxaJIV3mho0j3xAcxG/InIvAn39zqfzUEt3DO4l1VEKwqqNLXgWstmhHaW6tY64EDE+txtFEg==}
@@ -2244,8 +2237,8 @@ packages:
       antlr4ts: 0.5.0-alpha.4
     dev: true
 
-  /@soundxyz/sound-protocol/0.1.0-alpha-8beb046.0:
-    resolution: {integrity: sha512-Vc/iZfdDJ9covgmHqPr0T6h9/8ZQmP6Z02rsB3A3qbNivk7jcZEhDAtKy6SXwOq6KXJTxFRQfBBhs0C7Tx++1g==}
+  /@soundxyz/sound-protocol/0.0.2-alpha-42fddc8.0:
+    resolution: {integrity: sha512-82Sk5LKyP6EsHg0y6sudOq+iOk9LJaY0e1TiDCulbDhcWoRVFpaCWbNgc5KOZLAtcxqRzFgaHEqcUHrE1Hn2Ag==}
     dependencies:
       '@ethersproject/abi': 5.7.0
       '@ethersproject/providers': 5.7.0
@@ -12171,3 +12164,8 @@ packages:
       bn.js: 4.12.0
       ethereumjs-util: 6.2.1
     dev: true
+
+patchedDependencies:
+  '@graphql-codegen/visitor-plugin-common@2.12.1':
+    hash: zgfx63s4ecurjftrvxf7hfldnu
+    path: patches/@graphql-codegen__visitor-plugin-common@2.12.1.patch

@@ -10,7 +10,6 @@ import {
   SoundCreatorV1__factory,
   SoundEditionV1__factory,
 } from '@soundxyz/sound-protocol/typechain/index'
-
 import {
   InvalidQuantityError,
   MissingSignerError,
@@ -35,8 +34,8 @@ import {
   minterFactoryMap,
   ADDRESS_ZERO,
   supportedNetworks,
-  soundCreatorAddresses,
   supportedChainIds,
+  soundCreatorAddresses,
   minterNames,
   MINTER_ROLE,
 } from './utils/constants'
@@ -223,29 +222,25 @@ export function SoundClient({ signer, provider, apiKey, environment = 'productio
   async function createSoundAndMints({
     editionConfig,
     mintConfigs,
-    soundCreatorAddress,
     salt: customSalt,
   }: {
     editionConfig: EditionConfig
     mintConfigs: MintConfig[]
-    soundCreatorAddress?: string
     salt?: string
   }) {
     const { signer, chainId, userAddress } = await _requireSigner()
 
     const randomInt = Math.floor(Math.random() * 1_000_000_000_000)
     const salt = customSalt || hexZeroPad(hexlify(randomInt), 32)
+    const soundCreatorAddress = soundCreatorAddresses[chainId]
 
-    let soundCreator: string
-    if (chainId === supportedChainIds.HARDHAT || chainId === supportedChainIds.HARDHAT_ALT) {
-      if (!soundCreatorAddress) throw new Error('soundCreatorAddress is required in development mode')
-      soundCreator = soundCreatorAddress
-    } else {
-      soundCreator = soundCreatorAddresses[chainId]
-    }
+    console.log({ userAddress, salt, soundCreatorAddress })
+
+    const code = await signer.provider?.getCode(soundCreatorAddress)
+    console.log({ code })
 
     // Precompute the edition address.
-    const editionAddress = await SoundCreatorV1__factory.connect(soundCreator, signer).soundEditionAddress(
+    const editionAddress = await SoundCreatorV1__factory.connect(soundCreatorAddress, signer).soundEditionAddress(
       userAddress,
       salt,
     )
@@ -360,7 +355,7 @@ export function SoundClient({ signer, provider, apiKey, environment = 'productio
       editionConfig.mintRandomnessTimeThreshold,
     ])
 
-    const soundCreatorContract = SoundCreatorV1__factory.connect(soundCreator, signer)
+    const soundCreatorContract = SoundCreatorV1__factory.connect(soundCreatorAddress, signer)
 
     return await soundCreatorContract.createSoundAndMints(
       salt,
