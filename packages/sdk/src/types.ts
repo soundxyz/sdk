@@ -31,7 +31,7 @@ export type SoundClientConfig = (
   soundCreatorAddress?: string
 }
 
-export type MintInfoBase = {
+export type MintScheduleBase = {
   editionAddress: string
   minterAddress: string
   mintId: number
@@ -48,14 +48,14 @@ export type MinterInterfaceId =
   | typeof interfaceIds.IFixedPriceSignatureMinter
   | typeof interfaceIds.IRangeEditionMinter
 
-export type MintInfo =
-  | (MintInfoBase & {
+export type MintSchedule =
+  | (MintScheduleBase & {
       interfaceId: typeof interfaceIds.IRangeEditionMinter
       maxMintableLower: number
       maxMintableUpper: number
       closingTime: number
     })
-  | (MintInfoBase & {
+  | (MintScheduleBase & {
       interfaceId: typeof interfaceIds.IMerkleDropMinter | typeof interfaceIds.IFixedPriceSignatureMinter
       maxMintable: number
     })
