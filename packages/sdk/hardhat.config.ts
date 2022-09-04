@@ -5,8 +5,6 @@ import * as dotenv from 'dotenv'
 
 dotenv.config()
 
-console.log({ mnemonic: process.env.MNEMONIC })
-
 const config: HardhatUserConfig = {
   solidity: {
     version: '0.8.16',

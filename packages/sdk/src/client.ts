@@ -234,10 +234,9 @@ export function SoundClient({ signer, provider, apiKey, environment = 'productio
     const salt = customSalt || hexZeroPad(hexlify(randomInt), 32)
     const soundCreatorAddress = soundCreatorAddresses[chainId]
 
-    console.log({ userAddress, salt, soundCreatorAddress })
+    // console.log({ userAddress, salt, soundCreatorAddress })
 
     const code = await signer.provider?.getCode(soundCreatorAddress)
-    console.log({ code })
 
     // Precompute the edition address.
     const editionAddress = await SoundCreatorV1__factory.connect(soundCreatorAddress, signer).soundEditionAddress(

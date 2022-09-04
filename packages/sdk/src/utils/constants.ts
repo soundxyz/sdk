@@ -41,8 +41,8 @@ export const supportedChainIds = {
 export const soundCreatorAddresses = {
   // [supportedChainIds.MAINNET]: 'TODO',
   [supportedChainIds.GOERLI]: '0x063df381b76207fa7ef94bc7f81f68cb6708ee0e',
-  [supportedChainIds.LOCAL]: '0x0eb59c82c28d91497a5fbbc45a0f00c3bf97eead',
-  [supportedChainIds.LOCAL_ALT]: '0x0eb59c82c28d91497a5fbbc45a0f00c3bf97eead',
+  [supportedChainIds.LOCAL]: '0x6990f7bAcB34883E87f0aE9f0639E1fcAcCaA675', // <-  deterministic based on order of deployment in tests
+  [supportedChainIds.LOCAL_ALT]: '0x6990f7bAcB34883E87f0aE9f0639E1fcAcCaA675', // <-  deterministic based on order of deployment in tests
 }
 
 export const minterNames = {
