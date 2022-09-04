@@ -235,8 +235,6 @@ export function SoundClient({ signer, provider, apiKey, environment = 'productio
     const salt = customSalt || hexZeroPad(hexlify(randomInt), 32)
     const soundCreatorAddress = soundCreatorAddresses[chainId]
 
-    const code = await signer.provider?.getCode(soundCreatorAddress)
-
     // Precompute the edition address.
     const editionAddress = await SoundCreatorV1__factory.connect(soundCreatorAddress, signer).soundEditionAddress(
       userAddress,
@@ -245,38 +243,25 @@ export function SoundClient({ signer, provider, apiKey, environment = 'productio
 
     const editionInterface = SoundEditionV1__factory.createInterface()
 
-    // Deduplicate mint configs by minter address, start time, and end time.
-    const uniqueMintConfigs = mintConfigs.reduce((acc, mintConfig) => {
-      const noDuplicateFound =
-        acc.find(
-          (m) =>
-            m.minterAddress === mintConfig.minterAddress &&
-            m.startTime === mintConfig.startTime &&
-            m.endTime === mintConfig.endTime,
-        ) === undefined
-
-      if (noDuplicateFound) {
-        acc.push(mintConfig)
-      }
-      return acc
-    }, [] as MintConfig[])
-
     /**
      * Encode all the bundled contract calls.
      */
     const contractCalls: ContractCall[] = []
-    for (const mintConfig of uniqueMintConfigs) {
+
+    // Grant MINTER_ROLE for each minter.
+    const mintersToGrantRole = Array.from(new Set(mintConfigs.map((m) => m.minterAddress)))
+    for (const minterAddress of mintersToGrantRole) {
+      contractCalls.push({
+        contractAddress: editionAddress,
+        calldata: editionInterface.encodeFunctionData('grantRoles', [minterAddress, MINTER_ROLE]),
+      })
+    }
+
+    // Add the createEditionMint calls.
+    for (const mintConfig of mintConfigs) {
       if (!(mintConfig.name in minterNames)) {
         throw new UnsupportedMinterError({ minterName: mintConfig.name })
       }
-
-      /**
-       * Set up the grantRoles call for each mint config.
-       */
-      contractCalls.push({
-        contractAddress: editionAddress,
-        calldata: editionInterface.encodeFunctionData('grantRoles', [mintConfig.minterAddress, MINTER_ROLE]),
-      })
 
       /**
        * Set up the createEditionMint call for each mint config.
