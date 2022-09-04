@@ -5,6 +5,9 @@ on:
       - main
   pull_request:
 
+env:
+  MNEMONIC: ${{ secrets.MNEMONIC }}
+
 jobs:
   tests:
     runs-on: ubuntu-latest
