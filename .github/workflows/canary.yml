@@ -26,9 +26,6 @@ jobs:
           node-version: 18.x
           cache: 'pnpm'
 
-      - name: Install Dependencies
-        run: pnpm install
-
       - name: Cache pnpm modules
         uses: actions/cache@v2
         env:
