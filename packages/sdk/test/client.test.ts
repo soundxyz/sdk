@@ -550,25 +550,6 @@ describe('mint', () => {
       expect(mintInfos[0].interfaceId).to.eq(interfaceIds.IMerkleDropMinter)
     })
 
-    it(`Successfully mints via MerkleDropMinter`, async () => {
-      const quantity = 1
-      const initialBalance = await SoundEditionV1__factory.connect(
-        precomputedEditionAddress,
-        ethers.provider,
-      ).balanceOf(buyer.address)
-
-      await client.mint({
-        mintInfo: mintInfos[0],
-        quantity,
-        getMerkleProof: async (root, unhashedLeaf) => merkleHelper.getProof({ merkleTree, address: unhashedLeaf }),
-      })
-
-      const finalBalance = await SoundEditionV1__factory.connect(precomputedEditionAddress, ethers.provider).balanceOf(
-        buyer.address,
-      )
-      expect(finalBalance.sub(initialBalance)).to.eq(quantity)
-    })
-
     it('Should throw error if merkle proof is null', async () => {
       await client
         .mint({
@@ -577,7 +558,7 @@ describe('mint', () => {
           getMerkleProof: async (root, unhashedLeaf) => null,
         })
         .catch((error) => {
-          expect(error.message).to.equal('Unable to fetch merkle proof')
+          expect(error.message).to.equal('Merkle proof not found')
         })
     })
   })

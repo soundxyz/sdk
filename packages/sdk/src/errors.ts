@@ -112,3 +112,9 @@ export class InvalidQuantityError extends Error {
     this.name = 'InvalidQuantityError'
   }
 }
+
+export class NotFoundError extends Error {
+  constructor(message?: string) {
+    super(message || 'Requested resource not found')
+  }
+}

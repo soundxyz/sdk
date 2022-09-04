@@ -12,6 +12,7 @@ import {
   NotSoundEditionError,
   SoundNotFoundError,
   UnsupportedNetworkError,
+  NotFoundError,
 } from './errors'
 import type { MinterInterfaceId, MintInfo, SignerOrProvider, SoundClientConfig, ChainId } from './types'
 import { ADDRESS_ZERO, interfaceIds, minterFactoryMap, supportedNetworks } from './utils/constants'
@@ -181,7 +182,7 @@ export function SoundClient({ signer, provider, apiKey, environment = 'productio
         const { merkleRootHash } = await merkleDropMinter.mintInfo(mintInfo.editionAddress, mintInfo.mintId)
 
         const proof = await getMerkleProof(merkleRootHash, userAddress)
-        if (!proof) throw new Error('Unable to fetch merkle proof')
+        if (!proof?.length) throw new NotFoundError('Merkle proof not found')
 
         return await merkleDropMinter.mint(
           mintInfo.editionAddress,
