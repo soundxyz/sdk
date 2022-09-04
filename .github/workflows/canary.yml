@@ -43,7 +43,7 @@ jobs:
         run: npm i pnpm@latest -g
 
       - name: Install Dependencies
-        run: pnpm i
+        run: pnpm install --no-frozen-lockfile
 
       - name: Release Canary
         id: canary
