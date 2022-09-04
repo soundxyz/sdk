@@ -252,11 +252,27 @@ export function SoundClient({ signer, provider, apiKey, environment = 'productio
 
     const editionInterface = SoundEditionV1__factory.createInterface()
 
+    // Deduplicate mint configs by minter address, start time, and end time.
+    const uniqueMintConfigs = mintConfigs.reduce((acc, mintConfig) => {
+      const noDuplicateFound =
+        acc.find(
+          (m) =>
+            m.minterAddress === mintConfig.minterAddress &&
+            m.startTime === mintConfig.startTime &&
+            m.endTime === mintConfig.endTime,
+        ) === undefined
+
+      if (noDuplicateFound) {
+        acc.push(mintConfig)
+      }
+      return acc
+    }, [] as MintConfig[])
+
     /**
      * Encode all the bundled contract calls.
      */
     const contractCalls: ContractCall[] = []
-    for (const mintConfig of mintConfigs) {
+    for (const mintConfig of uniqueMintConfigs) {
       if (!(mintConfig.name in minterNames)) {
         throw new UnsupportedMinterError({ minterName: mintConfig.name })
       }
