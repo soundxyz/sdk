@@ -1,7 +1,7 @@
-import type { BigNumber } from '@ethersproject/bignumber'
+import type { BigNumber, BigNumberish } from '@ethersproject/bignumber'
 import type { Signer } from '@ethersproject/abstract-signer'
 import type { Provider } from '@ethersproject/abstract-provider'
-import type { ApiEnvironments, interfaceIds, supportedChainIds } from './utils/constants'
+import type { ApiEnvironments, interfaceIds, supportedChainIds, minterNames } from './utils/constants'
 
 /*********************************************************
                 PROTOCOL TYPES
@@ -59,12 +59,67 @@ export type MintInfo =
       maxMintable: number
     })
 
+/**
+ * The arguments required by SoundEdition.initialize
+ */
+export type EditionConfig = {
+  name: string
+  symbol: string
+  metadataModule: string
+  baseURI: string
+  contractURI: string
+  fundingRecipient: string
+  royaltyBPS: number
+  editionMaxMintable: number
+  mintRandomnessTokenThreshold: number
+  mintRandomnessTimeThreshold: number
+}
+
+export type minterNames = ValueOf<typeof minterNames>
+/**
+ * The arguments required for all minter calls.
+ */
+export type MintConfigBase = {
+  minterAddress: string
+  price: BigNumberish
+  startTime: BigNumberish
+  endTime: BigNumberish
+  affiliateFeeBPS: BigNumberish
+}
+
+/**
+ * The custom arguments required by each minter
+ */
+export type MintConfig =
+  | (MintConfigBase & {
+      name: 'RangeEditionMinter'
+      closingTime: BigNumberish
+      maxMintableLower: BigNumberish
+      maxMintableUpper: BigNumberish
+      maxMintablePerAccount: BigNumberish
+    })
+  | (MintConfigBase & {
+      name: 'MerkleDropMinter'
+      merkleRootHash: string
+      maxMintable: BigNumberish
+      maxMintablePerAccount: BigNumberish
+    })
+  | (MintConfigBase & {
+      name: 'FixedPriceSignatureMinter'
+      signer: string
+      maxMintable: BigNumberish
+    })
+
+export type ContractCall = {
+  contractAddress: string
+  calldata: string
+}
+
 /*********************************************************
                     API TYPES
  ********************************************************/
 
 export type GraphQLExecutionErrors = readonly [GraphQLError, ...Array<GraphQLError>]
-
 export interface ExecutionResult<
   TData extends Record<string, unknown> = Record<string, unknown>,
   TExtensions extends Record<string, unknown> = Record<string, unknown>,

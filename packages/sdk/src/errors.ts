@@ -35,6 +35,17 @@ export class InvalidAddressError extends Error {
   }
 }
 
+export class UnsupportedMinterError extends Error {
+  readonly name = 'UnsupportedMinterError'
+  readonly minterName: string
+
+  constructor({ minterName }: { minterName: string }) {
+    super('Must provide valid minter name')
+
+    this.minterName = minterName
+  }
+}
+
 export class NotSoundEditionError extends Error {
   readonly name = 'NotSoundEditionError'
 
@@ -110,5 +121,11 @@ export class InvalidQuantityError extends Error {
   constructor(message?: string) {
     super(message || 'Must provide valid quantity')
     this.name = 'InvalidQuantityError'
+  }
+}
+
+export class NotFoundError extends Error {
+  constructor(message?: string) {
+    super(message || 'Requested resource not found')
   }
 }

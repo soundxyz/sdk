@@ -1,10 +1,15 @@
+import { hexZeroPad, hexlify } from '@ethersproject/bytes'
+import type { Signer } from '@ethersproject/abstract-signer'
+import type { BigNumberish } from '@ethersproject/bignumber'
+import type { ContractTransaction } from '@ethersproject/contracts'
 import {
+  FixedPriceSignatureMinter__factory,
   IMinterModule__factory,
   MerkleDropMinter__factory,
   RangeEditionMinter__factory,
+  SoundCreatorV1__factory,
   SoundEditionV1__factory,
 } from '@soundxyz/sound-protocol/typechain/index'
-
 import {
   InvalidQuantityError,
   MissingSignerError,
@@ -12,17 +17,34 @@ import {
   NotSoundEditionError,
   SoundNotFoundError,
   UnsupportedNetworkError,
+  UnsupportedMinterError,
+  NotFoundError,
 } from './errors'
-import type { MinterInterfaceId, MintInfo, SignerOrProvider, SoundClientConfig, ChainId } from './types'
-import { ADDRESS_ZERO, interfaceIds, minterFactoryMap, supportedNetworks } from './utils/constants'
-import { getMerkleProof as _getMerkleProof, validateAddress } from './utils/helpers'
-
-import type { Signer } from '@ethersproject/abstract-signer'
-import type { BigNumberish } from '@ethersproject/bignumber'
-import type { ContractTransaction } from '@ethersproject/contracts'
+import type {
+  MinterInterfaceId,
+  MintInfo,
+  SignerOrProvider,
+  SoundClientConfig,
+  EditionConfig,
+  MintConfig,
+  ChainId,
+  ContractCall,
+} from './types'
+import {
+  interfaceIds,
+  minterFactoryMap,
+  ADDRESS_ZERO,
+  supportedNetworks,
+  supportedChainIds,
+  soundCreatorAddresses,
+  minterNames,
+  MINTER_ROLE,
+} from './utils/constants'
+import { validateAddress, getMerkleProof as _getMerkleProof } from './utils/helpers'
 import type { ReleaseInfoQueryVariables } from './api/graphql/gql'
 import { SoundAPI } from './api/soundApi'
 import { LazyPromise } from './utils/promise'
+import { Provider } from '@ethersproject/abstract-provider'
 
 export function SoundClient({ signer, provider, apiKey, environment = 'production' }: SoundClientConfig) {
   const soundApi = SoundAPI({
@@ -180,8 +202,8 @@ export function SoundClient({ signer, provider, apiKey, environment = 'productio
         const merkleDropMinter = MerkleDropMinter__factory.connect(mintInfo.minterAddress, signer)
         const { merkleRootHash } = await merkleDropMinter.mintInfo(mintInfo.editionAddress, mintInfo.mintId)
 
-        const proof = await getMerkleProof(merkleRootHash, userAddress)
-        if (!proof) throw new Error('Unable to fetch merkle proof')
+        const proof = await getMerkleProof(merkleRootHash, userAddress.toLowerCase())
+        if (!proof?.length) throw new NotFoundError('Unable to fetch merkle proof')
 
         return await merkleDropMinter.mint(
           mintInfo.editionAddress,
@@ -197,6 +219,138 @@ export function SoundClient({ signer, provider, apiKey, environment = 'productio
         throw new Error('Unimplemented')
     }
   }
+
+  async function createSoundAndMints({
+    editionConfig,
+    mintConfigs,
+    salt: customSalt,
+  }: {
+    editionConfig: EditionConfig
+    mintConfigs: MintConfig[]
+    salt?: string
+  }) {
+    const { signer, chainId, userAddress } = await _requireSigner()
+
+    const randomInt = Math.floor(Math.random() * 1_000_000_000_000)
+    const salt = customSalt || hexZeroPad(hexlify(randomInt), 32)
+    const soundCreatorAddress = soundCreatorAddresses[chainId]
+
+    // Precompute the edition address.
+    const editionAddress = await SoundCreatorV1__factory.connect(soundCreatorAddress, signer).soundEditionAddress(
+      userAddress,
+      salt,
+    )
+
+    const editionInterface = SoundEditionV1__factory.createInterface()
+
+    /**
+     * Encode all the bundled contract calls.
+     */
+    const contractCalls: ContractCall[] = []
+
+    // Grant MINTER_ROLE for each minter.
+    const mintersToGrantRole = Array.from(new Set(mintConfigs.map((m) => m.minterAddress)))
+    for (const minterAddress of mintersToGrantRole) {
+      contractCalls.push({
+        contractAddress: editionAddress,
+        calldata: editionInterface.encodeFunctionData('grantRoles', [minterAddress, MINTER_ROLE]),
+      })
+    }
+
+    // Add the createEditionMint calls.
+    for (const mintConfig of mintConfigs) {
+      if (!(mintConfig.name in minterNames)) {
+        throw new UnsupportedMinterError({ minterName: mintConfig.name })
+      }
+
+      /**
+       * Set up the createEditionMint call for each mint config.
+       */
+      switch (mintConfig.name) {
+        case 'RangeEditionMinter': {
+          const minterInterface = RangeEditionMinter__factory.createInterface()
+          contractCalls.push({
+            contractAddress: mintConfig.minterAddress,
+
+            calldata: minterInterface.encodeFunctionData('createEditionMint', [
+              editionAddress,
+              mintConfig.price,
+              mintConfig.startTime,
+              mintConfig.closingTime,
+              mintConfig.endTime,
+              mintConfig.affiliateFeeBPS,
+              mintConfig.maxMintableLower,
+              mintConfig.maxMintableUpper,
+              mintConfig.maxMintablePerAccount,
+            ]),
+          })
+          break
+        }
+        case 'FixedPriceSignatureMinter': {
+          const minterInterface = FixedPriceSignatureMinter__factory.createInterface()
+          contractCalls.push({
+            contractAddress: mintConfig.minterAddress,
+            calldata: minterInterface.encodeFunctionData('createEditionMint', [
+              editionAddress,
+              mintConfig.price,
+              mintConfig.signer,
+              mintConfig.maxMintable,
+              mintConfig.startTime,
+              mintConfig.endTime,
+              mintConfig.affiliateFeeBPS,
+            ]),
+          })
+          break
+        }
+        case 'MerkleDropMinter': {
+          const minterInterface = MerkleDropMinter__factory.createInterface()
+          contractCalls.push({
+            contractAddress: mintConfig.minterAddress,
+            calldata: minterInterface.encodeFunctionData('createEditionMint', [
+              editionAddress,
+              mintConfig.merkleRootHash,
+              mintConfig.price,
+              mintConfig.startTime,
+              mintConfig.endTime,
+              mintConfig.affiliateFeeBPS,
+              mintConfig.maxMintable,
+              mintConfig.maxMintablePerAccount,
+            ]),
+          })
+          break
+        }
+      }
+    }
+
+    /**
+     * Encode the SoundEdition.initialize call.
+     */
+    const editionInitData = editionInterface.encodeFunctionData('initialize', [
+      editionConfig.name,
+      editionConfig.symbol,
+      editionConfig.metadataModule,
+      editionConfig.baseURI,
+      editionConfig.contractURI,
+      editionConfig.fundingRecipient,
+      editionConfig.royaltyBPS,
+      editionConfig.editionMaxMintable,
+      editionConfig.mintRandomnessTokenThreshold,
+      editionConfig.mintRandomnessTimeThreshold,
+    ])
+
+    const soundCreatorContract = SoundCreatorV1__factory.connect(soundCreatorAddress, signer)
+
+    return await soundCreatorContract.createSoundAndMints(
+      salt,
+      editionInitData,
+      contractCalls.map((d) => d.contractAddress),
+      contractCalls.map((d) => d.calldata),
+    )
+  }
+
+  /*********************************************************
+                  INTERNAL FUNCTIONS
+ ********************************************************/
 
   // Addresses with MINTER_ROLE for a given edition
   async function _registeredMinters({ editionAddress }: { editionAddress: string }): Promise<string[]> {
@@ -363,6 +517,7 @@ export function SoundClient({ signer, provider, apiKey, environment = 'productio
     eligibleMintQuantity,
     mint,
     soundInfo,
+    createSoundAndMints,
   }
 }
 

@@ -5,8 +5,11 @@ on:
       - main
   pull_request:
 
+env:
+  MNEMONIC: ${{ secrets.MNEMONIC }}
+
 jobs:
-  typecheck:
+  tests:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:

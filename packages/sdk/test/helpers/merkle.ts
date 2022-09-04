@@ -4,11 +4,11 @@ import { keccak256 as solidityKeccak256 } from '@ethersproject/solidity'
 
 // default addresses generated for 'test test ...' mnemonic
 const snapshot = [
-  '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
-  '0x70997970C51812dc3A010C7d01b50e0d17dc79C8',
-  '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC',
-  '0x90F79bf6EB2c4f870365E785982E1f101E93b906',
-  '0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65',
+  '0xb0a36b3cedf210f37a5e7bc28d4b8e91d4e3c412',
+  '0x6fc4792b1bbe0df6b0d80e9cc7bd61d872bf2768',
+  '0xe34056ad5a4dbe825ea93cfb5b62ab5f2548c294',
+  '0x1372c547e54733ea35f28ef3ab00d4816a488208',
+  '0xde8cdc32a83854e55928ad0f881664e08ec4465a',
 ]
 
 const getNodeLeaf = (address: string) => {
