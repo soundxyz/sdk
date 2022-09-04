@@ -6,7 +6,7 @@ on:
   pull_request:
 
 jobs:
-  typecheck:
+  tests:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
