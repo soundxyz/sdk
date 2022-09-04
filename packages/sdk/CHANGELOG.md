@@ -1,5 +1,21 @@
 # @soundxyz/sdk
 
+## 0.0.5
+
+### Patch Changes
+
+- [#33](https://github.com/soundxyz/sdk/pull/33) [`7c09ba2`](https://github.com/soundxyz/sdk/commit/7c09ba2efb04e51002f2ee4bf26b5ed009b58e38) Thanks [@gigamesh](https://github.com/gigamesh)! - Adds network chainId validation
+
+- [#27](https://github.com/soundxyz/sdk/pull/27) [`6b807e4`](https://github.com/soundxyz/sdk/commit/6b807e49fae4a6c316e9cac111f84ecfecadb5b4) Thanks [@PabloSzx](https://github.com/PabloSzx)! - Add "index" to package, re-exporting SoundClient
+
+- [#25](https://github.com/soundxyz/sdk/pull/25) [`902d68e`](https://github.com/soundxyz/sdk/commit/902d68e2af661bc940dcdd96f6ce6c2660311059) Thanks [@gigamesh](https://github.com/gigamesh)! - Updates SDK with SoundCreatorV1.createEditionAndMints
+
+- [#31](https://github.com/soundxyz/sdk/pull/31) [`32c6402`](https://github.com/soundxyz/sdk/commit/32c6402ee6ff9f6bde43ec7f5dc6b934b44641d3) Thanks [@PabloSzx](https://github.com/PabloSzx)! - Rework soundInfo,releaseInfo functions to work with contractAddress and editionId
+
+- [#29](https://github.com/soundxyz/sdk/pull/29) [`8e82f1c`](https://github.com/soundxyz/sdk/commit/8e82f1c60c4c3260a43994cb05a1112b27bb7290) Thanks [@PabloSzx](https://github.com/PabloSzx)! - Specify environment of API on SoundClient init
+
+- [#30](https://github.com/soundxyz/sdk/pull/30) [`4a0c0b6`](https://github.com/soundxyz/sdk/commit/4a0c0b68dbe399b832a46893510d33acda9b67ba) Thanks [@PabloSzx](https://github.com/PabloSzx)! - Improve GraphQL Error types
+
 ## 0.0.3
 
 ### Patch Changes
