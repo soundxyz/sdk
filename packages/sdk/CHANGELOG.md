@@ -1,5 +1,11 @@
 # @soundxyz/sdk
 
+## 0.0.7
+
+### Patch Changes
+
+- [#41](https://github.com/soundxyz/sdk/pull/41) [`3383a3a`](https://github.com/soundxyz/sdk/commit/3383a3a9647483b600f4ca9603c731ae3ec919bb) Thanks [@vigneshka](https://github.com/vigneshka)! - Fix local network error
+
 ## 0.0.6
 
 ### Patch Changes
