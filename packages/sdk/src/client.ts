@@ -44,7 +44,6 @@ import { validateAddress, getMerkleProof as _getMerkleProof } from './utils/help
 import type { ReleaseInfoQueryVariables } from './api/graphql/gql'
 import { SoundAPI } from './api/soundApi'
 import { LazyPromise } from './utils/promise'
-import { Provider } from '@ethersproject/abstract-provider'
 
 export function SoundClient({
   signer,
@@ -519,6 +518,9 @@ export function SoundClient({
   }
 
   function _getCreatorAddress(chainId: number) {
+    if (chainId === supportedChainIds.LOCAL || (chainId === supportedChainIds.LOCAL_ALT && !soundCreatorAddress)) {
+      throw new Error('Must pass in soundCreatorAddress when using with a local network.')
+    }
     return soundCreatorAddress || soundCreatorAddresses[chainId]
   }
 
