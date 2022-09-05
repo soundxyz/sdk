@@ -1,7 +1,4 @@
-import { hexZeroPad, hexlify } from '@ethersproject/bytes'
-import type { Signer } from '@ethersproject/abstract-signer'
-import type { BigNumberish } from '@ethersproject/bignumber'
-import type { ContractTransaction } from '@ethersproject/contracts'
+import { hexlify, hexZeroPad } from '@ethersproject/bytes'
 import {
   FixedPriceSignatureMinter__factory,
   IMinterModule__factory,
@@ -10,16 +7,34 @@ import {
   SoundCreatorV1__factory,
   SoundEditionV1__factory,
 } from '@soundxyz/sound-protocol/typechain/index'
+
+import { SoundAPI } from './api/soundApi'
 import {
   InvalidQuantityError,
   MissingSignerError,
   MissingSignerOrProviderError,
+  NotFoundError,
   NotSoundEditionError,
   SoundNotFoundError,
-  UnsupportedNetworkError,
   UnsupportedMinterError,
-  NotFoundError,
+  UnsupportedNetworkError,
 } from './errors'
+import {
+  ADDRESS_ZERO,
+  interfaceIds,
+  MINTER_ROLE,
+  minterFactoryMap,
+  minterNames,
+  soundCreatorAddresses,
+  supportedChainIds,
+  supportedNetworks,
+} from './utils/constants'
+import { getMerkleProof as _getMerkleProof, validateAddress } from './utils/helpers'
+import { LazyPromise } from './utils/promise'
+
+import type { Signer } from '@ethersproject/abstract-signer'
+import type { BigNumberish } from '@ethersproject/bignumber'
+import type { ContractTransaction } from '@ethersproject/contracts'
 import type {
   MinterInterfaceId,
   MintSchedule,
@@ -30,20 +45,7 @@ import type {
   ChainId,
   ContractCall,
 } from './types'
-import {
-  interfaceIds,
-  minterFactoryMap,
-  ADDRESS_ZERO,
-  supportedNetworks,
-  soundCreatorAddresses,
-  supportedChainIds,
-  minterNames,
-  MINTER_ROLE,
-} from './utils/constants'
-import { validateAddress, getMerkleProof as _getMerkleProof } from './utils/helpers'
 import type { ReleaseInfoQueryVariables } from './api/graphql/gql'
-import { SoundAPI } from './api/soundApi'
-import { LazyPromise } from './utils/promise'
 
 export function SoundClient({
   signer,
@@ -73,14 +75,14 @@ export function SoundClient({
   }
 
   // All the minting schedules for a given edition, including past and future
-  async function mintSchedulesForEdition({ editionAddress }: { editionAddress: string }): Promise<MintSchedule[]> {
+  async function mintSchedules({ editionAddress }: { editionAddress: string }): Promise<MintSchedule[]> {
     _requireValidSoundEdition({ editionAddress })
 
     return _allMintSchedules({ editionAddress })
   }
 
   // Active minter schedules for a given edition
-  async function activeMintSchedulesForEdition({
+  async function activeMintSchedules({
     editionAddress,
     timestamp = Math.floor(Date.now() / 1000),
   }: {
@@ -99,7 +101,7 @@ export function SoundClient({
       .sort((a, b) => a.startTime - b.startTime)
   }
 
-  async function eligibleMintQuantity({
+  async function eligibleQuantity({
     mintSchedule,
     timestamp = Math.floor(Date.now() / 1000),
     userAddress,
@@ -182,7 +184,7 @@ export function SoundClient({
 
     const { signer, userAddress } = await _requireSigner()
 
-    const eligibleMintQty = await eligibleMintQuantity({ mintSchedule, userAddress })
+    const eligibleMintQty = await eligibleQuantity({ mintSchedule, userAddress })
     if (eligibleMintQty < quantity)
       throw new Error(`Not eligible to mint ${quantity}. Eligible quantity: ${eligibleMintQty}`)
 
@@ -527,9 +529,9 @@ export function SoundClient({
 
   return {
     isSoundEdition,
-    mintSchedulesForEdition,
-    activeMintSchedulesForEdition,
-    eligibleMintQuantity,
+    mintSchedules,
+    activeMintSchedules,
+    eligibleQuantity,
     mint,
     soundInfo,
     createEditionWithMintSchedules,
