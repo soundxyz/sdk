@@ -1,5 +1,11 @@
 # @soundxyz/sdk
 
+## 0.0.6
+
+### Patch Changes
+
+- [#38](https://github.com/soundxyz/sdk/pull/38) [`09f9c20`](https://github.com/soundxyz/sdk/commit/09f9c207ff10d1bb5893ef0af12b346f8b8521d2) Thanks [@gigamesh](https://github.com/gigamesh)! - Renames public-facing functions
+
 ## 0.0.5
 
 ### Patch Changes
