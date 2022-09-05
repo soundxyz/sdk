@@ -1,6 +1,6 @@
-import { MerkleTree } from 'merkletreejs'
-import keccak256 from 'keccak256'
 import { keccak256 as solidityKeccak256 } from '@ethersproject/solidity'
+import keccak256 from 'keccak256'
+import { MerkleTree } from 'merkletreejs'
 
 // default addresses generated for 'test test ...' mnemonic
 const snapshot = [

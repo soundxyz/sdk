@@ -1,7 +1,4 @@
-import { hexZeroPad, hexlify } from '@ethersproject/bytes'
-import type { Signer } from '@ethersproject/abstract-signer'
-import type { BigNumberish } from '@ethersproject/bignumber'
-import type { ContractTransaction } from '@ethersproject/contracts'
+import { hexlify, hexZeroPad } from '@ethersproject/bytes'
 import {
   FixedPriceSignatureMinter__factory,
   IMinterModule__factory,
@@ -10,19 +7,37 @@ import {
   SoundCreatorV1__factory,
   SoundEditionV1__factory,
 } from '@soundxyz/sound-protocol/typechain/index'
+
+import { SoundAPI } from './api/soundApi'
 import {
   InvalidQuantityError,
   MissingSignerError,
   MissingSignerOrProviderError,
+  NotFoundError,
   NotSoundEditionError,
   SoundNotFoundError,
-  UnsupportedNetworkError,
   UnsupportedMinterError,
-  NotFoundError,
+  UnsupportedNetworkError,
 } from './errors'
+import {
+  ADDRESS_ZERO,
+  interfaceIds,
+  MINTER_ROLE,
+  minterFactoryMap,
+  minterNames,
+  soundCreatorAddresses,
+  supportedChainIds,
+  supportedNetworks,
+} from './utils/constants'
+import { getMerkleProof as _getMerkleProof, validateAddress } from './utils/helpers'
+import { LazyPromise } from './utils/promise'
+
+import type { Signer } from '@ethersproject/abstract-signer'
+import type { BigNumberish } from '@ethersproject/bignumber'
+import type { ContractTransaction } from '@ethersproject/contracts'
 import type {
   MinterInterfaceId,
-  MintInfo,
+  MintSchedule,
   SignerOrProvider,
   SoundClientConfig,
   EditionConfig,
@@ -30,20 +45,7 @@ import type {
   ChainId,
   ContractCall,
 } from './types'
-import {
-  interfaceIds,
-  minterFactoryMap,
-  ADDRESS_ZERO,
-  supportedNetworks,
-  soundCreatorAddresses,
-  supportedChainIds,
-  minterNames,
-  MINTER_ROLE,
-} from './utils/constants'
-import { validateAddress, getMerkleProof as _getMerkleProof } from './utils/helpers'
 import type { ReleaseInfoQueryVariables } from './api/graphql/gql'
-import { SoundAPI } from './api/soundApi'
-import { LazyPromise } from './utils/promise'
 
 export function SoundClient({
   signer,
@@ -73,59 +75,60 @@ export function SoundClient({
   }
 
   // All the minting schedules for a given edition, including past and future
-  async function allMintsForEdition({ editionAddress }: { editionAddress: string }): Promise<MintInfo[]> {
+  async function mintSchedules({ editionAddress }: { editionAddress: string }): Promise<MintSchedule[]> {
     _requireValidSoundEdition({ editionAddress })
 
-    return _allMintInfos({ editionAddress })
+    return _allMintSchedules({ editionAddress })
   }
 
   // Active minter schedules for a given edition
-  async function activeMintsForEdition({
+  async function activeMintSchedules({
     editionAddress,
     timestamp = Math.floor(Date.now() / 1000),
   }: {
     editionAddress: string
     timestamp?: number
-  }): Promise<MintInfo[]> {
+  }): Promise<MintSchedule[]> {
     _requireValidSoundEdition({ editionAddress })
 
-    const mintInfos = await _allMintInfos({ editionAddress })
+    const mintSchedules = await _allMintSchedules({ editionAddress })
 
     // Filter mints that are live during the given timestamp
-    return mintInfos
-      .filter((mintInfo) => {
-        return mintInfo.startTime <= timestamp && mintInfo.endTime > timestamp && !mintInfo.mintPaused
+    return mintSchedules
+      .filter((mintSchedule) => {
+        return mintSchedule.startTime <= timestamp && mintSchedule.endTime > timestamp && !mintSchedule.mintPaused
       })
       .sort((a, b) => a.startTime - b.startTime)
   }
 
-  async function eligibleMintQuantity({
-    mintInfo,
+  async function eligibleQuantity({
+    mintSchedule,
     timestamp = Math.floor(Date.now() / 1000),
     userAddress,
   }: {
-    mintInfo: MintInfo
+    mintSchedule: MintSchedule
     timestamp?: number
     userAddress: string
   }): Promise<number> {
     // check valid mint time
-    if (timestamp < mintInfo.startTime || timestamp > mintInfo.endTime || mintInfo.mintPaused) {
+    if (timestamp < mintSchedule.startTime || timestamp > mintSchedule.endTime || mintSchedule.mintPaused) {
       return 0
     }
 
     // Checks for child minter custom logic
-    switch (mintInfo.interfaceId) {
+    switch (mintSchedule.interfaceId) {
       case interfaceIds.IRangeEditionMinter: {
         // handle range edition case
-        const maxQty = timestamp < mintInfo.closingTime ? mintInfo.maxMintableUpper : mintInfo.maxMintableLower
+        const maxQty =
+          timestamp < mintSchedule.closingTime ? mintSchedule.maxMintableUpper : mintSchedule.maxMintableLower
 
-        if (mintInfo.totalMinted >= maxQty) {
+        if (mintSchedule.totalMinted >= maxQty) {
           return 0
         }
         break
       }
       default: {
-        if (mintInfo.totalMinted >= mintInfo.maxMintable) {
+        if (mintSchedule.totalMinted >= mintSchedule.maxMintable) {
           return 0
         }
       }
@@ -133,25 +136,25 @@ export function SoundClient({
 
     const { signerOrProvider } = await _requireSignerOrProvider()
     // look up max mintable per account and user's already minted tally
-    switch (mintInfo.interfaceId) {
+    switch (mintSchedule.interfaceId) {
       case interfaceIds.IRangeEditionMinter: {
         const userBalanceBigNum = await RangeEditionMinter__factory.connect(
-          mintInfo.minterAddress,
+          mintSchedule.minterAddress,
           signerOrProvider,
-        ).mintedTallies(mintInfo.editionAddress, mintInfo.mintId, userAddress)
+        ).mintedTallies(mintSchedule.editionAddress, mintSchedule.mintId, userAddress)
 
         const userMintedBalance = userBalanceBigNum.toNumber()
-        return mintInfo.maxMintablePerAccount - userMintedBalance
+        return mintSchedule.maxMintablePerAccount - userMintedBalance
       }
 
       case interfaceIds.IMerkleDropMinter: {
         const userBalanceBigNum = await MerkleDropMinter__factory.connect(
-          mintInfo.minterAddress,
+          mintSchedule.minterAddress,
           signerOrProvider,
-        ).mintedTallies(mintInfo.editionAddress, mintInfo.mintId, userAddress)
+        ).mintedTallies(mintSchedule.editionAddress, mintSchedule.mintId, userAddress)
 
         const userMintedBalance = userBalanceBigNum.toNumber()
-        return mintInfo.maxMintablePerAccount - userMintedBalance
+        return mintSchedule.maxMintablePerAccount - userMintedBalance
       }
 
       default:
@@ -160,7 +163,7 @@ export function SoundClient({
   }
 
   async function mint({
-    mintInfo,
+    mintSchedule,
     quantity,
     affiliate = ADDRESS_ZERO,
     getMerkleProof = _getMerkleProof,
@@ -168,7 +171,7 @@ export function SoundClient({
     maxFeePerGas,
     maxPriorityFeePerGas,
   }: {
-    mintInfo: MintInfo
+    mintSchedule: MintSchedule
     quantity: number
     affiliate?: string
     getMerkleProof?: (root: string, unhashedLeaf: string) => Promise<string[] | null>
@@ -176,27 +179,27 @@ export function SoundClient({
     maxFeePerGas?: BigNumberish
     maxPriorityFeePerGas?: BigNumberish
   }): Promise<ContractTransaction> {
-    _requireValidSoundEdition({ editionAddress: mintInfo.editionAddress })
+    _requireValidSoundEdition({ editionAddress: mintSchedule.editionAddress })
     if (quantity <= 0) throw new InvalidQuantityError()
 
     const { signer, userAddress } = await _requireSigner()
 
-    const eligibleMintQty = await eligibleMintQuantity({ mintInfo, userAddress })
+    const eligibleMintQty = await eligibleQuantity({ mintSchedule, userAddress })
     if (eligibleMintQty < quantity)
       throw new Error(`Not eligible to mint ${quantity}. Eligible quantity: ${eligibleMintQty}`)
 
     const txnOverrides = {
-      value: mintInfo.price.mul(quantity),
+      value: mintSchedule.price.mul(quantity),
       gasLimit,
       maxFeePerGas,
       maxPriorityFeePerGas,
     }
 
-    switch (mintInfo.interfaceId) {
+    switch (mintSchedule.interfaceId) {
       case interfaceIds.IRangeEditionMinter: {
-        return await RangeEditionMinter__factory.connect(mintInfo.minterAddress, signer).mint(
-          mintInfo.editionAddress,
-          mintInfo.mintId,
+        return await RangeEditionMinter__factory.connect(mintSchedule.minterAddress, signer).mint(
+          mintSchedule.editionAddress,
+          mintSchedule.mintId,
           quantity,
           affiliate,
           txnOverrides,
@@ -204,15 +207,15 @@ export function SoundClient({
       }
 
       case interfaceIds.IMerkleDropMinter: {
-        const merkleDropMinter = MerkleDropMinter__factory.connect(mintInfo.minterAddress, signer)
-        const { merkleRootHash } = await merkleDropMinter.mintInfo(mintInfo.editionAddress, mintInfo.mintId)
+        const merkleDropMinter = MerkleDropMinter__factory.connect(mintSchedule.minterAddress, signer)
+        const { merkleRootHash } = await merkleDropMinter.mintInfo(mintSchedule.editionAddress, mintSchedule.mintId)
 
         const proof = await getMerkleProof(merkleRootHash, userAddress.toLowerCase())
         if (!proof?.length) throw new NotFoundError('Unable to fetch merkle proof')
 
         return await merkleDropMinter.mint(
-          mintInfo.editionAddress,
-          mintInfo.mintId,
+          mintSchedule.editionAddress,
+          mintSchedule.mintId,
           quantity,
           proof,
           affiliate,
@@ -225,7 +228,7 @@ export function SoundClient({
     }
   }
 
-  async function createSoundAndMints({
+  async function createEditionWithMintSchedules({
     editionConfig,
     mintConfigs,
     salt: customSalt,
@@ -398,14 +401,14 @@ export function SoundClient({
   }: {
     editionAddress: string
     minterAddress: string
-  }): Promise<MintInfo[]> {
+  }): Promise<MintSchedule[]> {
     const { signerOrProvider } = await _requireSignerOrProvider()
 
     // Query MintConfigCreated event
     const minterContract = IMinterModule__factory.connect(minterAddress, signerOrProvider)
     const filter = minterContract.filters.MintConfigCreated(editionAddress)
-    const mintConfigEvents = await minterContract.queryFilter(filter)
-    const mintIds = mintConfigEvents.map((event) => event.args.mintId)
+    const mintScheduleConfigEvents = await minterContract.queryFilter(filter)
+    const mintIds = mintScheduleConfigEvents.map((event) => event.args.mintId)
 
     return Promise.all(
       mintIds.map(async (mintId) => {
@@ -415,38 +418,38 @@ export function SoundClient({
         switch (interfaceId) {
           case interfaceIds.IRangeEditionMinter: {
             const minterContract = minterFactoryMap[interfaceId].connect(minterAddress, signerOrProvider)
-            const mintInfo = await minterContract.mintInfo(editionAddress, mintId)
+            const mintSchedule = await minterContract.mintInfo(editionAddress, mintId)
             return {
               interfaceId,
               mintId: mintId.toNumber(),
               editionAddress,
               minterAddress,
-              startTime: mintInfo.startTime,
-              endTime: mintInfo.endTime,
-              mintPaused: mintInfo.mintPaused,
-              price: mintInfo.price,
-              maxMintableLower: mintInfo.maxMintableLower,
-              maxMintableUpper: mintInfo.maxMintableUpper,
-              closingTime: mintInfo.closingTime,
-              maxMintablePerAccount: mintInfo.maxMintablePerAccount,
-              totalMinted: mintInfo.totalMinted,
+              startTime: mintSchedule.startTime,
+              endTime: mintSchedule.endTime,
+              mintPaused: mintSchedule.mintPaused,
+              price: mintSchedule.price,
+              maxMintableLower: mintSchedule.maxMintableLower,
+              maxMintableUpper: mintSchedule.maxMintableUpper,
+              closingTime: mintSchedule.closingTime,
+              maxMintablePerAccount: mintSchedule.maxMintablePerAccount,
+              totalMinted: mintSchedule.totalMinted,
             }
           }
           default: {
             const minterContract = minterFactoryMap[interfaceId].connect(minterAddress, signerOrProvider)
-            const mintInfo = await minterContract.mintInfo(editionAddress, mintId)
+            const mintSchedule = await minterContract.mintInfo(editionAddress, mintId)
             return {
               interfaceId,
               mintId: mintId.toNumber(),
               editionAddress,
               minterAddress,
-              startTime: mintInfo.startTime,
-              endTime: mintInfo.endTime,
-              mintPaused: mintInfo.mintPaused,
-              price: mintInfo.price,
-              maxMintable: mintInfo.maxMintable,
-              maxMintablePerAccount: mintInfo.maxMintablePerAccount,
-              totalMinted: mintInfo.totalMinted,
+              startTime: mintSchedule.startTime,
+              endTime: mintSchedule.endTime,
+              mintPaused: mintSchedule.mintPaused,
+              price: mintSchedule.price,
+              maxMintable: mintSchedule.maxMintable,
+              maxMintablePerAccount: mintSchedule.maxMintablePerAccount,
+              totalMinted: mintSchedule.totalMinted,
             }
           }
         }
@@ -454,14 +457,14 @@ export function SoundClient({
     )
   }
 
-  async function _allMintInfos({ editionAddress }: { editionAddress: string }): Promise<MintInfo[]> {
+  async function _allMintSchedules({ editionAddress }: { editionAddress: string }): Promise<MintSchedule[]> {
     const registeredMinters = await _registeredMinters({ editionAddress })
 
-    const mintInfos = await Promise.all(
+    const mintSchedules = await Promise.all(
       registeredMinters.map(async (minterAddress) => _mintInfosFromMinter({ editionAddress, minterAddress })),
     )
 
-    return mintInfos.flat().sort((a, b) => a.startTime - b.startTime)
+    return mintSchedules.flat().sort((a, b) => a.startTime - b.startTime)
   }
 
   async function _requireSigner(): Promise<{ signer: Signer; chainId: ChainId; userAddress: string }> {
@@ -526,12 +529,12 @@ export function SoundClient({
 
   return {
     isSoundEdition,
-    allMintsForEdition,
-    activeMintsForEdition,
-    eligibleMintQuantity,
+    mintSchedules,
+    activeMintSchedules,
+    eligibleQuantity,
     mint,
     soundInfo,
-    createSoundAndMints,
+    createEditionWithMintSchedules,
   }
 }
 
