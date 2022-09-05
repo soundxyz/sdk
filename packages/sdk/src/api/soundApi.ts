@@ -9,6 +9,9 @@ import {
   GenerateAuthChallenge,
   GenerateAuthChallengeMutation,
   GenerateAuthChallengeMutationVariables,
+  MerkleProof,
+  MerkleProofQuery,
+  MerkleProofQueryVariables,
   ReleaseInfo,
   ReleaseInfoQuery,
   ReleaseInfoQueryVariables,
@@ -154,6 +157,19 @@ export function SoundAPI({
       return {
         authToken: authChallengeAuthToken.verifyAuthChallenge,
       }
+    },
+    async merkleProof({ root, userAddress }: { root: string; userAddress: string }) {
+      const { data } = await graphqlRequest<MerkleProofQuery, MerkleProofQueryVariables>({
+        query: MerkleProof,
+        variables: {
+          root,
+          unhashedLeaf: userAddress,
+        },
+      })
+
+      if (!data?.merkleTreeProof) return null
+
+      return data.merkleTreeProof.proof
     },
   }
 }

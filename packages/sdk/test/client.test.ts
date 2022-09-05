@@ -1,3 +1,7 @@
+import assert from 'assert'
+import { expect } from 'chai'
+import { ethers } from 'hardhat'
+
 import { Wallet } from '@ethersproject/wallet'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 import {
@@ -12,17 +16,16 @@ import {
   SoundEditionV1__factory,
   SoundFeeRegistry__factory,
 } from '@soundxyz/sound-protocol/typechain/index'
-import { expect } from 'chai'
-import { ethers } from 'hardhat'
 
 import { SoundClient } from '../src/client'
+import { NotEligibleMint } from '../src/errors'
 import { interfaceIds, MINTER_ROLE } from '../src/utils/constants'
 import { MerkleHelper, now } from './helpers'
 
 import type { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import type MerkleTree from 'merkletreejs'
 
-import type { MintSchedule, ContractCall, MintConfig } from '../src/types'
+import type { ContractCall, MintConfig, MintSchedule } from '../src/types'
 
 const UINT32_MAX = 4294967295
 const NULL_ADDRESS = '0x0000000000000000000000000000000000000000'
@@ -83,7 +86,7 @@ beforeEach(async () => {
   artistWallet = signers[1]
   buyerWallet = signers[2]
 
-  client = SoundClient({ provider: ethers.provider, apiKey: '123' })
+  client = SoundClient({ provider: ethers.provider, apiKey: '123', environment: 'preview' })
   const fixture = await loadFixture(deployProtocol)
 
   soundCreator = fixture.soundCreator
@@ -520,7 +523,11 @@ describe('mint', () => {
         userAddress: buyerWallet.address,
       })
       await client.mint({ mintSchedule: mintSchedules[0], quantity }).catch((error) => {
-        expect(error.message).to.equal(`Not eligible to mint ${quantity}. Eligible quantity: ${eligibleQuantity}`)
+        expect(error).instanceOf(NotEligibleMint)
+
+        assert(error instanceof NotEligibleMint)
+
+        expect(error.eligibleMintQuantity).equal(eligibleQuantity)
       })
     })
   })
@@ -568,10 +575,13 @@ describe('mint', () => {
         ethers.provider,
       ).balanceOf(buyerWallet.address)
 
+      // Mock merkle proof api call
+      client.soundApi.merkleProof = async ({ userAddress }) =>
+        merkleHelper.getProof({ merkleTree, address: userAddress })
+
       await client.mint({
         mintSchedule: mintSchedules[0],
         quantity,
-        getMerkleProof: async (_root, unhashedLeaf) => merkleHelper.getProof({ merkleTree, address: unhashedLeaf }),
       })
 
       const finalBalance = await SoundEditionV1__factory.connect(precomputedEditionAddress, ethers.provider).balanceOf(
@@ -585,10 +595,9 @@ describe('mint', () => {
         .mint({
           mintSchedule: mintSchedules[0],
           quantity: 1,
-          getMerkleProof: async (_root, _unhashedLeaf) => null,
         })
         .catch((error) => {
-          expect(error.message).to.equal('Unable to fetch merkle proof')
+          expect(error).instanceOf(NotEligibleMint)
         })
     })
   })

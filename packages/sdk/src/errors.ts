@@ -1,4 +1,4 @@
-import type { GraphQLExecutionErrors } from './types'
+import type { GraphQLExecutionErrors, MintScheduleBase } from './types'
 
 export class MissingSignerError extends Error {
   readonly name = 'MissingSignerError'
@@ -146,5 +146,27 @@ export class InvalidQuantityError extends Error {
 export class NotFoundError extends Error {
   constructor(message?: string) {
     super(message || 'Requested resource not found')
+  }
+}
+
+export class NotEligibleMint extends Error {
+  readonly mintSchedule: MintScheduleBase
+  readonly userAddress: string
+  readonly eligibleMintQuantity: number
+
+  constructor({
+    mintSchedule,
+    userAddress,
+    eligibleMintQuantity,
+  }: {
+    mintSchedule: MintScheduleBase
+    userAddress: string
+    eligibleMintQuantity: number
+  }) {
+    super('Not eligible to mint')
+
+    this.mintSchedule = mintSchedule
+    this.userAddress = userAddress
+    this.eligibleMintQuantity = eligibleMintQuantity
   }
 }
