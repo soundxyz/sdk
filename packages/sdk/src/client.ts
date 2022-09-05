@@ -10,12 +10,14 @@ import {
 
 import { SoundAPI } from './api/soundApi'
 import {
+  CreatorAddressMissingForLocalError,
   InvalidQuantityError,
   MissingSignerError,
   MissingSignerOrProviderError,
   NotFoundError,
   NotSoundEditionError,
   SoundNotFoundError,
+  UnsupportedCreatorAddressError,
   UnsupportedMinterError,
   UnsupportedNetworkError,
 } from './errors'
@@ -521,10 +523,18 @@ export function SoundClient({
   }
 
   function _getCreatorAddress(chainId: number) {
-    if (chainId === supportedChainIds.LOCAL || (chainId === supportedChainIds.LOCAL_ALT && !soundCreatorAddress)) {
-      throw new Error('Must pass in soundCreatorAddress when using with a local network.')
+    if ((chainId === supportedChainIds.LOCAL || chainId === supportedChainIds.LOCAL_ALT) && !soundCreatorAddress) {
+      throw new CreatorAddressMissingForLocalError()
     }
-    return soundCreatorAddress || soundCreatorAddresses[chainId]
+
+    if (soundCreatorAddress) {
+      return soundCreatorAddress
+    }
+    if (soundCreatorAddresses[chainId]) {
+      return soundCreatorAddresses[chainId] as string
+    }
+
+    throw new UnsupportedCreatorAddressError({ chainId })
   }
 
   return {
