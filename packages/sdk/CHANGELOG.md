@@ -1,5 +1,11 @@
 # @soundxyz/sdk
 
+## 0.0.8
+
+### Patch Changes
+
+- [#26](https://github.com/soundxyz/sdk/pull/26) [`fbc9aaf`](https://github.com/soundxyz/sdk/commit/fbc9aaf8d0d5f8f9836dabe42845a7264ba99a20) Thanks [@PabloSzx](https://github.com/PabloSzx)! - Implement proper Merkle eligibility check
+
 ## 0.0.7
 
 ### Patch Changes
