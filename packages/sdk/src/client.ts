@@ -14,40 +14,32 @@ import {
   InvalidQuantityError,
   MissingSignerError,
   MissingSignerOrProviderError,
-  NotFoundError,
+  NotAllowedMint,
   NotSoundEditionError,
   SoundNotFoundError,
   UnsupportedCreatorAddressError,
   UnsupportedMinterError,
   UnsupportedNetworkError,
 } from './errors'
+import type { ChainId, MinterInterfaceId, SignerOrProvider, SoundClientConfig } from './types'
 import {
   ADDRESS_ZERO,
   interfaceIds,
-  MINTER_ROLE,
   minterFactoryMap,
   minterNames,
+  MINTER_ROLE,
   soundCreatorAddresses,
   supportedChainIds,
   supportedNetworks,
 } from './utils/constants'
-import { getMerkleProof as _getMerkleProof, validateAddress } from './utils/helpers'
+import { validateAddress } from './utils/helpers'
 import { LazyPromise } from './utils/promise'
 
 import type { Signer } from '@ethersproject/abstract-signer'
 import type { BigNumberish } from '@ethersproject/bignumber'
 import type { ContractTransaction } from '@ethersproject/contracts'
-import type {
-  MinterInterfaceId,
-  MintSchedule,
-  SignerOrProvider,
-  SoundClientConfig,
-  EditionConfig,
-  MintConfig,
-  ChainId,
-  ContractCall,
-} from './types'
 import type { ReleaseInfoQueryVariables } from './api/graphql/gql'
+import type { ContractCall, EditionConfig, MintConfig, MintSchedule } from './types'
 
 export function SoundClient({
   signer,
@@ -56,10 +48,19 @@ export function SoundClient({
   environment = 'production',
   soundCreatorAddress,
 }: SoundClientConfig) {
-  const soundApi = SoundAPI({
-    apiKey,
-    environment,
-  })
+  const client = {
+    soundApi: SoundAPI({
+      apiKey,
+      environment,
+    }),
+    isSoundEdition,
+    mintSchedules,
+    activeMintSchedules,
+    eligibleQuantity,
+    mint,
+    soundInfo,
+    createEditionWithMintSchedules,
+  }
 
   // If the contract address is a SoundEdition contract
   async function isSoundEdition({ editionAddress }: { editionAddress: string }): Promise<boolean> {
@@ -150,6 +151,13 @@ export function SoundClient({
       }
 
       case interfaceIds.IMerkleDropMinter: {
+        const merkleDropMinter = MerkleDropMinter__factory.connect(mintSchedule.minterAddress, signerOrProvider)
+        const { merkleRootHash } = await merkleDropMinter.mintInfo(mintSchedule.editionAddress, mintSchedule.mintId)
+
+        const proof = await getMerkleProof({ root: merkleRootHash, userAddress })
+
+        if (!proof) return 0
+
         const userBalanceBigNum = await MerkleDropMinter__factory.connect(
           mintSchedule.minterAddress,
           signerOrProvider,
@@ -164,11 +172,25 @@ export function SoundClient({
     }
   }
 
+  const MerkleProofCache: Record<string, string[] | null> = {}
+  const MerkleProofPromises: Record<string, Promise<string[] | null>> = {}
+
+  async function getMerkleProof({ root, userAddress }: { root: string; userAddress: string }) {
+    const key = root + userAddress
+
+    const existingCacheValue = MerkleProofCache[key]
+
+    if (existingCacheValue !== undefined) return existingCacheValue
+
+    return (MerkleProofCache[key] = await (MerkleProofPromises[key] ||= client.soundApi
+      .merkleProof({ root, userAddress })
+      .finally(() => delete MerkleProofPromises[key])))
+  }
+
   async function mint({
     mintSchedule,
     quantity,
     affiliate = ADDRESS_ZERO,
-    getMerkleProof = _getMerkleProof,
     gasLimit,
     maxFeePerGas,
     maxPriorityFeePerGas,
@@ -176,7 +198,6 @@ export function SoundClient({
     mintSchedule: MintSchedule
     quantity: number
     affiliate?: string
-    getMerkleProof?: (root: string, unhashedLeaf: string) => Promise<string[] | null>
     gasLimit?: BigNumberish
     maxFeePerGas?: BigNumberish
     maxPriorityFeePerGas?: BigNumberish
@@ -212,8 +233,13 @@ export function SoundClient({
         const merkleDropMinter = MerkleDropMinter__factory.connect(mintSchedule.minterAddress, signer)
         const { merkleRootHash } = await merkleDropMinter.mintInfo(mintSchedule.editionAddress, mintSchedule.mintId)
 
-        const proof = await getMerkleProof(merkleRootHash, userAddress.toLowerCase())
-        if (!proof?.length) throw new NotFoundError('Unable to fetch merkle proof')
+        const proof = await getMerkleProof({ root: merkleRootHash, userAddress })
+
+        if (!proof)
+          throw new NotAllowedMint({
+            mintSchedule,
+            userAddress,
+          })
 
         return await merkleDropMinter.mint(
           mintSchedule.editionAddress,
@@ -507,14 +533,14 @@ export function SoundClient({
   }
 
   async function soundInfo(soundParams: ReleaseInfoQueryVariables) {
-    const { data, errors } = await soundApi.releaseInfo(soundParams)
+    const { data, errors } = await client.soundApi.releaseInfo(soundParams)
 
     const release = data?.release
     if (!release) throw new SoundNotFoundError({ ...soundParams, graphqlErrors: errors })
 
     return {
       ...release,
-      trackAudio: LazyPromise(() => soundApi.audioFromTrack({ trackId: release.track.id })),
+      trackAudio: LazyPromise(() => client.soundApi.audioFromTrack({ trackId: release.track.id })),
     }
   }
 
@@ -537,15 +563,7 @@ export function SoundClient({
     throw new UnsupportedCreatorAddressError({ chainId })
   }
 
-  return {
-    isSoundEdition,
-    mintSchedules,
-    activeMintSchedules,
-    eligibleQuantity,
-    mint,
-    soundInfo,
-    createEditionWithMintSchedules,
-  }
+  return client
 }
 
 export type SoundClient = ReturnType<typeof SoundClient>

@@ -16,6 +16,7 @@ import { expect } from 'chai'
 import { ethers } from 'hardhat'
 
 import { SoundClient } from '../src/client'
+import { NotAllowedMint } from '../src/errors'
 import { interfaceIds, MINTER_ROLE } from '../src/utils/constants'
 import { MerkleHelper, now } from './helpers'
 
@@ -83,7 +84,7 @@ beforeEach(async () => {
   artistWallet = signers[1]
   buyerWallet = signers[2]
 
-  client = SoundClient({ provider: ethers.provider, apiKey: '123' })
+  client = SoundClient({ provider: ethers.provider, apiKey: '123', environment: 'preview' })
   const fixture = await loadFixture(deployProtocol)
 
   soundCreator = fixture.soundCreator
@@ -568,10 +569,13 @@ describe('mint', () => {
         ethers.provider,
       ).balanceOf(buyerWallet.address)
 
+      // Mock merkle proof api call
+      client.soundApi.merkleProof = async ({ userAddress }) =>
+        merkleHelper.getProof({ merkleTree, address: userAddress })
+
       await client.mint({
         mintSchedule: mintSchedules[0],
         quantity,
-        getMerkleProof: async (_root, unhashedLeaf) => merkleHelper.getProof({ merkleTree, address: unhashedLeaf }),
       })
 
       const finalBalance = await SoundEditionV1__factory.connect(precomputedEditionAddress, ethers.provider).balanceOf(
@@ -585,10 +589,9 @@ describe('mint', () => {
         .mint({
           mintSchedule: mintSchedules[0],
           quantity: 1,
-          getMerkleProof: async (_root, _unhashedLeaf) => null,
         })
         .catch((error) => {
-          expect(error.message).to.equal('Unable to fetch merkle proof')
+          expect(error).instanceOf(NotAllowedMint)
         })
     })
   })
