@@ -157,11 +157,11 @@ describe('isSoundEdition', () => {
 
   it('Correctly identifies SoundEdition addresses', async () => {
     await setupTest({})
-    // for (let i = 0; i < 10; i++) {
-    //   const wallet = Wallet.createRandom()
-    //   const isEdition = await client.isSoundEdition({ editionAddress: wallet.address })
-    //   expect(isEdition).to.be.false
-    // }
+    for (let i = 0; i < 10; i++) {
+      const wallet = Wallet.createRandom()
+      const isEdition = await client.isSoundEdition({ editionAddress: wallet.address })
+      expect(isEdition).to.be.false
+    }
 
     const isEdition = await client.isSoundEdition({ editionAddress: precomputedEditionAddress })
     expect(isEdition).to.be.true
