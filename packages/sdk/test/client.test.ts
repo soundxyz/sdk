@@ -523,7 +523,7 @@ describe('mint', () => {
         userAddress: buyerWallet.address,
       })
       await client.mint({ mintSchedule: mintSchedules[0], quantity }).catch((error) => {
-        expect(error).to.instanceOf(NotEligibleMint)
+        expect(error).instanceOf(NotEligibleMint)
 
         assert(error instanceof NotEligibleMint)
 
