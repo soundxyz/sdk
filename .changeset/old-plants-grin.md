@@ -2,4 +2,4 @@
 '@soundxyz/sdk': patch
 ---
 
-Implement merkle proof query logic
+Implement proper Merkle eligibility check
