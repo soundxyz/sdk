@@ -91,7 +91,7 @@ export type MintConfigBase = {
 /**
  * The custom arguments required by each minter
  */
-export type MintScheduleConfig =
+export type MintConfig =
   | (MintConfigBase & {
       name: 'RangeEditionMinter'
       closingTime: BigNumberish

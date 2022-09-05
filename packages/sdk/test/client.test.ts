@@ -19,7 +19,7 @@ import { ethers } from 'hardhat'
 import type MerkleTree from 'merkletreejs'
 
 import { SoundClient } from '../src/client'
-import type { MintSchedule, ContractCall, MintScheduleConfig } from '../src/types'
+import type { MintSchedule, ContractCall, MintConfig } from '../src/types'
 import { interfaceIds, MINTER_ROLE } from '../src/utils/constants'
 import { now, MerkleHelper } from './helpers'
 
@@ -621,7 +621,7 @@ describe('createEditionWithMintSchedules', () => {
     const merkleHelper = MerkleHelper()
     const merkleRootHash = merkleHelper.getMerkleRoot(merkleHelper.getMerkleTree())
 
-    const mintScheduleConfigs: MintScheduleConfig[] = [
+    const mintConfigs: MintConfig[] = [
       {
         name: 'RangeEditionMinter' as const,
         minterAddress: rangeEditionMinter.address,
@@ -662,7 +662,7 @@ describe('createEditionWithMintSchedules', () => {
      */
     await client.createEditionWithMintSchedules({
       editionConfig,
-      mintScheduleConfigs,
+      mintConfigs,
       salt: DEFAULT_SALT,
     })
 
@@ -680,21 +680,21 @@ describe('createEditionWithMintSchedules', () => {
     const MINT_ID = 0
 
     // Verify mint configs exist
-    for (const mintScheduleConfig of mintScheduleConfigs) {
-      switch (mintScheduleConfig.name) {
+    for (const mintConfig of mintConfigs) {
+      switch (mintConfig.name) {
         case 'RangeEditionMinter': {
-          const minter = RangeEditionMinter__factory.connect(mintScheduleConfig.minterAddress, ethers.provider)
+          const minter = RangeEditionMinter__factory.connect(mintConfig.minterAddress, ethers.provider)
           const mintSchedule = await minter.mintInfo(precomputedEditionAddress, MINT_ID)
           expect(mintSchedule.startTime).to.equal(mint1StartTime)
           expect(mintSchedule.closingTime).to.equal(mint1ClosingTime)
           expect(mintSchedule.endTime).to.equal(mint2StartTime)
-          expect(mintSchedule.maxMintableLower).to.equal(mintScheduleConfig.maxMintableLower)
-          expect(mintSchedule.maxMintableUpper).to.equal(mintScheduleConfig.maxMintableUpper)
+          expect(mintSchedule.maxMintableLower).to.equal(mintConfig.maxMintableLower)
+          expect(mintSchedule.maxMintableUpper).to.equal(mintConfig.maxMintableUpper)
           expect(mintSchedule.maxMintablePerAccount).to.equal(mint1MaxMintablePerAccount)
           break
         }
         case 'FixedPriceSignatureMinter': {
-          const minter = FixedPriceSignatureMinter__factory.connect(mintScheduleConfig.minterAddress, ethers.provider)
+          const minter = FixedPriceSignatureMinter__factory.connect(mintConfig.minterAddress, ethers.provider)
           const mintSchedule = await minter.mintInfo(precomputedEditionAddress, MINT_ID)
           expect(mintSchedule.startTime).to.equal(mint2StartTime)
           expect(mintSchedule.endTime).to.equal(mint3StartTime)
@@ -702,7 +702,7 @@ describe('createEditionWithMintSchedules', () => {
           break
         }
         case 'MerkleDropMinter': {
-          const minter = MerkleDropMinter__factory.connect(mintScheduleConfig.minterAddress, ethers.provider)
+          const minter = MerkleDropMinter__factory.connect(mintConfig.minterAddress, ethers.provider)
           const mintSchedule = await minter.mintInfo(precomputedEditionAddress, MINT_ID)
           expect(mintSchedule.startTime).to.equal(mint3StartTime)
           expect(mintSchedule.endTime).to.equal(mint3StartTime + ONE_HOUR)

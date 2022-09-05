@@ -26,7 +26,7 @@ import type {
   SignerOrProvider,
   SoundClientConfig,
   EditionConfig,
-  MintScheduleConfig,
+  MintConfig,
   ChainId,
   ContractCall,
 } from './types'
@@ -228,11 +228,11 @@ export function SoundClient({
 
   async function createEditionWithMintSchedules({
     editionConfig,
-    mintScheduleConfigs,
+    mintConfigs,
     salt: customSalt,
   }: {
     editionConfig: EditionConfig
-    mintScheduleConfigs: MintScheduleConfig[]
+    mintConfigs: MintConfig[]
     salt?: string
   }) {
     const { signer, chainId, userAddress } = await _requireSigner()
@@ -256,7 +256,7 @@ export function SoundClient({
     const contractCalls: ContractCall[] = []
 
     // Grant MINTER_ROLE for each minter.
-    const mintersToGrantRole = Array.from(new Set(mintScheduleConfigs.map((m) => m.minterAddress)))
+    const mintersToGrantRole = Array.from(new Set(mintConfigs.map((m) => m.minterAddress)))
     for (const minterAddress of mintersToGrantRole) {
       contractCalls.push({
         contractAddress: editionAddress,
@@ -265,30 +265,30 @@ export function SoundClient({
     }
 
     // Add the createEditionMint calls.
-    for (const mintScheduleConfig of mintScheduleConfigs) {
-      if (!(mintScheduleConfig.name in minterNames)) {
-        throw new UnsupportedMinterError({ minterName: mintScheduleConfig.name })
+    for (const mintConfig of mintConfigs) {
+      if (!(mintConfig.name in minterNames)) {
+        throw new UnsupportedMinterError({ minterName: mintConfig.name })
       }
 
       /**
        * Set up the createEditionMint call for each mint config.
        */
-      switch (mintScheduleConfig.name) {
+      switch (mintConfig.name) {
         case 'RangeEditionMinter': {
           const minterInterface = RangeEditionMinter__factory.createInterface()
           contractCalls.push({
-            contractAddress: mintScheduleConfig.minterAddress,
+            contractAddress: mintConfig.minterAddress,
 
             calldata: minterInterface.encodeFunctionData('createEditionMint', [
               editionAddress,
-              mintScheduleConfig.price,
-              mintScheduleConfig.startTime,
-              mintScheduleConfig.closingTime,
-              mintScheduleConfig.endTime,
-              mintScheduleConfig.affiliateFeeBPS,
-              mintScheduleConfig.maxMintableLower,
-              mintScheduleConfig.maxMintableUpper,
-              mintScheduleConfig.maxMintablePerAccount,
+              mintConfig.price,
+              mintConfig.startTime,
+              mintConfig.closingTime,
+              mintConfig.endTime,
+              mintConfig.affiliateFeeBPS,
+              mintConfig.maxMintableLower,
+              mintConfig.maxMintableUpper,
+              mintConfig.maxMintablePerAccount,
             ]),
           })
           break
@@ -296,15 +296,15 @@ export function SoundClient({
         case 'FixedPriceSignatureMinter': {
           const minterInterface = FixedPriceSignatureMinter__factory.createInterface()
           contractCalls.push({
-            contractAddress: mintScheduleConfig.minterAddress,
+            contractAddress: mintConfig.minterAddress,
             calldata: minterInterface.encodeFunctionData('createEditionMint', [
               editionAddress,
-              mintScheduleConfig.price,
-              mintScheduleConfig.signer,
-              mintScheduleConfig.maxMintable,
-              mintScheduleConfig.startTime,
-              mintScheduleConfig.endTime,
-              mintScheduleConfig.affiliateFeeBPS,
+              mintConfig.price,
+              mintConfig.signer,
+              mintConfig.maxMintable,
+              mintConfig.startTime,
+              mintConfig.endTime,
+              mintConfig.affiliateFeeBPS,
             ]),
           })
           break
@@ -312,16 +312,16 @@ export function SoundClient({
         case 'MerkleDropMinter': {
           const minterInterface = MerkleDropMinter__factory.createInterface()
           contractCalls.push({
-            contractAddress: mintScheduleConfig.minterAddress,
+            contractAddress: mintConfig.minterAddress,
             calldata: minterInterface.encodeFunctionData('createEditionMint', [
               editionAddress,
-              mintScheduleConfig.merkleRootHash,
-              mintScheduleConfig.price,
-              mintScheduleConfig.startTime,
-              mintScheduleConfig.endTime,
-              mintScheduleConfig.affiliateFeeBPS,
-              mintScheduleConfig.maxMintable,
-              mintScheduleConfig.maxMintablePerAccount,
+              mintConfig.merkleRootHash,
+              mintConfig.price,
+              mintConfig.startTime,
+              mintConfig.endTime,
+              mintConfig.affiliateFeeBPS,
+              mintConfig.maxMintable,
+              mintConfig.maxMintablePerAccount,
             ]),
           })
           break
