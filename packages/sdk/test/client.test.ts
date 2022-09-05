@@ -157,11 +157,11 @@ describe('isSoundEdition', () => {
 
   it('Correctly identifies SoundEdition addresses', async () => {
     await setupTest({})
-    // for (let i = 0; i < 10; i++) {
-    //   const wallet = Wallet.createRandom()
-    //   const isEdition = await client.isSoundEdition({ editionAddress: wallet.address })
-    //   expect(isEdition).to.be.false
-    // }
+    for (let i = 0; i < 10; i++) {
+      const wallet = Wallet.createRandom()
+      const isEdition = await client.isSoundEdition({ editionAddress: wallet.address })
+      expect(isEdition).to.be.false
+    }
 
     const isEdition = await client.isSoundEdition({ editionAddress: precomputedEditionAddress })
     expect(isEdition).to.be.true
@@ -480,7 +480,12 @@ describe('mint', () => {
       await setupTest({ minterCalls })
 
       // provide signer to the sdk
-      client = SoundClient({ provider: ethers.provider, signer: buyerWallet, apiKey: '123' })
+      client = SoundClient({
+        provider: ethers.provider,
+        signer: buyerWallet,
+        apiKey: '123',
+        soundCreatorAddress: soundCreator.address,
+      })
       mintInfos = await client.activeMintsForEdition({ editionAddress: precomputedEditionAddress })
       expect(mintInfos[0].interfaceId).to.eq(interfaceIds.IRangeEditionMinter)
     })
@@ -590,7 +595,7 @@ describe('mint', () => {
 
 describe('createSoundAndMints', () => {
   beforeEach(() => {
-    client = SoundClient({ signer: artistWallet, apiKey: '123' })
+    client = SoundClient({ signer: artistWallet, apiKey: '123', soundCreatorAddress: soundCreator.address })
   })
 
   it('Creates a sound edition and mint schedules', async () => {

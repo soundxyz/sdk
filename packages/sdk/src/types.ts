@@ -28,6 +28,7 @@ export type SoundClientConfig = (
    * @default "production"
    */
   environment?: ApiEnvironments
+  soundCreatorAddress?: string
 }
 
 export type MintInfoBase = {

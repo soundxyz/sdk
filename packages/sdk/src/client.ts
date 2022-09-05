@@ -35,8 +35,8 @@ import {
   minterFactoryMap,
   ADDRESS_ZERO,
   supportedNetworks,
-  supportedChainIds,
   soundCreatorAddresses,
+  supportedChainIds,
   minterNames,
   MINTER_ROLE,
 } from './utils/constants'
@@ -44,9 +44,14 @@ import { validateAddress, getMerkleProof as _getMerkleProof } from './utils/help
 import type { ReleaseInfoQueryVariables } from './api/graphql/gql'
 import { SoundAPI } from './api/soundApi'
 import { LazyPromise } from './utils/promise'
-import { Provider } from '@ethersproject/abstract-provider'
 
-export function SoundClient({ signer, provider, apiKey, environment = 'production' }: SoundClientConfig) {
+export function SoundClient({
+  signer,
+  provider,
+  apiKey,
+  environment = 'production',
+  soundCreatorAddress,
+}: SoundClientConfig) {
   const soundApi = SoundAPI({
     apiKey,
     environment,
@@ -233,10 +238,11 @@ export function SoundClient({ signer, provider, apiKey, environment = 'productio
 
     const randomInt = Math.floor(Math.random() * 1_000_000_000_000)
     const salt = customSalt || hexZeroPad(hexlify(randomInt), 32)
-    const soundCreatorAddress = soundCreatorAddresses[chainId]
+
+    const creatorAdddress = _getCreatorAddress(chainId)
 
     // Precompute the edition address.
-    const editionAddress = await SoundCreatorV1__factory.connect(soundCreatorAddress, signer).soundEditionAddress(
+    const editionAddress = await SoundCreatorV1__factory.connect(creatorAdddress, signer).soundEditionAddress(
       userAddress,
       salt,
     )
@@ -338,7 +344,8 @@ export function SoundClient({ signer, provider, apiKey, environment = 'productio
       editionConfig.mintRandomnessTimeThreshold,
     ])
 
-    const soundCreatorContract = SoundCreatorV1__factory.connect(soundCreatorAddress, signer)
+    const creatorAddress = _getCreatorAddress(chainId)
+    const soundCreatorContract = SoundCreatorV1__factory.connect(creatorAddress, signer)
 
     return await soundCreatorContract.createSoundAndMints(
       salt,
@@ -508,6 +515,13 @@ export function SoundClient({ signer, provider, apiKey, environment = 'productio
 
   function _isSupportedChain(chainId: number) {
     return Object.values(supportedNetworks).includes(chainId as ChainId)
+  }
+
+  function _getCreatorAddress(chainId: number) {
+    if (chainId === supportedChainIds.LOCAL || (chainId === supportedChainIds.LOCAL_ALT && !soundCreatorAddress)) {
+      throw new Error('Must pass in soundCreatorAddress when using with a local network.')
+    }
+    return soundCreatorAddress || soundCreatorAddresses[chainId]
   }
 
   return {
