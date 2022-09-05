@@ -27,6 +27,25 @@ export class UnsupportedNetworkError extends Error {
   }
 }
 
+export class CreatorAddressMissingForLocalError extends Error {
+  readonly name = 'CreatorAddressMissingForLocalError'
+
+  constructor(message?: string) {
+    super(message || 'Must pass in soundCreatorAddress when using with a local network')
+  }
+}
+
+export class UnsupportedCreatorAddressError extends Error {
+  readonly name = 'UnsupportedCreatorAddressError'
+
+  readonly chainId: number
+  constructor({ chainId }: { chainId: number }) {
+    super('Unsupported creatorAddress for chain ID')
+
+    this.chainId = chainId
+  }
+}
+
 export class InvalidAddressError extends Error {
   readonly name = 'InvalidAddressError'
 
