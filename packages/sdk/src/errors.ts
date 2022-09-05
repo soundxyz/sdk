@@ -149,14 +149,24 @@ export class NotFoundError extends Error {
   }
 }
 
-export class NotAllowedMint extends Error {
+export class NotEligibleMint extends Error {
   readonly mintSchedule: MintScheduleBase
   readonly userAddress: string
+  readonly eligibleMintQuantity: number
 
-  constructor({ mintSchedule, userAddress }: { mintSchedule: MintScheduleBase; userAddress: string }) {
-    super('Not allowed to mint')
+  constructor({
+    mintSchedule,
+    userAddress,
+    eligibleMintQuantity,
+  }: {
+    mintSchedule: MintScheduleBase
+    userAddress: string
+    eligibleMintQuantity: number
+  }) {
+    super('Not eligible to mint')
 
     this.mintSchedule = mintSchedule
     this.userAddress = userAddress
+    this.eligibleMintQuantity = eligibleMintQuantity
   }
 }

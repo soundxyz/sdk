@@ -1,3 +1,7 @@
+import assert from 'assert'
+import { expect } from 'chai'
+import { ethers } from 'hardhat'
+
 import { Wallet } from '@ethersproject/wallet'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 import {
@@ -12,18 +16,16 @@ import {
   SoundEditionV1__factory,
   SoundFeeRegistry__factory,
 } from '@soundxyz/sound-protocol/typechain/index'
-import { expect } from 'chai'
-import { ethers } from 'hardhat'
 
 import { SoundClient } from '../src/client'
-import { NotAllowedMint } from '../src/errors'
+import { NotEligibleMint } from '../src/errors'
 import { interfaceIds, MINTER_ROLE } from '../src/utils/constants'
 import { MerkleHelper, now } from './helpers'
 
 import type { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import type MerkleTree from 'merkletreejs'
 
-import type { MintSchedule, ContractCall, MintConfig } from '../src/types'
+import type { ContractCall, MintConfig, MintSchedule } from '../src/types'
 
 const UINT32_MAX = 4294967295
 const NULL_ADDRESS = '0x0000000000000000000000000000000000000000'
@@ -521,7 +523,11 @@ describe('mint', () => {
         userAddress: buyerWallet.address,
       })
       await client.mint({ mintSchedule: mintSchedules[0], quantity }).catch((error) => {
-        expect(error.message).to.equal(`Not eligible to mint ${quantity}. Eligible quantity: ${eligibleQuantity}`)
+        expect(error).to.instanceOf(NotEligibleMint)
+
+        assert(error instanceof NotEligibleMint)
+
+        expect(error.eligibleMintQuantity).equal(eligibleQuantity)
       })
     })
   })
@@ -591,7 +597,7 @@ describe('mint', () => {
           quantity: 1,
         })
         .catch((error) => {
-          expect(error).instanceOf(NotAllowedMint)
+          expect(error).instanceOf(NotEligibleMint)
         })
     })
   })

@@ -43,6 +43,10 @@ export const soundCreatorAddresses = {
   [supportedChainIds.GOERLI]: '0x063df381b76207fa7ef94bc7f81f68cb6708ee0e',
 }
 
+export function isSoundCreatorAddressChain(chain: number): chain is keyof typeof soundCreatorAddresses {
+  return chain in soundCreatorAddresses
+}
+
 export const minterNames = {
   MerkleDropMinter: 'MerkleDropMinter',
   FixedPriceSignatureMinter: 'FixedPriceSignatureMinter',

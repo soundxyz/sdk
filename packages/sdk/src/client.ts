@@ -14,7 +14,7 @@ import {
   InvalidQuantityError,
   MissingSignerError,
   MissingSignerOrProviderError,
-  NotAllowedMint,
+  NotEligibleMint,
   NotSoundEditionError,
   SoundNotFoundError,
   UnsupportedCreatorAddressError,
@@ -25,6 +25,7 @@ import type { ChainId, MinterInterfaceId, SignerOrProvider, SoundClientConfig } 
 import {
   ADDRESS_ZERO,
   interfaceIds,
+  isSoundCreatorAddressChain,
   minterFactoryMap,
   minterNames,
   MINTER_ROLE,
@@ -207,9 +208,14 @@ export function SoundClient({
 
     const { signer, userAddress } = await _requireSigner()
 
-    const eligibleMintQty = await eligibleQuantity({ mintSchedule, userAddress })
-    if (eligibleMintQty < quantity)
-      throw new Error(`Not eligible to mint ${quantity}. Eligible quantity: ${eligibleMintQty}`)
+    const eligibleMintQuantity = await eligibleQuantity({ mintSchedule, userAddress })
+    if (eligibleMintQuantity < quantity) {
+      throw new NotEligibleMint({
+        eligibleMintQuantity,
+        mintSchedule,
+        userAddress,
+      })
+    }
 
     const txnOverrides = {
       value: mintSchedule.price.mul(quantity),
@@ -235,11 +241,13 @@ export function SoundClient({
 
         const proof = await getMerkleProof({ root: merkleRootHash, userAddress })
 
-        if (!proof)
-          throw new NotAllowedMint({
+        if (!proof) {
+          throw new NotEligibleMint({
             mintSchedule,
             userAddress,
+            eligibleMintQuantity,
           })
+        }
 
         return await merkleDropMinter.mint(
           mintSchedule.editionAddress,
@@ -556,9 +564,8 @@ export function SoundClient({
     if (soundCreatorAddress) {
       return soundCreatorAddress
     }
-    if (soundCreatorAddresses[chainId]) {
-      return soundCreatorAddresses[chainId] as string
-    }
+
+    if (isSoundCreatorAddressChain(chainId)) return soundCreatorAddresses[chainId]
 
     throw new UnsupportedCreatorAddressError({ chainId })
   }

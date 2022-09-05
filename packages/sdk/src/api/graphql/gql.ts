@@ -281,6 +281,8 @@ export type Auction = PermissionedAuction | PermissionlessAuction | RangeBoundAu
 export type AuctionConfigurationUploadStepInfo = {
   /** Type of auction */
   auctionType: AuctionType
+  /** Free mint auction configurations */
+  freeMint?: Maybe<AuctionUploadStepInfo>
   /** Min mint supply of auction */
   minQuantity: Scalars['Int']
   /** Max mint supply of auction */
@@ -289,12 +291,16 @@ export type AuctionConfigurationUploadStepInfo = {
   presaleMint?: Maybe<AuctionUploadStepInfo>
   /** Public mint auction configurations */
   publicMint: AuctionUploadStepInfo
+  /** Breakdown of mint quantities */
+  quantityBreakdown?: Maybe<Array<Scalars['Int']>>
 }
 
 /** Release auction configuration upload step input values */
 export type AuctionConfigurationUploadStepInput = {
   /** Type of auction */
   auctionType: AuctionType
+  /** Free mint auction configurations */
+  freeMint?: InputMaybe<AuctionUploadStepInput>
   /** Min mint supply of auction */
   minQuantity: Scalars['Int']
   /** Max mint supply of auction */
@@ -303,6 +309,8 @@ export type AuctionConfigurationUploadStepInput = {
   presaleMint?: InputMaybe<AuctionUploadStepInput>
   /** Public mint auction configurations */
   publicMint: AuctionUploadStepInput
+  /** Breakdown of mint quantities */
+  quantityBreakdown?: InputMaybe<Array<Scalars['Int']>>
 }
 
 /** Customize auction options based on type of sale */
@@ -333,6 +341,8 @@ export type AuctionType = typeof AuctionType[keyof typeof AuctionType]
 export type AuctionUploadStepInfo = {
   /** List of public addresses to allow for auction */
   allowList: Array<Scalars['String']>
+  /** Max mints per wallet for auction */
+  maxMintsPerWallet: Scalars['Int']
   /** Price per mint */
   price: Scalars['Float']
   /** Max supply for auction */
@@ -345,6 +355,8 @@ export type AuctionUploadStepInfo = {
 export type AuctionUploadStepInput = {
   /** List of public addresses to allow for auction */
   allowList: Array<Scalars['Address']>
+  /** Max mints per wallet for auction */
+  maxMintsPerWallet?: InputMaybe<Scalars['Int']>
   /** Price per mint */
   price: Scalars['Float']
   /** Max supply for auction */
@@ -1056,7 +1068,7 @@ export type MerkleTreeProof = {
   /** Merkle proof */
   proof: Array<Scalars['String']>
   /** Unhashed leaf in merkle tree */
-  unhashedLeaf?: Maybe<Scalars['String']>
+  unhashedLeaf: Scalars['String']
 }
 
 /** Release info upload step info */
@@ -1151,6 +1163,8 @@ export type Mutation = {
   artistAuctionMeta: ArtistAuctionOverrides
   /** [ADMIN | ARTIST_RELATIONS] Configure specific artist minting options */
   artistMintingOption: ArtistAuctionOverrides
+  /** [ARTIST] Upload metadata to Arweave */
+  arweaveUpload: Scalars['NonEmptyString']
   /** [ADMIN] Change the role of a specified user */
   changeRoleForUser: UserRoles
   /** [ARTIST] Upsert release mint edition creation from the client-side. An alternative to wait until the transaction is completed and automatically acknowledged on background processes. */
@@ -1337,6 +1351,11 @@ export type MutationartistAuctionMetaArgs = {
 export type MutationartistMintingOptionArgs = {
   artistAddress: Scalars['Address']
   auctionType: AuctionInputRef
+}
+
+/** Mutations */
+export type MutationarweaveUploadArgs = {
+  releaseId: Scalars['UUID']
 }
 
 /** Mutations */
@@ -2687,6 +2706,8 @@ export type ReleaseInfoUploadStepInfo = {
   behindTheMusic: Scalars['String']
   /** Cover image */
   coverImage: MediaUploadStepInfo
+  /** Text to introduce song to supporters */
+  description: Scalars['String']
   /** Genre */
   genre: Scalars['String']
   /** Title */
@@ -2697,8 +2718,6 @@ export type ReleaseInfoUploadStepInfo = {
   tracks: Array<TrackUploadStepInfo>
   /** Release type */
   type: Scalars['String']
-  /** Text to introduce song to supporters */
-  welcomeComment: Scalars['String']
 }
 
 /** Release info upload step input values */
@@ -2707,6 +2726,8 @@ export type ReleaseInfoUploadStepInput = {
   behindTheMusic: Scalars['String']
   /** Cover image */
   coverImage: UploadedMedia
+  /** Text to introduce song to supporters */
+  description: Scalars['String']
   /** Release genre */
   genre: Scalars['String']
   /** Title */
@@ -2717,8 +2738,6 @@ export type ReleaseInfoUploadStepInput = {
   tracks: Array<TrackUpload>
   /** Release type */
   type: ReleaseType
-  /** Text to introduce song to supporters */
-  welcomeComment: Scalars['String']
 }
 
 /** Meta input values for release */
@@ -2825,16 +2844,16 @@ export type RewardUploadStepInfo = {
 
 /** Release info upload step info */
 export type RewardsUploadStepInfo = {
-  /** Special golden egg image */
-  goldenEggImage: MediaUploadStepInfo
+  /** Special golden egg images */
+  goldenEggImages: Array<MediaUploadStepInfo>
   /** Custom rewards */
   rewards: Array<RewardUploadStepInfo>
 }
 
 /** Release rewards upload step input values */
 export type RewardsUploadStepInput = {
-  /** Special golden egg image */
-  goldenEggImage: UploadedMedia
+  /** Special golden egg images */
+  goldenEggImages: Array<UploadedMedia>
   /** Custom rewards */
   rewards?: InputMaybe<Array<RewardInput>>
 }
@@ -3286,6 +3305,8 @@ export type TrackAudio = {
 
 /** Uploaded track information */
 export type TrackUpload = {
+  /** Cover image */
+  coverImage?: InputMaybe<UploadedMedia>
   /** Duration of track in seconds */
   duration: Scalars['Int']
   /** Details of uploaded track file */
@@ -3298,6 +3319,8 @@ export type TrackUpload = {
 
 /** Release info upload step info */
 export type TrackUploadStepInfo = {
+  /** Details of uploaded track cover image */
+  coverImage?: Maybe<MediaUploadStepInfo>
   /** Duration of track in seconds */
   duration: Scalars['Int']
   /** Details of uploaded track file */
