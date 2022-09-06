@@ -15,7 +15,7 @@ const getNodeLeaf = (address: string) => {
   return Buffer.from(solidityKeccak256(['address'], [address]).slice(2), 'hex')
 }
 
-export const MerkleHelper = () => {
+export const MerkleTestHelper = () => {
   function getMerkleTree(): MerkleTree {
     const merkleTree = new MerkleTree(
       snapshot.map((address) => getNodeLeaf(address)),
@@ -34,9 +34,12 @@ export const MerkleHelper = () => {
     return merkleTree.getHexProof(getNodeLeaf(address))
   }
 
+  const emptyMerkleTree = new MerkleTree([], keccak256, { sortPairs: true })
+
   return {
     getMerkleTree,
     getMerkleRoot,
     getProof,
+    emptyMerkleTree,
   }
 }
