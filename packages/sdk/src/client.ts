@@ -272,12 +272,14 @@ export function SoundClient({
   }: {
     editionConfig: EditionConfig
     mintConfigs: MintConfig[]
-    salt?: string
+    salt?: number
   }) {
     const { signer, chainId, userAddress } = await _requireSigner()
 
+    if (customSalt && customSalt < 1000000) throw new Error('Salt must be greater than 1,000,000')
+
     const randomInt = Math.floor(Math.random() * 1_000_000_000_000)
-    const salt = customSalt || hexZeroPad(hexlify(randomInt), 32)
+    const salt = hexZeroPad(hexlify(Math.floor(customSalt || randomInt)), 32)
 
     const creatorAdddress = _getCreatorAddress(chainId)
 

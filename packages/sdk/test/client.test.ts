@@ -1,5 +1,6 @@
 import assert from 'assert'
 import { expect } from 'chai'
+import { hexlify, hexZeroPad } from '@ethersproject/bytes'
 import { ethers } from 'hardhat'
 
 import { Wallet } from '@ethersproject/wallet'
@@ -34,7 +35,7 @@ const SOUND_FEE = 0
 const ONE_HOUR = 3600
 const PRICE = 420420420
 const randomInt = Math.floor(Math.random() * 1_000_000_000_000)
-const DEFAULT_SALT = ethers.utils.hexZeroPad(ethers.utils.hexlify(randomInt), 32)
+const DEFAULT_SALT = hexZeroPad(hexlify(randomInt), 32)
 
 let client: SoundClient
 let soundCreator: SoundCreatorV1
@@ -99,14 +100,7 @@ beforeEach(async () => {
 /**
  * Sets up an edition and mint schedules.
  */
-export async function setupTest({
-  customSalt,
-  minterCalls = [],
-}: {
-  customSalt?: string
-  minterCalls?: ContractCall[]
-}) {
-  const salt = customSalt || DEFAULT_SALT
+export async function setupTest({ minterCalls = [] }: { minterCalls?: ContractCall[] }) {
   const editionInitArgs = [
     'Song Name',
     'SYMBOL',
@@ -121,7 +115,7 @@ export async function setupTest({
   ]
   const editionInterface = new ethers.utils.Interface(SoundEditionV1__factory.abi)
   const editionInitData = editionInterface.encodeFunctionData('initialize', editionInitArgs)
-  const editionAddress = await soundCreator.soundEditionAddress(artistWallet.address, salt)
+  const editionAddress = await soundCreator.soundEditionAddress(artistWallet.address, DEFAULT_SALT)
 
   const grantRolesCalls = [
     {
@@ -141,7 +135,7 @@ export async function setupTest({
   const allContractCalls = [...grantRolesCalls, ...minterCalls]
 
   await soundCreator.connect(artistWallet).createSoundAndMints(
-    salt,
+    DEFAULT_SALT,
     editionInitData,
     allContractCalls.map((d) => d.contractAddress),
     allContractCalls.map((d) => d.calldata),
@@ -671,16 +665,23 @@ describe('createEditionWithMintSchedules', () => {
       },
     ]
 
+    const customSalt = 1_000_000
+    const precomputedEditionAddress = await SoundCreatorV1__factory.connect(
+      soundCreator.address,
+      ethers.provider,
+    ).soundEditionAddress(artistWallet.address, hexZeroPad(hexlify(customSalt), 32))
+
     /**
      * Create sound edition and mint schedules.
      */
     await client.createEditionWithMintSchedules({
       editionConfig,
       mintConfigs,
-      salt: DEFAULT_SALT,
+      salt: customSalt,
     })
 
     const editionContract = SoundEditionV1__factory.connect(precomputedEditionAddress, ethers.provider)
+    const code = await ethers.provider.getCode(precomputedEditionAddress)
     const editionBaseURI = await editionContract.baseURI()
     const mintRandomnessTimeThreshold = await editionContract.mintRandomnessTimeThreshold()
     const fundingRecipient = await editionContract.fundingRecipient()
@@ -726,5 +727,85 @@ describe('createEditionWithMintSchedules', () => {
         }
       }
     }
+  })
+
+  it('throws an NUMERIC_FAULT error if salt is too large', () => {
+    const editionConfig = {
+      name: 'Test',
+      symbol: 'TEST',
+      metadataModule: NULL_ADDRESS,
+      baseURI: 'https://test.com',
+      contractURI: 'https://test.com',
+      fundingRecipient: NON_NULL_ADDRESS,
+      royaltyBPS: 0,
+      editionMaxMintable: 10,
+      mintRandomnessTokenThreshold: 10,
+      mintRandomnessTimeThreshold: 999999,
+    }
+
+    const mintConfigs: MintConfig[] = [
+      {
+        name: 'RangeEditionMinter' as const,
+        minterAddress: rangeEditionMinter.address,
+        price: PRICE,
+        startTime: now(),
+        closingTime: now() + ONE_HOUR / 2,
+        endTime: now() + ONE_HOUR,
+        maxMintableLower: 5,
+        maxMintableUpper: 10,
+        maxMintablePerAccount: 2,
+        affiliateFeeBPS: 0,
+      },
+    ]
+
+    client
+      .createEditionWithMintSchedules({
+        editionConfig,
+        mintConfigs,
+        salt: Number.MAX_SAFE_INTEGER,
+      })
+      .catch((error) => {
+        expect(error.code).to.eq('NUMERIC_FAULT')
+      })
+  })
+
+  it('throws an error if salt is too small', () => {
+    const editionConfig = {
+      name: 'Test',
+      symbol: 'TEST',
+      metadataModule: NULL_ADDRESS,
+      baseURI: 'https://test.com',
+      contractURI: 'https://test.com',
+      fundingRecipient: NON_NULL_ADDRESS,
+      royaltyBPS: 0,
+      editionMaxMintable: 10,
+      mintRandomnessTokenThreshold: 10,
+      mintRandomnessTimeThreshold: 999999,
+    }
+
+    const mintConfigs: MintConfig[] = [
+      {
+        name: 'RangeEditionMinter' as const,
+        minterAddress: rangeEditionMinter.address,
+        price: PRICE,
+        startTime: now(),
+        closingTime: now() + ONE_HOUR / 2,
+        endTime: now() + ONE_HOUR,
+        maxMintableLower: 5,
+        maxMintableUpper: 10,
+        maxMintablePerAccount: 2,
+        affiliateFeeBPS: 0,
+      },
+    ]
+
+    client
+      .createEditionWithMintSchedules({
+        editionConfig,
+        mintConfigs,
+        salt: 9_999_999,
+      })
+      .catch((error) => {
+        expect(error.message).to.eq('Salt must be greater than 1,000,000')
+      })
   })
 })
