@@ -20,7 +20,7 @@ import {
 import { SoundClient } from '../src/client'
 import { NotEligibleMint } from '../src/errors'
 import { interfaceIds, MINTER_ROLE } from '../src/utils/constants'
-import { MerkleHelper, now } from './helpers'
+import { MerkleTestHelper, now } from './helpers'
 
 import type { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import type MerkleTree from 'merkletreejs'
@@ -533,13 +533,13 @@ describe('mint', () => {
   })
 
   describe('MerkleDropMinter', () => {
-    const merkleHelper = MerkleHelper()
+    const merkleTestHelper = MerkleTestHelper()
     let merkleTree: MerkleTree
     let mintSchedules: MintSchedule[] = []
 
     beforeEach(async () => {
-      merkleTree = merkleHelper.getMerkleTree()
-      const merkleRoot = merkleHelper.getMerkleRoot(merkleTree)
+      merkleTree = merkleTestHelper.getMerkleTree()
+      const merkleRoot = merkleTestHelper.getMerkleRoot(merkleTree)
 
       const minter = MerkleDropMinter__factory.connect(merkleDropMinter.address, artistWallet)
       const startTime = now()
@@ -577,7 +577,7 @@ describe('mint', () => {
 
       // Mock merkle proof api call
       client.soundApi.merkleProof = async ({ userAddress }) =>
-        merkleHelper.getProof({ merkleTree, address: userAddress })
+        merkleTestHelper.getProof({ merkleTree, address: userAddress })
 
       await client.mint({
         mintSchedule: mintSchedules[0],
@@ -591,6 +591,11 @@ describe('mint', () => {
     })
 
     it('Should throw error if merkle proof is null', async () => {
+      // Set up client so it fetches an empty merkle tree
+      client.soundApi.merkleProof = async ({ userAddress }) =>
+        merkleTestHelper.getProof({ merkleTree: merkleTestHelper.emptyMerkleTree, address: userAddress })
+
+      // Test client throws expected error
       await client
         .mint({
           mintSchedule: mintSchedules[0],
@@ -628,8 +633,8 @@ describe('createEditionWithMintSchedules', () => {
     const mint3StartTime = mint1StartTime + ONE_HOUR * 2
     const mint1MaxMintablePerAccount = 2
     const mint3MaxMintablePerAccount = 3
-    const merkleHelper = MerkleHelper()
-    const merkleRootHash = merkleHelper.getMerkleRoot(merkleHelper.getMerkleTree())
+    const merkleTestHelper = MerkleTestHelper()
+    const merkleRootHash = merkleTestHelper.getMerkleRoot(merkleTestHelper.getMerkleTree())
 
     const mintConfigs: MintConfig[] = [
       {

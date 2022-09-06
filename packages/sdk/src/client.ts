@@ -157,7 +157,7 @@ export function SoundClient({
 
         const proof = await getMerkleProof({ root: merkleRootHash, userAddress })
 
-        if (!proof) return 0
+        if (!proof?.length) return 0
 
         const userBalanceBigNum = await MerkleDropMinter__factory.connect(
           mintSchedule.minterAddress,
@@ -241,7 +241,7 @@ export function SoundClient({
 
         const proof = await getMerkleProof({ root: merkleRootHash, userAddress })
 
-        if (!proof) {
+        if (!proof?.length) {
           throw new NotEligibleMint({
             mintSchedule,
             userAddress,
