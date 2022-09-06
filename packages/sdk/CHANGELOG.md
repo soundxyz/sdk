@@ -1,5 +1,11 @@
 # @soundxyz/sdk
 
+## 0.0.9
+
+### Patch Changes
+
+- [#44](https://github.com/soundxyz/sdk/pull/44) [`3682273`](https://github.com/soundxyz/sdk/commit/3682273ad0e4c5bfcb79bf7b297bef8c90c3d1d4) Thanks [@gigamesh](https://github.com/gigamesh)! - Export types
+
 ## 0.0.8
 
 ### Patch Changes
