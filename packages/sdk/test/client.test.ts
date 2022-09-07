@@ -680,8 +680,11 @@ describe('createEditionWithMintSchedules', () => {
       salt: customSalt,
     })
 
-    const editionContract = SoundEditionV1__factory.connect(precomputedEditionAddress, ethers.provider)
+    console.log({ precomputedEditionAddress })
     const code = await ethers.provider.getCode(precomputedEditionAddress)
+    console.log({ code })
+
+    const editionContract = SoundEditionV1__factory.connect(precomputedEditionAddress, ethers.provider)
     const editionBaseURI = await editionContract.baseURI()
     const mintRandomnessTimeThreshold = await editionContract.mintRandomnessTimeThreshold()
     const fundingRecipient = await editionContract.fundingRecipient()
@@ -743,25 +746,10 @@ describe('createEditionWithMintSchedules', () => {
       mintRandomnessTimeThreshold: 999999,
     }
 
-    const mintConfigs: MintConfig[] = [
-      {
-        name: 'RangeEditionMinter' as const,
-        minterAddress: rangeEditionMinter.address,
-        price: PRICE,
-        startTime: now(),
-        closingTime: now() + ONE_HOUR / 2,
-        endTime: now() + ONE_HOUR,
-        maxMintableLower: 5,
-        maxMintableUpper: 10,
-        maxMintablePerAccount: 2,
-        affiliateFeeBPS: 0,
-      },
-    ]
-
     client
       .createEditionWithMintSchedules({
         editionConfig,
-        mintConfigs,
+        mintConfigs: [],
         salt: Number.MAX_SAFE_INTEGER,
       })
       .catch((error) => {
@@ -783,29 +771,71 @@ describe('createEditionWithMintSchedules', () => {
       mintRandomnessTimeThreshold: 999999,
     }
 
-    const mintConfigs: MintConfig[] = [
-      {
-        name: 'RangeEditionMinter' as const,
-        minterAddress: rangeEditionMinter.address,
-        price: PRICE,
-        startTime: now(),
-        closingTime: now() + ONE_HOUR / 2,
-        endTime: now() + ONE_HOUR,
-        maxMintableLower: 5,
-        maxMintableUpper: 10,
-        maxMintablePerAccount: 2,
-        affiliateFeeBPS: 0,
-      },
-    ]
-
     client
       .createEditionWithMintSchedules({
         editionConfig,
-        mintConfigs,
+        mintConfigs: [],
         salt: 9_999_999,
       })
       .catch((error) => {
         expect(error.message).to.eq('Salt must be greater than 1,000,000')
       })
+  })
+
+  it('fails with a short string salt', () => {
+    const editionConfig = {
+      name: 'Test',
+      symbol: 'TEST',
+      metadataModule: NULL_ADDRESS,
+      baseURI: 'https://test.com',
+      contractURI: 'https://test.com',
+      fundingRecipient: NON_NULL_ADDRESS,
+      royaltyBPS: 0,
+      editionMaxMintable: 10,
+      mintRandomnessTokenThreshold: 10,
+      mintRandomnessTimeThreshold: 999999,
+    }
+
+    client
+      .createEditionWithMintSchedules({
+        editionConfig,
+        mintConfigs: [],
+        salt: 'helloworld',
+      })
+      .catch((error) => {
+        expect(error.message).to.eq('Salt must be at least 16 characters')
+      })
+  })
+
+  const baseURI = 'https://test.com'
+
+  it('succeeds with a string as salt', async () => {
+    const editionConfig = {
+      name: 'Test',
+      symbol: 'TEST',
+      metadataModule: NULL_ADDRESS,
+      baseURI,
+      contractURI: 'https://test.com',
+      fundingRecipient: NON_NULL_ADDRESS,
+      royaltyBPS: 0,
+      editionMaxMintable: 10,
+      mintRandomnessTokenThreshold: 10,
+      mintRandomnessTimeThreshold: 999999,
+    }
+
+    const salt = 'helloworldhelloworldhellow'
+
+    client.createEditionWithMintSchedules({
+      editionConfig,
+      mintConfigs: [],
+      salt,
+    })
+
+    const expectedAddress = await soundCreator.soundEditionAddress(artistWallet.address, salt)
+
+    const edition = await SoundEditionV1__factory.connect(expectedAddress, ethers.provider)
+    const expectedBaseURI = await edition.baseURI()
+
+    expect(expectedBaseURI).to.eq(baseURI)
   })
 })

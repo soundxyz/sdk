@@ -50,6 +50,7 @@ importers:
       '@ethersproject/providers': ^5.7.0
       '@ethersproject/sha2': ^5.7.0
       '@ethersproject/solidity': ^5.7.0
+      '@ethersproject/strings': ^5.7.0
       '@ethersproject/units': ^5.7.0
       '@ethersproject/wallet': ^5.7.0
       '@graphql-codegen/cli': ^2.11.7
@@ -96,6 +97,7 @@ importers:
       '@ethersproject/providers': 5.7.0
       '@ethersproject/sha2': 5.7.0
       '@ethersproject/solidity': 5.7.0
+      '@ethersproject/strings': 5.7.0
       '@ethersproject/units': 5.7.0
       '@ethersproject/wallet': 5.7.0
       '@graphql-codegen/cli': 2.12.0_3anto3m4ywkedqkwjav66cpuei

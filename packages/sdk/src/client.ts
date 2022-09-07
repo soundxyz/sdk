@@ -1,4 +1,5 @@
-import { hexlify, hexZeroPad } from '@ethersproject/bytes'
+import { hexlify, hexZeroPad, BytesLike } from '@ethersproject/bytes'
+import { toUtf8Bytes } from '@ethersproject/strings'
 import {
   FixedPriceSignatureMinter__factory,
   IMinterModule__factory,
@@ -272,14 +273,27 @@ export function SoundClient({
   }: {
     editionConfig: EditionConfig
     mintConfigs: MintConfig[]
-    salt?: number
+    salt?: number | string
   }) {
     const { signer, chainId, userAddress } = await _requireSigner()
 
-    if (customSalt && customSalt < 1000000) throw new Error('Salt must be greater than 1,000,000')
-
-    const randomInt = Math.floor(Math.random() * 1_000_000_000_000)
-    const salt = hexZeroPad(hexlify(Math.floor(customSalt || randomInt)), 32)
+    let salt: BytesLike
+    switch (typeof customSalt) {
+      case 'number': {
+        if (customSalt < 1000000) throw new Error('Salt must be greater than 1,000,000')
+        salt = hexZeroPad(hexlify(Math.floor(customSalt)), 32)
+        break
+      }
+      case 'string': {
+        if (customSalt.length < 16) throw new Error('Salt must be at least 16 characters')
+        salt = hexZeroPad(hexlify(toUtf8Bytes(customSalt)), 32)
+        break
+      }
+      default: {
+        const randomInt = Math.floor(Math.random() * 1_000_000_000_000)
+        salt = hexZeroPad(hexlify(Math.floor(randomInt)), 32)
+      }
+    }
 
     const creatorAdddress = _getCreatorAddress(chainId)
 
