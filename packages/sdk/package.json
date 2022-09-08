@@ -37,6 +37,7 @@
     "@ethersproject/abstract-provider": "^5.7.0",
     "@ethersproject/abstract-signer": "^5.7.0",
     "@ethersproject/address": "^5.7.0",
+    "keccak256": "^1.0.6",
     "zod": "^3.18.0"
   },
   "devDependencies": {
@@ -72,7 +73,6 @@
     "ethers": "^5.7.0",
     "graphql": "^16.6.0",
     "hardhat": "^2.10.2",
-    "keccak256": "^1.0.6",
     "merkletreejs": "^0.2.32",
     "prettier": "^2.7.1",
     "require-env-variable": "^4.0.1",
