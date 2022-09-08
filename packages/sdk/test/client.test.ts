@@ -752,9 +752,9 @@ describe('createEditionWithMintSchedules', () => {
       })
   })
 
-  const baseURI = 'https://test.com'
-
   it('succeeds with a UUID as salt', async () => {
+    const baseURI = 'https://test.com'
+
     const editionConfig = {
       name: 'Test',
       symbol: 'TEST',

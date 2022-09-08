@@ -1,5 +1,4 @@
 import { v4 as uuidv4 } from 'uuid'
-import uuidValidate from 'uuid-validate'
 import {
   FixedPriceSignatureMinter__factory,
   IMinterModule__factory,
@@ -275,8 +274,6 @@ export function SoundClient({
     salt?: string
   }) {
     const { signer, chainId, userAddress } = await _requireSigner()
-
-    if (customSalt && !uuidValidate(customSalt)) throw new Error('Salt must be a valid UUID')
 
     const formattedSalt = uuidToBytes32(customSalt || uuidv4())
 
