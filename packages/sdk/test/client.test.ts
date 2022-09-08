@@ -492,6 +492,12 @@ describe('mint', () => {
     })
 
     it(`Successfully mints via RangeEditionMinter`, async () => {
+      expect(
+        await client.soundNumSold({
+          contractAddress: precomputedEditionAddress,
+        }),
+      ).to.equal(0)
+
       const quantity = 2
       const initialBalance = await SoundEditionV1__factory.connect(
         precomputedEditionAddress,
@@ -572,6 +578,12 @@ describe('mint', () => {
     })
 
     it(`Successfully mints via MerkleDropMinter`, async () => {
+      expect(
+        await client.soundNumSold({
+          contractAddress: precomputedEditionAddress,
+        }),
+      ).to.equal(0)
+
       const quantity = 1
       const initialBalance = await SoundEditionV1__factory.connect(
         precomputedEditionAddress,
