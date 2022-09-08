@@ -572,15 +572,6 @@ export function SoundClient({
     throw new UnsupportedCreatorAddressError({ chainId })
   }
 
-  function _convertStringToNumber(str: string) {
-    let numString = ''
-    for (var i = 0; i < str.length; i++) {
-      numString += str.charCodeAt(i).toString()
-    }
-    console.log(numString)
-    return parseInt(numString)
-  }
-
   return client
 }
 
