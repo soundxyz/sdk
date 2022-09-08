@@ -1,5 +1,12 @@
 # @soundxyz/sdk
 
+## 0.1.0
+
+### Minor Changes
+
+- [#47](https://github.com/soundxyz/sdk/pull/47) [`f6e54d0`](https://github.com/soundxyz/sdk/commit/f6e54d07fef26e6f653de2278f3199f92e19ca5a) Thanks [@gigamesh](https://github.com/gigamesh)! - - Enables edition salt to be any string or number, which we hash & format to Bytes32
+  - Adds public expectedEditionAddress function
+
 ## 0.0.10
 
 ### Patch Changes
