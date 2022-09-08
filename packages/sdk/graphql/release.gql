@@ -10,7 +10,6 @@ query ReleaseInfo($contractAddress: Address!, $editionId: String) {
     title
     season
     quantity
-    numSold
     quantityLowerBound
     quantityUpperBound
     totalRaised

@@ -396,6 +396,14 @@ export function SoundClient({
 
     return {
       ...release,
+      numSold: async function numSold() {
+        const soundCreatorContract = SoundEditionV1__factory.connect(
+          soundParams.contractAddress,
+          (await _requireSignerOrProvider()).signerOrProvider,
+        )
+
+        return (await soundCreatorContract.totalMinted()).toNumber()
+      },
       trackAudio: LazyPromise(() => client.soundApi.audioFromTrack({ trackId: release.track.id })),
     }
   }
