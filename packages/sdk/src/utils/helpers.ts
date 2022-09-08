@@ -1,9 +1,6 @@
 import { isAddress } from '@ethersproject/address'
-import { BigNumber } from '@ethersproject/bignumber'
-import uuidToHex from 'uuid-to-hex'
-import { hexZeroPad } from '@ethersproject/bytes'
-import uuidValidate from 'uuid-validate'
 import { InvalidAddressError } from '../errors'
+import keccak256 from 'keccak256'
 
 export function validateAddress(contractAddress: string) {
   if (!isAddress(contractAddress)) {
@@ -11,10 +8,6 @@ export function validateAddress(contractAddress: string) {
   }
 }
 
-export function uuidToBytes32(uuid: string) {
-  if (!uuidValidate(uuid)) throw new Error('Salt must be a valid UUID')
-
-  const uuidAsBigNum = BigNumber.from(uuidToHex(uuid, true))
-
-  return hexZeroPad(uuidAsBigNum.toHexString(), 32)
+export function getSaltAsBytes32(salt: string | number) {
+  return '0x' + keccak256(salt).toString('hex')
 }

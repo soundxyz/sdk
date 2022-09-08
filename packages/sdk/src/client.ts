@@ -1,4 +1,3 @@
-import { v4 as uuidv4 } from 'uuid'
 import {
   FixedPriceSignatureMinter__factory,
   IMinterModule__factory,
@@ -32,7 +31,7 @@ import {
   supportedChainIds,
   supportedNetworks,
 } from './utils/constants'
-import { validateAddress, uuidToBytes32 } from './utils/helpers'
+import { getSaltAsBytes32, validateAddress } from './utils/helpers'
 import { LazyPromise } from './utils/promise'
 import type { Signer } from '@ethersproject/abstract-signer'
 import type { BigNumberish } from '@ethersproject/bignumber'
@@ -275,7 +274,7 @@ export function SoundClient({
   }) {
     const { signer, chainId, userAddress } = await _requireSigner()
 
-    const formattedSalt = uuidToBytes32(customSalt || uuidv4())
+    const formattedSalt = getSaltAsBytes32(customSalt || Math.random() * 1_000_000_000_000_000)
 
     const creatorAdddress = _getCreatorAddress(chainId)
 
