@@ -1,7 +1,7 @@
 import type { BigNumber, BigNumberish } from '@ethersproject/bignumber'
 import type { Signer } from '@ethersproject/abstract-signer'
 import type { Provider } from '@ethersproject/abstract-provider'
-import type { ApiEnvironments, supportedChainIds, minterNames } from './utils/constants'
+import type { ApiEnvironments, supportedChainIds } from './utils/constants'
 import type { interfaceIds } from '@soundxyz/sound-protocol'
 
 /*********************************************************
@@ -49,17 +49,36 @@ export type MinterInterfaceId =
   | typeof interfaceIds.IFixedPriceSignatureMinter
   | typeof interfaceIds.IRangeEditionMinter
 
-export type MintSchedule =
-  | (MintScheduleBase & {
-      interfaceId: typeof interfaceIds.IRangeEditionMinter
-      maxMintableLower: number
-      maxMintableUpper: number
-      closingTime: number
-    })
-  | (MintScheduleBase & {
-      interfaceId: typeof interfaceIds.IMerkleDropMinter | typeof interfaceIds.IFixedPriceSignatureMinter
-      maxMintable: number
-    })
+export type RangeEditionSchedule = MintScheduleBase & {
+  mintType: 'RangeEdition'
+  maxMintableLower: number
+  maxMintableUpper: number
+  closingTime: number
+}
+
+export type MerkleDropSchedule = MintScheduleBase & {
+  mintType: 'MerkleDrop'
+  maxMintable: number
+}
+
+export type FixedPriceSignatureSchedule = MintScheduleBase & {
+  mintType: 'FixedPriceSignature'
+  maxMintable: number
+}
+
+export type MintSchedule = RangeEditionSchedule | MerkleDropSchedule | FixedPriceSignatureSchedule
+
+export function isRangeEditionSchedule(schedule: MintSchedule): schedule is RangeEditionSchedule {
+  return schedule.mintType === 'RangeEdition'
+}
+
+export function isMerkleDropSchedule(schedule: MintSchedule): schedule is MerkleDropSchedule {
+  return schedule.mintType === 'MerkleDrop'
+}
+
+export function isFixedPriceSignatureSchedule(schedule: MintSchedule): schedule is FixedPriceSignatureSchedule {
+  return schedule.mintType === 'FixedPriceSignature'
+}
 
 /**
  * The arguments required by SoundEdition.initialize
@@ -77,7 +96,6 @@ export type EditionConfig = {
   mintRandomnessTimeThreshold: number
 }
 
-export type minterNames = ValueOf<typeof minterNames>
 /**
  * The arguments required for all minter calls.
  */
@@ -92,25 +110,40 @@ export type MintConfigBase = {
 /**
  * The custom arguments required by each minter
  */
-export type MintConfig =
-  | (MintConfigBase & {
-      name: 'RangeEditionMinter'
-      closingTime: BigNumberish
-      maxMintableLower: BigNumberish
-      maxMintableUpper: BigNumberish
-      maxMintablePerAccount: BigNumberish
-    })
-  | (MintConfigBase & {
-      name: 'MerkleDropMinter'
-      merkleRootHash: string
-      maxMintable: BigNumberish
-      maxMintablePerAccount: BigNumberish
-    })
-  | (MintConfigBase & {
-      name: 'FixedPriceSignatureMinter'
-      signer: string
-      maxMintable: BigNumberish
-    })
+export type MerkleDropConfig = MintConfigBase & {
+  mintType: 'MerkleDrop'
+  merkleRootHash: string
+  maxMintable: BigNumberish
+  maxMintablePerAccount: BigNumberish
+}
+
+export type RangeEditionConfig = MintConfigBase & {
+  mintType: 'RangeEdition'
+  closingTime: BigNumberish
+  maxMintableLower: BigNumberish
+  maxMintableUpper: BigNumberish
+  maxMintablePerAccount: BigNumberish
+}
+
+export type FixedPriceSignatureConfig = MintConfigBase & {
+  mintType: 'FixedPriceSignature'
+  signer: string
+  maxMintable: BigNumberish
+}
+
+export type MintConfig = MerkleDropConfig | RangeEditionConfig | FixedPriceSignatureConfig
+
+export function isMerkleDropConfig(config: MintConfig): config is MerkleDropConfig {
+  return config.mintType === 'MerkleDrop'
+}
+
+export function isRangeEditionConfig(config: MintConfig): config is RangeEditionConfig {
+  return config.mintType === 'RangeEdition'
+}
+
+export function isFixedPriceSignatureConfig(config: MintConfig): config is FixedPriceSignatureConfig {
+  return config.mintType === 'FixedPriceSignature'
+}
 
 export type ContractCall = {
   contractAddress: string

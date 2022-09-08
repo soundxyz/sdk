@@ -1,3 +1,4 @@
+import { interfaceIds } from '@soundxyz/sound-protocol'
 import {
   FixedPriceSignatureMinter__factory,
   IMinterModule__factory,
@@ -6,7 +7,7 @@ import {
   SoundCreatorV1__factory,
   SoundEditionV1__factory,
 } from '@soundxyz/sound-protocol/typechain/index'
-import { interfaceIds } from '@soundxyz/sound-protocol'
+
 import { SoundAPI } from './api/soundApi'
 import {
   CreatorAddressMissingForLocalError,
@@ -20,26 +21,24 @@ import {
   UnsupportedMinterError,
   UnsupportedNetworkError,
 } from './errors'
-import type { ChainId, MinterInterfaceId, SignerOrProvider, SoundClientConfig } from './types'
 import {
   ADDRESS_ZERO,
   isSoundCreatorAddressChain,
-  minterFactoryMap,
-  minterNames,
   MINTER_ROLE,
+  minterFactoryMap,
   soundCreatorAddresses,
   supportedChainIds,
   supportedNetworks,
 } from './utils/constants'
 import { getSaltAsBytes32, validateAddress } from './utils/helpers'
 import { LazyPromise } from './utils/promise'
+
+import type { ChainId, MinterInterfaceId, SignerOrProvider, SoundClientConfig } from './types'
 import type { Signer } from '@ethersproject/abstract-signer'
 import type { BigNumberish } from '@ethersproject/bignumber'
 import type { ContractTransaction } from '@ethersproject/contracts'
 import type { ReleaseInfoQueryVariables } from './api/graphql/gql'
 import type { ContractCall, EditionConfig, MintConfig, MintSchedule } from './types'
-
-type InterfaceId = keyof typeof interfaceIds
 
 export function SoundClient({
   signer,
@@ -120,8 +119,8 @@ export function SoundClient({
     }
 
     // Checks for child minter custom logic
-    switch (mintSchedule.interfaceId) {
-      case interfaceIds.IRangeEditionMinter: {
+    switch (mintSchedule.mintType) {
+      case 'RangeEdition': {
         // handle range edition case
         const maxQty =
           timestamp < mintSchedule.closingTime ? mintSchedule.maxMintableUpper : mintSchedule.maxMintableLower
@@ -140,8 +139,8 @@ export function SoundClient({
 
     const { signerOrProvider } = await _requireSignerOrProvider()
     // look up max mintable per account and user's already minted tally
-    switch (mintSchedule.interfaceId) {
-      case interfaceIds.IRangeEditionMinter: {
+    switch (mintSchedule.mintType) {
+      case 'RangeEdition': {
         const userBalanceBigNum = await RangeEditionMinter__factory.connect(
           mintSchedule.minterAddress,
           signerOrProvider,
@@ -151,7 +150,7 @@ export function SoundClient({
         return mintSchedule.maxMintablePerAccount - userMintedBalance
       }
 
-      case interfaceIds.IMerkleDropMinter: {
+      case 'MerkleDrop': {
         const merkleDropMinter = MerkleDropMinter__factory.connect(mintSchedule.minterAddress, signerOrProvider)
         const { merkleRootHash } = await merkleDropMinter.mintInfo(mintSchedule.editionAddress, mintSchedule.mintId)
 
@@ -224,8 +223,8 @@ export function SoundClient({
       maxPriorityFeePerGas,
     }
 
-    switch (mintSchedule.interfaceId) {
-      case interfaceIds.IRangeEditionMinter: {
+    switch (mintSchedule.mintType) {
+      case 'RangeEdition': {
         return RangeEditionMinter__factory.connect(mintSchedule.minterAddress, signer).mint(
           mintSchedule.editionAddress,
           mintSchedule.mintId,
@@ -235,7 +234,7 @@ export function SoundClient({
         )
       }
 
-      case interfaceIds.IMerkleDropMinter: {
+      case 'MerkleDrop': {
         const merkleDropMinter = MerkleDropMinter__factory.connect(mintSchedule.minterAddress, signer)
         const { merkleRootHash } = await merkleDropMinter.mintInfo(mintSchedule.editionAddress, mintSchedule.mintId)
 
@@ -303,15 +302,11 @@ export function SoundClient({
 
     // Add the createEditionMint calls.
     for (const mintConfig of mintConfigs) {
-      if (!(mintConfig.name in minterNames)) {
-        throw new UnsupportedMinterError({ minterName: mintConfig.name })
-      }
-
       /**
        * Set up the createEditionMint call for each mint config.
        */
-      switch (mintConfig.name) {
-        case 'RangeEditionMinter': {
+      switch (mintConfig.mintType) {
+        case 'RangeEdition': {
           const minterInterface = RangeEditionMinter__factory.createInterface()
           contractCalls.push({
             contractAddress: mintConfig.minterAddress,
@@ -330,7 +325,7 @@ export function SoundClient({
           })
           break
         }
-        case 'FixedPriceSignatureMinter': {
+        case 'FixedPriceSignature': {
           const minterInterface = FixedPriceSignatureMinter__factory.createInterface()
           contractCalls.push({
             contractAddress: mintConfig.minterAddress,
@@ -346,7 +341,7 @@ export function SoundClient({
           })
           break
         }
-        case 'MerkleDropMinter': {
+        case 'MerkleDrop': {
           const minterInterface = MerkleDropMinter__factory.createInterface()
           contractCalls.push({
             contractAddress: mintConfig.minterAddress,
@@ -478,6 +473,7 @@ export function SoundClient({
             const minterContract = minterFactoryMap[interfaceId].connect(minterAddress, signerOrProvider)
             const mintSchedule = await minterContract.mintInfo(editionAddress, mintId)
             return {
+              mintType: 'RangeEdition',
               interfaceId,
               mintId: mintId.toNumber(),
               editionAddress,
@@ -493,11 +489,11 @@ export function SoundClient({
               totalMinted: mintSchedule.totalMinted,
             }
           }
-          default: {
+          case interfaceIds.IMerkleDropMinter: {
             const minterContract = minterFactoryMap[interfaceId].connect(minterAddress, signerOrProvider)
             const mintSchedule = await minterContract.mintInfo(editionAddress, mintId)
             return {
-              interfaceId,
+              mintType: 'MerkleDrop',
               mintId: mintId.toNumber(),
               editionAddress,
               minterAddress,
@@ -509,6 +505,26 @@ export function SoundClient({
               maxMintablePerAccount: mintSchedule.maxMintablePerAccount,
               totalMinted: mintSchedule.totalMinted,
             }
+          }
+          case interfaceIds.IFixedPriceSignatureMinter: {
+            const minterContract = minterFactoryMap[interfaceId].connect(minterAddress, signerOrProvider)
+            const mintSchedule = await minterContract.mintInfo(editionAddress, mintId)
+            return {
+              mintType: 'FixedPriceSignature',
+              mintId: mintId.toNumber(),
+              editionAddress,
+              minterAddress,
+              startTime: mintSchedule.startTime,
+              endTime: mintSchedule.endTime,
+              mintPaused: mintSchedule.mintPaused,
+              price: mintSchedule.price,
+              maxMintable: mintSchedule.maxMintable,
+              maxMintablePerAccount: mintSchedule.maxMintablePerAccount,
+              totalMinted: mintSchedule.totalMinted,
+            }
+          }
+          default: {
+            throw new UnsupportedMinterError()
           }
         }
       }),

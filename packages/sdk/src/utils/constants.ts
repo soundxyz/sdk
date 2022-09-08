@@ -40,10 +40,4 @@ export function isSoundCreatorAddressChain(chain: number): chain is keyof typeof
   return chain in soundCreatorAddresses
 }
 
-export const minterNames = {
-  MerkleDropMinter: 'MerkleDropMinter',
-  FixedPriceSignatureMinter: 'FixedPriceSignatureMinter',
-  RangeEditionMinter: 'RangeEditionMinter',
-}
-
 export const supportedNetworks = Object.values(supportedChainIds)

@@ -1,6 +1,3 @@
-import assert from 'assert'
-import { expect } from 'chai'
-import { ethers } from 'hardhat'
 import { Wallet } from '@ethersproject/wallet'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 import {
@@ -15,11 +12,14 @@ import {
   SoundEditionV1__factory,
   SoundFeeRegistry__factory,
 } from '@soundxyz/sound-protocol/typechain/index'
-import { interfaceIds } from '@soundxyz/sound-protocol'
-import { getSaltAsBytes32 } from '../src/utils/helpers'
+import assert from 'assert'
+import { expect } from 'chai'
+import { ethers } from 'hardhat'
+
 import { SoundClient } from '../src/client'
-import { NotEligibleMint, InvalidAddressError, MissingSignerOrProviderError } from '../src/errors'
+import { InvalidAddressError, MissingSignerOrProviderError, NotEligibleMint } from '../src/errors'
 import { MINTER_ROLE } from '../src/utils/constants'
+import { getSaltAsBytes32 } from '../src/utils/helpers'
 import { MerkleTestHelper, now } from './helpers'
 
 import type { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
@@ -488,7 +488,7 @@ describe('mint', () => {
         soundCreatorAddress: soundCreator.address,
       })
       mintSchedules = await client.activeMintSchedules({ editionAddress: precomputedEditionAddress })
-      expect(mintSchedules[0].interfaceId).to.eq(interfaceIds.IRangeEditionMinter)
+      expect(mintSchedules[0].mintType).to.eq('RangeEdition')
     })
 
     it(`Successfully mints via RangeEditionMinter`, async () => {
@@ -562,7 +562,7 @@ describe('mint', () => {
       // provide signer to the sdk
       client = SoundClient({ provider: ethers.provider, signer: buyerWallet, apiKey: '123' })
       mintSchedules = await client.activeMintSchedules({ editionAddress: precomputedEditionAddress })
-      expect(mintSchedules[0].interfaceId).to.eq(interfaceIds.IMerkleDropMinter)
+      expect(mintSchedules[0].mintType).to.eq('MerkleDrop')
     })
 
     it(`Successfully mints via MerkleDropMinter`, async () => {
@@ -635,7 +635,7 @@ describe('createEditionWithMintSchedules', () => {
 
     const mintConfigs: MintConfig[] = [
       {
-        name: 'RangeEditionMinter' as const,
+        mintType: 'RangeEdition' as const,
         minterAddress: rangeEditionMinter.address,
         price: PRICE,
         startTime: mint1StartTime,
@@ -647,7 +647,7 @@ describe('createEditionWithMintSchedules', () => {
         affiliateFeeBPS: 0,
       },
       {
-        name: 'FixedPriceSignatureMinter' as const,
+        mintType: 'FixedPriceSignature' as const,
         minterAddress: fixedPriceSignatureMinter.address,
         price: PRICE,
         startTime: mint2StartTime,
@@ -657,7 +657,7 @@ describe('createEditionWithMintSchedules', () => {
         affiliateFeeBPS: 0,
       },
       {
-        name: 'MerkleDropMinter' as const,
+        mintType: 'MerkleDrop' as const,
         minterAddress: merkleDropMinter.address,
         price: PRICE,
         merkleRootHash,
@@ -699,8 +699,8 @@ describe('createEditionWithMintSchedules', () => {
 
     // Verify mint configs exist
     for (const mintConfig of mintConfigs) {
-      switch (mintConfig.name) {
-        case 'RangeEditionMinter': {
+      switch (mintConfig.mintType) {
+        case 'RangeEdition': {
           const minter = RangeEditionMinter__factory.connect(mintConfig.minterAddress, ethers.provider)
           const mintSchedule = await minter.mintInfo(precomputedEditionAddress, MINT_ID)
           expect(mintSchedule.startTime).to.equal(mint1StartTime)
@@ -711,7 +711,7 @@ describe('createEditionWithMintSchedules', () => {
           expect(mintSchedule.maxMintablePerAccount).to.equal(mint1MaxMintablePerAccount)
           break
         }
-        case 'FixedPriceSignatureMinter': {
+        case 'FixedPriceSignature': {
           const minter = FixedPriceSignatureMinter__factory.connect(mintConfig.minterAddress, ethers.provider)
           const mintSchedule = await minter.mintInfo(precomputedEditionAddress, MINT_ID)
           expect(mintSchedule.startTime).to.equal(mint2StartTime)
@@ -719,7 +719,7 @@ describe('createEditionWithMintSchedules', () => {
           expect(mintSchedule.signer).to.equal(NON_NULL_ADDRESS)
           break
         }
-        case 'MerkleDropMinter': {
+        case 'MerkleDrop': {
           const minter = MerkleDropMinter__factory.connect(mintConfig.minterAddress, ethers.provider)
           const mintSchedule = await minter.mintInfo(precomputedEditionAddress, MINT_ID)
           expect(mintSchedule.startTime).to.equal(mint3StartTime)

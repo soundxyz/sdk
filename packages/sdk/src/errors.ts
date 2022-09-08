@@ -56,12 +56,9 @@ export class InvalidAddressError extends Error {
 
 export class UnsupportedMinterError extends Error {
   readonly name = 'UnsupportedMinterError'
-  readonly minterName: string
 
-  constructor({ minterName }: { minterName: string }) {
-    super('Must provide valid minter name')
-
-    this.minterName = minterName
+  constructor(message?: string) {
+    super(message || 'Minter not handled by sdk')
   }
 }
 
