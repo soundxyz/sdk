@@ -7,7 +7,7 @@ import {
   SoundCreatorV1__factory,
   SoundEditionV1__factory,
 } from '@soundxyz/sound-protocol/typechain/index'
-
+import { interfaceIds } from '@soundxyz/sound-protocol'
 import { SoundAPI } from './api/soundApi'
 import {
   CreatorAddressMissingForLocalError,
@@ -24,7 +24,6 @@ import {
 import type { ChainId, MinterInterfaceId, SignerOrProvider, SoundClientConfig } from './types'
 import {
   ADDRESS_ZERO,
-  interfaceIds,
   isSoundCreatorAddressChain,
   minterFactoryMap,
   minterNames,
@@ -41,6 +40,8 @@ import type { BigNumberish } from '@ethersproject/bignumber'
 import type { ContractTransaction } from '@ethersproject/contracts'
 import type { ReleaseInfoQueryVariables } from './api/graphql/gql'
 import type { ContractCall, EditionConfig, MintConfig, MintSchedule } from './types'
+
+type InterfaceId = keyof typeof interfaceIds
 
 export function SoundClient({
   signer,

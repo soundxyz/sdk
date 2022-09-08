@@ -62,7 +62,7 @@ importers:
       '@nomicfoundation/hardhat-network-helpers': ^1.0.4
       '@nomiclabs/hardhat-ethers': ^2.1.1
       '@nomiclabs/hardhat-waffle': ^2.0.3
-      '@soundxyz/sound-protocol': 0.0.2-alpha-42fddc8.0
+      '@soundxyz/sound-protocol': 0.0.2-alpha-a71f0db.0
       '@types/chai': ^4.3.3
       '@types/mocha': ^9.1.1
       '@types/node': 18.7.5
@@ -108,7 +108,7 @@ importers:
       '@nomicfoundation/hardhat-network-helpers': 1.0.5_hardhat@2.11.0
       '@nomiclabs/hardhat-ethers': 2.1.1_im6uuiflh5ovyfxdp4ogx3ls3y
       '@nomiclabs/hardhat-waffle': 2.0.3_tvu7uzjfxrhmjgvpduzktxn2me
-      '@soundxyz/sound-protocol': 0.0.2-alpha-42fddc8.0
+      '@soundxyz/sound-protocol': 0.0.2-alpha-a71f0db.0
       '@types/chai': 4.3.3
       '@types/mocha': 9.1.1
       '@types/node': 18.7.5
@@ -2526,8 +2526,8 @@ packages:
     dev: true
     optional: true
 
-  /@soundxyz/sound-protocol/0.0.2-alpha-42fddc8.0:
-    resolution: {integrity: sha512-82Sk5LKyP6EsHg0y6sudOq+iOk9LJaY0e1TiDCulbDhcWoRVFpaCWbNgc5KOZLAtcxqRzFgaHEqcUHrE1Hn2Ag==}
+  /@soundxyz/sound-protocol/0.0.2-alpha-a71f0db.0:
+    resolution: {integrity: sha512-U1NA2bBrziQSj6KKgcmDiWmR0Q9Mgjp70YvX5Pg206MyyXzuBsRuuI6zf9G/1z3/TmV+ZEWLVoDZf9d7/7aXIA==}
     dependencies:
       '@ethersproject/abi': 5.7.0
       '@ethersproject/providers': 5.7.0
@@ -6704,18 +6704,6 @@ packages:
         optional: true
     dev: true
 
-  /follow-redirects/1.15.1_debug@4.3.4:
-    resolution: {integrity: sha512-yLAMQs+k0b2m7cVxpS1VKJVvoz7SS9Td1zss3XRwXj+ZDH00RJgnuLx7E44wx02kQLrdM3aOOy+FpzS7+8OizA==}
-    engines: {node: '>=4.0'}
-    peerDependencies:
-      debug: '*'
-    peerDependenciesMeta:
-      debug:
-        optional: true
-    dependencies:
-      debug: 4.3.4
-    dev: true
-
   /for-each/0.3.3:
     resolution: {integrity: sha512-jqYfLp7mo9vIyQf8ykW2v7A+2N4QjeCeI5+Dz9XraiO1ign81wjiH7Fb9vSOWvQfNtmSa4H2RoQTrrXivdUZmw==}
     dependencies:
@@ -10860,7 +10848,7 @@ packages:
     dependencies:
       command-exists: 1.2.9
       commander: 3.0.2
-      follow-redirects: 1.15.1_debug@4.3.4
+      follow-redirects: 1.15.1
       fs-extra: 0.30.0
       js-sha3: 0.8.0
       memorystream: 0.3.1
