@@ -1,5 +1,11 @@
 # @soundxyz/sdk
 
+## 0.1.5
+
+### Patch Changes
+
+- [#55](https://github.com/soundxyz/sdk/pull/55) [`d40a902`](https://github.com/soundxyz/sdk/commit/d40a902d9c414528b172eceb2a5b91e6cb6847c4) Thanks [@PabloSzx](https://github.com/PabloSzx)! - Add numSold to soundInfo & soundNumSold helper to client
+
 ## 0.1.4
 
 ### Patch Changes
