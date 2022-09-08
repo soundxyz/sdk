@@ -1,4 +1,3 @@
-import { hexlify, hexZeroPad } from '@ethersproject/bytes'
 import {
   FixedPriceSignatureMinter__factory,
   IMinterModule__factory,
@@ -32,9 +31,8 @@ import {
   supportedChainIds,
   supportedNetworks,
 } from './utils/constants'
-import { validateAddress } from './utils/helpers'
+import { getSaltAsBytes32, validateAddress } from './utils/helpers'
 import { LazyPromise } from './utils/promise'
-
 import type { Signer } from '@ethersproject/abstract-signer'
 import type { BigNumberish } from '@ethersproject/bignumber'
 import type { ContractTransaction } from '@ethersproject/contracts'
@@ -60,8 +58,9 @@ export function SoundClient({
     activeMintSchedules,
     eligibleQuantity,
     mint,
-    soundInfo,
     createEditionWithMintSchedules,
+    soundInfo,
+    expectedEditionAddress,
   }
 
   // If the contract address is a SoundEdition contract
@@ -227,7 +226,7 @@ export function SoundClient({
 
     switch (mintSchedule.interfaceId) {
       case interfaceIds.IRangeEditionMinter: {
-        return await RangeEditionMinter__factory.connect(mintSchedule.minterAddress, signer).mint(
+        return RangeEditionMinter__factory.connect(mintSchedule.minterAddress, signer).mint(
           mintSchedule.editionAddress,
           mintSchedule.mintId,
           quantity,
@@ -250,7 +249,7 @@ export function SoundClient({
           })
         }
 
-        return await merkleDropMinter.mint(
+        return merkleDropMinter.mint(
           mintSchedule.editionAddress,
           mintSchedule.mintId,
           quantity,
@@ -272,19 +271,18 @@ export function SoundClient({
   }: {
     editionConfig: EditionConfig
     mintConfigs: MintConfig[]
-    salt?: string
+    salt?: string | number
   }) {
     const { signer, chainId, userAddress } = await _requireSigner()
 
-    const randomInt = Math.floor(Math.random() * 1_000_000_000_000)
-    const salt = customSalt || hexZeroPad(hexlify(randomInt), 32)
+    const formattedSalt = getSaltAsBytes32(customSalt || Math.random() * 1_000_000_000_000_000)
 
     const creatorAdddress = _getCreatorAddress(chainId)
 
     // Precompute the edition address.
     const editionAddress = await SoundCreatorV1__factory.connect(creatorAdddress, signer).soundEditionAddress(
       userAddress,
-      salt,
+      formattedSalt,
     )
 
     const editionInterface = SoundEditionV1__factory.createInterface()
@@ -387,11 +385,34 @@ export function SoundClient({
     const creatorAddress = _getCreatorAddress(chainId)
     const soundCreatorContract = SoundCreatorV1__factory.connect(creatorAddress, signer)
 
-    return await soundCreatorContract.createSoundAndMints(
-      salt,
+    return soundCreatorContract.createSoundAndMints(
+      formattedSalt,
       editionInitData,
       contractCalls.map((d) => d.contractAddress),
       contractCalls.map((d) => d.calldata),
+    )
+  }
+
+  async function soundInfo(soundParams: ReleaseInfoQueryVariables) {
+    const { data, errors } = await client.soundApi.releaseInfo(soundParams)
+
+    const release = data?.release
+    if (!release) throw new SoundNotFoundError({ ...soundParams, graphqlErrors: errors })
+
+    return {
+      ...release,
+      trackAudio: LazyPromise(() => client.soundApi.audioFromTrack({ trackId: release.track.id })),
+    }
+  }
+
+  async function expectedEditionAddress({ deployer, salt }: { deployer: string; salt: string | number }) {
+    validateAddress(deployer)
+    const { signerOrProvider, chainId } = await _requireSignerOrProvider()
+    const soundCreatorAddress = _getCreatorAddress(chainId)
+
+    return SoundCreatorV1__factory.connect(soundCreatorAddress, signerOrProvider).soundEditionAddress(
+      deployer,
+      getSaltAsBytes32(salt),
     )
   }
 
@@ -538,18 +559,6 @@ export function SoundClient({
     const isEdition = await isSoundEdition({ editionAddress })
     if (!isEdition) {
       throw new NotSoundEditionError()
-    }
-  }
-
-  async function soundInfo(soundParams: ReleaseInfoQueryVariables) {
-    const { data, errors } = await client.soundApi.releaseInfo(soundParams)
-
-    const release = data?.release
-    if (!release) throw new SoundNotFoundError({ ...soundParams, graphqlErrors: errors })
-
-    return {
-      ...release,
-      trackAudio: LazyPromise(() => client.soundApi.audioFromTrack({ trackId: release.track.id })),
     }
   }
 

@@ -1,7 +1,6 @@
 import assert from 'assert'
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
-
 import { Wallet } from '@ethersproject/wallet'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 import {
@@ -17,8 +16,9 @@ import {
   SoundFeeRegistry__factory,
 } from '@soundxyz/sound-protocol/typechain/index'
 import { interfaceIds } from '@soundxyz/sound-protocol'
+import { getSaltAsBytes32 } from '../src/utils/helpers'
 import { SoundClient } from '../src/client'
-import { NotEligibleMint } from '../src/errors'
+import { NotEligibleMint, InvalidAddressError, MissingSignerOrProviderError } from '../src/errors'
 import { MINTER_ROLE } from '../src/utils/constants'
 import { MerkleTestHelper, now } from './helpers'
 
@@ -33,8 +33,7 @@ const NON_NULL_ADDRESS = '0x0000000000000000000000000000000000000001'
 const SOUND_FEE = 0
 const ONE_HOUR = 3600
 const PRICE = 420420420
-const randomInt = Math.floor(Math.random() * 1_000_000_000_000)
-const DEFAULT_SALT = ethers.utils.hexZeroPad(ethers.utils.hexlify(randomInt), 32)
+const DEFAULT_SALT = getSaltAsBytes32(Math.random())
 
 let client: SoundClient
 let soundCreator: SoundCreatorV1
@@ -86,7 +85,6 @@ beforeEach(async () => {
   artistWallet = signers[1]
   buyerWallet = signers[2]
 
-  client = SoundClient({ provider: ethers.provider, apiKey: '123', environment: 'preview' })
   const fixture = await loadFixture(deployProtocol)
 
   soundCreator = fixture.soundCreator
@@ -94,19 +92,19 @@ beforeEach(async () => {
   fixedPriceSignatureMinter = fixture.fixedPriceSignatureMinter
   merkleDropMinter = fixture.merkleDropMinter
   rangeEditionMinter = fixture.rangeEditionMinter
+
+  client = SoundClient({
+    provider: ethers.provider,
+    apiKey: '123',
+    environment: 'preview',
+    soundCreatorAddress: soundCreator.address,
+  })
 })
 
 /**
  * Sets up an edition and mint schedules.
  */
-export async function setupTest({
-  customSalt,
-  minterCalls = [],
-}: {
-  customSalt?: string
-  minterCalls?: ContractCall[]
-}) {
-  const salt = customSalt || DEFAULT_SALT
+export async function setupTest({ minterCalls = [] }: { minterCalls?: ContractCall[] }) {
   const editionInitArgs = [
     'Song Name',
     'SYMBOL',
@@ -121,7 +119,7 @@ export async function setupTest({
   ]
   const editionInterface = new ethers.utils.Interface(SoundEditionV1__factory.abi)
   const editionInitData = editionInterface.encodeFunctionData('initialize', editionInitArgs)
-  const editionAddress = await soundCreator.soundEditionAddress(artistWallet.address, salt)
+  const editionAddress = await soundCreator.soundEditionAddress(artistWallet.address, DEFAULT_SALT)
 
   const grantRolesCalls = [
     {
@@ -141,7 +139,7 @@ export async function setupTest({
   const allContractCalls = [...grantRolesCalls, ...minterCalls]
 
   await soundCreator.connect(artistWallet).createSoundAndMints(
-    salt,
+    DEFAULT_SALT,
     editionInitData,
     allContractCalls.map((d) => d.contractAddress),
     allContractCalls.map((d) => d.calldata),
@@ -671,13 +669,19 @@ describe('createEditionWithMintSchedules', () => {
       },
     ]
 
+    const customSalt = 'hello world'
+    const precomputedEditionAddress = await SoundCreatorV1__factory.connect(
+      soundCreator.address,
+      ethers.provider,
+    ).soundEditionAddress(artistWallet.address, getSaltAsBytes32(customSalt))
+
     /**
      * Create sound edition and mint schedules.
      */
     await client.createEditionWithMintSchedules({
       editionConfig,
       mintConfigs,
-      salt: DEFAULT_SALT,
+      salt: customSalt,
     })
 
     const editionContract = SoundEditionV1__factory.connect(precomputedEditionAddress, ethers.provider)
@@ -726,5 +730,37 @@ describe('createEditionWithMintSchedules', () => {
         }
       }
     }
+  })
+})
+
+describe('expectedEditionAddress', () => {
+  it('throws if provided deployerAddress is invalid', () => {
+    client.expectedEditionAddress({ deployer: '0x0', salt: '123' }).catch((error) => {
+      expect(error).instanceOf(InvalidAddressError)
+    })
+  })
+
+  it('throws if provider not connected', () => {
+    client = SoundClient({ provider: new ethers.providers.JsonRpcProvider(), apiKey: '123' })
+
+    client
+      .expectedEditionAddress({ deployer: '0xbf9a1fad0cbd61cc8158ccb6e1e8e111707088bb', salt: '123' })
+      .catch((error) => {
+        expect(error).instanceOf(MissingSignerOrProviderError)
+      })
+  })
+
+  it('returns expected address', async () => {
+    const deployer = artistWallet.address
+    const salt = '12345'
+
+    const expectedAddress = await SoundCreatorV1__factory.connect(
+      soundCreator.address,
+      ethers.provider,
+    ).soundEditionAddress(deployer, getSaltAsBytes32(salt))
+
+    const address = await client.expectedEditionAddress({ deployer, salt })
+
+    expect(address).to.eq(expectedAddress)
   })
 })
