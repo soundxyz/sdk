@@ -50,7 +50,6 @@ importers:
       '@ethersproject/providers': ^5.7.0
       '@ethersproject/sha2': ^5.7.0
       '@ethersproject/solidity': ^5.7.0
-      '@ethersproject/strings': ^5.7.0
       '@ethersproject/units': ^5.7.0
       '@ethersproject/wallet': ^5.7.0
       '@graphql-codegen/cli': ^2.11.7
@@ -67,6 +66,7 @@ importers:
       '@types/chai': ^4.3.3
       '@types/mocha': ^9.1.1
       '@types/node': 18.7.5
+      '@types/uuid': ^8.3.4
       bob-ts: ^4.1.1
       bob-tsm: ^1.1.2
       chai: ^4.3.6
@@ -84,11 +84,17 @@ importers:
       ts-node: ^10.9.1
       tslib: ^2.4.0
       typescript: 4.7.4
+      uuid: ^9.0.0
+      uuid-to-hex: ^1.1.1
+      uuid-validate: ^0.0.3
       zod: ^3.18.0
     dependencies:
       '@ethersproject/abstract-provider': 5.7.0
       '@ethersproject/abstract-signer': 5.7.0
       '@ethersproject/address': 5.7.0
+      uuid: 9.0.0
+      uuid-to-hex: 1.1.1
+      uuid-validate: 0.0.3
       zod: 3.18.0
     devDependencies:
       '@ethersproject/bignumber': 5.7.0
@@ -97,7 +103,6 @@ importers:
       '@ethersproject/providers': 5.7.0
       '@ethersproject/sha2': 5.7.0
       '@ethersproject/solidity': 5.7.0
-      '@ethersproject/strings': 5.7.0
       '@ethersproject/units': 5.7.0
       '@ethersproject/wallet': 5.7.0
       '@graphql-codegen/cli': 2.12.0_3anto3m4ywkedqkwjav66cpuei
@@ -114,6 +119,7 @@ importers:
       '@types/chai': 4.3.3
       '@types/mocha': 9.1.1
       '@types/node': 18.7.5
+      '@types/uuid': 8.3.4
       bob-ts: 4.1.1_indbw2pukug75jcdktxc2uzqvm
       bob-tsm: 1.1.2_l67nbeh2yx64mvkw4rtzq4sh3a
       chai: 4.3.6
@@ -2732,6 +2738,10 @@ packages:
 
   /@types/underscore/1.11.4:
     resolution: {integrity: sha512-uO4CD2ELOjw8tasUrAhvnn2W4A0ZECOvMjCivJr4gA9pGgjv+qxKWY9GLTMVEK8ej85BxQOocUyE7hImmSQYcg==}
+    dev: true
+
+  /@types/uuid/8.3.4:
+    resolution: {integrity: sha512-c/I8ZRb51j+pYGAu5CrFMRxqZ2ke4y2grEBO5AUjgSkSk+qT2Ea+OdWElz/OiMf5MNpn2b17kuVBwZLQJXzihw==}
     dev: true
 
   /@types/web3/1.0.19:
@@ -11794,6 +11804,22 @@ packages:
     dev: true
     optional: true
 
+  /uuid-parse/1.1.0:
+    resolution: {integrity: sha512-OdmXxA8rDsQ7YpNVbKSJkNzTw2I+S5WsbMDnCtIWSQaosNAcWtFuI/YK1TjzUI6nbkgiqEyh8gWngfcv8Asd9A==}
+    dev: false
+
+  /uuid-to-hex/1.1.1:
+    resolution: {integrity: sha512-pLlDNTR9MlDzkTT8RusDuk9QpxhAzDAvko3W/bdYf1jwK6Haaj90YNDQnkVZTBbOAlJb5p55WENjmtnARbkw+w==}
+    engines: {node: '>=12'}
+    dependencies:
+      uuid-parse: 1.1.0
+      validator: 9.4.1
+    dev: false
+
+  /uuid-validate/0.0.3:
+    resolution: {integrity: sha512-Fykw5U4eZESbq739BeLvEBFRuJODfrlmjx5eJux7W817LjRaq4b7/i4t2zxQmhcX+fAj4nMfRdTzO4tmwLKn0w==}
+    dev: false
+
   /uuid/3.3.2:
     resolution: {integrity: sha512-yXJmeNaw3DnnKAOKJE51sL/ZaYfWJRl1pK9dr19YFCu0ObS231AB1/LbqTKRAQ5kw8A90rA6fr4riOUpTZvQZA==}
     deprecated: Please upgrade  to version 7 or higher.  Older versions may use Math.random() in certain circumstances, which is known to be problematic.  See https://v8.dev/blog/math-random for details.
@@ -11812,6 +11838,11 @@ packages:
     hasBin: true
     dev: true
 
+  /uuid/9.0.0:
+    resolution: {integrity: sha512-MXcSTerfPa4uqyzStbRoTgt5XIe3x5+42+q1sDuy3R5MDk66URdLMOZe5aPX/SQd+kuYAh0FdP/pO28IkQyTeg==}
+    hasBin: true
+    dev: false
+
   /v8-compile-cache-lib/3.0.1:
     resolution: {integrity: sha512-wa7YjyUGfNZngI/vtK0UHAN+lgDCxBPCylVXGp0zu59Fz5aiGtNXaq3DhIov063MorB+VfufLh3JlF2KdTK3xg==}
     dev: true
@@ -11822,6 +11853,11 @@ packages:
       spdx-correct: 3.1.1
       spdx-expression-parse: 3.0.1
     dev: true
+
+  /validator/9.4.1:
+    resolution: {integrity: sha512-YV5KjzvRmSyJ1ee/Dm5UED0G+1L4GZnLN3w6/T+zZm8scVua4sOhYKWTUrKa0H/tMiJyO9QLHMPN+9mB/aMunA==}
+    engines: {node: '>= 0.10'}
+    dev: false
 
   /value-or-promise/1.0.11:
     resolution: {integrity: sha512-41BrgH+dIbCFXClcSapVs5M6GkENd3gQOJpEfPDNa71LsUGMXDL0jMWpI/Rh7WhX+Aalfz2TTS3Zt5pUsbnhLg==}

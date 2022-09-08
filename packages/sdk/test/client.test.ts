@@ -2,7 +2,7 @@ import assert from 'assert'
 import { expect } from 'chai'
 import { hexlify, hexZeroPad } from '@ethersproject/bytes'
 import { ethers } from 'hardhat'
-
+import { v4 as uuidv4 } from 'uuid'
 import { Wallet } from '@ethersproject/wallet'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 import {
@@ -18,6 +18,7 @@ import {
   SoundFeeRegistry__factory,
 } from '@soundxyz/sound-protocol/typechain/index'
 import { interfaceIds } from '@soundxyz/sound-protocol'
+import { uuidToBytes32 } from '../src/utils/helpers'
 import { SoundClient } from '../src/client'
 import { NotEligibleMint } from '../src/errors'
 import { MINTER_ROLE } from '../src/utils/constants'
@@ -665,11 +666,11 @@ describe('createEditionWithMintSchedules', () => {
       },
     ]
 
-    const customSalt = 1_000_000
+    const customSalt = uuidv4()
     const precomputedEditionAddress = await SoundCreatorV1__factory.connect(
       soundCreator.address,
       ethers.provider,
-    ).soundEditionAddress(artistWallet.address, hexZeroPad(hexlify(customSalt), 32))
+    ).soundEditionAddress(artistWallet.address, uuidToBytes32(customSalt))
 
     /**
      * Create sound edition and mint schedules.
@@ -679,10 +680,6 @@ describe('createEditionWithMintSchedules', () => {
       mintConfigs,
       salt: customSalt,
     })
-
-    console.log({ precomputedEditionAddress })
-    const code = await ethers.provider.getCode(precomputedEditionAddress)
-    console.log({ code })
 
     const editionContract = SoundEditionV1__factory.connect(precomputedEditionAddress, ethers.provider)
     const editionBaseURI = await editionContract.baseURI()
@@ -732,57 +729,7 @@ describe('createEditionWithMintSchedules', () => {
     }
   })
 
-  it('throws an NUMERIC_FAULT error if salt is too large', () => {
-    const editionConfig = {
-      name: 'Test',
-      symbol: 'TEST',
-      metadataModule: NULL_ADDRESS,
-      baseURI: 'https://test.com',
-      contractURI: 'https://test.com',
-      fundingRecipient: NON_NULL_ADDRESS,
-      royaltyBPS: 0,
-      editionMaxMintable: 10,
-      mintRandomnessTokenThreshold: 10,
-      mintRandomnessTimeThreshold: 999999,
-    }
-
-    client
-      .createEditionWithMintSchedules({
-        editionConfig,
-        mintConfigs: [],
-        salt: Number.MAX_SAFE_INTEGER,
-      })
-      .catch((error) => {
-        expect(error.code).to.eq('NUMERIC_FAULT')
-      })
-  })
-
-  it('throws an error if salt is too small', () => {
-    const editionConfig = {
-      name: 'Test',
-      symbol: 'TEST',
-      metadataModule: NULL_ADDRESS,
-      baseURI: 'https://test.com',
-      contractURI: 'https://test.com',
-      fundingRecipient: NON_NULL_ADDRESS,
-      royaltyBPS: 0,
-      editionMaxMintable: 10,
-      mintRandomnessTokenThreshold: 10,
-      mintRandomnessTimeThreshold: 999999,
-    }
-
-    client
-      .createEditionWithMintSchedules({
-        editionConfig,
-        mintConfigs: [],
-        salt: 9_999_999,
-      })
-      .catch((error) => {
-        expect(error.message).to.eq('Salt must be greater than 1,000,000')
-      })
-  })
-
-  it('fails with a short string salt', () => {
+  it('fails with an invalid salt', () => {
     const editionConfig = {
       name: 'Test',
       symbol: 'TEST',
@@ -803,13 +750,13 @@ describe('createEditionWithMintSchedules', () => {
         salt: 'helloworld',
       })
       .catch((error) => {
-        expect(error.message).to.eq('Salt must be at least 16 characters')
+        expect(error.message).to.eq('Salt must be a valid UUID')
       })
   })
 
   const baseURI = 'https://test.com'
 
-  it('succeeds with a string as salt', async () => {
+  it('succeeds with a UUID as salt', async () => {
     const editionConfig = {
       name: 'Test',
       symbol: 'TEST',
@@ -823,7 +770,7 @@ describe('createEditionWithMintSchedules', () => {
       mintRandomnessTimeThreshold: 999999,
     }
 
-    const salt = 'helloworldhelloworldhellow'
+    const salt = uuidv4()
 
     client.createEditionWithMintSchedules({
       editionConfig,
@@ -831,7 +778,7 @@ describe('createEditionWithMintSchedules', () => {
       salt,
     })
 
-    const expectedAddress = await soundCreator.soundEditionAddress(artistWallet.address, salt)
+    const expectedAddress = await soundCreator.soundEditionAddress(artistWallet.address, uuidToBytes32(salt))
 
     const edition = await SoundEditionV1__factory.connect(expectedAddress, ethers.provider)
     const expectedBaseURI = await edition.baseURI()

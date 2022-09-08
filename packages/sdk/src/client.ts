@@ -1,5 +1,5 @@
-import { hexlify, hexZeroPad, BytesLike } from '@ethersproject/bytes'
-import { toUtf8Bytes } from '@ethersproject/strings'
+import { v4 as uuidv4 } from 'uuid'
+import uuidValidate from 'uuid-validate'
 import {
   FixedPriceSignatureMinter__factory,
   IMinterModule__factory,
@@ -33,9 +33,8 @@ import {
   supportedChainIds,
   supportedNetworks,
 } from './utils/constants'
-import { validateAddress } from './utils/helpers'
+import { validateAddress, uuidToBytes32 } from './utils/helpers'
 import { LazyPromise } from './utils/promise'
-
 import type { Signer } from '@ethersproject/abstract-signer'
 import type { BigNumberish } from '@ethersproject/bignumber'
 import type { ContractTransaction } from '@ethersproject/contracts'
@@ -273,34 +272,20 @@ export function SoundClient({
   }: {
     editionConfig: EditionConfig
     mintConfigs: MintConfig[]
-    salt?: number | string
+    salt?: string
   }) {
     const { signer, chainId, userAddress } = await _requireSigner()
 
-    let salt: BytesLike
-    switch (typeof customSalt) {
-      case 'number': {
-        if (customSalt < 1000000) throw new Error('Salt must be greater than 1,000,000')
-        salt = hexZeroPad(hexlify(Math.floor(customSalt)), 32)
-        break
-      }
-      case 'string': {
-        if (customSalt.length < 16) throw new Error('Salt must be at least 16 characters')
-        salt = hexZeroPad(hexlify(toUtf8Bytes(customSalt)), 32)
-        break
-      }
-      default: {
-        const randomInt = Math.floor(Math.random() * 1_000_000_000_000)
-        salt = hexZeroPad(hexlify(Math.floor(randomInt)), 32)
-      }
-    }
+    if (customSalt && !uuidValidate(customSalt)) throw new Error('Salt must be a valid UUID')
+
+    const formattedSalt = uuidToBytes32(customSalt || uuidv4())
 
     const creatorAdddress = _getCreatorAddress(chainId)
 
     // Precompute the edition address.
     const editionAddress = await SoundCreatorV1__factory.connect(creatorAdddress, signer).soundEditionAddress(
       userAddress,
-      salt,
+      formattedSalt,
     )
 
     const editionInterface = SoundEditionV1__factory.createInterface()
@@ -404,7 +389,7 @@ export function SoundClient({
     const soundCreatorContract = SoundCreatorV1__factory.connect(creatorAddress, signer)
 
     return await soundCreatorContract.createSoundAndMints(
-      salt,
+      formattedSalt,
       editionInitData,
       contractCalls.map((d) => d.contractAddress),
       contractCalls.map((d) => d.calldata),
@@ -585,6 +570,15 @@ export function SoundClient({
     if (isSoundCreatorAddressChain(chainId)) return soundCreatorAddresses[chainId]
 
     throw new UnsupportedCreatorAddressError({ chainId })
+  }
+
+  function _convertStringToNumber(str: string) {
+    let numString = ''
+    for (var i = 0; i < str.length; i++) {
+      numString += str.charCodeAt(i).toString()
+    }
+    console.log(numString)
+    return parseInt(numString)
   }
 
   return client
