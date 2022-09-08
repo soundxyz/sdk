@@ -610,7 +610,81 @@ describe('createEditionWithMintSchedules', () => {
     client = SoundClient({ signer: artistWallet, apiKey: '123', soundCreatorAddress: soundCreator.address })
   })
 
-  it('Creates a sound edition and mint schedules', async () => {
+  it('Creates a sound edition with a single mint schedule', async () => {
+    const editionConfig = {
+      name: 'Test',
+      symbol: 'TEST',
+      metadataModule: NULL_ADDRESS,
+      baseURI: 'ar://MiTDMt1LOCXGTutJ3DJ10gXvseiUlA8K1j7-gQ7oYEc',
+      contractURI: 'https://test.com',
+      fundingRecipient: NON_NULL_ADDRESS,
+      royaltyBPS: 1000,
+      editionMaxMintable: 10,
+      mintRandomnessTokenThreshold: 2,
+      mintRandomnessTimeThreshold: 1662723900,
+    }
+
+    const mintStartTime = 1662637500
+    const mintClosingTime = 1662723900
+    const mintEndTime = 4294967295
+    const maxMintablePerAccount = 5
+
+    const mintConfigs: MintConfig[] = [
+      {
+        name: 'RangeEditionMinter' as const,
+        minterAddress: rangeEditionMinter.address,
+        price: PRICE,
+        startTime: mintStartTime,
+        closingTime: mintClosingTime,
+        endTime: mintEndTime,
+        maxMintableLower: 2,
+        maxMintableUpper: 10,
+        maxMintablePerAccount,
+        affiliateFeeBPS: 0,
+      },
+    ]
+
+    const customSalt = 'hello world'
+    const precomputedEditionAddress = await SoundCreatorV1__factory.connect(
+      soundCreator.address,
+      ethers.provider,
+    ).soundEditionAddress(artistWallet.address, getSaltAsBytes32(customSalt))
+
+    /**
+     * Create sound edition and mint schedules.
+     */
+    await client.createEditionWithMintSchedules({
+      editionConfig,
+      mintConfigs,
+      salt: customSalt,
+    })
+
+    const editionContract = SoundEditionV1__factory.connect(precomputedEditionAddress, ethers.provider)
+    const editionBaseURI = await editionContract.baseURI()
+    const mintRandomnessTimeThreshold = await editionContract.mintRandomnessTimeThreshold()
+    const fundingRecipient = await editionContract.fundingRecipient()
+    const editionMaxMintable = await editionContract.editionMaxMintable()
+
+    expect(editionBaseURI).to.eq(editionConfig.baseURI)
+    expect(mintRandomnessTimeThreshold).to.eq(editionConfig.mintRandomnessTimeThreshold)
+    expect(fundingRecipient).to.eq(editionConfig.fundingRecipient)
+    expect(editionMaxMintable).to.eq(editionConfig.editionMaxMintable)
+
+    const MINT_ID = 0
+
+    // Verify mint configs exist
+    const mintConfig = mintConfigs[0]
+    const minter = RangeEditionMinter__factory.connect(mintConfig.minterAddress, ethers.provider)
+    const mintSchedule = await minter.mintInfo(precomputedEditionAddress, MINT_ID)
+    expect(mintSchedule.startTime).to.equal(mintStartTime)
+    expect(mintSchedule.closingTime).to.equal(mintClosingTime)
+    expect(mintSchedule.endTime).to.equal(mintEndTime)
+    expect(mintSchedule.maxMintableLower).to.equal(mintConfig.maxMintableLower)
+    expect(mintSchedule.maxMintableUpper).to.equal(mintConfig.maxMintableUpper)
+    expect(mintSchedule.maxMintablePerAccount).to.equal(maxMintablePerAccount)
+  })
+
+  it('Creates a sound edition with multiple mint schedules', async () => {
     const editionConfig = {
       name: 'Test',
       symbol: 'TEST',
