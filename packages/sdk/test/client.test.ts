@@ -1,6 +1,5 @@
 import assert from 'assert'
 import { expect } from 'chai'
-import { hexlify, hexZeroPad } from '@ethersproject/bytes'
 import { ethers } from 'hardhat'
 import { v4 as uuidv4 } from 'uuid'
 import { Wallet } from '@ethersproject/wallet'
@@ -35,8 +34,7 @@ const NON_NULL_ADDRESS = '0x0000000000000000000000000000000000000001'
 const SOUND_FEE = 0
 const ONE_HOUR = 3600
 const PRICE = 420420420
-const randomInt = Math.floor(Math.random() * 1_000_000_000_000)
-const DEFAULT_SALT = hexZeroPad(hexlify(randomInt), 32)
+const DEFAULT_SALT = uuidToBytes32(uuidv4())
 
 let client: SoundClient
 let soundCreator: SoundCreatorV1
