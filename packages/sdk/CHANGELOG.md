@@ -1,5 +1,11 @@
 # @soundxyz/sdk
 
+## 0.1.1
+
+### Patch Changes
+
+- [#52](https://github.com/soundxyz/sdk/pull/52) [`2b5de3f`](https://github.com/soundxyz/sdk/commit/2b5de3f3c2c13ba6505a27064dbf93a2439a9bb4) Thanks [@vigneshka](https://github.com/vigneshka)! - Moving keccak to regular dependency
+
 ## 0.1.0
 
 ### Minor Changes
