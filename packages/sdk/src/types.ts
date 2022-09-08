@@ -68,6 +68,18 @@ export type FixedPriceSignatureSchedule = MintScheduleBase & {
 
 export type MintSchedule = RangeEditionSchedule | MerkleDropSchedule | FixedPriceSignatureSchedule
 
+export function isRangeEditionSchedule(schedule: MintSchedule): schedule is RangeEditionSchedule {
+  return schedule.mintType === 'RangeEdition'
+}
+
+export function isMerkleDropSchedule(schedule: MintSchedule): schedule is MerkleDropSchedule {
+  return schedule.mintType === 'MerkleDrop'
+}
+
+export function isFixedPriceSignatureSchedule(schedule: MintSchedule): schedule is FixedPriceSignatureSchedule {
+  return schedule.mintType === 'FixedPriceSignature'
+}
+
 /**
  * The arguments required by SoundEdition.initialize
  */
@@ -120,6 +132,18 @@ export type FixedPriceSignatureConfig = MintConfigBase & {
 }
 
 export type MintConfig = MerkleDropConfig | RangeEditionConfig | FixedPriceSignatureConfig
+
+export function isMerkleDropConfig(config: MintConfig): config is MerkleDropConfig {
+  return config.mintType === 'MerkleDrop'
+}
+
+export function isRangeEditionConfig(config: MintConfig): config is RangeEditionConfig {
+  return config.mintType === 'RangeEdition'
+}
+
+export function isFixedPriceSignatureConfig(config: MintConfig): config is FixedPriceSignatureConfig {
+  return config.mintType === 'FixedPriceSignature'
+}
 
 export type ContractCall = {
   contractAddress: string
