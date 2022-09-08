@@ -271,7 +271,7 @@ export function SoundClient({
   }: {
     editionConfig: EditionConfig
     mintConfigs: MintConfig[]
-    salt?: string
+    salt?: string | number
   }) {
     const { signer, chainId, userAddress } = await _requireSigner()
 
@@ -405,7 +405,7 @@ export function SoundClient({
     }
   }
 
-  async function expectedEditionAddress({ deployer, salt }: { deployer: string; salt: string }) {
+  async function expectedEditionAddress({ deployer, salt }: { deployer: string; salt: string | number }) {
     validateAddress(deployer)
     const { signerOrProvider, chainId } = await _requireSignerOrProvider()
     const soundCreatorAddress = _getCreatorAddress(chainId)
