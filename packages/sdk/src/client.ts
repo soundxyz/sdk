@@ -347,7 +347,7 @@ export function SoundClient({
             contractAddress: mintConfig.minterAddress,
             calldata: minterInterface.encodeFunctionData('createEditionMint', [
               editionAddress,
-              mintConfig.merkleRootHash,
+              mintConfig.merkleRoot,
               mintConfig.price,
               mintConfig.startTime,
               mintConfig.endTime,
@@ -499,6 +499,7 @@ export function SoundClient({
             return {
               mintType: 'MerkleDrop',
               mintId: mintId.toNumber(),
+              merkleRoot: mintSchedule.merkleRootHash,
               editionAddress,
               minterAddress,
               startTime: mintSchedule.startTime,
