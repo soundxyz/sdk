@@ -1,5 +1,11 @@
 # @soundxyz/sdk
 
+## 0.1.4
+
+### Patch Changes
+
+- [#59](https://github.com/soundxyz/sdk/pull/59) [`ee0184d`](https://github.com/soundxyz/sdk/commit/ee0184d4856d0fd022071f89ae615efa4b494744) Thanks [@vigneshka](https://github.com/vigneshka)! - Add merkle root to merkledrop sale schedule
+
 ## 0.1.3
 
 ### Patch Changes
