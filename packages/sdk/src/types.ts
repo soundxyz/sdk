@@ -54,6 +54,7 @@ export type RangeEditionSchedule = MintScheduleBase & {
   maxMintableLower: number
   maxMintableUpper: number
   closingTime: number
+  maxMintable: (unix_timestamp?: number) => number
 }
 
 export type MerkleDropSchedule = MintScheduleBase & {
