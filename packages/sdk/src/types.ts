@@ -60,6 +60,7 @@ export type RangeEditionSchedule = MintScheduleBase & {
 export type MerkleDropSchedule = MintScheduleBase & {
   mintType: 'MerkleDrop'
   maxMintable: number
+  merkleRoot: string
 }
 
 export type FixedPriceSignatureSchedule = MintScheduleBase & {
@@ -113,7 +114,7 @@ export type MintConfigBase = {
  */
 export type MerkleDropConfig = MintConfigBase & {
   mintType: 'MerkleDrop'
-  merkleRootHash: string
+  merkleRoot: string
   maxMintable: BigNumberish
   maxMintablePerAccount: BigNumberish
 }
