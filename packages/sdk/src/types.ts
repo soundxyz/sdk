@@ -66,12 +66,7 @@ export type FixedPriceSignatureSchedule = MintScheduleBase & {
   maxMintable: number
 }
 
-export type UnknownSchedule = MintScheduleBase & {
-  mintType: 'Unknown'
-  maxMintable: number
-}
-
-export type MintSchedule = RangeEditionSchedule | MerkleDropSchedule | FixedPriceSignatureSchedule | UnknownSchedule
+export type MintSchedule = RangeEditionSchedule | MerkleDropSchedule | FixedPriceSignatureSchedule
 
 /**
  * The arguments required by SoundEdition.initialize

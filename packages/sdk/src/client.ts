@@ -18,6 +18,7 @@ import {
   NotSoundEditionError,
   SoundNotFoundError,
   UnsupportedCreatorAddressError,
+  UnsupportedMinterError,
   UnsupportedNetworkError,
 } from './errors'
 import {
@@ -523,21 +524,7 @@ export function SoundClient({
             }
           }
           default: {
-            const minterContract = minterFactoryMap[interfaceId].connect(minterAddress, signerOrProvider)
-            const mintSchedule = await minterContract.mintInfo(editionAddress, mintId)
-            return {
-              mintType: 'Unknown',
-              mintId: mintId.toNumber(),
-              editionAddress,
-              minterAddress,
-              startTime: mintSchedule.startTime,
-              endTime: mintSchedule.endTime,
-              mintPaused: mintSchedule.mintPaused,
-              price: mintSchedule.price,
-              maxMintable: mintSchedule.maxMintable,
-              maxMintablePerAccount: mintSchedule.maxMintablePerAccount,
-              totalMinted: mintSchedule.totalMinted,
-            }
+            throw new UnsupportedMinterError()
           }
         }
       }),
