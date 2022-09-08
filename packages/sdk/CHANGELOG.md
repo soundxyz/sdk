@@ -1,5 +1,11 @@
 # @soundxyz/sdk
 
+## 0.1.3
+
+### Patch Changes
+
+- [#57](https://github.com/soundxyz/sdk/pull/57) [`932cb59`](https://github.com/soundxyz/sdk/commit/932cb59914846dbba1e5c0f979fd74c1c119001f) Thanks [@vigneshka](https://github.com/vigneshka)! - Add maxMintable helper function for range editions
+
 ## 0.1.2
 
 ### Patch Changes
