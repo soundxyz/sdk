@@ -1,5 +1,11 @@
 # @soundxyz/sdk
 
+## 0.1.2
+
+### Patch Changes
+
+- [#54](https://github.com/soundxyz/sdk/pull/54) [`bd76d66`](https://github.com/soundxyz/sdk/commit/bd76d663dbcc43b204a4a0c715fff4874e13561c) Thanks [@vigneshka](https://github.com/vigneshka)! - Improved types, using string name instead of mintType
+
 ## 0.1.1
 
 ### Patch Changes
