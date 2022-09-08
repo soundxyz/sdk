@@ -58,8 +58,9 @@ export function SoundClient({
     activeMintSchedules,
     eligibleQuantity,
     mint,
-    soundInfo,
     createEditionWithMintSchedules,
+    soundInfo,
+    expectedEditionAddress,
   }
 
   // If the contract address is a SoundEdition contract
@@ -392,6 +393,29 @@ export function SoundClient({
     )
   }
 
+  async function soundInfo(soundParams: ReleaseInfoQueryVariables) {
+    const { data, errors } = await client.soundApi.releaseInfo(soundParams)
+
+    const release = data?.release
+    if (!release) throw new SoundNotFoundError({ ...soundParams, graphqlErrors: errors })
+
+    return {
+      ...release,
+      trackAudio: LazyPromise(() => client.soundApi.audioFromTrack({ trackId: release.track.id })),
+    }
+  }
+
+  async function expectedEditionAddress({ deployer, salt }: { deployer: string; salt: string }) {
+    validateAddress(deployer)
+    const { signerOrProvider, chainId } = await _requireSignerOrProvider()
+    const soundCreatorAddress = _getCreatorAddress(chainId)
+
+    return await SoundCreatorV1__factory.connect(soundCreatorAddress, signerOrProvider).soundEditionAddress(
+      deployer,
+      getSaltAsBytes32(salt),
+    )
+  }
+
   /*********************************************************
                   INTERNAL FUNCTIONS
  ********************************************************/
@@ -535,18 +559,6 @@ export function SoundClient({
     const isEdition = await isSoundEdition({ editionAddress })
     if (!isEdition) {
       throw new NotSoundEditionError()
-    }
-  }
-
-  async function soundInfo(soundParams: ReleaseInfoQueryVariables) {
-    const { data, errors } = await client.soundApi.releaseInfo(soundParams)
-
-    const release = data?.release
-    if (!release) throw new SoundNotFoundError({ ...soundParams, graphqlErrors: errors })
-
-    return {
-      ...release,
-      trackAudio: LazyPromise(() => client.soundApi.audioFromTrack({ trackId: release.track.id })),
     }
   }
 

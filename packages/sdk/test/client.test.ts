@@ -18,7 +18,7 @@ import {
 import { interfaceIds } from '@soundxyz/sound-protocol'
 import { getSaltAsBytes32 } from '../src/utils/helpers'
 import { SoundClient } from '../src/client'
-import { NotEligibleMint } from '../src/errors'
+import { NotEligibleMint, InvalidAddressError, MissingSignerOrProviderError } from '../src/errors'
 import { MINTER_ROLE } from '../src/utils/constants'
 import { MerkleTestHelper, now } from './helpers'
 
@@ -85,7 +85,6 @@ beforeEach(async () => {
   artistWallet = signers[1]
   buyerWallet = signers[2]
 
-  client = SoundClient({ provider: ethers.provider, apiKey: '123', environment: 'preview' })
   const fixture = await loadFixture(deployProtocol)
 
   soundCreator = fixture.soundCreator
@@ -93,6 +92,13 @@ beforeEach(async () => {
   fixedPriceSignatureMinter = fixture.fixedPriceSignatureMinter
   merkleDropMinter = fixture.merkleDropMinter
   rangeEditionMinter = fixture.rangeEditionMinter
+
+  client = SoundClient({
+    provider: ethers.provider,
+    apiKey: '123',
+    environment: 'preview',
+    soundCreatorAddress: soundCreator.address,
+  })
 })
 
 /**
@@ -724,5 +730,37 @@ describe('createEditionWithMintSchedules', () => {
         }
       }
     }
+  })
+})
+
+describe('expectedEditionAddress', () => {
+  it('throws if provided deployerAddress is invalid', () => {
+    client.expectedEditionAddress({ deployer: '0x0', salt: '123' }).catch((error) => {
+      expect(error).instanceOf(InvalidAddressError)
+    })
+  })
+
+  it('throws if provider not connected', () => {
+    client = SoundClient({ provider: new ethers.providers.JsonRpcProvider(), apiKey: '123' })
+
+    client
+      .expectedEditionAddress({ deployer: '0xbf9a1fad0cbd61cc8158ccb6e1e8e111707088bb', salt: '123' })
+      .catch((error) => {
+        expect(error).instanceOf(MissingSignerOrProviderError)
+      })
+  })
+
+  it('returns expected address', async () => {
+    const deployer = artistWallet.address
+    const salt = '12345'
+
+    const expectedAddress = await SoundCreatorV1__factory.connect(
+      soundCreator.address,
+      ethers.provider,
+    ).soundEditionAddress(deployer, getSaltAsBytes32(salt))
+
+    const address = await client.expectedEditionAddress({ deployer, salt })
+
+    expect(address).to.eq(expectedAddress)
   })
 })
