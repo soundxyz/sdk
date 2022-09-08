@@ -58,7 +58,7 @@
     "@nomicfoundation/hardhat-network-helpers": "^1.0.4",
     "@nomiclabs/hardhat-ethers": "^2.1.1",
     "@nomiclabs/hardhat-waffle": "^2.0.3",
-    "@soundxyz/sound-protocol": "0.0.2-alpha-42fddc8.0",
+    "@soundxyz/sound-protocol": "0.0.2-alpha-940b736.0",
     "@types/chai": "^4.3.3",
     "@types/mocha": "^9.1.1",
     "@types/node": "18.7.5",

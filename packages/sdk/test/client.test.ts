@@ -16,10 +16,10 @@ import {
   SoundEditionV1__factory,
   SoundFeeRegistry__factory,
 } from '@soundxyz/sound-protocol/typechain/index'
-
+import { interfaceIds } from '@soundxyz/sound-protocol'
 import { SoundClient } from '../src/client'
 import { NotEligibleMint } from '../src/errors'
-import { interfaceIds, MINTER_ROLE } from '../src/utils/constants'
+import { MINTER_ROLE } from '../src/utils/constants'
 import { MerkleTestHelper, now } from './helpers'
 
 import type { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
@@ -161,13 +161,12 @@ describe('isSoundEdition', () => {
 
   it('Correctly identifies SoundEdition addresses', async () => {
     await setupTest({})
-    for (let i = 0; i < 10; i++) {
-      const wallet = Wallet.createRandom()
-      const isEdition = await client.isSoundEdition({ editionAddress: wallet.address })
-      expect(isEdition).to.be.false
-    }
 
-    const isEdition = await client.isSoundEdition({ editionAddress: precomputedEditionAddress })
+    const wallet = Wallet.createRandom()
+    let isEdition = await client.isSoundEdition({ editionAddress: wallet.address })
+    expect(isEdition).to.be.false
+
+    isEdition = await client.isSoundEdition({ editionAddress: precomputedEditionAddress })
     expect(isEdition).to.be.true
   })
 })
