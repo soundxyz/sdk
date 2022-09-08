@@ -226,7 +226,7 @@ export function SoundClient({
 
     switch (mintSchedule.interfaceId) {
       case interfaceIds.IRangeEditionMinter: {
-        return await RangeEditionMinter__factory.connect(mintSchedule.minterAddress, signer).mint(
+        return RangeEditionMinter__factory.connect(mintSchedule.minterAddress, signer).mint(
           mintSchedule.editionAddress,
           mintSchedule.mintId,
           quantity,
@@ -249,7 +249,7 @@ export function SoundClient({
           })
         }
 
-        return await merkleDropMinter.mint(
+        return merkleDropMinter.mint(
           mintSchedule.editionAddress,
           mintSchedule.mintId,
           quantity,
@@ -385,7 +385,7 @@ export function SoundClient({
     const creatorAddress = _getCreatorAddress(chainId)
     const soundCreatorContract = SoundCreatorV1__factory.connect(creatorAddress, signer)
 
-    return await soundCreatorContract.createSoundAndMints(
+    return soundCreatorContract.createSoundAndMints(
       formattedSalt,
       editionInitData,
       contractCalls.map((d) => d.contractAddress),
@@ -410,7 +410,7 @@ export function SoundClient({
     const { signerOrProvider, chainId } = await _requireSignerOrProvider()
     const soundCreatorAddress = _getCreatorAddress(chainId)
 
-    return await SoundCreatorV1__factory.connect(soundCreatorAddress, signerOrProvider).soundEditionAddress(
+    return SoundCreatorV1__factory.connect(soundCreatorAddress, signerOrProvider).soundEditionAddress(
       deployer,
       getSaltAsBytes32(salt),
     )
