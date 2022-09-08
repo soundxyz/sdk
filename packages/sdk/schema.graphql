@@ -624,7 +624,7 @@ type AuctionUploadStepInfo {
   """
   Max mints per wallet for auction
   """
-  maxMintsPerWallet: Int!
+  maxMintsPerWallet: Int
 
   """
   Price per mint
@@ -930,6 +930,11 @@ type CollectedRelease implements Node {
   artist: Artist!
 
   """
+  Contract associated to Sound Edition
+  """
+  contract: Contract!
+
+  """
   Cover image of release
   """
   coverImage: Media!
@@ -1076,6 +1081,46 @@ interface Connection {
 }
 
 """
+Contract entity
+"""
+type Contract {
+  """
+  Contract address
+  """
+  contractAddress: String!
+
+  """
+  Type of contract
+  """
+  contractType: ContractType!
+
+  """
+  Date of creation
+  """
+  createdAt: DateTime!
+
+  """
+  Contract entity unique identifier
+  """
+  id: ID!
+
+  """
+  Contract owner
+  """
+  owner: User!
+
+  """
+  Public address of contract owner
+  """
+  ownerPublicAddress: String!
+
+  """
+  Date of last update
+  """
+  updatedAt: DateTime!
+}
+
+"""
 Contract methods of transactions
 """
 enum ContractMethod {
@@ -1083,6 +1128,7 @@ enum ContractMethod {
   ARTIST__BUY_EDITION
   ARTIST__CREATE_EDITION
   ARTIST__WITHDRAW_FUNDS
+  SOUND_CREATOR__CREATE_SOUND_AND_MINTS
   SPLIT_MAIN__CREATE_SPLIT
   SPLIT_MAIN__DISTRIBUTE_ETH
   SPLIT_MAIN__WITHDRAW
@@ -1093,6 +1139,7 @@ Contract type, currently the playform only supports "ARTIST"
 """
 enum ContractType {
   ARTIST
+  EDITION
 }
 
 """
@@ -1468,12 +1515,17 @@ type EventV2 implements Node {
   """
   Artist contract address
   """
-  artistContractAddress: String!
+  artistContractAddress: String
 
   """
   Timestamp on blockchain of event
   """
   blockTimestamp: DateTime!
+
+  """
+  Contract address
+  """
+  contractAddress: String!
 
   """
   Date of creation of event entity
@@ -2541,6 +2593,21 @@ type Mutation {
   ): Transaction!
 
   """
+  [ARTIST] Manually register transaction of SoundEdition contract creation & mint schedule registrations on minter contracts.
+  """
+  registerCreateSoundAndMintsTx(
+    """
+    Transaction hash
+    """
+    hash: String!
+
+    """
+    Release identifier
+    """
+    releaseId: UUID!
+  ): Transaction!
+
+  """
   [ARTIST] Manually register split transaction
   """
   registerCreateSplitTx(
@@ -3164,6 +3231,11 @@ type Nft implements Node {
   comment: Comment
 
   """
+  Contract address
+  """
+  contractAddress: String!
+
+  """
   Date of creation of NFT entity
   """
   createdAt: DateTime!
@@ -3327,6 +3399,11 @@ type NftWithComment {
   Comment of NFT
   """
   comment: Comment!
+
+  """
+  Contract address
+  """
+  contractAddress: String!
 
   """
   Unique identifier of Nft
@@ -3524,12 +3601,42 @@ Auction options associated with permissioned sales
 """
 type PermissionedAuction {
   """
-  List of different eth prices options
+  List of different max mints per wallet quantity options for free sale
+  """
+  freeSaleMaxMintsPerWalletOptions: [Int!]!
+
+  """
+  List of different quantity options for free sale
+  """
+  freeSaleQuantityOptions: [Int!]
+
+  """
+  List of different max mints per wallet quantity options for presale
+  """
+  presaleMaxMintsPerWalletOptions: [Int!]!
+
+  """
+  List of different eth prices options for presale
+  """
+  presalePriceOptions: [Float!]
+
+  """
+  List of different quantity options for presale
+  """
+  presaleQuantityOptions: [Int!]
+
+  """
+  List of different eth prices options for public sale
   """
   priceOptions: [Float!]!
 
   """
-  List of different quantity options
+  List of different max mints per wallet quantity options for public sale
+  """
+  publicSaleMaxMintsPerWalletOptions: [Int!]!
+
+  """
+  List of different quantity options for public sale
   """
   quantityOptions: [Int!]!
 
@@ -3544,12 +3651,42 @@ Input options to customize permissioned auctions
 """
 input PermissionedAuctionInput {
   """
-  List of different eth prices options
+  List of different max mints per wallet quantity options for free sale
+  """
+  freeSaleMaxMintsPerWalletOptions: [Int!]!
+
+  """
+  List of different options of maximum quantity for free sale mint
+  """
+  freeSaleQuantityOptions: [Int!]!
+
+  """
+  List of different max mints per wallet quantity options for presale
+  """
+  presaleMaxMintsPerWalletOptions: [Int!]!
+
+  """
+  List of different eth prices options for presales
+  """
+  presalePriceOptions: [Float!]!
+
+  """
+  List of different options of maximum quantity for presale mint
+  """
+  presaleQuantityOptions: [Int!]!
+
+  """
+  List of different eth prices options for public sale
   """
   priceOptions: [Float!]!
 
   """
-  List of different quantity options
+  List of different max mints per wallet quantity options for public sale
+  """
+  publicSaleMaxMintsPerWalletOptions: [Int!]!
+
+  """
+  List of different quantity options for public sale
   """
   quantityOptions: [Int!]!
 }
@@ -4518,12 +4655,22 @@ Auction options associated with range bound sales
 """
 type RangeBoundAuction {
   """
-  List of different options of maximum quantity
+  List of different max mints per wallet quantity options for free sale
+  """
+  freeSaleMaxMintsPerWalletOptions: [Int!]!
+
+  """
+  List of different quantity options for free sale
+  """
+  freeSaleQuantityOptions: [Int!]
+
+  """
+  List of different options of maximum quantity for public sale
   """
   maxOptions: [Int!]!
 
   """
-  List of different options of minimum quantity
+  List of different options of minimum quantity for public sale
   """
   minOptions: [Int!]!
 
@@ -4533,9 +4680,29 @@ type RangeBoundAuction {
   mintingPeriodMins: Int!
 
   """
-  List of different eth prices options
+  List of different max mints per wallet quantity options for presale
+  """
+  presaleMaxMintsPerWalletOptions: [Int!]!
+
+  """
+  List of different eth prices options for presale
+  """
+  presalePriceOptions: [Float!]
+
+  """
+  List of different quantity options for presale
+  """
+  presaleQuantityOptions: [Int!]
+
+  """
+  List of different eth prices options for public sale
   """
   priceOptions: [Float!]!
+
+  """
+  List of different max mints per wallet quantity options for public sale
+  """
+  publicSaleMaxMintsPerWalletOptions: [Int!]!
 
   """
   Signing address for minting process
@@ -4548,24 +4715,54 @@ Input options to customize range bound auctions
 """
 input RangeBoundAuctionInput {
   """
-  List of different options of maximum quantity
+  List of different max mints per wallet quantity options for free sale
+  """
+  freeSaleMaxMintsPerWalletOptions: [Int!]!
+
+  """
+  List of different options of maximum quantity for free sale mint
+  """
+  freeSaleQuantityOptions: [Int!]!
+
+  """
+  List of different options of maximum quantity for public sale
   """
   maxOptions: [Int!]!
 
   """
-  List of different options of minimum quantity
+  List of different options of minimum quantity for public sale
   """
   minOptions: [Int!]!
 
   """
-  Minting period duration in minutes
+  Minting period duration in minutes for public sale
   """
   mintingPeriodMins: Int!
 
   """
-  List of different eth prices options
+  List of different max mints per wallet quantity options for presale
+  """
+  presaleMaxMintsPerWalletOptions: [Int!]!
+
+  """
+  List of different eth prices options for presales
+  """
+  presalePriceOptions: [Float!]!
+
+  """
+  List of different options of maximum quantity for presale mint
+  """
+  presaleQuantityOptions: [Int!]!
+
+  """
+  List of different eth prices options for public sale
   """
   priceOptions: [Float!]!
+
+  """
+  List of different max mints per wallet quantity options for public sale
+  """
+  publicSaleMaxMintsPerWalletOptions: [Int!]!
 }
 
 """
@@ -4580,7 +4777,7 @@ type Release implements Node {
   """
   Artist contract address
   """
-  artistContractAddress: String!
+  artistContractAddress: String! @deprecated(reason: "Use contractAddress instead")
 
   """
   Available balance to withdraw for an edition
@@ -4596,6 +4793,16 @@ type Release implements Node {
   Currently claimed song slots
   """
   claimedSongSlots: [Int!]!
+
+  """
+  Contract associated to Sound Edition
+  """
+  contract: Contract!
+
+  """
+  Contract address
+  """
+  contractAddress: String!
 
   """
   Cover image of release
@@ -5982,9 +6189,14 @@ Track audio
 """
 type TrackAudio {
   """
-  Track audio
+  Track audio, transcoded version if available
   """
   audio: Media
+
+  """
+  Track audio, original non-transcoded version
+  """
+  audioOriginal: Media
 
   """
   Track duration in seconds
