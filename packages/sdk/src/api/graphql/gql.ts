@@ -3892,7 +3892,6 @@ export type ReleaseInfoQuery = {
     title: string
     season?: string | null
     quantity: number
-    numSold: number
     quantityLowerBound: number
     quantityUpperBound: number
     totalRaised: string
@@ -3935,6 +3934,6 @@ export type TestQuery = { __typename: 'Query' }
 export const GenerateAuthChallenge = `mutation GenerateAuthChallenge($publicAddress:String!){generateAuthChallenge(publicAddress:$publicAddress)}`
 export const VerifyAuthChallenge = `mutation VerifyAuthChallenge($publicAddress:String!$signedMessage:String!){verifyAuthChallenge(publicAddress:$publicAddress signedMessage:$signedMessage)}`
 export const MerkleProof = `query MerkleProof($root:String!$unhashedLeaf:String!){merkleTreeProof(root:$root unhashedLeaf:$unhashedLeaf){proof}}`
-export const ReleaseInfo = `query ReleaseInfo($contractAddress:Address!$editionId:String){release:releaseContract(contractAddress:$contractAddress editionId:$editionId){id artistContractAddress editionId externalUrl finalQuantity mintStartTime openseaUrl title season quantity numSold quantityLowerBound quantityUpperBound totalRaised totalRaisedPrimaryUsd totalRaisedSecondaryUsd genre{id name}track{id duration}artist{id user{id publicAddress}}coverImage{id url}eggGame{id winningSerialNum finalSerialBlockHash nft{id songSlot tokenId updatedAtBlockNum isPresaleNft amountPaidInWei comment{id message}owner{id publicAddress}}}}}`
+export const ReleaseInfo = `query ReleaseInfo($contractAddress:Address!$editionId:String){release:releaseContract(contractAddress:$contractAddress editionId:$editionId){id artistContractAddress editionId externalUrl finalQuantity mintStartTime openseaUrl title season quantity quantityLowerBound quantityUpperBound totalRaised totalRaisedPrimaryUsd totalRaisedSecondaryUsd genre{id name}track{id duration}artist{id user{id publicAddress}}coverImage{id url}eggGame{id winningSerialNum finalSerialBlockHash nft{id songSlot tokenId updatedAtBlockNum isPresaleNft amountPaidInWei comment{id message}owner{id publicAddress}}}}}`
 export const AudioFromTrack = `query AudioFromTrack($trackId:UUID!){audioFromTrack(trackId:$trackId){id duration audio{id url}revealTime}}`
 export const Test = `query Test{__typename}`
