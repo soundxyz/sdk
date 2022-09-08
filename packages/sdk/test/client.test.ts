@@ -631,7 +631,7 @@ describe('createEditionWithMintSchedules', () => {
     const mint1MaxMintablePerAccount = 2
     const mint3MaxMintablePerAccount = 3
     const merkleTestHelper = MerkleTestHelper()
-    const merkleRootHash = merkleTestHelper.getMerkleRoot(merkleTestHelper.getMerkleTree())
+    const merkleRoot = merkleTestHelper.getMerkleRoot(merkleTestHelper.getMerkleTree())
 
     const mintConfigs: MintConfig[] = [
       {
@@ -660,7 +660,7 @@ describe('createEditionWithMintSchedules', () => {
         mintType: 'MerkleDrop' as const,
         minterAddress: merkleDropMinter.address,
         price: PRICE,
-        merkleRootHash,
+        merkleRoot,
         startTime: mint3StartTime,
         endTime: mint3StartTime + ONE_HOUR,
         maxMintable: 9,
@@ -724,7 +724,7 @@ describe('createEditionWithMintSchedules', () => {
           const mintSchedule = await minter.mintInfo(precomputedEditionAddress, MINT_ID)
           expect(mintSchedule.startTime).to.equal(mint3StartTime)
           expect(mintSchedule.endTime).to.equal(mint3StartTime + ONE_HOUR)
-          expect(mintSchedule.merkleRootHash).to.equal(merkleRootHash)
+          expect(mintSchedule.merkleRootHash).to.equal(merkleRoot)
           expect(mintSchedule.maxMintablePerAccount).to.equal(mint3MaxMintablePerAccount)
           break
         }
