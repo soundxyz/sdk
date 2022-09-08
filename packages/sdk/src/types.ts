@@ -1,7 +1,8 @@
 import type { BigNumber, BigNumberish } from '@ethersproject/bignumber'
 import type { Signer } from '@ethersproject/abstract-signer'
 import type { Provider } from '@ethersproject/abstract-provider'
-import type { ApiEnvironments, interfaceIds, supportedChainIds, minterNames } from './utils/constants'
+import type { ApiEnvironments, supportedChainIds, minterNames } from './utils/constants'
+import type { interfaceIds } from '@soundxyz/sound-protocol'
 
 /*********************************************************
                 PROTOCOL TYPES

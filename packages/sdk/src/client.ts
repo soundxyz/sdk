@@ -41,6 +41,8 @@ import type { ContractTransaction } from '@ethersproject/contracts'
 import type { ReleaseInfoQueryVariables } from './api/graphql/gql'
 import type { ContractCall, EditionConfig, MintConfig, MintSchedule } from './types'
 
+type InterfaceId = keyof typeof interfaceIds
+
 export function SoundClient({
   signer,
   provider,
