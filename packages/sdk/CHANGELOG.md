@@ -1,5 +1,12 @@
 # @soundxyz/sdk
 
+## 0.0.10
+
+### Patch Changes
+
+- [#48](https://github.com/soundxyz/sdk/pull/48) [`b3f7c1e`](https://github.com/soundxyz/sdk/commit/b3f7c1e5e8e12b13019a8e195c9393d9841cf361) Thanks [@gigamesh](https://github.com/gigamesh)! - - Bumps @soundxyz/sound-protocol
+  - Makes isSoundEdition test less noisy
+
 ## 0.0.9
 
 ### Patch Changes
