@@ -492,6 +492,12 @@ describe('mint', () => {
     })
 
     it(`Successfully mints via RangeEditionMinter`, async () => {
+      expect(
+        await client.soundNumSold({
+          contractAddress: precomputedEditionAddress,
+        }),
+      ).to.equal(0)
+
       const quantity = 2
       const initialBalance = await SoundEditionV1__factory.connect(
         precomputedEditionAddress,
@@ -504,6 +510,12 @@ describe('mint', () => {
         buyerWallet.address,
       )
       expect(finalBalance.sub(initialBalance)).to.eq(quantity)
+
+      expect(
+        await client.soundNumSold({
+          contractAddress: precomputedEditionAddress,
+        }),
+      ).to.equal(quantity)
     })
 
     it(`Should throw error if invalid quantity requested`, async () => {
@@ -566,6 +578,12 @@ describe('mint', () => {
     })
 
     it(`Successfully mints via MerkleDropMinter`, async () => {
+      expect(
+        await client.soundNumSold({
+          contractAddress: precomputedEditionAddress,
+        }),
+      ).to.equal(0)
+
       const quantity = 1
       const initialBalance = await SoundEditionV1__factory.connect(
         precomputedEditionAddress,
@@ -580,6 +598,12 @@ describe('mint', () => {
         mintSchedule: mintSchedules[0],
         quantity,
       })
+
+      expect(
+        await client.soundNumSold({
+          contractAddress: precomputedEditionAddress,
+        }),
+      ).to.equal(quantity)
 
       const finalBalance = await SoundEditionV1__factory.connect(precomputedEditionAddress, ethers.provider).balanceOf(
         buyerWallet.address,

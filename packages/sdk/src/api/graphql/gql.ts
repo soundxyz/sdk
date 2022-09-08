@@ -342,7 +342,7 @@ export type AuctionUploadStepInfo = {
   /** List of public addresses to allow for auction */
   allowList: Array<Scalars['String']>
   /** Max mints per wallet for auction */
-  maxMintsPerWallet: Scalars['Int']
+  maxMintsPerWallet?: Maybe<Scalars['Int']>
   /** Price per mint */
   price: Scalars['Float']
   /** Max supply for auction */
@@ -505,6 +505,8 @@ export type ChatMessagesConnection = Connection & {
 export type CollectedRelease = Node & {
   /** Artist of release */
   artist: Artist
+  /** Contract associated to Sound Edition */
+  contract: Contract
   /** Cover image of release */
   coverImage: Media
   /** Release creation date */
@@ -573,12 +575,31 @@ export type Connection = {
   pageInfo: PageInfo
 }
 
+/** Contract entity */
+export type Contract = {
+  /** Contract address */
+  contractAddress: Scalars['String']
+  /** Type of contract */
+  contractType: ContractType
+  /** Date of creation */
+  createdAt: Scalars['DateTime']
+  /** Contract entity unique identifier */
+  id: Scalars['ID']
+  /** Contract owner */
+  owner: User
+  /** Public address of contract owner */
+  ownerPublicAddress: Scalars['String']
+  /** Date of last update */
+  updatedAt: Scalars['DateTime']
+}
+
 /** Contract methods of transactions */
 export const ContractMethod = {
   ARTIST_CREATOR__CREATE_ARTIST: 'ARTIST_CREATOR__CREATE_ARTIST',
   ARTIST__BUY_EDITION: 'ARTIST__BUY_EDITION',
   ARTIST__CREATE_EDITION: 'ARTIST__CREATE_EDITION',
   ARTIST__WITHDRAW_FUNDS: 'ARTIST__WITHDRAW_FUNDS',
+  SOUND_CREATOR__CREATE_SOUND_AND_MINTS: 'SOUND_CREATOR__CREATE_SOUND_AND_MINTS',
   SPLIT_MAIN__CREATE_SPLIT: 'SPLIT_MAIN__CREATE_SPLIT',
   SPLIT_MAIN__DISTRIBUTE_ETH: 'SPLIT_MAIN__DISTRIBUTE_ETH',
   SPLIT_MAIN__WITHDRAW: 'SPLIT_MAIN__WITHDRAW',
@@ -588,6 +609,7 @@ export type ContractMethod = typeof ContractMethod[keyof typeof ContractMethod]
 /** Contract type, currently the playform only supports "ARTIST" */
 export const ContractType = {
   ARTIST: 'ARTIST',
+  EDITION: 'EDITION',
 } as const
 
 export type ContractType = typeof ContractType[keyof typeof ContractType]
@@ -776,9 +798,11 @@ export type EventType = typeof EventType[keyof typeof EventType]
 /** Event entity */
 export type EventV2 = Node & {
   /** Artist contract address */
-  artistContractAddress: Scalars['String']
+  artistContractAddress?: Maybe<Scalars['String']>
   /** Timestamp on blockchain of event */
   blockTimestamp: Scalars['DateTime']
+  /** Contract address */
+  contractAddress: Scalars['String']
   /** Date of creation of event entity */
   createdAt: Scalars['DateTime']
   /** Event type */
@@ -1217,6 +1241,8 @@ export type Mutation = {
   registerBuyEditionTx: Transaction
   /** [ARTIST] Manually register transaction of artist contract creation */
   registerCreateArtistTx: Transaction
+  /** [ARTIST] Manually register transaction of SoundEdition contract creation & mint schedule registrations on minter contracts. */
+  registerCreateSoundAndMintsTx: Transaction
   /** [ARTIST] Manually register split transaction */
   registerCreateSplitTx: Transaction
   /** [ARTIST] Manually register transaction of minted release */
@@ -1486,6 +1512,12 @@ export type MutationregisterBuyEditionTxArgs = {
 /** Mutations */
 export type MutationregisterCreateArtistTxArgs = {
   hash: Scalars['String']
+}
+
+/** Mutations */
+export type MutationregisterCreateSoundAndMintsTxArgs = {
+  hash: Scalars['String']
+  releaseId: Scalars['UUID']
 }
 
 /** Mutations */
@@ -1771,6 +1803,8 @@ export type Nft = Node & {
   amountPaidInWei: Scalars['String']
   /** Comment set for NFT */
   comment?: Maybe<Comment>
+  /** Contract address */
+  contractAddress: Scalars['String']
   /** Date of creation of NFT entity */
   createdAt: Scalars['DateTime']
   /** Block number of the nft mint */
@@ -1847,6 +1881,8 @@ export type NftWithComment = {
   avatarUrl?: Maybe<Scalars['String']>
   /** Comment of NFT */
   comment: Comment
+  /** Contract address */
+  contractAddress: Scalars['String']
   /** Unique identifier of Nft */
   id: Scalars['ID']
   /** Was the NFT bought on a presale */
@@ -1939,9 +1975,21 @@ export type PageInfo = {
 
 /** Auction options associated with permissioned sales */
 export type PermissionedAuction = {
-  /** List of different eth prices options */
+  /** List of different max mints per wallet quantity options for free sale */
+  freeSaleMaxMintsPerWalletOptions: Array<Scalars['Int']>
+  /** List of different quantity options for free sale */
+  freeSaleQuantityOptions?: Maybe<Array<Scalars['Int']>>
+  /** List of different max mints per wallet quantity options for presale */
+  presaleMaxMintsPerWalletOptions: Array<Scalars['Int']>
+  /** List of different eth prices options for presale */
+  presalePriceOptions?: Maybe<Array<Scalars['Float']>>
+  /** List of different quantity options for presale */
+  presaleQuantityOptions?: Maybe<Array<Scalars['Int']>>
+  /** List of different eth prices options for public sale */
   priceOptions: Array<Scalars['Float']>
-  /** List of different quantity options */
+  /** List of different max mints per wallet quantity options for public sale */
+  publicSaleMaxMintsPerWalletOptions: Array<Scalars['Int']>
+  /** List of different quantity options for public sale */
   quantityOptions: Array<Scalars['Int']>
   /** Signing address for minting process */
   signingAddress: Scalars['String']
@@ -1949,9 +1997,21 @@ export type PermissionedAuction = {
 
 /** Input options to customize permissioned auctions */
 export type PermissionedAuctionInput = {
-  /** List of different eth prices options */
+  /** List of different max mints per wallet quantity options for free sale */
+  freeSaleMaxMintsPerWalletOptions: Array<Scalars['Int']>
+  /** List of different options of maximum quantity for free sale mint */
+  freeSaleQuantityOptions: Array<Scalars['Int']>
+  /** List of different max mints per wallet quantity options for presale */
+  presaleMaxMintsPerWalletOptions: Array<Scalars['Int']>
+  /** List of different eth prices options for presales */
+  presalePriceOptions: Array<Scalars['Float']>
+  /** List of different options of maximum quantity for presale mint */
+  presaleQuantityOptions: Array<Scalars['Int']>
+  /** List of different eth prices options for public sale */
   priceOptions: Array<Scalars['Float']>
-  /** List of different quantity options */
+  /** List of different max mints per wallet quantity options for public sale */
+  publicSaleMaxMintsPerWalletOptions: Array<Scalars['Int']>
+  /** List of different quantity options for public sale */
   quantityOptions: Array<Scalars['Int']>
 }
 
@@ -2524,35 +2584,62 @@ export type QueueStatusSubscriptionInput = {
 
 /** Auction options associated with range bound sales */
 export type RangeBoundAuction = {
-  /** List of different options of maximum quantity */
+  /** List of different max mints per wallet quantity options for free sale */
+  freeSaleMaxMintsPerWalletOptions: Array<Scalars['Int']>
+  /** List of different quantity options for free sale */
+  freeSaleQuantityOptions?: Maybe<Array<Scalars['Int']>>
+  /** List of different options of maximum quantity for public sale */
   maxOptions: Array<Scalars['Int']>
-  /** List of different options of minimum quantity */
+  /** List of different options of minimum quantity for public sale */
   minOptions: Array<Scalars['Int']>
   /** Minting period duration in minutes */
   mintingPeriodMins: Scalars['Int']
-  /** List of different eth prices options */
+  /** List of different max mints per wallet quantity options for presale */
+  presaleMaxMintsPerWalletOptions: Array<Scalars['Int']>
+  /** List of different eth prices options for presale */
+  presalePriceOptions?: Maybe<Array<Scalars['Float']>>
+  /** List of different quantity options for presale */
+  presaleQuantityOptions?: Maybe<Array<Scalars['Int']>>
+  /** List of different eth prices options for public sale */
   priceOptions: Array<Scalars['Float']>
+  /** List of different max mints per wallet quantity options for public sale */
+  publicSaleMaxMintsPerWalletOptions: Array<Scalars['Int']>
   /** Signing address for minting process */
   signingAddress: Scalars['String']
 }
 
 /** Input options to customize range bound auctions */
 export type RangeBoundAuctionInput = {
-  /** List of different options of maximum quantity */
+  /** List of different max mints per wallet quantity options for free sale */
+  freeSaleMaxMintsPerWalletOptions: Array<Scalars['Int']>
+  /** List of different options of maximum quantity for free sale mint */
+  freeSaleQuantityOptions: Array<Scalars['Int']>
+  /** List of different options of maximum quantity for public sale */
   maxOptions: Array<Scalars['Int']>
-  /** List of different options of minimum quantity */
+  /** List of different options of minimum quantity for public sale */
   minOptions: Array<Scalars['Int']>
-  /** Minting period duration in minutes */
+  /** Minting period duration in minutes for public sale */
   mintingPeriodMins: Scalars['Int']
-  /** List of different eth prices options */
+  /** List of different max mints per wallet quantity options for presale */
+  presaleMaxMintsPerWalletOptions: Array<Scalars['Int']>
+  /** List of different eth prices options for presales */
+  presalePriceOptions: Array<Scalars['Float']>
+  /** List of different options of maximum quantity for presale mint */
+  presaleQuantityOptions: Array<Scalars['Int']>
+  /** List of different eth prices options for public sale */
   priceOptions: Array<Scalars['Float']>
+  /** List of different max mints per wallet quantity options for public sale */
+  publicSaleMaxMintsPerWalletOptions: Array<Scalars['Int']>
 }
 
 /** Release entity */
 export type Release = Node & {
   /** Artist of release */
   artist: Artist
-  /** Artist contract address */
+  /**
+   * Artist contract address
+   * @deprecated Use contractAddress instead
+   */
   artistContractAddress: Scalars['String']
   /** Available balance to withdraw for an edition */
   balanceToWithdraw?: Maybe<Scalars['String']>
@@ -2560,6 +2647,10 @@ export type Release = Node & {
   behindTheMusic: Scalars['String']
   /** Currently claimed song slots */
   claimedSongSlots: Array<Scalars['Int']>
+  /** Contract associated to Sound Edition */
+  contract: Contract
+  /** Contract address */
+  contractAddress: Scalars['String']
   /** Cover image of release */
   coverImage: Media
   /** Release creation date */
@@ -3289,8 +3380,10 @@ export type Track = {
 
 /** Track audio */
 export type TrackAudio = {
-  /** Track audio */
+  /** Track audio, transcoded version if available */
   audio?: Maybe<Media>
+  /** Track audio, original non-transcoded version */
+  audioOriginal?: Maybe<Media>
   /** Track duration in seconds */
   duration: Scalars['Int']
   /** Track identifier */

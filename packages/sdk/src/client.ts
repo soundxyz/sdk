@@ -60,6 +60,7 @@ export function SoundClient({
     createEditionWithMintSchedules,
     soundInfo,
     expectedEditionAddress,
+    soundNumSold,
   }
 
   // If the contract address is a SoundEdition contract
@@ -388,6 +389,15 @@ export function SoundClient({
     )
   }
 
+  async function soundNumSold({ contractAddress }: { contractAddress: string }) {
+    const soundCreatorContract = SoundEditionV1__factory.connect(
+      contractAddress,
+      (await _requireSignerOrProvider()).signerOrProvider,
+    )
+
+    return (await soundCreatorContract.totalMinted()).toNumber()
+  }
+
   async function soundInfo(soundParams: ReleaseInfoQueryVariables) {
     const { data, errors } = await client.soundApi.releaseInfo(soundParams)
 
@@ -396,6 +406,9 @@ export function SoundClient({
 
     return {
       ...release,
+      numSold: function numSold() {
+        return soundNumSold({ contractAddress: soundParams.contractAddress })
+      },
       trackAudio: LazyPromise(() => client.soundApi.audioFromTrack({ trackId: release.track.id })),
     }
   }
