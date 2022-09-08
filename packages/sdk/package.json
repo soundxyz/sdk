@@ -62,7 +62,6 @@
     "@types/chai": "^4.3.3",
     "@types/mocha": "^9.1.1",
     "@types/node": "18.7.5",
-    "@types/uuid": "^8.3.4",
     "bob-ts": "^4.1.1",
     "bob-tsm": "^1.1.2",
     "chai": "^4.3.6",
