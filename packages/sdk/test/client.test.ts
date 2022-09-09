@@ -778,10 +778,12 @@ describe('expectedEditionAddress', () => {
     const deployer = artistWallet.address
     const salt = '12345'
 
-    const expectedAddress = await SoundCreatorV1__factory.connect(
-      soundCreator.address,
-      ethers.provider,
-    ).soundEditionAddress(deployer, getSaltAsBytes32(salt))
+    const expectedAddress = (
+      await SoundCreatorV1__factory.connect(soundCreator.address, ethers.provider).soundEditionAddress(
+        deployer,
+        getSaltAsBytes32(salt),
+      )
+    ).toLowerCase()
 
     const address = await client.expectedEditionAddress({ deployer, salt })
 
