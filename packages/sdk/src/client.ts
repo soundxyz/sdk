@@ -57,10 +57,9 @@ export function SoundClient({
     activeMintSchedules,
     eligibleQuantity,
     mint,
-    createEditionWithMintSchedules,
-    soundInfo,
+    createEdition,
+    editionInfo,
     expectedEditionAddress,
-    soundNumSold,
   }
 
   // If the contract address is a SoundEdition contract
@@ -264,7 +263,7 @@ export function SoundClient({
     }
   }
 
-  async function createEditionWithMintSchedules({
+  async function createEdition({
     editionConfig,
     mintConfigs,
     salt: customSalt,
@@ -389,26 +388,23 @@ export function SoundClient({
     )
   }
 
-  async function soundNumSold({ contractAddress }: { contractAddress: string }) {
-    const soundCreatorContract = SoundEditionV1__factory.connect(
-      contractAddress,
+  async function editionInfo(soundParams: ReleaseInfoQueryVariables) {
+    const editionContract = SoundEditionV1__factory.connect(
+      soundParams.contractAddress,
       (await _requireSignerOrProvider()).signerOrProvider,
     )
 
-    return (await soundCreatorContract.totalMinted()).toNumber()
-  }
-
-  async function soundInfo(soundParams: ReleaseInfoQueryVariables) {
-    const { data, errors } = await client.soundApi.releaseInfo(soundParams)
+    const [{ data, errors }, totalMintedBigNum] = await Promise.all([
+      client.soundApi.releaseInfo(soundParams),
+      editionContract.totalMinted(),
+    ])
 
     const release = data?.release
     if (!release) throw new SoundNotFoundError({ ...soundParams, graphqlErrors: errors })
 
     return {
       ...release,
-      numSold: function numSold() {
-        return soundNumSold({ contractAddress: soundParams.contractAddress })
-      },
+      totalMinted: totalMintedBigNum.toNumber(),
       trackAudio: LazyPromise(() => client.soundApi.audioFromTrack({ trackId: release.track.id })),
     }
   }
