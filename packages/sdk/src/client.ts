@@ -389,23 +389,22 @@ export function SoundClient({
   }
 
   async function editionInfo(soundParams: ReleaseInfoQueryVariables) {
-    const { data, errors } = await client.soundApi.releaseInfo(soundParams)
-
-    const release = data?.release
-    if (!release) throw new SoundNotFoundError({ ...soundParams, graphqlErrors: errors })
-
     const editionContract = SoundEditionV1__factory.connect(
       soundParams.contractAddress,
       (await _requireSignerOrProvider()).signerOrProvider,
     )
 
-    const totalMinted = async () => {
-      return (await editionContract.totalMinted()).toNumber()
-    }
+    const [{ data, errors }, totalMintedBigNum] = await Promise.all([
+      client.soundApi.releaseInfo(soundParams),
+      editionContract.totalMinted(),
+    ])
+
+    const release = data?.release
+    if (!release) throw new SoundNotFoundError({ ...soundParams, graphqlErrors: errors })
 
     return {
       ...release,
-      totalMinted,
+      totalMinted: totalMintedBigNum.toNumber(),
       trackAudio: LazyPromise(() => client.soundApi.audioFromTrack({ trackId: release.track.id })),
     }
   }
