@@ -418,10 +418,12 @@ export function SoundClient({
     const { signerOrProvider, chainId } = await _requireSignerOrProvider()
     const soundCreatorAddress = _getCreatorAddress(chainId)
 
-    return SoundCreatorV1__factory.connect(soundCreatorAddress, signerOrProvider).soundEditionAddress(
+    const address = await SoundCreatorV1__factory.connect(soundCreatorAddress, signerOrProvider).soundEditionAddress(
       deployer,
       getSaltAsBytes32(salt),
     )
+
+    return address.toLowerCase()
   }
 
   /*********************************************************
