@@ -4,4 +4,4 @@
 
 - [BREAKING] Rename createEditionWithMintSchedules to createEdition
 - [BREAKING] Rename soundInfo to editionInfo
-- Removes soundNumSold
+- [BREAKING] Removes client `soundNumSold`, and renames `editionInfo.numSold` to `totalMinted` 
