@@ -36,7 +36,7 @@ import { LazyPromise } from './utils/promise'
 import type { ChainId, MinterInterfaceId, SignerOrProvider, SoundClientConfig } from './types'
 import type { Signer } from '@ethersproject/abstract-signer'
 import type { BigNumberish } from '@ethersproject/bignumber'
-import type { ContractTransaction, PayableOverrides } from '@ethersproject/contracts'
+import type { ContractTransaction } from '@ethersproject/contracts'
 import type { ReleaseInfoQueryVariables } from './api/graphql/gql'
 import type { ContractCall, EditionConfig, MintConfig, MintSchedule, EditionType } from './types'
 
@@ -221,7 +221,7 @@ export function SoundClient({
       gasLimit,
       maxFeePerGas,
       maxPriorityFeePerGas,
-    } as PayableOverrides
+    }
 
     switch (mintSchedule.mintType) {
       case 'RangeEdition': {
