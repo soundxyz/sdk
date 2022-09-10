@@ -6,9 +6,5 @@
   "linked": [],
   "access": "public",
   "baseBranch": "main",
-  "updateInternalDependencies": "patch",
-  "snapshot": {
-    "useCalculatedVersion": true,
-    "prereleaseTemplate": "{tag}-{datetime}-{commit}"
-  }
+  "updateInternalDependencies": "patch"
 }
