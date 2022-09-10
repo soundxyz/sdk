@@ -494,8 +494,8 @@ export function SoundClient({
               maxMintableLower: mintSchedule.maxMintableLower,
               maxMintableUpper: mintSchedule.maxMintableUpper,
               closingTime: mintSchedule.closingTime,
-              maxMintable: (unix_timestamp?: number) =>
-                (unix_timestamp || Math.floor(Date.now() / 1000)) < mintSchedule.closingTime
+              maxMintable: (unixTimestamp?: number) =>
+                (unixTimestamp || Math.floor(Date.now() / 1000)) < mintSchedule.closingTime
                   ? mintSchedule.maxMintableUpper
                   : mintSchedule.maxMintableLower,
               maxMintablePerAccount: mintSchedule.maxMintablePerAccount,
