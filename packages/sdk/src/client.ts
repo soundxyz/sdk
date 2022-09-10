@@ -614,7 +614,7 @@ export function SoundClient({
       return soundCreatorAddress
     }
 
-    if (isSoundCreatorAddressChain(chainId)) return soundCreatorAddresses[chainId][editionType]
+    if (isSoundCreatorAddressChain(chainId)) return soundCreatorAddresses[chainId][editionType.toLowerCase()]
 
     throw new UnsupportedCreatorAddressError({ chainId })
   }
