@@ -608,6 +608,7 @@ export const ContractMethod = {
 export type ContractMethod = typeof ContractMethod[keyof typeof ContractMethod]
 /** Contract type, currently the playform only supports "ARTIST" */
 export const ContractType = {
+  ALBUM: 'ALBUM',
   ARTIST: 'ARTIST',
   EDITION: 'EDITION',
 } as const
@@ -1207,6 +1208,8 @@ export type Mutation = {
   createPresale: SaleSchedule
   /** [ARTIST] Create release */
   createRelease: Release
+  /** [ARTIST] Create release for new sound edition contracts */
+  createSoundEditionRelease: Release
   /** [ADMIN] Delete specified sale schedule */
   deleteSaleSchedule: Scalars['Void']
   /** [AUTHENTICATED] Delete shelf for user */
@@ -1428,6 +1431,11 @@ export type MutationcreatePresaleArgs = {
 
 /** Mutations */
 export type MutationcreateReleaseArgs = {
+  input: CreateReleaseInput
+}
+
+/** Mutations */
+export type MutationcreateSoundEditionReleaseArgs = {
   input: CreateReleaseInput
 }
 
