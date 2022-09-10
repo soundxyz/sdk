@@ -38,7 +38,7 @@ import type { Signer } from '@ethersproject/abstract-signer'
 import type { BigNumberish } from '@ethersproject/bignumber'
 import type { ContractTransaction } from '@ethersproject/contracts'
 import type { ReleaseInfoQueryVariables } from './api/graphql/gql'
-import type { ContractCall, EditionConfig, MintConfig, MintSchedule, SoundEditionType } from './types'
+import type { ContractCall, EditionConfig, MintConfig, MintSchedule, EditionType } from './types'
 
 export function SoundClient({
   signer,
@@ -267,18 +267,18 @@ export function SoundClient({
     editionConfig,
     mintConfigs,
     salt: customSalt,
-    soundEditionType = 'single',
+    editionType = 'SINGLE',
   }: {
     editionConfig: EditionConfig
     mintConfigs: MintConfig[]
     salt?: string | number
-    soundEditionType?: SoundEditionType
+    editionType?: EditionType
   }) {
     const { signer, chainId, userAddress } = await _requireSigner()
 
     const formattedSalt = getSaltAsBytes32(customSalt || Math.random() * 1_000_000_000_000_000)
 
-    const creatorAddress = _getCreatorAddress({ chainId, soundEditionType })
+    const creatorAddress = _getCreatorAddress({ chainId, editionType })
 
     // Precompute the edition address.
     const editionAddress = await SoundCreatorV1__factory.connect(creatorAddress, signer).soundEditionAddress(
@@ -413,15 +413,15 @@ export function SoundClient({
   async function expectedEditionAddress({
     deployer,
     salt,
-    soundEditionType = 'single',
+    editionType = 'SINGLE',
   }: {
     deployer: string
     salt: string | number
-    soundEditionType?: SoundEditionType
+    editionType?: EditionType
   }) {
     validateAddress(deployer)
     const { signerOrProvider, chainId } = await _requireSignerOrProvider()
-    const soundCreatorAddress = _getCreatorAddress({ chainId, soundEditionType })
+    const soundCreatorAddress = _getCreatorAddress({ chainId, editionType })
 
     return SoundCreatorV1__factory.connect(soundCreatorAddress, signerOrProvider).soundEditionAddress(
       deployer,
@@ -605,7 +605,7 @@ export function SoundClient({
     return Object.values(supportedNetworks).includes(chainId as ChainId)
   }
 
-  function _getCreatorAddress({ chainId, soundEditionType }: { chainId: number; soundEditionType: SoundEditionType }) {
+  function _getCreatorAddress({ chainId, editionType }: { chainId: number; editionType: EditionType }) {
     if ((chainId === supportedChainIds.LOCAL || chainId === supportedChainIds.LOCAL_ALT) && !soundCreatorAddress) {
       throw new CreatorAddressMissingForLocalError()
     }
@@ -614,7 +614,7 @@ export function SoundClient({
       return soundCreatorAddress
     }
 
-    if (isSoundCreatorAddressChain(chainId)) return soundCreatorAddresses[chainId][soundEditionType]
+    if (isSoundCreatorAddressChain(chainId)) return soundCreatorAddresses[chainId][editionType]
 
     throw new UnsupportedCreatorAddressError({ chainId })
   }

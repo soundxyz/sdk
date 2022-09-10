@@ -152,7 +152,7 @@ export type ContractCall = {
   calldata: string
 }
 
-export type SoundEditionType = 'single' | 'album'
+export type EditionType = 'SINGLE' | 'ALBUM'
 
 /*********************************************************
                     API TYPES

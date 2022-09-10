@@ -2,4 +2,4 @@
 '@soundxyz/sdk': patch
 ---
 
-Integrates album contract & SoundEditionType to distinguish between single & album
+Integrates album contract & EditionType to distinguish between single & album
