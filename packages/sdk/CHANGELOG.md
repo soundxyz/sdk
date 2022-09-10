@@ -1,5 +1,19 @@
 # @soundxyz/sdk
 
+## 0.2.0
+
+### Minor Changes
+
+- [#63](https://github.com/soundxyz/sdk/pull/63) [`8f00721`](https://github.com/soundxyz/sdk/commit/8f007212ba66607fe0d7b01abff7755ff7a6a196) Thanks [@gigamesh](https://github.com/gigamesh)! - - [BREAKING] Rename createEditionWithMintSchedules to createEdition
+  - [BREAKING] Rename soundInfo to editionInfo
+  - [BREAKING] Removes client `soundNumSold`, and renames `editionInfo.numSold` to `totalMinted`
+
+### Patch Changes
+
+- [#66](https://github.com/soundxyz/sdk/pull/66) [`db003a0`](https://github.com/soundxyz/sdk/commit/db003a0765559b3e7b2588f418956eec3da9aadb) Thanks [@gigamesh](https://github.com/gigamesh)! - unix_timestamp -> unixTimestamp
+
+- [#62](https://github.com/soundxyz/sdk/pull/62) [`5696974`](https://github.com/soundxyz/sdk/commit/56969749749e4f6c823ae626b8bb729927c1f4d6) Thanks [@gigamesh](https://github.com/gigamesh)! - Integrates album contract & EditionType to distinguish between single & album
+
 ## 0.1.5
 
 ### Patch Changes
