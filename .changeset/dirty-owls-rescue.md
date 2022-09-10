@@ -1,5 +1,5 @@
 ---
-'@soundxyz/sdk': patch
+'@soundxyz/sdk': minor
 ---
 
 - [BREAKING] Rename createEditionWithMintSchedules to createEdition
