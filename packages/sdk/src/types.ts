@@ -152,7 +152,12 @@ export type ContractCall = {
   calldata: string
 }
 
-export type EditionType = 'SINGLE' | 'ALBUM'
+export const EditionType = {
+  SINGLE: 'SINGLE',
+  ALBUM: 'ALBUM',
+} as const
+
+export type EditionType = typeof EditionType[keyof typeof EditionType]
 
 /*********************************************************
                     API TYPES

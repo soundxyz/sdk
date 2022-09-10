@@ -1138,6 +1138,7 @@ enum ContractMethod {
 Contract type, currently the playform only supports "ARTIST"
 """
 enum ContractType {
+  ALBUM
   ARTIST
   EDITION
 }
@@ -2421,6 +2422,16 @@ type Mutation {
   [ARTIST] Create release
   """
   createRelease(
+    """
+    New release data
+    """
+    input: CreateReleaseInput!
+  ): Release!
+
+  """
+  [ARTIST] Create release for new sound edition contracts
+  """
+  createSoundEditionRelease(
     """
     New release data
     """

@@ -3,13 +3,11 @@
   "private": true,
   "scripts": {
     "format": "prettier . --write",
-    "check": "pnpm -r check",
     "postinstall": "husky install",
     "pretty-quick": "pretty-quick --staged",
     "release": "pnpm -r --access=public publish --no-git-checks",
     "release:canary": "(node scripts/canary-release.js && pnpm -r publish --access public --no-git-checks --tag alpha) || echo Skipping Canary...",
     "test": "pnpm -r --filter=sdk test",
-    "tsc": "tsc -p tsconfig.check.json",
     "changeset": "changeset"
   },
   "license": "MIT",

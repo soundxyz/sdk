@@ -5,6 +5,7 @@ import {
   MerkleDropMinter__factory,
 } from '@soundxyz/sound-protocol/typechain/index'
 import { contractAddresses } from '@soundxyz/sound-protocol'
+import { EditionType } from '../types'
 
 export const minterFactoryMap = {
   [interfaceIds.IRangeEditionMinter]: RangeEditionMinter__factory,
@@ -35,10 +36,10 @@ export const supportedChainIds = {
 export const soundCreatorAddresses = {
   // [supportedChainIds.MAINNET]: 'TODO',
   [supportedChainIds.GOERLI]: {
-    single: contractAddresses.preview.soundCreatorV1.single,
-    album: contractAddresses.preview.soundCreatorV1.album,
+    [EditionType.SINGLE]: contractAddresses.preview.soundCreatorV1.single,
+    [EditionType.ALBUM]: contractAddresses.preview.soundCreatorV1.album,
   },
-}
+} as const
 
 export function isSoundCreatorAddressChain(chain: number): chain is keyof typeof soundCreatorAddresses {
   return chain in soundCreatorAddresses
