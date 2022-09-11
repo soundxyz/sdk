@@ -1,5 +1,11 @@
 # @soundxyz/sdk
 
+## 0.2.1
+
+### Patch Changes
+
+- [#68](https://github.com/soundxyz/sdk/pull/68) [`bc239f3`](https://github.com/soundxyz/sdk/commit/bc239f3f0e9b6f603a06363877eaa8690d5b2810) Thanks [@PabloSzx](https://github.com/PabloSzx)! - Fix type definitions on package
+
 ## 0.2.0
 
 ### Minor Changes
