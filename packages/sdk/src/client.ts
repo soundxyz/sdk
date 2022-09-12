@@ -395,9 +395,10 @@ export function SoundClient({
       (await _requireSignerOrProvider()).signerOrProvider,
     )
 
-    const [{ data, errors }, totalMintedBigNum] = await Promise.all([
+    const [{ data, errors }, totalMintedBigNum, maxMintable] = await Promise.all([
       client.soundApi.releaseInfo(soundParams),
       editionContract.totalMinted(),
+      editionContract.editionMaxMintable(),
     ])
 
     const release = data?.release
@@ -405,8 +406,9 @@ export function SoundClient({
 
     return {
       ...release,
-      totalMinted: totalMintedBigNum.toNumber(),
       trackAudio: LazyPromise(() => client.soundApi.audioFromTrack({ trackId: release.track.id })),
+      totalMinted: totalMintedBigNum.toNumber(),
+      maxMintable,
     }
   }
 
