@@ -7,7 +7,7 @@ import {
   SoundCreatorV1__factory,
   SoundEditionV1__factory,
 } from '@soundxyz/sound-protocol/typechain/index'
-
+import { contractAddresses } from '@soundxyz/sound-protocol'
 import { SoundAPI } from './api/soundApi'
 import {
   CreatorAddressMissingForLocalError,
@@ -17,19 +17,10 @@ import {
   NotEligibleMint,
   NotSoundEditionError,
   SoundNotFoundError,
-  UnsupportedCreatorAddressError,
   UnsupportedMinterError,
   UnsupportedNetworkError,
 } from './errors'
-import {
-  ADDRESS_ZERO,
-  isSoundCreatorAddressChain,
-  MINTER_ROLE,
-  minterFactoryMap,
-  soundCreatorAddresses,
-  supportedChainIds,
-  supportedNetworks,
-} from './utils/constants'
+import { ADDRESS_ZERO, MINTER_ROLE, minterFactoryMap, supportedChainIds, supportedNetworks } from './utils/constants'
 import { getSaltAsBytes32, validateAddress } from './utils/helpers'
 import { LazyPromise } from './utils/promise'
 
@@ -38,7 +29,7 @@ import type { Signer } from '@ethersproject/abstract-signer'
 import type { BigNumberish } from '@ethersproject/bignumber'
 import type { ContractTransaction } from '@ethersproject/contracts'
 import type { ReleaseInfoQueryVariables } from './api/graphql/gql'
-import type { ContractCall, EditionConfig, MintConfig, MintSchedule, EditionType } from './types'
+import type { ContractCall, EditionConfig, MintConfig, MintSchedule } from './types'
 
 export function SoundClient({
   signer,
@@ -267,18 +258,16 @@ export function SoundClient({
     editionConfig,
     mintConfigs,
     salt: customSalt,
-    editionType = 'SINGLE',
   }: {
     editionConfig: EditionConfig
     mintConfigs: MintConfig[]
     salt?: string | number
-    editionType?: EditionType
   }) {
     const { signer, chainId, userAddress } = await _requireSigner()
 
     const formattedSalt = getSaltAsBytes32(customSalt || Math.random() * 1_000_000_000_000_000)
 
-    const creatorAddress = _getCreatorAddress({ chainId, editionType })
+    const creatorAddress = _getCreatorAddress({ chainId })
 
     // Precompute the edition address.
     const editionAddress = await SoundCreatorV1__factory.connect(creatorAddress, signer).soundEditionAddress(
@@ -410,18 +399,10 @@ export function SoundClient({
     }
   }
 
-  async function expectedEditionAddress({
-    deployer,
-    salt,
-    editionType = 'SINGLE',
-  }: {
-    deployer: string
-    salt: string | number
-    editionType?: EditionType
-  }) {
+  async function expectedEditionAddress({ deployer, salt }: { deployer: string; salt: string | number }) {
     validateAddress(deployer)
     const { signerOrProvider, chainId } = await _requireSignerOrProvider()
-    const soundCreatorAddress = _getCreatorAddress({ chainId, editionType })
+    const soundCreatorAddress = _getCreatorAddress({ chainId })
 
     return SoundCreatorV1__factory.connect(soundCreatorAddress, signerOrProvider).soundEditionAddress(
       deployer,
@@ -605,7 +586,7 @@ export function SoundClient({
     return Object.values(supportedNetworks).includes(chainId as ChainId)
   }
 
-  function _getCreatorAddress({ chainId, editionType }: { chainId: number; editionType: EditionType }) {
+  function _getCreatorAddress({ chainId }: { chainId: number }) {
     if ((chainId === supportedChainIds.LOCAL || chainId === supportedChainIds.LOCAL_ALT) && !soundCreatorAddress) {
       throw new CreatorAddressMissingForLocalError()
     }
@@ -614,9 +595,10 @@ export function SoundClient({
       return soundCreatorAddress
     }
 
-    if (isSoundCreatorAddressChain(chainId)) return soundCreatorAddresses[chainId][editionType]
+    const key = chainId === 1 ? 'mainnet' : environment === 'staging' ? 'staging' : 'preview'
 
-    throw new UnsupportedCreatorAddressError({ chainId })
+    // TODO: Remove this key type assertion when we add mainnet to contractAddresses
+    return contractAddresses[key as 'preview' | 'staging'].soundCreatorV1
   }
 
   return client
