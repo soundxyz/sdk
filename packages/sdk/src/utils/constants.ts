@@ -36,8 +36,8 @@ export const supportedChainIds = {
 export const soundCreatorAddresses = {
   // [supportedChainIds.MAINNET]: 'TODO',
   [supportedChainIds.GOERLI]: {
-    [EditionType.SINGLE]: contractAddresses.preview.soundCreatorV1.single,
-    [EditionType.ALBUM]: contractAddresses.preview.soundCreatorV1.album,
+    [EditionType.SINGLE]: contractAddresses.preview.soundCreatorV1,
+    [EditionType.ALBUM]: contractAddresses.preview.soundCreatorV1,
   },
 } as const
 
