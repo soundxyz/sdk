@@ -17,7 +17,6 @@ import {
   NotEligibleMint,
   NotSoundEditionError,
   SoundNotFoundError,
-  UnsupportedCreatorAddressError,
   UnsupportedMinterError,
   UnsupportedNetworkError,
 } from './errors'
@@ -600,8 +599,6 @@ export function SoundClient({
 
     // TODO: Remove this key type assertion when we add mainnet to contractAddresses
     return contractAddresses[key as 'preview' | 'staging'].soundCreatorV1
-
-    throw new UnsupportedCreatorAddressError({ chainId })
   }
 
   return client

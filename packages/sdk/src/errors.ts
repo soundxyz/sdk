@@ -35,17 +35,6 @@ export class CreatorAddressMissingForLocalError extends Error {
   }
 }
 
-export class UnsupportedCreatorAddressError extends Error {
-  readonly name = 'UnsupportedCreatorAddressError'
-
-  readonly chainId: number
-  constructor({ chainId }: { chainId: number }) {
-    super('Unsupported creatorAddress for chain ID')
-
-    this.chainId = chainId
-  }
-}
-
 export class InvalidAddressError extends Error {
   readonly name = 'InvalidAddressError'
 
