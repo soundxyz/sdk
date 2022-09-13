@@ -1,5 +1,12 @@
 # @soundxyz/sdk
 
+## 0.3.0
+
+### Minor Changes
+
+- [#71](https://github.com/soundxyz/sdk/pull/71) [`441886f`](https://github.com/soundxyz/sdk/commit/441886f0e5ce0c93b0467dfa35b59a721178ac60) Thanks [@gigamesh](https://github.com/gigamesh)! - - Bumps sound-protocol to 0.2.0
+  - Removes EditionType (no longer deploying separate SoundCreator for albums)
+
 ## 0.2.1
 
 ### Patch Changes
