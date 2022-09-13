@@ -35,10 +35,7 @@ export const supportedChainIds = {
 
 export const soundCreatorAddresses = {
   // [supportedChainIds.MAINNET]: 'TODO',
-  [supportedChainIds.GOERLI]: {
-    [EditionType.SINGLE]: contractAddresses.preview.soundCreatorV1,
-    [EditionType.ALBUM]: contractAddresses.preview.soundCreatorV1,
-  },
+  [supportedChainIds.GOERLI]: contractAddresses.preview.soundCreatorV1,
 } as const
 
 export function isSoundCreatorAddressChain(chain: number): chain is keyof typeof soundCreatorAddresses {
