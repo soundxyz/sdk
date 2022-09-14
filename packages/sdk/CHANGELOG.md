@@ -1,5 +1,11 @@
 # @soundxyz/sdk
 
+## 0.3.2
+
+### Patch Changes
+
+- [`bdd7f83`](https://github.com/soundxyz/sdk/commit/bdd7f8391898f5888e471346b795c0f1ea44baa6) Thanks [@PabloSzx](https://github.com/PabloSzx)! - Fix SoundClientConfig to follow SoundAPI optional apiKey
+
 ## 0.3.1
 
 ### Patch Changes
