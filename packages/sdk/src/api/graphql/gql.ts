@@ -102,13 +102,13 @@ export type ArtistcollectorsArgs = {
 
 /** Artist Entity */
 export type ArtistmintedReleasesPaginatedArgs = {
-  filter?: InputMaybe<ArtistMintedReleasesFilter>
+  filter?: ArtistMintedReleasesFilter
   pagination?: CursorConnectionArgs
 }
 
 /** Artist Entity */
 export type ArtistnumMintedReleasesArgs = {
-  filter?: InputMaybe<ArtistMintedReleasesFilter>
+  filter?: ArtistMintedReleasesFilter
 }
 
 /** Data for Artist minting auction process */
@@ -249,10 +249,14 @@ export type ArtistMintedReleasesCursorFilterArgs = {
   sounds?: InputMaybe<Scalars['Boolean']>
 }
 
-/** Filter for artist minted releases */
+/** Filter for artist minted releases. Default is only for artist sounds. */
 export type ArtistMintedReleasesFilter = {
+  /** Includes songs where that artist has a split */
+  appearsOn?: InputMaybe<Scalars['Boolean']>
   /** Filter if the release has credit splits */
   hasCreditSplits?: InputMaybe<Scalars['Boolean']>
+  /** Includes songs uploaded by artist */
+  sounds?: InputMaybe<Scalars['Boolean']>
 }
 
 /** Artist minting release options */
@@ -340,9 +344,11 @@ export type AuctionType = typeof AuctionType[keyof typeof AuctionType]
 /** Release info upload step info */
 export type AuctionUploadStepInfo = {
   /** List of public addresses to allow for auction */
-  allowList: Array<Scalars['String']>
+  allowList?: Maybe<Array<Scalars['String']>>
   /** Max mints per wallet for auction */
   maxMintsPerWallet?: Maybe<Scalars['Int']>
+  /** MerkleRoot derived from allowList */
+  merkleRoot?: Maybe<Scalars['String']>
   /** Price per mint */
   price: Scalars['Float']
   /** Max supply for auction */
@@ -351,10 +357,10 @@ export type AuctionUploadStepInfo = {
   startTime: Scalars['Int']
 }
 
-/** Release rewards upload step input values */
+/** Release auction upload step input values */
 export type AuctionUploadStepInput = {
   /** List of public addresses to allow for auction */
-  allowList: Array<Scalars['Address']>
+  allowList?: InputMaybe<Array<Scalars['Address']>>
   /** Max mints per wallet for auction */
   maxMintsPerWallet?: InputMaybe<Scalars['Int']>
   /** Price per mint */
@@ -1194,6 +1200,8 @@ export type Mutation = {
   changeRoleForUser: UserRoles
   /** [ARTIST] Upsert release mint edition creation from the client-side. An alternative to wait until the transaction is completed and automatically acknowledged on background processes. */
   clientCreateEditionUpsert: Release
+  /** [ARTIST] Upsert release edition based on transaction */
+  clientCreateNewEditionUpsert: Release
   /** [AUTHENTICATED] Upsert bought NFT entity from the client-side. An alternative to wait until the transaction is completed and automatically acknowledged on background processes */
   clientNftUpsert?: Maybe<Nft>
   /** [AUTHENTICATED] Create artist entity for authenticated user, User has to be allowed to create artist profile beforehand */
@@ -1240,6 +1248,8 @@ export type Mutation = {
   moveShelfUp: Array<Shelf>
   /** [ARTIST] Prepare release to be minted, pinning media files */
   prepareMint: Release
+  /** [ARTIST] Prepare release before minting */
+  prepareReleaseForMint?: Maybe<Scalars['Void']>
   /** [AUTHENTICATED] Manually register transaction of nft buy */
   registerBuyEditionTx: Transaction
   /** [ARTIST] Manually register transaction of artist contract creation */
@@ -1398,6 +1408,11 @@ export type MutationclientCreateEditionUpsertArgs = {
 }
 
 /** Mutations */
+export type MutationclientCreateNewEditionUpsertArgs = {
+  hash: Scalars['String']
+}
+
+/** Mutations */
 export type MutationclientNftUpsertArgs = {
   txHash: Scalars['String']
 }
@@ -1509,6 +1524,11 @@ export type MutationmoveShelfUpArgs = {
 /** Mutations */
 export type MutationprepareMintArgs = {
   input: PrepareMintInput
+}
+
+/** Mutations */
+export type MutationprepareReleaseForMintArgs = {
+  id: Scalars['UUID']
 }
 
 /** Mutations */
@@ -1985,14 +2005,10 @@ export type PageInfo = {
 export type PermissionedAuction = {
   /** List of different max mints per wallet quantity options for free sale */
   freeSaleMaxMintsPerWalletOptions: Array<Scalars['Int']>
-  /** List of different quantity options for free sale */
-  freeSaleQuantityOptions?: Maybe<Array<Scalars['Int']>>
   /** List of different max mints per wallet quantity options for presale */
   presaleMaxMintsPerWalletOptions: Array<Scalars['Int']>
   /** List of different eth prices options for presale */
   presalePriceOptions?: Maybe<Array<Scalars['Float']>>
-  /** List of different quantity options for presale */
-  presaleQuantityOptions?: Maybe<Array<Scalars['Int']>>
   /** List of different eth prices options for public sale */
   priceOptions: Array<Scalars['Float']>
   /** List of different max mints per wallet quantity options for public sale */
@@ -2007,14 +2023,10 @@ export type PermissionedAuction = {
 export type PermissionedAuctionInput = {
   /** List of different max mints per wallet quantity options for free sale */
   freeSaleMaxMintsPerWalletOptions: Array<Scalars['Int']>
-  /** List of different options of maximum quantity for free sale mint */
-  freeSaleQuantityOptions: Array<Scalars['Int']>
   /** List of different max mints per wallet quantity options for presale */
   presaleMaxMintsPerWalletOptions: Array<Scalars['Int']>
   /** List of different eth prices options for presales */
   presalePriceOptions: Array<Scalars['Float']>
-  /** List of different options of maximum quantity for presale mint */
-  presaleQuantityOptions: Array<Scalars['Int']>
   /** List of different eth prices options for public sale */
   priceOptions: Array<Scalars['Float']>
   /** List of different max mints per wallet quantity options for public sale */
@@ -2236,7 +2248,10 @@ export type Query = {
   merkleTreeProof?: Maybe<MerkleTreeProof>
   /** [PUBLIC] Get minted release by Artist sound handle and release title slug */
   mintedRelease?: Maybe<Release>
-  /** [PUBLIC] Get all minted releases of an artist */
+  /**
+   * [PUBLIC] Get all minted releases of an artist
+   * @deprecated Use Artist.mintedReleasesPaginated instead
+   */
   mintedReleases: ReleaseConnection
   /** [PUBLIC] Current UNIX date to test caching */
   now: Scalars['Int']
@@ -2594,8 +2609,6 @@ export type QueueStatusSubscriptionInput = {
 export type RangeBoundAuction = {
   /** List of different max mints per wallet quantity options for free sale */
   freeSaleMaxMintsPerWalletOptions: Array<Scalars['Int']>
-  /** List of different quantity options for free sale */
-  freeSaleQuantityOptions?: Maybe<Array<Scalars['Int']>>
   /** List of different options of maximum quantity for public sale */
   maxOptions: Array<Scalars['Int']>
   /** List of different options of minimum quantity for public sale */
@@ -2606,8 +2619,6 @@ export type RangeBoundAuction = {
   presaleMaxMintsPerWalletOptions: Array<Scalars['Int']>
   /** List of different eth prices options for presale */
   presalePriceOptions?: Maybe<Array<Scalars['Float']>>
-  /** List of different quantity options for presale */
-  presaleQuantityOptions?: Maybe<Array<Scalars['Int']>>
   /** List of different eth prices options for public sale */
   priceOptions: Array<Scalars['Float']>
   /** List of different max mints per wallet quantity options for public sale */
@@ -2620,8 +2631,6 @@ export type RangeBoundAuction = {
 export type RangeBoundAuctionInput = {
   /** List of different max mints per wallet quantity options for free sale */
   freeSaleMaxMintsPerWalletOptions: Array<Scalars['Int']>
-  /** List of different options of maximum quantity for free sale mint */
-  freeSaleQuantityOptions: Array<Scalars['Int']>
   /** List of different options of maximum quantity for public sale */
   maxOptions: Array<Scalars['Int']>
   /** List of different options of minimum quantity for public sale */
@@ -2632,8 +2641,6 @@ export type RangeBoundAuctionInput = {
   presaleMaxMintsPerWalletOptions: Array<Scalars['Int']>
   /** List of different eth prices options for presales */
   presalePriceOptions: Array<Scalars['Float']>
-  /** List of different options of maximum quantity for presale mint */
-  presaleQuantityOptions: Array<Scalars['Int']>
   /** List of different eth prices options for public sale */
   priceOptions: Array<Scalars['Float']>
   /** List of different max mints per wallet quantity options for public sale */
@@ -2683,8 +2690,6 @@ export type Release = Node & {
   finalSaleScheduleEndTime?: Maybe<Scalars['DateTime']>
   /** Last sale schedule end time as number of milliseconds since the ECMAScript epoch. */
   finalSaleScheduleEndTimestamp?: Maybe<Scalars['Timestamp']>
-  /** Public address of address to receive the transactions funds */
-  fundingRecipient: Scalars['String']
   /** Genre of Release */
   genre: Genre
   /** Special golden egg image */

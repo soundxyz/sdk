@@ -2,4 +2,5 @@ export { SoundClient } from './client'
 
 export * as Errors from './errors'
 export * from './types'
-export { ApiEndpointsMap, ApiEnvironments } from './utils/constants'
+export type { ApiEnvironments } from './utils/constants'
+export { ApiEndpointsMap } from './utils/constants'

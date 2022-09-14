@@ -114,7 +114,7 @@ type Artist implements Node {
     """
     Filter the artist releases
     """
-    filter: ArtistMintedReleasesFilter
+    filter: ArtistMintedReleasesFilter! = { appearsOn: false, hasCreditSplits: false, sounds: true }
 
     """
     Pagination parameters
@@ -139,7 +139,7 @@ type Artist implements Node {
     """
     Filter the releases to be counted
     """
-    filter: ArtistMintedReleasesFilter
+    filter: ArtistMintedReleasesFilter! = { appearsOn: false, hasCreditSplits: false, sounds: true }
   ): Int!
 
   """
@@ -449,13 +449,23 @@ input ArtistMintedReleasesCursorFilterArgs {
 }
 
 """
-Filter for artist minted releases
+Filter for artist minted releases. Default is only for artist sounds.
 """
 input ArtistMintedReleasesFilter {
+  """
+  Includes songs where that artist has a split
+  """
+  appearsOn: Boolean
+
   """
   Filter if the release has credit splits
   """
   hasCreditSplits: Boolean
+
+  """
+  Includes songs uploaded by artist
+  """
+  sounds: Boolean
 }
 
 """
@@ -619,12 +629,17 @@ type AuctionUploadStepInfo {
   """
   List of public addresses to allow for auction
   """
-  allowList: [String!]!
+  allowList: [String!]
 
   """
   Max mints per wallet for auction
   """
   maxMintsPerWallet: Int
+
+  """
+  MerkleRoot derived from allowList
+  """
+  merkleRoot: String
 
   """
   Price per mint
@@ -643,13 +658,13 @@ type AuctionUploadStepInfo {
 }
 
 """
-Release rewards upload step input values
+Release auction upload step input values
 """
 input AuctionUploadStepInput {
   """
   List of public addresses to allow for auction
   """
-  allowList: [Address!]!
+  allowList: [Address!]
 
   """
   Max mints per wallet for auction
@@ -2349,6 +2364,16 @@ type Mutation {
   clientCreateEditionUpsert(txHash: String!): Release!
 
   """
+  [ARTIST] Upsert release edition based on transaction
+  """
+  clientCreateNewEditionUpsert(
+    """
+    Transaction hash
+    """
+    hash: String!
+  ): Release!
+
+  """
   [AUTHENTICATED] Upsert bought NFT entity from the client-side. An alternative to wait until the transaction is completed and automatically acknowledged on background processes
   """
   clientNftUpsert(
@@ -2577,6 +2602,16 @@ type Mutation {
     """
     input: PrepareMintInput!
   ): Release!
+
+  """
+  [ARTIST] Prepare release before minting
+  """
+  prepareReleaseForMint(
+    """
+    ReleaseId to be prepared
+    """
+    id: UUID!
+  ): Void
 
   """
   [AUTHENTICATED] Manually register transaction of nft buy
@@ -3617,11 +3652,6 @@ type PermissionedAuction {
   freeSaleMaxMintsPerWalletOptions: [Int!]!
 
   """
-  List of different quantity options for free sale
-  """
-  freeSaleQuantityOptions: [Int!]
-
-  """
   List of different max mints per wallet quantity options for presale
   """
   presaleMaxMintsPerWalletOptions: [Int!]!
@@ -3630,11 +3660,6 @@ type PermissionedAuction {
   List of different eth prices options for presale
   """
   presalePriceOptions: [Float!]
-
-  """
-  List of different quantity options for presale
-  """
-  presaleQuantityOptions: [Int!]
 
   """
   List of different eth prices options for public sale
@@ -3667,11 +3692,6 @@ input PermissionedAuctionInput {
   freeSaleMaxMintsPerWalletOptions: [Int!]!
 
   """
-  List of different options of maximum quantity for free sale mint
-  """
-  freeSaleQuantityOptions: [Int!]!
-
-  """
   List of different max mints per wallet quantity options for presale
   """
   presaleMaxMintsPerWalletOptions: [Int!]!
@@ -3680,11 +3700,6 @@ input PermissionedAuctionInput {
   List of different eth prices options for presales
   """
   presalePriceOptions: [Float!]!
-
-  """
-  List of different options of maximum quantity for presale mint
-  """
-  presaleQuantityOptions: [Int!]!
 
   """
   List of different eth prices options for public sale
@@ -4298,7 +4313,7 @@ type Query {
     Pagination parameters
     """
     pagination: CursorConnectionArgs! = { first: 10, sort: DESC }
-  ): ReleaseConnection!
+  ): ReleaseConnection! @deprecated(reason: "Use Artist.mintedReleasesPaginated instead")
 
   """
   [PUBLIC] Current UNIX date to test caching
@@ -4671,11 +4686,6 @@ type RangeBoundAuction {
   freeSaleMaxMintsPerWalletOptions: [Int!]!
 
   """
-  List of different quantity options for free sale
-  """
-  freeSaleQuantityOptions: [Int!]
-
-  """
   List of different options of maximum quantity for public sale
   """
   maxOptions: [Int!]!
@@ -4699,11 +4709,6 @@ type RangeBoundAuction {
   List of different eth prices options for presale
   """
   presalePriceOptions: [Float!]
-
-  """
-  List of different quantity options for presale
-  """
-  presaleQuantityOptions: [Int!]
 
   """
   List of different eth prices options for public sale
@@ -4731,11 +4736,6 @@ input RangeBoundAuctionInput {
   freeSaleMaxMintsPerWalletOptions: [Int!]!
 
   """
-  List of different options of maximum quantity for free sale mint
-  """
-  freeSaleQuantityOptions: [Int!]!
-
-  """
   List of different options of maximum quantity for public sale
   """
   maxOptions: [Int!]!
@@ -4759,11 +4759,6 @@ input RangeBoundAuctionInput {
   List of different eth prices options for presales
   """
   presalePriceOptions: [Float!]!
-
-  """
-  List of different options of maximum quantity for presale mint
-  """
-  presaleQuantityOptions: [Int!]!
 
   """
   List of different eth prices options for public sale
@@ -4874,11 +4869,6 @@ type Release implements Node {
   Last sale schedule end time as number of milliseconds since the ECMAScript epoch.
   """
   finalSaleScheduleEndTimestamp: Timestamp
-
-  """
-  Public address of address to receive the transactions funds
-  """
-  fundingRecipient: String!
 
   """
   Genre of Release
