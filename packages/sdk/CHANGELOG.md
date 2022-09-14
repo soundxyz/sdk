@@ -1,5 +1,13 @@
 # @soundxyz/sdk
 
+## 0.3.1
+
+### Patch Changes
+
+- [#73](https://github.com/soundxyz/sdk/pull/73) [`fbcd255`](https://github.com/soundxyz/sdk/commit/fbcd2557aeda449f668b802429fe20666a4d8077) Thanks [@PabloSzx](https://github.com/PabloSzx)! - Make apiKey optional but MissingApiKey error is thrown when is required and it's not specified
+
+- [#73](https://github.com/soundxyz/sdk/pull/73) [`fbcd255`](https://github.com/soundxyz/sdk/commit/fbcd2557aeda449f668b802429fe20666a4d8077) Thanks [@PabloSzx](https://github.com/PabloSzx)! - Add new "development" for api environments, by default points to http://localhost:4000/graphql and can be overriden by changing ApiEndpointsMap
+
 ## 0.3.0
 
 ### Minor Changes
