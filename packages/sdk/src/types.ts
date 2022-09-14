@@ -24,7 +24,7 @@ export type SoundClientConfig = (
       signer: Signer
     }
 ) & {
-  apiKey: string
+  apiKey?: string
   /**
    * @default "production"
    */
