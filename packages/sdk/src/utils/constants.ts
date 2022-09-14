@@ -17,7 +17,8 @@ export const ApiEndpointsMap = {
   production: 'https://api.sound.xyz/graphql',
   staging: 'https://staging.api.sound.xyz/graphql',
   preview: 'https://preview.api.sound.xyz/graphql',
-} as const
+  development: 'http://localhost:4000/graphql',
+}
 
 export type ApiEnvironments = keyof typeof ApiEndpointsMap
 
