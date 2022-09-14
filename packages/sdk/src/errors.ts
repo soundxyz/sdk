@@ -156,3 +156,9 @@ export class NotEligibleMint extends Error {
     this.eligibleMintQuantity = eligibleMintQuantity
   }
 }
+
+export class MissingApiKey extends Error {
+  constructor() {
+    super('Missing "apiKey" while creating SoundAPI instance')
+  }
+}

@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { SoundAPILoginError, UnexpectedApiResponse } from '../errors'
+import { MissingApiKey, SoundAPILoginError, UnexpectedApiResponse } from '../errors'
 import type { ExecutionResult } from '../types'
 import { ApiEndpointsMap, ApiEnvironments } from '../utils/constants'
 import {
@@ -53,7 +53,7 @@ export function SoundAPI({
    * @default "production"
    */
   environment?: ApiEnvironments
-  apiKey: string
+  apiKey?: string
 } & Partial<AuthTokenConfig>) {
   const apiUrl = new URL(ApiEndpointsMap[environment])
 
@@ -61,6 +61,8 @@ export function SoundAPI({
     Data extends Record<string, unknown> = Record<string, unknown>,
     Variables extends Record<string, unknown> = Record<string, never>,
   >({ query, variables }: { query: string; variables?: Variables }) {
+    if (!apiKey) throw new MissingApiKey()
+
     return fetch(apiUrl, {
       method: 'POST',
       headers: {
