@@ -1,5 +1,11 @@
 # @soundxyz/sdk
 
+## 0.3.3
+
+### Patch Changes
+
+- [#76](https://github.com/soundxyz/sdk/pull/76) [`444ca62`](https://github.com/soundxyz/sdk/commit/444ca6205c471d667310a785c20e126db537036f) Thanks [@gigamesh](https://github.com/gigamesh)! - Bumps sound-protocol
+
 ## 0.3.2
 
 ### Patch Changes
