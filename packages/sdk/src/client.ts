@@ -533,7 +533,7 @@ export function SoundClient({
             }
           }
           default: {
-            throw new UnsupportedMinterError()
+            throw new UnsupportedMinterError(interfaceId)
           }
         }
       }),

@@ -626,6 +626,8 @@ describe('createEdition', () => {
       editionMaxMintableLower: 10,
       editionMaxMintableUpper: 10,
       editionCutoffTime: 999999,
+      mintRandomnessEnabled: true,
+      metadataIsFrozen: false,
     }
 
     const mint1StartTime = now()
@@ -761,18 +763,18 @@ describe('expectedEditionAddress', () => {
     const salt1 = Math.random()
     const salt2 = Math.random()
 
-    const expectedAddress1 = await SoundCreatorV1__factory.connect(
+    const [expectedAddress1, _exists1] = await SoundCreatorV1__factory.connect(
       soundCreator.address,
       ethers.provider,
     ).soundEditionAddress(deployer, getSaltAsBytes32(salt1))
 
-    const expectedAddress2 = await SoundCreatorV1__factory.connect(
+    const [expectedAddress2, _exists2] = await SoundCreatorV1__factory.connect(
       soundCreator.address,
       ethers.provider,
     ).soundEditionAddress(deployer, getSaltAsBytes32(salt2))
 
-    const address1 = await client.expectedEditionAddress({ deployer, salt: salt1 })
-    const address2 = await client.expectedEditionAddress({ deployer, salt: salt2 })
+    const [address1, _exists3] = await client.expectedEditionAddress({ deployer, salt: salt1 })
+    const [address2, _exists4] = await client.expectedEditionAddress({ deployer, salt: salt2 })
 
     expect(address1).to.eq(expectedAddress1)
     expect(address2).to.eq(expectedAddress2)
