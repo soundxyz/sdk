@@ -1,5 +1,11 @@
 # @soundxyz/sdk
 
+## 0.3.5
+
+### Patch Changes
+
+- [`af6c884`](https://github.com/soundxyz/sdk/commit/af6c88419a1d6b0180e78d038a42134a53f154ab) Thanks [@vigneshka](https://github.com/vigneshka)! - Bump protocol version
+
 ## 0.3.4
 
 ### Patch Changes
