@@ -53,7 +53,7 @@ export type RangeEditionSchedule = MintScheduleBase & {
   mintType: 'RangeEdition'
   maxMintableLower: number
   maxMintableUpper: number
-  closingTime: number
+  cutoffTime: number
   maxMintable: (unixTimestamp?: number) => number
 }
 
@@ -93,9 +93,11 @@ export type EditionConfig = {
   contractURI: string
   fundingRecipient: string
   royaltyBPS: number
-  editionMaxMintable: number
-  mintRandomnessTokenThreshold: number
-  mintRandomnessTimeThreshold: number
+  editionMaxMintableLower: number
+  editionMaxMintableUpper: number
+  editionCutoffTime: number
+  shouldFreezeMetadata: boolean
+  shouldEnableMintRandomness: boolean
 }
 
 /**
@@ -121,7 +123,7 @@ export type MerkleDropConfig = MintConfigBase & {
 
 export type RangeEditionConfig = MintConfigBase & {
   mintType: 'RangeEdition'
-  closingTime: BigNumberish
+  cutoffTime: BigNumberish
   maxMintableLower: BigNumberish
   maxMintableUpper: BigNumberish
   maxMintablePerAccount: BigNumberish

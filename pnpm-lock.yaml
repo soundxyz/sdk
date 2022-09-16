@@ -74,7 +74,7 @@ importers:
       '@nomicfoundation/hardhat-network-helpers': ^1.0.4
       '@nomiclabs/hardhat-ethers': ^2.1.1
       '@nomiclabs/hardhat-waffle': ^2.0.3
-      '@soundxyz/sound-protocol': 0.3.0
+      '@soundxyz/sound-protocol': 0.4.4
       '@types/chai': ^4.3.3
       '@types/mocha': ^9.1.1
       '@types/node': 18.7.5
@@ -121,7 +121,7 @@ importers:
       '@nomicfoundation/hardhat-network-helpers': 1.0.5_hardhat@2.11.0
       '@nomiclabs/hardhat-ethers': 2.1.1_im6uuiflh5ovyfxdp4ogx3ls3y
       '@nomiclabs/hardhat-waffle': 2.0.3_tvu7uzjfxrhmjgvpduzktxn2me
-      '@soundxyz/sound-protocol': 0.3.0
+      '@soundxyz/sound-protocol': 0.4.4
       '@types/chai': 4.3.3
       '@types/mocha': 9.1.1
       '@types/node': 18.7.5
@@ -1001,7 +1001,7 @@ packages:
     engines: {node: '>=10.0'}
     dependencies:
       '@ethereum-waffle/provider': 3.4.4
-      ethers: 5.7.0
+      ethers: 5.7.1
     transitivePeerDependencies:
       - bufferutil
       - encoding
@@ -1015,10 +1015,10 @@ packages:
     dependencies:
       '@resolver-engine/imports': 0.3.3
       '@resolver-engine/imports-fs': 0.3.3
-      '@typechain/ethers-v5': 2.0.0_nencdbwvihrvhes5lxff7r5ypq
+      '@typechain/ethers-v5': 2.0.0_hvhmgvgv65f7ns5nchpmx3azgq
       '@types/mkdirp': 0.5.2
       '@types/node-fetch': 2.6.2
-      ethers: 5.7.0
+      ethers: 5.7.1
       mkdirp: 0.5.6
       node-fetch: 2.6.7
       solc: 0.6.12
@@ -1049,7 +1049,7 @@ packages:
     engines: {node: '>=10.0'}
     dependencies:
       '@ethersproject/abi': 5.7.0
-      ethers: 5.7.0
+      ethers: 5.7.1
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
@@ -1060,7 +1060,7 @@ packages:
     engines: {node: '>=10.0'}
     dependencies:
       '@ethereum-waffle/ens': 3.4.4
-      ethers: 5.7.0
+      ethers: 5.7.1
       ganache-core: 2.13.2
       patch-package: 6.4.7
       postinstall-postinstall: 2.1.0
@@ -2582,8 +2582,8 @@ packages:
     dev: true
     optional: true
 
-  /@soundxyz/sound-protocol/0.3.0:
-    resolution: {integrity: sha512-UuUNB+/tYybpoItSulVcrQrMIrxfYZLBmtkvoe7c2OwdIPyjJQvo/xQry6Fl7f3JyHk7hTftGqSAVhzhLY83RA==}
+  /@soundxyz/sound-protocol/0.4.4:
+    resolution: {integrity: sha512-kCjDoBnna6xLxQ3L6Bv0EHKaLbO2mv5ZbeX+eb4qjMuGrxSMhtmSWfzOcoYaO1r8zK4xYa5nYT31KVLz80kwfA==}
     dependencies:
       '@ethersproject/abi': 5.7.0
       '@ethersproject/providers': 5.7.1
@@ -2622,13 +2622,13 @@ packages:
     resolution: {integrity: sha512-yOlFc+7UtL/89t2ZhjPvvB/DeAr3r+Dq58IgzsFkOAvVC6NMJXmCGjbptdXdR9qsX7pKcTL+s87FtYREi2dEEQ==}
     dev: true
 
-  /@typechain/ethers-v5/2.0.0_nencdbwvihrvhes5lxff7r5ypq:
+  /@typechain/ethers-v5/2.0.0_hvhmgvgv65f7ns5nchpmx3azgq:
     resolution: {integrity: sha512-0xdCkyGOzdqh4h5JSf+zoWx85IusEjDcPIwNEHP8mrWSnCae4rvrqB+/gtpdNfX7zjlFlZiMeePn2r63EI3Lrw==}
     peerDependencies:
       ethers: ^5.0.0
       typechain: ^3.0.0
     dependencies:
-      ethers: 5.7.0
+      ethers: 5.7.1
       typechain: 3.0.0_typescript@4.8.3
     dev: true
 
