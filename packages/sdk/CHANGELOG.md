@@ -1,5 +1,11 @@
 # @soundxyz/sdk
 
+## 0.3.4
+
+### Patch Changes
+
+- [#78](https://github.com/soundxyz/sdk/pull/78) [`05bac14`](https://github.com/soundxyz/sdk/commit/05bac14270fa17d556e74fa645f96a6a039af8d6) Thanks [@gigamesh](https://github.com/gigamesh)! - Convert salt to string before converting to bytes32
+
 ## 0.3.3
 
 ### Patch Changes
