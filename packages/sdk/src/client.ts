@@ -257,12 +257,24 @@ export function SoundClient({
     editionConfig,
     mintConfigs,
     salt: customSalt,
+    gasLimit,
+    maxFeePerGas,
+    maxPriorityFeePerGas,
   }: {
     editionConfig: EditionConfig
     mintConfigs: MintConfig[]
     salt?: string | number
+    gasLimit?: BigNumberish
+    maxFeePerGas?: BigNumberish
+    maxPriorityFeePerGas?: BigNumberish
   }) {
     const { signer, chainId, userAddress } = await _requireSigner()
+
+    const txnOverrides = {
+      gasLimit,
+      maxFeePerGas,
+      maxPriorityFeePerGas,
+    }
 
     const formattedSalt = getSaltAsBytes32(customSalt || Math.random() * 1_000_000_000_000_000)
 
@@ -363,6 +375,7 @@ export function SoundClient({
       editionInitData,
       contractCalls.map((d) => d.contractAddress),
       contractCalls.map((d) => d.calldata),
+      txnOverrides,
     )
   }
 
