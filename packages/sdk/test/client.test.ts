@@ -752,15 +752,24 @@ describe('expectedEditionAddress', () => {
 
   it('returns expected address', async () => {
     const deployer = artistWallet.address
-    const salt = '12345'
+    const salt1 = Math.random()
+    const salt2 = Math.random()
 
-    const expectedAddress = await SoundCreatorV1__factory.connect(
+    const expectedAddress1 = await SoundCreatorV1__factory.connect(
       soundCreator.address,
       ethers.provider,
-    ).soundEditionAddress(deployer, getSaltAsBytes32(salt))
+    ).soundEditionAddress(deployer, getSaltAsBytes32(salt1))
 
-    const address = await client.expectedEditionAddress({ deployer, salt })
+    const expectedAddress2 = await SoundCreatorV1__factory.connect(
+      soundCreator.address,
+      ethers.provider,
+    ).soundEditionAddress(deployer, getSaltAsBytes32(salt2))
 
-    expect(address).to.eq(expectedAddress)
+    const address1 = await client.expectedEditionAddress({ deployer, salt: salt1 })
+    const address2 = await client.expectedEditionAddress({ deployer, salt: salt2 })
+
+    expect(address1).to.eq(expectedAddress1)
+    expect(address2).to.eq(expectedAddress2)
+    expect(address1).not.to.eq(address2)
   })
 })
