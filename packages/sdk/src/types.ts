@@ -44,10 +44,7 @@ export type MintScheduleBase = {
   totalMinted: number
 }
 
-export type MinterInterfaceId =
-  | typeof interfaceIds.IMerkleDropMinter
-  | typeof interfaceIds.IFixedPriceSignatureMinter
-  | typeof interfaceIds.IRangeEditionMinter
+export type MinterInterfaceId = typeof interfaceIds.IMerkleDropMinter | typeof interfaceIds.IRangeEditionMinter
 
 export type RangeEditionSchedule = MintScheduleBase & {
   mintType: 'RangeEdition'
@@ -63,12 +60,7 @@ export type MerkleDropSchedule = MintScheduleBase & {
   merkleRoot: string
 }
 
-export type FixedPriceSignatureSchedule = MintScheduleBase & {
-  mintType: 'FixedPriceSignature'
-  maxMintable: number
-}
-
-export type MintSchedule = RangeEditionSchedule | MerkleDropSchedule | FixedPriceSignatureSchedule
+export type MintSchedule = RangeEditionSchedule | MerkleDropSchedule
 
 export function isRangeEditionSchedule(schedule: MintSchedule): schedule is RangeEditionSchedule {
   return schedule.mintType === 'RangeEdition'
@@ -76,10 +68,6 @@ export function isRangeEditionSchedule(schedule: MintSchedule): schedule is Rang
 
 export function isMerkleDropSchedule(schedule: MintSchedule): schedule is MerkleDropSchedule {
   return schedule.mintType === 'MerkleDrop'
-}
-
-export function isFixedPriceSignatureSchedule(schedule: MintSchedule): schedule is FixedPriceSignatureSchedule {
-  return schedule.mintType === 'FixedPriceSignature'
 }
 
 /**
@@ -129,13 +117,7 @@ export type RangeEditionConfig = MintConfigBase & {
   maxMintablePerAccount: BigNumberish
 }
 
-export type FixedPriceSignatureConfig = MintConfigBase & {
-  mintType: 'FixedPriceSignature'
-  signer: string
-  maxMintable: BigNumberish
-}
-
-export type MintConfig = MerkleDropConfig | RangeEditionConfig | FixedPriceSignatureConfig
+export type MintConfig = MerkleDropConfig | RangeEditionConfig
 
 export function isMerkleDropConfig(config: MintConfig): config is MerkleDropConfig {
   return config.mintType === 'MerkleDrop'
@@ -143,10 +125,6 @@ export function isMerkleDropConfig(config: MintConfig): config is MerkleDropConf
 
 export function isRangeEditionConfig(config: MintConfig): config is RangeEditionConfig {
   return config.mintType === 'RangeEdition'
-}
-
-export function isFixedPriceSignatureConfig(config: MintConfig): config is FixedPriceSignatureConfig {
-  return config.mintType === 'FixedPriceSignature'
 }
 
 export type ContractCall = {

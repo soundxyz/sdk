@@ -1,8 +1,6 @@
 import { Wallet } from '@ethersproject/wallet'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 import {
-  FixedPriceSignatureMinter,
-  FixedPriceSignatureMinter__factory,
   MerkleDropMinter,
   MerkleDropMinter__factory,
   RangeEditionMinter,
@@ -38,7 +36,6 @@ const DEFAULT_SALT = getSaltAsBytes32(Math.random())
 let client: SoundClient
 let soundCreator: SoundCreatorV1
 let precomputedEditionAddress: string
-let fixedPriceSignatureMinter: FixedPriceSignatureMinter
 let merkleDropMinter: MerkleDropMinter
 let rangeEditionMinter: RangeEditionMinter
 let signers: SignerWithAddress[]
@@ -66,8 +63,6 @@ async function deployProtocol() {
   const feeRegistry = await SoundFeeRegistry.connect(soundWallet).deploy(NON_NULL_ADDRESS, SOUND_FEE)
 
   // Deploy minters
-  const FixedPriceSignatureMinter = new FixedPriceSignatureMinter__factory()
-  const fixedPriceSignatureMinter = await FixedPriceSignatureMinter.connect(soundWallet).deploy(feeRegistry.address)
   const MerkleDropMinter = new MerkleDropMinter__factory()
   const merkleDropMinter = await MerkleDropMinter.connect(soundWallet).deploy(feeRegistry.address)
   const RangeEditionMinter = new RangeEditionMinter__factory()
@@ -76,7 +71,7 @@ async function deployProtocol() {
   // Get precomputed edition address using default salt
   const [precomputedEditionAddress, _] = await soundCreator.soundEditionAddress(artistWallet.address, DEFAULT_SALT)
 
-  return { soundCreator, precomputedEditionAddress, fixedPriceSignatureMinter, merkleDropMinter, rangeEditionMinter }
+  return { soundCreator, precomputedEditionAddress, merkleDropMinter, rangeEditionMinter }
 }
 
 beforeEach(async () => {
@@ -89,7 +84,6 @@ beforeEach(async () => {
 
   soundCreator = fixture.soundCreator
   precomputedEditionAddress = fixture.precomputedEditionAddress
-  fixedPriceSignatureMinter = fixture.fixedPriceSignatureMinter
   merkleDropMinter = fixture.merkleDropMinter
   rangeEditionMinter = fixture.rangeEditionMinter
 
@@ -122,10 +116,6 @@ export async function setupTest({ minterCalls = [] }: { minterCalls?: ContractCa
   const [editionAddress, _] = await soundCreator.soundEditionAddress(artistWallet.address, DEFAULT_SALT)
 
   const grantRolesCalls = [
-    {
-      contractAddress: editionAddress,
-      calldata: editionInterface.encodeFunctionData('grantRoles', [fixedPriceSignatureMinter.address, MINTER_ROLE]),
-    },
     {
       contractAddress: editionAddress,
       calldata: editionInterface.encodeFunctionData('grantRoles', [merkleDropMinter.address, MINTER_ROLE]),
@@ -649,16 +639,6 @@ describe('createEdition', () => {
         affiliateFeeBPS: 0,
       },
       {
-        mintType: 'FixedPriceSignature' as const,
-        minterAddress: fixedPriceSignatureMinter.address,
-        price: PRICE,
-        startTime: mint2StartTime,
-        endTime: mint3StartTime,
-        signer: NON_NULL_ADDRESS,
-        maxMintable: 13,
-        affiliateFeeBPS: 0,
-      },
-      {
         mintType: 'MerkleDrop' as const,
         minterAddress: merkleDropMinter.address,
         price: PRICE,
@@ -713,14 +693,6 @@ describe('createEdition', () => {
           expect(mintSchedule.maxMintableLower).to.equal(mintConfig.maxMintableLower)
           expect(mintSchedule.maxMintableUpper).to.equal(mintConfig.maxMintableUpper)
           expect(mintSchedule.maxMintablePerAccount).to.equal(mint1MaxMintablePerAccount)
-          break
-        }
-        case 'FixedPriceSignature': {
-          const minter = FixedPriceSignatureMinter__factory.connect(mintConfig.minterAddress, ethers.provider)
-          const mintSchedule = await minter.mintInfo(precomputedEditionAddress, MINT_ID)
-          expect(mintSchedule.startTime).to.equal(mint2StartTime)
-          expect(mintSchedule.endTime).to.equal(mint3StartTime)
-          expect(mintSchedule.signer).to.equal(NON_NULL_ADDRESS)
           break
         }
         case 'MerkleDrop': {

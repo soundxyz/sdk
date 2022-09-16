@@ -1,6 +1,5 @@
 import { interfaceIds } from '@soundxyz/sound-protocol'
 import {
-  FixedPriceSignatureMinter__factory,
   IMinterModule__factory,
   MerkleDropMinter__factory,
   RangeEditionMinter__factory,
@@ -316,22 +315,6 @@ export function SoundClient({
           })
           break
         }
-        case 'FixedPriceSignature': {
-          const minterInterface = FixedPriceSignatureMinter__factory.createInterface()
-          contractCalls.push({
-            contractAddress: mintConfig.minterAddress,
-            calldata: minterInterface.encodeFunctionData('createEditionMint', [
-              editionAddress,
-              mintConfig.price,
-              mintConfig.signer,
-              mintConfig.maxMintable,
-              mintConfig.startTime,
-              mintConfig.endTime,
-              mintConfig.affiliateFeeBPS,
-            ]),
-          })
-          break
-        }
         case 'MerkleDrop': {
           const minterInterface = MerkleDropMinter__factory.createInterface()
           contractCalls.push({
@@ -389,9 +372,9 @@ export function SoundClient({
       (await _requireSignerOrProvider()).signerOrProvider,
     )
 
-    const [{ data, errors }, totalMintedBigNum] = await Promise.all([
+    const [{ data, errors }, editionInfo] = await Promise.all([
       client.soundApi.releaseInfo(soundParams),
-      editionContract.totalMinted(),
+      editionContract.editionInfo(),
     ])
 
     const release = data?.release
@@ -399,7 +382,7 @@ export function SoundClient({
 
     return {
       ...release,
-      totalMinted: totalMintedBigNum.toNumber(),
+      editionInfo,
       trackAudio: LazyPromise(() => client.soundApi.audioFromTrack({ trackId: release.track.id })),
     }
   }
@@ -504,23 +487,6 @@ export function SoundClient({
               mintType: 'MerkleDrop',
               mintId: mintId.toNumber(),
               merkleRoot: mintSchedule.merkleRootHash,
-              editionAddress,
-              minterAddress,
-              startTime: mintSchedule.startTime,
-              endTime: mintSchedule.endTime,
-              mintPaused: mintSchedule.mintPaused,
-              price: mintSchedule.price,
-              maxMintable: mintSchedule.maxMintable,
-              maxMintablePerAccount: mintSchedule.maxMintablePerAccount,
-              totalMinted: mintSchedule.totalMinted,
-            }
-          }
-          case interfaceIds.IFixedPriceSignatureMinter: {
-            const minterContract = minterFactoryMap[interfaceId].connect(minterAddress, signerOrProvider)
-            const mintSchedule = await minterContract.mintInfo(editionAddress, mintId)
-            return {
-              mintType: 'FixedPriceSignature',
-              mintId: mintId.toNumber(),
               editionAddress,
               minterAddress,
               startTime: mintSchedule.startTime,
