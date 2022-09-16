@@ -114,7 +114,7 @@ export function SoundClient({
       case 'RangeEdition': {
         // handle range edition case
         const maxQty =
-          timestamp < mintSchedule.closingTime ? mintSchedule.maxMintableUpper : mintSchedule.maxMintableLower
+          timestamp < mintSchedule.cutoffTime ? mintSchedule.maxMintableUpper : mintSchedule.maxMintableLower
 
         if (mintSchedule.totalMinted >= maxQty) {
           return 0
@@ -270,7 +270,7 @@ export function SoundClient({
     const creatorAddress = _getCreatorAddress({ chainId })
 
     // Precompute the edition address.
-    const editionAddress = await SoundCreatorV1__factory.connect(creatorAddress, signer).soundEditionAddress(
+    const [editionAddress, _exists] = await SoundCreatorV1__factory.connect(creatorAddress, signer).soundEditionAddress(
       userAddress,
       formattedSalt,
     )
@@ -352,6 +352,10 @@ export function SoundClient({
       }
     }
 
+    let flags = 0
+    if (editionConfig.metadataIsFrozen) flags |= 1
+    if (editionConfig) flags |= 2
+
     /**
      * Encode the SoundEdition.initialize call.
      */
@@ -363,9 +367,10 @@ export function SoundClient({
       editionConfig.contractURI,
       editionConfig.fundingRecipient,
       editionConfig.royaltyBPS,
-      editionConfig.editionMaxMintable,
-      editionConfig.mintRandomnessTokenThreshold,
-      editionConfig.mintRandomnessTimeThreshold,
+      editionConfig.editionMaxMintableLower,
+      editionConfig.editionMaxMintableUpper,
+      editionConfig.editionCutoffTime,
+      flags,
     ])
 
     const soundCreatorContract = SoundCreatorV1__factory.connect(creatorAddress, signer)
@@ -483,9 +488,9 @@ export function SoundClient({
               price: mintSchedule.price,
               maxMintableLower: mintSchedule.maxMintableLower,
               maxMintableUpper: mintSchedule.maxMintableUpper,
-              closingTime: mintSchedule.closingTime,
+              cutoffTime: mintSchedule.cutoffTime,
               maxMintable: (unixTimestamp?: number) =>
-                (unixTimestamp || Math.floor(Date.now() / 1000)) < mintSchedule.closingTime
+                (unixTimestamp || Math.floor(Date.now() / 1000)) < mintSchedule.cutoffTime
                   ? mintSchedule.maxMintableUpper
                   : mintSchedule.maxMintableLower,
               maxMintablePerAccount: mintSchedule.maxMintablePerAccount,

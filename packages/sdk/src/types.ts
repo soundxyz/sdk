@@ -53,7 +53,7 @@ export type RangeEditionSchedule = MintScheduleBase & {
   mintType: 'RangeEdition'
   maxMintableLower: number
   maxMintableUpper: number
-  closingTime: number
+  cutoffTime: number
   maxMintable: (unixTimestamp?: number) => number
 }
 
@@ -93,9 +93,11 @@ export type EditionConfig = {
   contractURI: string
   fundingRecipient: string
   royaltyBPS: number
-  editionMaxMintable: number
-  mintRandomnessTokenThreshold: number
-  mintRandomnessTimeThreshold: number
+  editionMaxMintableLower: number
+  editionMaxMintableUpper: number
+  editionCutoffTime: number
+  mintRandomnessEnabled: boolean
+  metadataIsFrozen: boolean
 }
 
 /**
@@ -104,9 +106,9 @@ export type EditionConfig = {
 export type MintConfigBase = {
   minterAddress: string
   price: BigNumberish
-  startTime: BigNumberish
-  endTime: BigNumberish
-  affiliateFeeBPS: BigNumberish
+  startTime: number
+  endTime: number
+  affiliateFeeBPS: number
 }
 
 /**
@@ -115,22 +117,29 @@ export type MintConfigBase = {
 export type MerkleDropConfig = MintConfigBase & {
   mintType: 'MerkleDrop'
   merkleRoot: string
-  maxMintable: BigNumberish
-  maxMintablePerAccount: BigNumberish
+  maxMintable: number
+  maxMintablePerAccount: number
+}
+
+export type PublicSaleConbfig = MintConfigBase & {
+  mintType: 'PublicSale'
+  merkleRoot: string
+  maxMintable: number
+  maxMintablePerAccount: number
 }
 
 export type RangeEditionConfig = MintConfigBase & {
   mintType: 'RangeEdition'
-  closingTime: BigNumberish
-  maxMintableLower: BigNumberish
-  maxMintableUpper: BigNumberish
-  maxMintablePerAccount: BigNumberish
+  closingTime: number
+  maxMintableLower: number
+  maxMintableUpper: number
+  maxMintablePerAccount: number
 }
 
 export type FixedPriceSignatureConfig = MintConfigBase & {
   mintType: 'FixedPriceSignature'
   signer: string
-  maxMintable: BigNumberish
+  maxMintable: number
 }
 
 export type MintConfig = MerkleDropConfig | RangeEditionConfig | FixedPriceSignatureConfig

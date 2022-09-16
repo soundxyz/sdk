@@ -74,7 +74,10 @@ async function deployProtocol() {
   const rangeEditionMinter = await RangeEditionMinter.connect(soundWallet).deploy(feeRegistry.address)
 
   // Get precomputed edition address using default salt
-  const precomputedEditionAddress = await soundCreator.soundEditionAddress(artistWallet.address, DEFAULT_SALT)
+  const [precomputedEditionAddress, _exists] = await soundCreator.soundEditionAddress(
+    artistWallet.address,
+    DEFAULT_SALT,
+  )
 
   return { soundCreator, precomputedEditionAddress, fixedPriceSignatureMinter, merkleDropMinter, rangeEditionMinter }
 }
@@ -113,13 +116,14 @@ export async function setupTest({ minterCalls = [] }: { minterCalls?: ContractCa
     'https://contractURI.com',
     NON_NULL_ADDRESS,
     0, //royaltyBPS,
-    UINT32_MAX, // editionMaxMintable
-    100, // mintRandomnessTokenThreshold
-    100, // mintRandomnessTimeThreshold
+    100, // editionMaxMintableLower
+    UINT32_MAX, // editionMaxMintableUpper
+    0, // editionCutoffTime
+    2, // flags(mintRandomnessEnabled = true, metadataIsFrozen = false)4
   ]
   const editionInterface = new ethers.utils.Interface(SoundEditionV1__factory.abi)
   const editionInitData = editionInterface.encodeFunctionData('initialize', editionInitArgs)
-  const editionAddress = await soundCreator.soundEditionAddress(artistWallet.address, DEFAULT_SALT)
+  const [editionAddress, _exists] = await soundCreator.soundEditionAddress(artistWallet.address, DEFAULT_SALT)
 
   const grantRolesCalls = [
     {
@@ -619,9 +623,9 @@ describe('createEdition', () => {
       contractURI: 'https://test.com',
       fundingRecipient: NON_NULL_ADDRESS,
       royaltyBPS: 0,
-      editionMaxMintable: 10,
-      mintRandomnessTokenThreshold: 10,
-      mintRandomnessTimeThreshold: 999999,
+      editionMaxMintableLower: 10,
+      editionMaxMintableUpper: 10,
+      editionCutoffTime: 999999,
     }
 
     const mint1StartTime = now()
@@ -670,7 +674,7 @@ describe('createEdition', () => {
     ]
 
     const customSalt = 'hello world'
-    const precomputedEditionAddress = await SoundCreatorV1__factory.connect(
+    const [precomputedEditionAddress, _exists] = await SoundCreatorV1__factory.connect(
       soundCreator.address,
       ethers.provider,
     ).soundEditionAddress(artistWallet.address, getSaltAsBytes32(customSalt))
@@ -686,14 +690,16 @@ describe('createEdition', () => {
 
     const editionContract = SoundEditionV1__factory.connect(precomputedEditionAddress, ethers.provider)
     const editionBaseURI = await editionContract.baseURI()
-    const mintRandomnessTimeThreshold = await editionContract.mintRandomnessTimeThreshold()
+    const editionMaxMintableLower = await editionContract.editionMaxMintableLower()
+    const editionMaxMintableUpper = await editionContract.editionMaxMintableUpper()
+    const editionCutoffTime = await editionContract.editionCutoffTime()
     const fundingRecipient = await editionContract.fundingRecipient()
-    const editionMaxMintable = await editionContract.editionMaxMintable()
 
     expect(editionBaseURI).to.eq(editionConfig.baseURI)
-    expect(mintRandomnessTimeThreshold).to.eq(editionConfig.mintRandomnessTimeThreshold)
+    expect(editionMaxMintableLower).to.eq(editionConfig.editionMaxMintableLower)
+    expect(editionMaxMintableUpper).to.eq(editionConfig.editionMaxMintableUpper)
+    expect(editionCutoffTime).to.eq(editionConfig.editionCutoffTime)
     expect(fundingRecipient).to.eq(editionConfig.fundingRecipient)
-    expect(editionMaxMintable).to.eq(editionConfig.editionMaxMintable)
 
     const MINT_ID = 0
 
@@ -704,7 +710,7 @@ describe('createEdition', () => {
           const minter = RangeEditionMinter__factory.connect(mintConfig.minterAddress, ethers.provider)
           const mintSchedule = await minter.mintInfo(precomputedEditionAddress, MINT_ID)
           expect(mintSchedule.startTime).to.equal(mint1StartTime)
-          expect(mintSchedule.closingTime).to.equal(mint1ClosingTime)
+          expect(mintSchedule.cutoffTime).to.equal(mint1ClosingTime)
           expect(mintSchedule.endTime).to.equal(mint2StartTime)
           expect(mintSchedule.maxMintableLower).to.equal(mintConfig.maxMintableLower)
           expect(mintSchedule.maxMintableUpper).to.equal(mintConfig.maxMintableUpper)
