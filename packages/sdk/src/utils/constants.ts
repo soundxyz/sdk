@@ -1,13 +1,8 @@
 import { interfaceIds } from '@soundxyz/sound-protocol'
-import {
-  RangeEditionMinter__factory,
-  FixedPriceSignatureMinter__factory,
-  MerkleDropMinter__factory,
-} from '@soundxyz/sound-protocol/typechain/index'
+import { RangeEditionMinter__factory, MerkleDropMinter__factory } from '@soundxyz/sound-protocol/typechain/index'
 
 export const minterFactoryMap = {
   [interfaceIds.IRangeEditionMinter]: RangeEditionMinter__factory,
-  [interfaceIds.IFixedPriceSignatureMinter]: FixedPriceSignatureMinter__factory,
   [interfaceIds.IMerkleDropMinter]: MerkleDropMinter__factory,
 } as const
 

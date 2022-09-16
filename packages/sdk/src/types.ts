@@ -44,16 +44,13 @@ export type MintScheduleBase = {
   totalMinted: number
 }
 
-export type MinterInterfaceId =
-  | typeof interfaceIds.IMerkleDropMinter
-  | typeof interfaceIds.IFixedPriceSignatureMinter
-  | typeof interfaceIds.IRangeEditionMinter
+export type MinterInterfaceId = typeof interfaceIds.IMerkleDropMinter | typeof interfaceIds.IRangeEditionMinter
 
 export type RangeEditionSchedule = MintScheduleBase & {
   mintType: 'RangeEdition'
   maxMintableLower: number
   maxMintableUpper: number
-  closingTime: number
+  cutoffTime: number
   maxMintable: (unixTimestamp?: number) => number
 }
 
@@ -63,12 +60,7 @@ export type MerkleDropSchedule = MintScheduleBase & {
   merkleRoot: string
 }
 
-export type FixedPriceSignatureSchedule = MintScheduleBase & {
-  mintType: 'FixedPriceSignature'
-  maxMintable: number
-}
-
-export type MintSchedule = RangeEditionSchedule | MerkleDropSchedule | FixedPriceSignatureSchedule
+export type MintSchedule = RangeEditionSchedule | MerkleDropSchedule
 
 export function isRangeEditionSchedule(schedule: MintSchedule): schedule is RangeEditionSchedule {
   return schedule.mintType === 'RangeEdition'
@@ -76,10 +68,6 @@ export function isRangeEditionSchedule(schedule: MintSchedule): schedule is Rang
 
 export function isMerkleDropSchedule(schedule: MintSchedule): schedule is MerkleDropSchedule {
   return schedule.mintType === 'MerkleDrop'
-}
-
-export function isFixedPriceSignatureSchedule(schedule: MintSchedule): schedule is FixedPriceSignatureSchedule {
-  return schedule.mintType === 'FixedPriceSignature'
 }
 
 /**
@@ -93,9 +81,11 @@ export type EditionConfig = {
   contractURI: string
   fundingRecipient: string
   royaltyBPS: number
-  editionMaxMintable: number
-  mintRandomnessTokenThreshold: number
-  mintRandomnessTimeThreshold: number
+  editionMaxMintableLower: number
+  editionMaxMintableUpper: number
+  editionCutoffTime: number
+  shouldFreezeMetadata: boolean
+  shouldEnableMintRandomness: boolean
 }
 
 /**
@@ -104,9 +94,9 @@ export type EditionConfig = {
 export type MintConfigBase = {
   minterAddress: string
   price: BigNumberish
-  startTime: BigNumberish
-  endTime: BigNumberish
-  affiliateFeeBPS: BigNumberish
+  startTime: number
+  endTime: number
+  affiliateFeeBPS: number
 }
 
 /**
@@ -115,25 +105,19 @@ export type MintConfigBase = {
 export type MerkleDropConfig = MintConfigBase & {
   mintType: 'MerkleDrop'
   merkleRoot: string
-  maxMintable: BigNumberish
-  maxMintablePerAccount: BigNumberish
+  maxMintable: number
+  maxMintablePerAccount: number
 }
 
 export type RangeEditionConfig = MintConfigBase & {
   mintType: 'RangeEdition'
-  closingTime: BigNumberish
-  maxMintableLower: BigNumberish
-  maxMintableUpper: BigNumberish
-  maxMintablePerAccount: BigNumberish
+  cutoffTime: number
+  maxMintableLower: number
+  maxMintableUpper: number
+  maxMintablePerAccount: number
 }
 
-export type FixedPriceSignatureConfig = MintConfigBase & {
-  mintType: 'FixedPriceSignature'
-  signer: string
-  maxMintable: BigNumberish
-}
-
-export type MintConfig = MerkleDropConfig | RangeEditionConfig | FixedPriceSignatureConfig
+export type MintConfig = MerkleDropConfig | RangeEditionConfig
 
 export function isMerkleDropConfig(config: MintConfig): config is MerkleDropConfig {
   return config.mintType === 'MerkleDrop'
@@ -141,10 +125,6 @@ export function isMerkleDropConfig(config: MintConfig): config is MerkleDropConf
 
 export function isRangeEditionConfig(config: MintConfig): config is RangeEditionConfig {
   return config.mintType === 'RangeEdition'
-}
-
-export function isFixedPriceSignatureConfig(config: MintConfig): config is FixedPriceSignatureConfig {
-  return config.mintType === 'FixedPriceSignature'
 }
 
 export type ContractCall = {
