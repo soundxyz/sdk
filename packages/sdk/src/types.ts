@@ -94,9 +94,9 @@ export type EditionConfig = {
 export type MintConfigBase = {
   minterAddress: string
   price: BigNumberish
-  startTime: BigNumberish
-  endTime: BigNumberish
-  affiliateFeeBPS: BigNumberish
+  startTime: number
+  endTime: number
+  affiliateFeeBPS: number
 }
 
 /**
@@ -105,16 +105,16 @@ export type MintConfigBase = {
 export type MerkleDropConfig = MintConfigBase & {
   mintType: 'MerkleDrop'
   merkleRoot: string
-  maxMintable: BigNumberish
-  maxMintablePerAccount: BigNumberish
+  maxMintable: number
+  maxMintablePerAccount: number
 }
 
 export type RangeEditionConfig = MintConfigBase & {
   mintType: 'RangeEdition'
-  cutoffTime: BigNumberish
-  maxMintableLower: BigNumberish
-  maxMintableUpper: BigNumberish
-  maxMintablePerAccount: BigNumberish
+  cutoffTime: number
+  maxMintableLower: number
+  maxMintableUpper: number
+  maxMintablePerAccount: number
 }
 
 export type MintConfig = MerkleDropConfig | RangeEditionConfig
