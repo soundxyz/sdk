@@ -10,6 +10,7 @@ import {
   SoundCreatorV1,
   SoundCreatorV1__factory,
   SoundEditionV1__factory,
+  ISoundEditionV1__factory,
   SoundFeeRegistry__factory,
 } from '@soundxyz/sound-protocol/typechain/index'
 import assert from 'assert'
@@ -150,617 +151,633 @@ export async function setupTest({ minterCalls = [] }: { minterCalls?: ContractCa
                         TESTS
  ********************************************************/
 
-describe('isSoundEdition', () => {
-  it("Should throw error if the address isn't valid", async () => {
-    await client.isSoundEdition({ editionAddress: '0x123' }).catch((error) => {
-      expect(error.message).to.equal('Invalid address: 0x123')
-    })
-  })
-
-  it('Correctly identifies SoundEdition addresses', async () => {
-    await setupTest({})
-
-    const wallet = Wallet.createRandom()
-    let isEdition = await client.isSoundEdition({ editionAddress: wallet.address })
-    expect(isEdition).to.be.false
-
-    isEdition = await client.isSoundEdition({ editionAddress: precomputedEditionAddress })
-    expect(isEdition).to.be.true
-  })
-})
-
-describe('eligibleQuantity: single RangeEditionMinter instance', () => {
-  it(`Eligible quantity is user specific and changes with mint`, async () => {
-    const startTime = now()
-    const MINT_ID = 0
-
-    let minter = RangeEditionMinter__factory.connect(rangeEditionMinter.address, artistWallet)
-
-    const minterCalls = [
-      {
-        contractAddress: rangeEditionMinter.address,
-        calldata: minter.interface.encodeFunctionData('createEditionMint', [
-          precomputedEditionAddress,
-          PRICE,
-          startTime,
-          startTime + ONE_HOUR, // closingTime
-          startTime + ONE_HOUR * 2, // endTime
-          0, // affiliateFeeBPS,
-          4, // maxMintableLower,
-          5, // maxMintableUpper,
-          2, // maxMintablePerAccount
-        ]),
-      },
-    ]
-
-    await setupTest({ minterCalls })
-
-    // shows single active mint
-    const mints = await client.activeMintSchedules({ editionAddress: precomputedEditionAddress })
-
-    expect(mints.length).to.equal(1)
-
-    // eligible for 2
-    const eligibleQuantity = await client.eligibleQuantity({
-      mintSchedule: mints[0],
-      userAddress: buyerWallet.address,
-    })
-    expect(eligibleQuantity).to.equal(2)
-
-    // Test balances decreases after minting
-    minter = RangeEditionMinter__factory.connect(rangeEditionMinter.address, buyerWallet)
-    await minter.mint(precomputedEditionAddress, MINT_ID, 1, NULL_ADDRESS, {
-      value: PRICE,
-    })
-
-    // only eligible for 1 now
-    const newEligibleQuantity = await client.eligibleQuantity({
-      mintSchedule: mints[0],
-      userAddress: buyerWallet.address,
-    })
-    expect(newEligibleQuantity).to.equal(1)
-
-    // another user is still eligible for 2
-    const eligibleQuantityForOther = await client.eligibleQuantity({
-      mintSchedule: mints[0],
-      userAddress: artistWallet.address,
-    })
-    expect(eligibleQuantityForOther).to.equal(2)
-  })
-
-  it(`Eligible quantity is zero outside of minting time`, async () => {
-    const startTime = now()
-    const closingTime = startTime + ONE_HOUR
-    const endTime = closingTime + ONE_HOUR
-    const maxMintablePerAccount = 5
-
-    const minter = RangeEditionMinter__factory.connect(rangeEditionMinter.address, artistWallet)
-    const minterCalls = [
-      {
-        contractAddress: rangeEditionMinter.address,
-        calldata: minter.interface.encodeFunctionData('createEditionMint', [
-          precomputedEditionAddress,
-          PRICE,
-          startTime,
-          closingTime,
-          endTime,
-          0, // affiliateFeeBPS
-          10, // maxMintableLower
-          10, // maxMintableUpper
-          maxMintablePerAccount,
-        ]),
-      },
-    ]
-
-    await setupTest({ minterCalls })
-
-    const mints = await client.activeMintSchedules({ editionAddress: precomputedEditionAddress })
-    expect(mints.length).to.equal(1)
-
-    const eligibleQuantityBeforeStart = await client.eligibleQuantity({
-      mintSchedule: mints[0],
-      userAddress: buyerWallet.address,
-      timestamp: startTime - 1,
-    })
-    expect(eligibleQuantityBeforeStart).to.equal(0)
-
-    const eligibleQuantityAtStart = await client.eligibleQuantity({
-      mintSchedule: mints[0],
-      userAddress: buyerWallet.address,
-      timestamp: startTime,
-    })
-    expect(eligibleQuantityAtStart).to.equal(maxMintablePerAccount)
-
-    const eligibleQuantityAtEnd = await client.eligibleQuantity({
-      mintSchedule: mints[0],
-      userAddress: buyerWallet.address,
-      timestamp: endTime + 1,
-    })
-    expect(eligibleQuantityAtEnd).to.equal(0)
-  })
-
-  it(`Eligible quantity becomes zero for every user if range edition mint instance is sold out before closingTime`, async () => {
-    const maxMintableUpper = 8
-    const startTime = now()
-    const MINT_ID = 0
-
-    const minter = RangeEditionMinter__factory.connect(rangeEditionMinter.address, artistWallet)
-    const minterCalls = [
-      {
-        contractAddress: rangeEditionMinter.address,
-        calldata: minter.interface.encodeFunctionData('createEditionMint', [
-          precomputedEditionAddress,
-          PRICE,
-          startTime,
-          startTime + ONE_HOUR, // closingTime,
-          startTime + ONE_HOUR * 2, // endTime,
-          0, // affiliateFeeBPS
-          4, // maxMintableLower
-          maxMintableUpper, // maxMintableUpper
-          1, // maxMintablePerAccount,
-        ]),
-      },
-    ]
-
-    await setupTest({ minterCalls })
-
-    for (let i = 0; i < maxMintableUpper; i++) {
-      const minter = RangeEditionMinter__factory.connect(rangeEditionMinter.address, signers[i])
-      minter.mint(precomputedEditionAddress, MINT_ID, 1, NULL_ADDRESS, { value: PRICE })
-    }
-
-    // Check that all users have zero eligible balance
-    for (let i = 0; i < 10; i++) {
-      const randomSigner = Wallet.createRandom()
-      randomSigner.connect(ethers.provider)
-
-      const mints = await client.activeMintSchedules({ editionAddress: precomputedEditionAddress })
-      expect(mints.length).to.equal(1)
-
-      const eligibleQuantity = await client.eligibleQuantity({
-        mintSchedule: mints[0],
-        userAddress: randomSigner.address,
-      })
-      expect(eligibleQuantity).to.equal(0)
-    }
-  })
-
-  it(`Eligible balance switches to zero after closing time if maxMintableLower has been surpassed`, async () => {
-    const maxMintableLower = 5
-    const maxMintablePerAccount = 1
-    const signers = await ethers.getSigners()
-    const startTime = now()
-    const closingTime = startTime + ONE_HOUR
-    const MINT_ID = 0
-
-    const minter = RangeEditionMinter__factory.connect(rangeEditionMinter.address, artistWallet)
-    const minterCalls = [
-      {
-        contractAddress: rangeEditionMinter.address,
-        calldata: minter.interface.encodeFunctionData('createEditionMint', [
-          precomputedEditionAddress,
-          PRICE,
-          startTime,
-          closingTime,
-          startTime + ONE_HOUR * 2, // endTime,
-          0, // affiliateFeeBPS
-          maxMintableLower,
-          10, // maxMintableUpper,
-          maxMintablePerAccount,
-        ]),
-      },
-    ]
-
-    await setupTest({ minterCalls })
-
-    // Mint lower range limit
-    for (let i = 0; i < maxMintableLower; i++) {
-      const minter = RangeEditionMinter__factory.connect(rangeEditionMinter.address, signers[i])
-      minter.mint(precomputedEditionAddress, MINT_ID, 1, NULL_ADDRESS, { value: PRICE })
-    }
-
-    const mints = await client.activeMintSchedules({ editionAddress: precomputedEditionAddress })
-    expect(mints.length).to.equal(1)
-
-    // Check that random users still have an eligible quantity at current time
-    for (let i = 0; i < 1; i++) {
-      const randomSigner = Wallet.createRandom()
-      randomSigner.connect(ethers.provider)
-
-      const eligibleQuantity = await client.eligibleQuantity({
-        mintSchedule: mints[0],
-        userAddress: randomSigner.address,
-        timestamp: now(),
-      })
-      expect(eligibleQuantity).to.equal(maxMintablePerAccount)
-    }
-
-    // Check that random users have no eligible quantity at closing time
-    for (let i = 0; i < 1; i++) {
-      const randomSigner = Wallet.createRandom()
-      randomSigner.connect(ethers.provider)
-
-      const eligibleQuantity = await client.eligibleQuantity({
-        mintSchedule: mints[0],
-        userAddress: randomSigner.address,
-        timestamp: closingTime,
-      })
-      expect(eligibleQuantity).to.equal(0)
-    }
-  })
-
-  it(`Eligible quantity changes if querying between multiple mints with different start times and max mintable quantities.`, async () => {
-    const mint1StartTime = now()
-    const mint1EndTime = mint1StartTime + ONE_HOUR
-    const mint2StartTime = mint1EndTime
-
-    const mint1MaxMintablePerAccount = 1
-    const mint2MaxMintablePerAccount = 42
-
-    const minter = RangeEditionMinter__factory.connect(rangeEditionMinter.address, artistWallet)
-    const minterCalls = [
-      {
-        contractAddress: rangeEditionMinter.address,
-        calldata: minter.interface.encodeFunctionData('createEditionMint', [
-          precomputedEditionAddress,
-          PRICE,
-          mint1StartTime,
-          mint1EndTime - 1, // closingTime,
-          mint1EndTime,
-          0, // affiliateFeeBPS
-          99, // maxMintableLower,
-          100, // maxMintableUpper,
-          mint1MaxMintablePerAccount,
-        ]),
-      },
-      {
-        contractAddress: rangeEditionMinter.address,
-        calldata: minter.interface.encodeFunctionData('createEditionMint', [
-          precomputedEditionAddress,
-          PRICE,
-          mint2StartTime,
-          mint2StartTime + ONE_HOUR, // closingTime,
-          mint2StartTime + ONE_HOUR + 1, // endTime
-          0, // affiliateFeeBPS
-          99, // maxMintableLower,
-          100, // maxMintableUpper,
-          mint2MaxMintablePerAccount,
-        ]),
-      },
-    ]
-
-    await setupTest({ minterCalls })
-
-    // 1 active mint
-    const activeMints = await client.activeMintSchedules({ editionAddress: precomputedEditionAddress })
-    expect(activeMints.length).to.equal(1)
-    // 2 total mints (1 in the future)
-    const allMints = await client.mintSchedules({ editionAddress: precomputedEditionAddress })
-    expect(allMints.length).to.equal(2)
-
-    const eligibleQuantity1 = await client.eligibleQuantity({
-      mintSchedule: allMints[0],
-      userAddress: buyerWallet.address,
-    })
-
-    const eligibleQuantity2 = await client.eligibleQuantity({
-      mintSchedule: allMints[1],
-      userAddress: buyerWallet.address,
-      timestamp: mint2StartTime,
-    })
-
-    expect(eligibleQuantity1).to.equal(mint1MaxMintablePerAccount)
-    expect(eligibleQuantity2).to.equal(mint2MaxMintablePerAccount)
-  })
-})
-
-describe('mint', () => {
-  describe('RangeEditionMinter', () => {
-    let mintSchedules: MintSchedule[] = []
-    beforeEach(async () => {
-      const startTime = now()
-
-      const minter = RangeEditionMinter__factory.connect(rangeEditionMinter.address, artistWallet)
-      const minterCalls = [
-        {
-          contractAddress: rangeEditionMinter.address,
-          calldata: minter.interface.encodeFunctionData('createEditionMint', [
-            precomputedEditionAddress,
-            PRICE,
-            startTime,
-            startTime + ONE_HOUR, // closingTime,
-            startTime + ONE_HOUR * 2, // endTime,
-            0, // affiliateFeeBPS
-            4, // maxMintableLower,
-            5, // maxMintableUpper,
-            2, // maxMintablePerAccount,
-          ]),
-        },
-      ]
-
-      await setupTest({ minterCalls })
-
-      // provide signer to the sdk
-      client = SoundClient({
-        provider: ethers.provider,
-        signer: buyerWallet,
-        apiKey: '123',
-        soundCreatorAddress: soundCreator.address,
-      })
-      mintSchedules = await client.activeMintSchedules({ editionAddress: precomputedEditionAddress })
-      expect(mintSchedules[0].mintType).to.eq('RangeEdition')
-    })
-
-    it(`Successfully mints via RangeEditionMinter`, async () => {
-      const quantity = 2
-      const initialBalance = await SoundEditionV1__factory.connect(
-        precomputedEditionAddress,
-        ethers.provider,
-      ).balanceOf(buyerWallet.address)
-
-      await client.mint({ mintSchedule: mintSchedules[0], quantity })
-
-      const finalBalance = await SoundEditionV1__factory.connect(precomputedEditionAddress, ethers.provider).balanceOf(
-        buyerWallet.address,
-      )
-      expect(finalBalance.sub(initialBalance)).to.eq(quantity)
-    })
-
-    it(`Should throw error if invalid quantity requested`, async () => {
-      const quantity = 0
-      await client.mint({ mintSchedule: mintSchedules[0], quantity }).catch((error) => {
-        expect(error.message).to.equal('Must provide valid quantity')
-      })
-    })
-
-    it(`Should throw error if more than eligibleQuantity requested`, async () => {
-      const quantity = 5
-      const eligibleQuantity = await client.eligibleQuantity({
-        mintSchedule: mintSchedules[0],
-        userAddress: buyerWallet.address,
-      })
-      await client.mint({ mintSchedule: mintSchedules[0], quantity }).catch((error) => {
-        expect(error).instanceOf(NotEligibleMint)
-
-        assert(error instanceof NotEligibleMint)
-
-        expect(error.eligibleMintQuantity).equal(eligibleQuantity)
-      })
-    })
-  })
-
-  describe('MerkleDropMinter', () => {
-    const merkleTestHelper = MerkleTestHelper()
-    let merkleTree: MerkleTree
-    let mintSchedules: MintSchedule[] = []
-
-    beforeEach(async () => {
-      merkleTree = merkleTestHelper.getMerkleTree()
-      const merkleRoot = merkleTestHelper.getMerkleRoot(merkleTree)
-
-      const minter = MerkleDropMinter__factory.connect(merkleDropMinter.address, artistWallet)
-      const startTime = now()
-
-      const minterCalls = [
-        {
-          contractAddress: merkleDropMinter.address,
-          calldata: minter.interface.encodeFunctionData('createEditionMint', [
-            precomputedEditionAddress,
-            merkleRoot,
-            PRICE,
-            startTime,
-            startTime + ONE_HOUR,
-            0, // affiliateFeeBPS
-            5, // maxMintable,
-            1, // maxMintablePerAccount
-          ]),
-        },
-      ]
-
-      await setupTest({ minterCalls })
-
-      // provide signer to the sdk
-      client = SoundClient({ provider: ethers.provider, signer: buyerWallet, apiKey: '123' })
-      mintSchedules = await client.activeMintSchedules({ editionAddress: precomputedEditionAddress })
-      expect(mintSchedules[0].mintType).to.eq('MerkleDrop')
-    })
-
-    it(`Successfully mints via MerkleDropMinter`, async () => {
-      const quantity = 1
-      const initialBalance = await SoundEditionV1__factory.connect(
-        precomputedEditionAddress,
-        ethers.provider,
-      ).balanceOf(buyerWallet.address)
-
-      // Mock merkle proof api call
-      client.soundApi.merkleProof = async ({ userAddress }) =>
-        merkleTestHelper.getProof({ merkleTree, address: userAddress })
-
-      await client.mint({
-        mintSchedule: mintSchedules[0],
-        quantity,
-      })
-
-      const finalBalance = await SoundEditionV1__factory.connect(precomputedEditionAddress, ethers.provider).balanceOf(
-        buyerWallet.address,
-      )
-      expect(finalBalance.sub(initialBalance)).to.eq(quantity)
-    })
-
-    it('Should throw error if merkle proof is null', async () => {
-      // Set up client so it fetches an empty merkle tree
-      client.soundApi.merkleProof = async ({ userAddress }) =>
-        merkleTestHelper.getProof({ merkleTree: merkleTestHelper.emptyMerkleTree, address: userAddress })
-
-      // Test client throws expected error
-      await client
-        .mint({
-          mintSchedule: mintSchedules[0],
-          quantity: 1,
-        })
-        .catch((error) => {
-          expect(error).instanceOf(NotEligibleMint)
-        })
-    })
-  })
-})
-
-describe('createEdition', () => {
-  beforeEach(() => {
-    client = SoundClient({ signer: artistWallet, apiKey: '123', soundCreatorAddress: soundCreator.address })
-  })
-
-  it('Creates a sound edition and mint schedules', async () => {
-    const editionConfig = {
-      name: 'Test',
-      symbol: 'TEST',
-      metadataModule: NULL_ADDRESS,
-      baseURI: 'https://test.com',
-      contractURI: 'https://test.com',
-      fundingRecipient: NON_NULL_ADDRESS,
-      royaltyBPS: 0,
-      editionMaxMintable: 10,
-      mintRandomnessTokenThreshold: 10,
-      mintRandomnessTimeThreshold: 999999,
-    }
-
-    const mint1StartTime = now()
-    const mint1ClosingTime = mint1StartTime + ONE_HOUR / 2
-    const mint2StartTime = mint1StartTime + ONE_HOUR
-    const mint3StartTime = mint1StartTime + ONE_HOUR * 2
-    const mint1MaxMintablePerAccount = 2
-    const mint3MaxMintablePerAccount = 3
-    const merkleTestHelper = MerkleTestHelper()
-    const merkleRoot = merkleTestHelper.getMerkleRoot(merkleTestHelper.getMerkleTree())
-
-    const mintConfigs: MintConfig[] = [
-      {
-        mintType: 'RangeEdition' as const,
-        minterAddress: rangeEditionMinter.address,
-        price: PRICE,
-        startTime: mint1StartTime,
-        closingTime: mint1ClosingTime,
-        endTime: mint2StartTime,
-        maxMintableLower: 5,
-        maxMintableUpper: 10,
-        maxMintablePerAccount: mint1MaxMintablePerAccount,
-        affiliateFeeBPS: 0,
-      },
-      {
-        mintType: 'FixedPriceSignature' as const,
-        minterAddress: fixedPriceSignatureMinter.address,
-        price: PRICE,
-        startTime: mint2StartTime,
-        endTime: mint3StartTime,
-        signer: NON_NULL_ADDRESS,
-        maxMintable: 13,
-        affiliateFeeBPS: 0,
-      },
-      {
-        mintType: 'MerkleDrop' as const,
-        minterAddress: merkleDropMinter.address,
-        price: PRICE,
-        merkleRoot,
-        startTime: mint3StartTime,
-        endTime: mint3StartTime + ONE_HOUR,
-        maxMintable: 9,
-        maxMintablePerAccount: mint3MaxMintablePerAccount,
-        affiliateFeeBPS: 0,
-      },
-    ]
-
-    const customSalt = 'hello world'
-    const precomputedEditionAddress = await SoundCreatorV1__factory.connect(
-      soundCreator.address,
-      ethers.provider,
-    ).soundEditionAddress(artistWallet.address, getSaltAsBytes32(customSalt))
-
-    /**
-     * Create sound edition and mint schedules.
-     */
-    await client.createEdition({
-      editionConfig,
-      mintConfigs,
-      salt: customSalt,
-    })
-
-    const editionContract = SoundEditionV1__factory.connect(precomputedEditionAddress, ethers.provider)
-    const editionBaseURI = await editionContract.baseURI()
-    const mintRandomnessTimeThreshold = await editionContract.mintRandomnessTimeThreshold()
-    const fundingRecipient = await editionContract.fundingRecipient()
-    const editionMaxMintable = await editionContract.editionMaxMintable()
-
-    expect(editionBaseURI).to.eq(editionConfig.baseURI)
-    expect(mintRandomnessTimeThreshold).to.eq(editionConfig.mintRandomnessTimeThreshold)
-    expect(fundingRecipient).to.eq(editionConfig.fundingRecipient)
-    expect(editionMaxMintable).to.eq(editionConfig.editionMaxMintable)
-
-    const MINT_ID = 0
-
-    // Verify mint configs exist
-    for (const mintConfig of mintConfigs) {
-      switch (mintConfig.mintType) {
-        case 'RangeEdition': {
-          const minter = RangeEditionMinter__factory.connect(mintConfig.minterAddress, ethers.provider)
-          const mintSchedule = await minter.mintInfo(precomputedEditionAddress, MINT_ID)
-          expect(mintSchedule.startTime).to.equal(mint1StartTime)
-          expect(mintSchedule.closingTime).to.equal(mint1ClosingTime)
-          expect(mintSchedule.endTime).to.equal(mint2StartTime)
-          expect(mintSchedule.maxMintableLower).to.equal(mintConfig.maxMintableLower)
-          expect(mintSchedule.maxMintableUpper).to.equal(mintConfig.maxMintableUpper)
-          expect(mintSchedule.maxMintablePerAccount).to.equal(mint1MaxMintablePerAccount)
-          break
-        }
-        case 'FixedPriceSignature': {
-          const minter = FixedPriceSignatureMinter__factory.connect(mintConfig.minterAddress, ethers.provider)
-          const mintSchedule = await minter.mintInfo(precomputedEditionAddress, MINT_ID)
-          expect(mintSchedule.startTime).to.equal(mint2StartTime)
-          expect(mintSchedule.endTime).to.equal(mint3StartTime)
-          expect(mintSchedule.signer).to.equal(NON_NULL_ADDRESS)
-          break
-        }
-        case 'MerkleDrop': {
-          const minter = MerkleDropMinter__factory.connect(mintConfig.minterAddress, ethers.provider)
-          const mintSchedule = await minter.mintInfo(precomputedEditionAddress, MINT_ID)
-          expect(mintSchedule.startTime).to.equal(mint3StartTime)
-          expect(mintSchedule.endTime).to.equal(mint3StartTime + ONE_HOUR)
-          expect(mintSchedule.merkleRootHash).to.equal(merkleRoot)
-          expect(mintSchedule.maxMintablePerAccount).to.equal(mint3MaxMintablePerAccount)
-          break
-        }
-      }
-    }
-  })
-})
-
-describe('expectedEditionAddress', () => {
-  it('throws if provided deployerAddress is invalid', () => {
-    client.expectedEditionAddress({ deployer: '0x0', salt: '123' }).catch((error) => {
-      expect(error).instanceOf(InvalidAddressError)
-    })
-  })
-
-  it('throws if provider not connected', () => {
-    client = SoundClient({ provider: new ethers.providers.JsonRpcProvider(), apiKey: '123' })
-
-    client
-      .expectedEditionAddress({ deployer: '0xbf9a1fad0cbd61cc8158ccb6e1e8e111707088bb', salt: '123' })
-      .catch((error) => {
-        expect(error).instanceOf(MissingSignerOrProviderError)
-      })
-  })
-
-  it('returns expected address', async () => {
-    const deployer = artistWallet.address
-    const salt = '12345'
-
-    const expectedAddress = await SoundCreatorV1__factory.connect(
-      soundCreator.address,
-      ethers.provider,
-    ).soundEditionAddress(deployer, getSaltAsBytes32(salt))
-
-    const address = await client.expectedEditionAddress({ deployer, salt })
-
-    expect(address).to.eq(expectedAddress)
-  })
+// describe('isSoundEdition', () => {
+//   it("Should throw error if the address isn't valid", async () => {
+//     await client.isSoundEdition({ editionAddress: '0x123' }).catch((error) => {
+//       expect(error.message).to.equal('Invalid address: 0x123')
+//     })
+//   })
+
+//   it('Correctly identifies SoundEdition addresses', async () => {
+//     await setupTest({})
+
+//     const wallet = Wallet.createRandom()
+//     let isEdition = await client.isSoundEdition({ editionAddress: wallet.address })
+//     expect(isEdition).to.be.false
+
+//     isEdition = await client.isSoundEdition({ editionAddress: precomputedEditionAddress })
+//     expect(isEdition).to.be.true
+//   })
+// })
+
+// describe('eligibleQuantity: single RangeEditionMinter instance', () => {
+//   it(`Eligible quantity is user specific and changes with mint`, async () => {
+//     const startTime = now()
+//     const MINT_ID = 0
+
+//     let minter = RangeEditionMinter__factory.connect(rangeEditionMinter.address, artistWallet)
+
+//     const minterCalls = [
+//       {
+//         contractAddress: rangeEditionMinter.address,
+//         calldata: minter.interface.encodeFunctionData('createEditionMint', [
+//           precomputedEditionAddress,
+//           PRICE,
+//           startTime,
+//           startTime + ONE_HOUR, // closingTime
+//           startTime + ONE_HOUR * 2, // endTime
+//           0, // affiliateFeeBPS,
+//           4, // maxMintableLower,
+//           5, // maxMintableUpper,
+//           2, // maxMintablePerAccount
+//         ]),
+//       },
+//     ]
+
+//     await setupTest({ minterCalls })
+
+//     // shows single active mint
+//     const mints = await client.activeMintSchedules({ editionAddress: precomputedEditionAddress })
+
+//     expect(mints.length).to.equal(1)
+
+//     // eligible for 2
+//     const eligibleQuantity = await client.eligibleQuantity({
+//       mintSchedule: mints[0],
+//       userAddress: buyerWallet.address,
+//     })
+//     expect(eligibleQuantity).to.equal(2)
+
+//     // Test balances decreases after minting
+//     minter = RangeEditionMinter__factory.connect(rangeEditionMinter.address, buyerWallet)
+//     await minter.mint(precomputedEditionAddress, MINT_ID, 1, NULL_ADDRESS, {
+//       value: PRICE,
+//     })
+
+//     // only eligible for 1 now
+//     const newEligibleQuantity = await client.eligibleQuantity({
+//       mintSchedule: mints[0],
+//       userAddress: buyerWallet.address,
+//     })
+//     expect(newEligibleQuantity).to.equal(1)
+
+//     // another user is still eligible for 2
+//     const eligibleQuantityForOther = await client.eligibleQuantity({
+//       mintSchedule: mints[0],
+//       userAddress: artistWallet.address,
+//     })
+//     expect(eligibleQuantityForOther).to.equal(2)
+//   })
+
+//   it(`Eligible quantity is zero outside of minting time`, async () => {
+//     const startTime = now()
+//     const closingTime = startTime + ONE_HOUR
+//     const endTime = closingTime + ONE_HOUR
+//     const maxMintablePerAccount = 5
+
+//     const minter = RangeEditionMinter__factory.connect(rangeEditionMinter.address, artistWallet)
+//     const minterCalls = [
+//       {
+//         contractAddress: rangeEditionMinter.address,
+//         calldata: minter.interface.encodeFunctionData('createEditionMint', [
+//           precomputedEditionAddress,
+//           PRICE,
+//           startTime,
+//           closingTime,
+//           endTime,
+//           0, // affiliateFeeBPS
+//           10, // maxMintableLower
+//           10, // maxMintableUpper
+//           maxMintablePerAccount,
+//         ]),
+//       },
+//     ]
+
+//     await setupTest({ minterCalls })
+
+//     const mints = await client.activeMintSchedules({ editionAddress: precomputedEditionAddress })
+//     expect(mints.length).to.equal(1)
+
+//     const eligibleQuantityBeforeStart = await client.eligibleQuantity({
+//       mintSchedule: mints[0],
+//       userAddress: buyerWallet.address,
+//       timestamp: startTime - 1,
+//     })
+//     expect(eligibleQuantityBeforeStart).to.equal(0)
+
+//     const eligibleQuantityAtStart = await client.eligibleQuantity({
+//       mintSchedule: mints[0],
+//       userAddress: buyerWallet.address,
+//       timestamp: startTime,
+//     })
+//     expect(eligibleQuantityAtStart).to.equal(maxMintablePerAccount)
+
+//     const eligibleQuantityAtEnd = await client.eligibleQuantity({
+//       mintSchedule: mints[0],
+//       userAddress: buyerWallet.address,
+//       timestamp: endTime + 1,
+//     })
+//     expect(eligibleQuantityAtEnd).to.equal(0)
+//   })
+
+//   it(`Eligible quantity becomes zero for every user if range edition mint instance is sold out before closingTime`, async () => {
+//     const maxMintableUpper = 8
+//     const startTime = now()
+//     const MINT_ID = 0
+
+//     const minter = RangeEditionMinter__factory.connect(rangeEditionMinter.address, artistWallet)
+//     const minterCalls = [
+//       {
+//         contractAddress: rangeEditionMinter.address,
+//         calldata: minter.interface.encodeFunctionData('createEditionMint', [
+//           precomputedEditionAddress,
+//           PRICE,
+//           startTime,
+//           startTime + ONE_HOUR, // closingTime,
+//           startTime + ONE_HOUR * 2, // endTime,
+//           0, // affiliateFeeBPS
+//           4, // maxMintableLower
+//           maxMintableUpper, // maxMintableUpper
+//           1, // maxMintablePerAccount,
+//         ]),
+//       },
+//     ]
+
+//     await setupTest({ minterCalls })
+
+//     for (let i = 0; i < maxMintableUpper; i++) {
+//       const minter = RangeEditionMinter__factory.connect(rangeEditionMinter.address, signers[i])
+//       minter.mint(precomputedEditionAddress, MINT_ID, 1, NULL_ADDRESS, { value: PRICE })
+//     }
+
+//     // Check that all users have zero eligible balance
+//     for (let i = 0; i < 10; i++) {
+//       const randomSigner = Wallet.createRandom()
+//       randomSigner.connect(ethers.provider)
+
+//       const mints = await client.activeMintSchedules({ editionAddress: precomputedEditionAddress })
+//       expect(mints.length).to.equal(1)
+
+//       const eligibleQuantity = await client.eligibleQuantity({
+//         mintSchedule: mints[0],
+//         userAddress: randomSigner.address,
+//       })
+//       expect(eligibleQuantity).to.equal(0)
+//     }
+//   })
+
+//   it(`Eligible balance switches to zero after closing time if maxMintableLower has been surpassed`, async () => {
+//     const maxMintableLower = 5
+//     const maxMintablePerAccount = 1
+//     const signers = await ethers.getSigners()
+//     const startTime = now()
+//     const closingTime = startTime + ONE_HOUR
+//     const MINT_ID = 0
+
+//     const minter = RangeEditionMinter__factory.connect(rangeEditionMinter.address, artistWallet)
+//     const minterCalls = [
+//       {
+//         contractAddress: rangeEditionMinter.address,
+//         calldata: minter.interface.encodeFunctionData('createEditionMint', [
+//           precomputedEditionAddress,
+//           PRICE,
+//           startTime,
+//           closingTime,
+//           startTime + ONE_HOUR * 2, // endTime,
+//           0, // affiliateFeeBPS
+//           maxMintableLower,
+//           10, // maxMintableUpper,
+//           maxMintablePerAccount,
+//         ]),
+//       },
+//     ]
+
+//     await setupTest({ minterCalls })
+
+//     // Mint lower range limit
+//     for (let i = 0; i < maxMintableLower; i++) {
+//       const minter = RangeEditionMinter__factory.connect(rangeEditionMinter.address, signers[i])
+//       minter.mint(precomputedEditionAddress, MINT_ID, 1, NULL_ADDRESS, { value: PRICE })
+//     }
+
+//     const mints = await client.activeMintSchedules({ editionAddress: precomputedEditionAddress })
+//     expect(mints.length).to.equal(1)
+
+//     // Check that random users still have an eligible quantity at current time
+//     for (let i = 0; i < 1; i++) {
+//       const randomSigner = Wallet.createRandom()
+//       randomSigner.connect(ethers.provider)
+
+//       const eligibleQuantity = await client.eligibleQuantity({
+//         mintSchedule: mints[0],
+//         userAddress: randomSigner.address,
+//         timestamp: now(),
+//       })
+//       expect(eligibleQuantity).to.equal(maxMintablePerAccount)
+//     }
+
+//     // Check that random users have no eligible quantity at closing time
+//     for (let i = 0; i < 1; i++) {
+//       const randomSigner = Wallet.createRandom()
+//       randomSigner.connect(ethers.provider)
+
+//       const eligibleQuantity = await client.eligibleQuantity({
+//         mintSchedule: mints[0],
+//         userAddress: randomSigner.address,
+//         timestamp: closingTime,
+//       })
+//       expect(eligibleQuantity).to.equal(0)
+//     }
+//   })
+
+//   it(`Eligible quantity changes if querying between multiple mints with different start times and max mintable quantities.`, async () => {
+//     const mint1StartTime = now()
+//     const mint1EndTime = mint1StartTime + ONE_HOUR
+//     const mint2StartTime = mint1EndTime
+
+//     const mint1MaxMintablePerAccount = 1
+//     const mint2MaxMintablePerAccount = 42
+
+//     const minter = RangeEditionMinter__factory.connect(rangeEditionMinter.address, artistWallet)
+//     const minterCalls = [
+//       {
+//         contractAddress: rangeEditionMinter.address,
+//         calldata: minter.interface.encodeFunctionData('createEditionMint', [
+//           precomputedEditionAddress,
+//           PRICE,
+//           mint1StartTime,
+//           mint1EndTime - 1, // closingTime,
+//           mint1EndTime,
+//           0, // affiliateFeeBPS
+//           99, // maxMintableLower,
+//           100, // maxMintableUpper,
+//           mint1MaxMintablePerAccount,
+//         ]),
+//       },
+//       {
+//         contractAddress: rangeEditionMinter.address,
+//         calldata: minter.interface.encodeFunctionData('createEditionMint', [
+//           precomputedEditionAddress,
+//           PRICE,
+//           mint2StartTime,
+//           mint2StartTime + ONE_HOUR, // closingTime,
+//           mint2StartTime + ONE_HOUR + 1, // endTime
+//           0, // affiliateFeeBPS
+//           99, // maxMintableLower,
+//           100, // maxMintableUpper,
+//           mint2MaxMintablePerAccount,
+//         ]),
+//       },
+//     ]
+
+//     await setupTest({ minterCalls })
+
+//     // 1 active mint
+//     const activeMints = await client.activeMintSchedules({ editionAddress: precomputedEditionAddress })
+//     expect(activeMints.length).to.equal(1)
+//     // 2 total mints (1 in the future)
+//     const allMints = await client.mintSchedules({ editionAddress: precomputedEditionAddress })
+//     expect(allMints.length).to.equal(2)
+
+//     const eligibleQuantity1 = await client.eligibleQuantity({
+//       mintSchedule: allMints[0],
+//       userAddress: buyerWallet.address,
+//     })
+
+//     const eligibleQuantity2 = await client.eligibleQuantity({
+//       mintSchedule: allMints[1],
+//       userAddress: buyerWallet.address,
+//       timestamp: mint2StartTime,
+//     })
+
+//     expect(eligibleQuantity1).to.equal(mint1MaxMintablePerAccount)
+//     expect(eligibleQuantity2).to.equal(mint2MaxMintablePerAccount)
+//   })
+// })
+
+// describe('mint', () => {
+//   describe('RangeEditionMinter', () => {
+//     let mintSchedules: MintSchedule[] = []
+//     beforeEach(async () => {
+//       const startTime = now()
+
+//       const minter = RangeEditionMinter__factory.connect(rangeEditionMinter.address, artistWallet)
+//       const minterCalls = [
+//         {
+//           contractAddress: rangeEditionMinter.address,
+//           calldata: minter.interface.encodeFunctionData('createEditionMint', [
+//             precomputedEditionAddress,
+//             PRICE,
+//             startTime,
+//             startTime + ONE_HOUR, // closingTime,
+//             startTime + ONE_HOUR * 2, // endTime,
+//             0, // affiliateFeeBPS
+//             4, // maxMintableLower,
+//             5, // maxMintableUpper,
+//             2, // maxMintablePerAccount,
+//           ]),
+//         },
+//       ]
+
+//       await setupTest({ minterCalls })
+
+//       // provide signer to the sdk
+//       client = SoundClient({
+//         provider: ethers.provider,
+//         signer: buyerWallet,
+//         apiKey: '123',
+//         soundCreatorAddress: soundCreator.address,
+//       })
+//       mintSchedules = await client.activeMintSchedules({ editionAddress: precomputedEditionAddress })
+//       expect(mintSchedules[0].mintType).to.eq('RangeEdition')
+//     })
+
+//     it(`Successfully mints via RangeEditionMinter`, async () => {
+//       const quantity = 2
+//       const initialBalance = await SoundEditionV1__factory.connect(
+//         precomputedEditionAddress,
+//         ethers.provider,
+//       ).balanceOf(buyerWallet.address)
+
+//       await client.mint({ mintSchedule: mintSchedules[0], quantity })
+
+//       const finalBalance = await SoundEditionV1__factory.connect(precomputedEditionAddress, ethers.provider).balanceOf(
+//         buyerWallet.address,
+//       )
+//       expect(finalBalance.sub(initialBalance)).to.eq(quantity)
+//     })
+
+//     it(`Should throw error if invalid quantity requested`, async () => {
+//       const quantity = 0
+//       await client.mint({ mintSchedule: mintSchedules[0], quantity }).catch((error) => {
+//         expect(error.message).to.equal('Must provide valid quantity')
+//       })
+//     })
+
+//     it(`Should throw error if more than eligibleQuantity requested`, async () => {
+//       const quantity = 5
+//       const eligibleQuantity = await client.eligibleQuantity({
+//         mintSchedule: mintSchedules[0],
+//         userAddress: buyerWallet.address,
+//       })
+//       await client.mint({ mintSchedule: mintSchedules[0], quantity }).catch((error) => {
+//         expect(error).instanceOf(NotEligibleMint)
+
+//         assert(error instanceof NotEligibleMint)
+
+//         expect(error.eligibleMintQuantity).equal(eligibleQuantity)
+//       })
+//     })
+//   })
+
+//   describe('MerkleDropMinter', () => {
+//     const merkleTestHelper = MerkleTestHelper()
+//     let merkleTree: MerkleTree
+//     let mintSchedules: MintSchedule[] = []
+
+//     beforeEach(async () => {
+//       merkleTree = merkleTestHelper.getMerkleTree()
+//       const merkleRoot = merkleTestHelper.getMerkleRoot(merkleTree)
+
+//       const minter = MerkleDropMinter__factory.connect(merkleDropMinter.address, artistWallet)
+//       const startTime = now()
+
+//       const minterCalls = [
+//         {
+//           contractAddress: merkleDropMinter.address,
+//           calldata: minter.interface.encodeFunctionData('createEditionMint', [
+//             precomputedEditionAddress,
+//             merkleRoot,
+//             PRICE,
+//             startTime,
+//             startTime + ONE_HOUR,
+//             0, // affiliateFeeBPS
+//             5, // maxMintable,
+//             1, // maxMintablePerAccount
+//           ]),
+//         },
+//       ]
+
+//       await setupTest({ minterCalls })
+
+//       // provide signer to the sdk
+//       client = SoundClient({ provider: ethers.provider, signer: buyerWallet, apiKey: '123' })
+//       mintSchedules = await client.activeMintSchedules({ editionAddress: precomputedEditionAddress })
+//       expect(mintSchedules[0].mintType).to.eq('MerkleDrop')
+//     })
+
+//     it(`Successfully mints via MerkleDropMinter`, async () => {
+//       const quantity = 1
+//       const initialBalance = await SoundEditionV1__factory.connect(
+//         precomputedEditionAddress,
+//         ethers.provider,
+//       ).balanceOf(buyerWallet.address)
+
+//       // Mock merkle proof api call
+//       client.soundApi.merkleProof = async ({ userAddress }) =>
+//         merkleTestHelper.getProof({ merkleTree, address: userAddress })
+
+//       await client.mint({
+//         mintSchedule: mintSchedules[0],
+//         quantity,
+//       })
+
+//       const finalBalance = await SoundEditionV1__factory.connect(precomputedEditionAddress, ethers.provider).balanceOf(
+//         buyerWallet.address,
+//       )
+//       expect(finalBalance.sub(initialBalance)).to.eq(quantity)
+//     })
+
+//     it('Should throw error if merkle proof is null', async () => {
+//       // Set up client so it fetches an empty merkle tree
+//       client.soundApi.merkleProof = async ({ userAddress }) =>
+//         merkleTestHelper.getProof({ merkleTree: merkleTestHelper.emptyMerkleTree, address: userAddress })
+
+//       // Test client throws expected error
+//       await client
+//         .mint({
+//           mintSchedule: mintSchedules[0],
+//           quantity: 1,
+//         })
+//         .catch((error) => {
+//           expect(error).instanceOf(NotEligibleMint)
+//         })
+//     })
+//   })
+// })
+
+// describe('createEdition', () => {
+//   beforeEach(() => {
+//     client = SoundClient({ signer: artistWallet, apiKey: '123', soundCreatorAddress: soundCreator.address })
+//   })
+
+//   it('Creates a sound edition and mint schedules', async () => {
+//     const editionConfig = {
+//       name: 'Test',
+//       symbol: 'TEST',
+//       metadataModule: NULL_ADDRESS,
+//       baseURI: 'https://test.com',
+//       contractURI: 'https://test.com',
+//       fundingRecipient: NON_NULL_ADDRESS,
+//       royaltyBPS: 0,
+//       editionMaxMintable: 10,
+//       mintRandomnessTokenThreshold: 10,
+//       mintRandomnessTimeThreshold: 999999,
+//     }
+
+//     const mint1StartTime = now()
+//     const mint1ClosingTime = mint1StartTime + ONE_HOUR / 2
+//     const mint2StartTime = mint1StartTime + ONE_HOUR
+//     const mint3StartTime = mint1StartTime + ONE_HOUR * 2
+//     const mint1MaxMintablePerAccount = 2
+//     const mint3MaxMintablePerAccount = 3
+//     const merkleTestHelper = MerkleTestHelper()
+//     const merkleRoot = merkleTestHelper.getMerkleRoot(merkleTestHelper.getMerkleTree())
+
+//     const mintConfigs: MintConfig[] = [
+//       {
+//         mintType: 'RangeEdition' as const,
+//         minterAddress: rangeEditionMinter.address,
+//         price: PRICE,
+//         startTime: mint1StartTime,
+//         closingTime: mint1ClosingTime,
+//         endTime: mint2StartTime,
+//         maxMintableLower: 5,
+//         maxMintableUpper: 10,
+//         maxMintablePerAccount: mint1MaxMintablePerAccount,
+//         affiliateFeeBPS: 0,
+//       },
+//       {
+//         mintType: 'FixedPriceSignature' as const,
+//         minterAddress: fixedPriceSignatureMinter.address,
+//         price: PRICE,
+//         startTime: mint2StartTime,
+//         endTime: mint3StartTime,
+//         signer: NON_NULL_ADDRESS,
+//         maxMintable: 13,
+//         affiliateFeeBPS: 0,
+//       },
+//       {
+//         mintType: 'MerkleDrop' as const,
+//         minterAddress: merkleDropMinter.address,
+//         price: PRICE,
+//         merkleRoot,
+//         startTime: mint3StartTime,
+//         endTime: mint3StartTime + ONE_HOUR,
+//         maxMintable: 9,
+//         maxMintablePerAccount: mint3MaxMintablePerAccount,
+//         affiliateFeeBPS: 0,
+//       },
+//     ]
+
+//     const customSalt = 'hello world'
+//     const precomputedEditionAddress = await SoundCreatorV1__factory.connect(
+//       soundCreator.address,
+//       ethers.provider,
+//     ).soundEditionAddress(artistWallet.address, getSaltAsBytes32(customSalt))
+
+//     /**
+//      * Create sound edition and mint schedules.
+//      */
+//     await client.createEdition({
+//       editionConfig,
+//       mintConfigs,
+//       salt: customSalt,
+//     })
+
+//     const editionContract = SoundEditionV1__factory.connect(precomputedEditionAddress, ethers.provider)
+//     const editionBaseURI = await editionContract.baseURI()
+//     const mintRandomnessTimeThreshold = await editionContract.mintRandomnessTimeThreshold()
+//     const fundingRecipient = await editionContract.fundingRecipient()
+//     const editionMaxMintable = await editionContract.editionMaxMintable()
+
+//     expect(editionBaseURI).to.eq(editionConfig.baseURI)
+//     expect(mintRandomnessTimeThreshold).to.eq(editionConfig.mintRandomnessTimeThreshold)
+//     expect(fundingRecipient).to.eq(editionConfig.fundingRecipient)
+//     expect(editionMaxMintable).to.eq(editionConfig.editionMaxMintable)
+
+//     const MINT_ID = 0
+
+//     // Verify mint configs exist
+//     for (const mintConfig of mintConfigs) {
+//       switch (mintConfig.mintType) {
+//         case 'RangeEdition': {
+//           const minter = RangeEditionMinter__factory.connect(mintConfig.minterAddress, ethers.provider)
+//           const mintSchedule = await minter.mintInfo(precomputedEditionAddress, MINT_ID)
+//           expect(mintSchedule.startTime).to.equal(mint1StartTime)
+//           expect(mintSchedule.closingTime).to.equal(mint1ClosingTime)
+//           expect(mintSchedule.endTime).to.equal(mint2StartTime)
+//           expect(mintSchedule.maxMintableLower).to.equal(mintConfig.maxMintableLower)
+//           expect(mintSchedule.maxMintableUpper).to.equal(mintConfig.maxMintableUpper)
+//           expect(mintSchedule.maxMintablePerAccount).to.equal(mint1MaxMintablePerAccount)
+//           break
+//         }
+//         case 'FixedPriceSignature': {
+//           const minter = FixedPriceSignatureMinter__factory.connect(mintConfig.minterAddress, ethers.provider)
+//           const mintSchedule = await minter.mintInfo(precomputedEditionAddress, MINT_ID)
+//           expect(mintSchedule.startTime).to.equal(mint2StartTime)
+//           expect(mintSchedule.endTime).to.equal(mint3StartTime)
+//           expect(mintSchedule.signer).to.equal(NON_NULL_ADDRESS)
+//           break
+//         }
+//         case 'MerkleDrop': {
+//           const minter = MerkleDropMinter__factory.connect(mintConfig.minterAddress, ethers.provider)
+//           const mintSchedule = await minter.mintInfo(precomputedEditionAddress, MINT_ID)
+//           expect(mintSchedule.startTime).to.equal(mint3StartTime)
+//           expect(mintSchedule.endTime).to.equal(mint3StartTime + ONE_HOUR)
+//           expect(mintSchedule.merkleRootHash).to.equal(merkleRoot)
+//           expect(mintSchedule.maxMintablePerAccount).to.equal(mint3MaxMintablePerAccount)
+//           break
+//         }
+//       }
+//     }
+//   })
+// })
+
+// describe('expectedEditionAddress', () => {
+//   it('throws if provided deployerAddress is invalid', () => {
+//     client.expectedEditionAddress({ deployer: '0x0', salt: '123' }).catch((error) => {
+//       expect(error).instanceOf(InvalidAddressError)
+//     })
+//   })
+
+//   it('throws if provider not connected', () => {
+//     client = SoundClient({ provider: new ethers.providers.JsonRpcProvider(), apiKey: '123' })
+
+//     client
+//       .expectedEditionAddress({ deployer: '0xbf9a1fad0cbd61cc8158ccb6e1e8e111707088bb', salt: '123' })
+//       .catch((error) => {
+//         expect(error).instanceOf(MissingSignerOrProviderError)
+//       })
+//   })
+
+//   it('returns expected address', async () => {
+//     const deployer = artistWallet.address
+//     const salt = '12345'
+
+//     const expectedAddress = await SoundCreatorV1__factory.connect(
+//       soundCreator.address,
+//       ethers.provider,
+//     ).soundEditionAddress(deployer, getSaltAsBytes32(salt))
+
+//     const address = await client.expectedEditionAddress({ deployer, salt })
+
+//     expect(address).to.eq(expectedAddress)
+//   })
+// })
+
+describe('decodeParams', () => {
+  const creatorInterface = SoundCreatorV1__factory.createInterface()
+  const decodedParams = creatorInterface.decodeFunctionData(
+    'createSoundAndMints',
+    '0x3d1d406a8a05e456b85b900841c34c2552b3bf58d46aa0b83d51b744c7e10044b620d52000000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000360000000000000000000000000000000000000000000000000000000000000042000000000000000000000000000000000000000000000000000000000000002a4564e359a00000000000000000000000000000000000000000000000000000000000001400000000000000000000000000000000000000000000000000000000000000180000000000000000000000000ec6a09631f22c448181d8c6324ceb6fb6d96c1d800000000000000000000000000000000000000000000000000000000000001c000000000000000000000000000000000000000000000000000000000000002200000000000000000000000008f970324e90b708bca8207fc1c60d557e8022d5100000000000000000000000000000000000000000000000000000000000003e8000000000000000000000000000000000000000000000000000000000000000500000000000000000000000000000000000000000000000000000000ffffffff0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000a5465666c6f6e20446f6e000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003444f4e0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003061723a2f2f5f46674d4d325f3244744d5856376a7254397931365f674c374b30584d567066715054347350543441583400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000005b68747470733a2f2f73746167696e672e6d657461646174612e736f756e642e78797a2f76312f3078416236343033303046313846356432374636633845656563376363396334423537376334643830302f73746f726566726f6e740000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000005000000000000000000000000ab640300f18f5d27f6c8eeec7cc9c4b577c4d800000000000000000000000000ab640300f18f5d27f6c8eeec7cc9c4b577c4d8000000000000000000000000006d7d6f429fe5186334d3450ef7110e08782313f7000000000000000000000000660e52044e49f952fb7661feb86a9dcf1a906d62000000000000000000000000660e52044e49f952fb7661feb86a9dcf1a906d62000000000000000000000000000000000000000000000000000000000000000500000000000000000000000000000000000000000000000000000000000000a0000000000000000000000000000000000000000000000000000000000000012000000000000000000000000000000000000000000000000000000000000001a00000000000000000000000000000000000000000000000000000000000000300000000000000000000000000000000000000000000000000000000000000044000000000000000000000000000000000000000000000000000000000000000441c10893f0000000000000000000000006d7d6f429fe5186334d3450ef7110e08782313f700000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000441c10893f000000000000000000000000660e52044e49f952fb7661feb86a9dcf1a906d620000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000124dd2aef8f000000000000000000000000ab640300f18f5d27f6c8eeec7cc9c4b577c4d800000000000000000000000000000000000000000000000000002386f26fc10000000000000000000000000000000000000000000000000000000000006324df2000000000000000000000000000000000000000000000000000000000632630a000000000000000000000000000000000000000000000000000000000ffffffff0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000500000000000000000000000000000000000000000000000000000000000000050000000000000000000000000000000000000000000000000000000000000003000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000104c2733b09000000000000000000000000ab640300f18f5d27f6c8eeec7cc9c4b577c4d80053121ec034aba07f06d9aa79c004a3fc1073792dafc59dee718ae946d4c3f123000000000000000000000000000000000000000000000000002386f26fc10000000000000000000000000000000000000000000000000000000000006324df20000000000000000000000000000000000000000000000000000000006324df20000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000104c2733b09000000000000000000000000ab640300f18f5d27f6c8eeec7cc9c4b577c4d80053121ec034aba07f06d9aa79c004a3fc1073792dafc59dee718ae946d4c3f1230000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000006324dee4000000000000000000000000000000000000000000000000000000006324df2000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000',
+  )
+
+  const editionInterface = ISoundEditionV1__factory.createInterface()
+  const editionDecodedParams = editionInterface.decodeFunctionData(
+    'initialize',
+    '0x564e359a00000000000000000000000000000000000000000000000000000000000001400000000000000000000000000000000000000000000000000000000000000180000000000000000000000000ec6a09631f22c448181d8c6324ceb6fb6d96c1d800000000000000000000000000000000000000000000000000000000000001c000000000000000000000000000000000000000000000000000000000000002200000000000000000000000008f970324e90b708bca8207fc1c60d557e8022d5100000000000000000000000000000000000000000000000000000000000003e8000000000000000000000000000000000000000000000000000000000000000500000000000000000000000000000000000000000000000000000000ffffffff0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000a5465666c6f6e20446f6e000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003444f4e0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003061723a2f2f5f46674d4d325f3244744d5856376a7254397931365f674c374b30584d567066715054347350543441583400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000005b68747470733a2f2f73746167696e672e6d657461646174612e736f756e642e78797a2f76312f3078416236343033303046313846356432374636633845656563376363396334423537376334643830302f73746f726566726f6e740000000000',
+  )
+
+  console.log(decodedParams)
 })
