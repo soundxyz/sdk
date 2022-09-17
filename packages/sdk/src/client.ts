@@ -69,7 +69,7 @@ export function SoundClient({
 
   // All the minting schedules for a given edition, including past and future
   async function mintSchedules({ editionAddress }: { editionAddress: string }): Promise<MintSchedule[]> {
-    _requireValidSoundEdition({ editionAddress })
+    await _requireValidSoundEdition({ editionAddress })
 
     return _allMintSchedules({ editionAddress })
   }
@@ -82,7 +82,7 @@ export function SoundClient({
     editionAddress: string
     timestamp?: number
   }): Promise<MintSchedule[]> {
-    _requireValidSoundEdition({ editionAddress })
+    await _requireValidSoundEdition({ editionAddress })
 
     const mintSchedules = await _allMintSchedules({ editionAddress })
 
@@ -192,7 +192,7 @@ export function SoundClient({
     maxFeePerGas?: BigNumberish
     maxPriorityFeePerGas?: BigNumberish
   }): Promise<ContractTransaction> {
-    _requireValidSoundEdition({ editionAddress: mintSchedule.editionAddress })
+    await _requireValidSoundEdition({ editionAddress: mintSchedule.editionAddress })
     if (quantity <= 0) throw new InvalidQuantityError()
 
     const { signer, userAddress } = await _requireSigner()
