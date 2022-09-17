@@ -66,7 +66,6 @@ importers:
       '@ethersproject/wallet': ^5.7.0
       '@graphql-codegen/cli': ^2.11.7
       '@graphql-codegen/core': ^2.6.2
-      '@graphql-codegen/schema-ast': ^2.5.1
       '@graphql-codegen/typescript': ^2.7.3
       '@graphql-codegen/typescript-document-nodes': ^2.3.3
       '@graphql-codegen/typescript-operations': ^2.5.3
@@ -113,7 +112,6 @@ importers:
       '@ethersproject/wallet': 5.7.0
       '@graphql-codegen/cli': 2.12.0_nr4n4uispnzmdiuintc2k6lkrm
       '@graphql-codegen/core': 2.6.2_graphql@16.6.0
-      '@graphql-codegen/schema-ast': 2.5.1_graphql@16.6.0
       '@graphql-codegen/typescript': 2.7.3_graphql@16.6.0
       '@graphql-codegen/typescript-document-nodes': 2.3.3_graphql@16.6.0
       '@graphql-codegen/typescript-operations': 2.5.3_graphql@16.6.0
