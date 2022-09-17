@@ -549,7 +549,7 @@ export function SoundClient({
     validateAddress(editionAddress)
     const isEdition = await isSoundEdition({ editionAddress })
     if (!isEdition) {
-      throw new NotSoundEditionError()
+      throw new NotSoundEditionError({ contractAddress: editionAddress })
     }
   }
 

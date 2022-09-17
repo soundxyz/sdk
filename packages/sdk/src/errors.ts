@@ -54,8 +54,11 @@ export class UnsupportedMinterError extends Error {
 export class NotSoundEditionError extends Error {
   readonly name = 'NotSoundEditionError'
 
-  constructor(message?: string) {
-    super(message || 'Address must be a sound edition contract')
+  readonly contractAddress: string
+  constructor({ contractAddress }: { contractAddress: string }) {
+    super('Address must be a sound edition contract')
+
+    this.contractAddress = contractAddress
   }
 }
 
