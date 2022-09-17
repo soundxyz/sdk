@@ -50,7 +50,6 @@
     "@ethersproject/wallet": "^5.7.0",
     "@graphql-codegen/cli": "^2.11.7",
     "@graphql-codegen/core": "^2.6.2",
-    "@graphql-codegen/schema-ast": "^2.5.1",
     "@graphql-codegen/typescript": "^2.7.3",
     "@graphql-codegen/typescript-document-nodes": "^2.3.3",
     "@graphql-codegen/typescript-operations": "^2.5.3",

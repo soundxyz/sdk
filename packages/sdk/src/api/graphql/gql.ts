@@ -10,49 +10,22 @@ export type Scalars = {
   Boolean: boolean
   Int: number
   Float: number
+  /** Ethereum address */
   Address: string
-  CountryCode: string
+  /** A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar. */
   DateTime: string
-  EmailAddress: string
-  JSON: unknown
-  NonEmptyString: string
+  /** Integers that will have a value of 0 or more. */
   NonNegativeInt: number
+  /** Integers that will have a value greater than 0. */
   PositiveInt: number
+  /** The javascript `Date` as integer. Type represents date and time as number of milliseconds from start of UNIX epoch. */
   Timestamp: number
-  URL: string
+  /** UUID v4 */
   UUID: string
+  /** Represents NULL values */
   Void: null
 }
 
-/** AWS Presigned upload */
-export type AWSPresignedPost = {
-  /** JSON Fields associated with upload */
-  fields: Scalars['JSON']
-  /** Upload key of authenticated user */
-  uploadKey: Scalars['String']
-  /** Target URL for upload process */
-  url: Scalars['String']
-}
-
-/** Allocation input for credit split creation */
-export type Allocation = {
-  /** Owner address of allocation */
-  ownerAddress: Scalars['Address']
-  /** Percent of allocation */
-  percent: Scalars['Float']
-  /** Roles associated with credit allocation */
-  roles: Array<Scalars['String']>
-}
-
-/** Possible options of role update input */
-export const AlterRole = {
-  /** Administrator of platform */
-  ADMIN: 'ADMIN',
-  /** Member of artist relations team */
-  ARTIST_RELATIONS: 'ARTIST_RELATIONS',
-} as const
-
-export type AlterRole = typeof AlterRole[keyof typeof AlterRole]
 /** Artist Entity */
 export type Artist = Node & {
   /** Artist contract address (public address) */
@@ -111,16 +84,6 @@ export type ArtistnumMintedReleasesArgs = {
   filter?: ArtistMintedReleasesFilter
 }
 
-/** Data for Artist minting auction process */
-export type ArtistAuctionOverrides = {
-  /** Artist user wallet public address associated to auction options */
-  artistAddress: Scalars['String']
-  /** Date of creation of options */
-  createdAt: Scalars['DateTime']
-  /** Identifier of options entity */
-  id: Scalars['ID']
-}
-
 /** ArtistCollector */
 export type ArtistCollector = Node & {
   /** Amount of artist nfts owned */
@@ -147,20 +110,6 @@ export type ArtistCollectorConnectionEdge = Edge & {
   cursor: Scalars['String']
   /** ArtistCollector node */
   node: ArtistCollector
-}
-
-/** Cursor connection paramaters */
-export type ArtistCollectorCursorConnectionArgs = {
-  /** Start forwards pagination since "after" cursor */
-  after?: InputMaybe<Scalars['String']>
-  /** Start backwards pagination since "before" cursor */
-  before?: InputMaybe<Scalars['String']>
-  /** Limit the amount of nodes to be fetched, to be used with "after", with a maximum of 50 nodes. */
-  first?: InputMaybe<Scalars['NonNegativeInt']>
-  /** Limit the amount of nodes to be fetched, to be used with "before", with a maximum of 50 nodes. */
-  last?: InputMaybe<Scalars['NonNegativeInt']>
-  /** Sort the artist collectors ascending or descending relative to the user creation date */
-  sort?: SortOrder
 }
 
 /** Artist Collectors wrapper entity */
@@ -195,50 +144,12 @@ export type ArtistConnectionEdge = Edge & {
   node: Artist
 }
 
-/** Cursor connection paramaters */
-export type ArtistCursorConnectionArgs = {
-  /** Start forwards pagination since "after" cursor */
-  after?: InputMaybe<Scalars['String']>
-  /** Start backwards pagination since "before" cursor */
-  before?: InputMaybe<Scalars['String']>
-  /** Limit the amount of nodes to be fetched, to be used with "after", with a maximum of 50 nodes. */
-  first?: InputMaybe<Scalars['NonNegativeInt']>
-  /** Limit the amount of nodes to be fetched, to be used with "before", with a maximum of 50 nodes. */
-  last?: InputMaybe<Scalars['NonNegativeInt']>
-}
-
 /** Filter for paginated artists */
 export type ArtistCursorFilterArgs = {
   /** Specify whether artist already has at least one minted release */
   hasMintedRelease?: InputMaybe<Scalars['Boolean']>
   /** Specify season to be filtered */
   season?: InputMaybe<ArtistSeason>
-}
-
-/** Default reference artist minting release options for administration */
-export type ArtistDefaultOptions = {
-  /** Auction options union based on type */
-  auction: Array<Auction>
-}
-
-/** Artist invite entity to manage artist invitations */
-export type ArtistInvite = {
-  /** Date of invite creation */
-  createdAt: Scalars['DateTime']
-  /** Artist identifier */
-  id: Scalars['ID']
-  /** User that receives invitation */
-  invitee: User
-  /** User that sent invitation */
-  inviter: Artist
-  /** Status of invitation */
-  status: Scalars['String']
-}
-
-/** Artist meta configuration input */
-export type ArtistMetaInput = {
-  /** Gem Collection URL */
-  gemCollectionUrl?: InputMaybe<Scalars['URL']>
 }
 
 /** Filter artist minted releases based on whether artist uploaded release or artist is credited on a split */
@@ -259,16 +170,6 @@ export type ArtistMintedReleasesFilter = {
   sounds?: Scalars['Boolean']
 }
 
-/** Artist minting release options */
-export type ArtistReleaseOptions = {
-  /** Auction options union based on type */
-  auction: Array<Auction>
-  /** Artist has no time restriction for minting */
-  hasNoTimeRestriction: Scalars['Boolean']
-  /** Does the artist have access to splits functionality */
-  hasSplitsAccess: Scalars['Boolean']
-}
-
 /** Types of seasons for artists */
 export const ArtistSeason = {
   GENESIS: 'GENESIS',
@@ -278,128 +179,6 @@ export const ArtistSeason = {
 } as const
 
 export type ArtistSeason = typeof ArtistSeason[keyof typeof ArtistSeason]
-/** Union of auction sale types */
-export type Auction = PermissionedAuction | PermissionlessAuction | RangeBoundAuction
-
-/** Release info upload step info */
-export type AuctionConfigurationUploadStepInfo = {
-  /** Type of auction */
-  auctionType: AuctionType
-  /** Free mint auction configurations */
-  freeMint?: Maybe<AuctionUploadStepInfo>
-  /** Max mint supply of auction */
-  maxMintable: Scalars['Int']
-  /** Min mint supply of auction */
-  minQuantity: Scalars['Int']
-  /** Presale mint auction configurations */
-  presaleMint?: Maybe<AuctionUploadStepInfo>
-  /** Public mint auction configurations */
-  publicMint: AuctionUploadStepInfo
-  /** Breakdown of mint quantities */
-  quantityBreakdown?: Maybe<Array<Scalars['Int']>>
-}
-
-/** Release auction configuration upload step input values */
-export type AuctionConfigurationUploadStepInput = {
-  /** Type of auction */
-  auctionType: AuctionType
-  /** Free mint auction configurations */
-  freeMint?: InputMaybe<AuctionUploadStepInput>
-  /** Max mint supply of auction */
-  maxMintable: Scalars['Int']
-  /** Min mint supply of auction */
-  minQuantity: Scalars['Int']
-  /** Presale mint auction configurations */
-  presaleMint?: InputMaybe<AuctionUploadStepInput>
-  /** Public mint auction configurations */
-  publicMint: AuctionUploadStepInput
-  /** Breakdown of mint quantities */
-  quantityBreakdown?: InputMaybe<Array<Scalars['Int']>>
-}
-
-/** Customize auction options based on type of sale */
-export type AuctionInputRef = {
-  /** Permissioned sales */
-  permissioned?: InputMaybe<PermissionedAuctionInput>
-  /** Permissionless sales */
-  permissionless?: InputMaybe<PermissionlessAuctionInput>
-  /** Range bound sales */
-  rangeBound?: InputMaybe<RangeBoundAuctionInput>
-}
-
-/** Special meta options relation to auction */
-export type AuctionMetaInput = {
-  /** Allow split functionality */
-  hasSplitsAccess: Scalars['Boolean']
-}
-
-/** Types of release sales */
-export const AuctionType = {
-  PERMISSIONED: 'PERMISSIONED',
-  PERMISSIONLESS: 'PERMISSIONLESS',
-  RANGE_BOUND: 'RANGE_BOUND',
-} as const
-
-export type AuctionType = typeof AuctionType[keyof typeof AuctionType]
-/** Release info upload step info */
-export type AuctionUploadStepInfo = {
-  /** List of public addresses to allow for auction */
-  allowList?: Maybe<Array<Scalars['String']>>
-  /** Max mints per wallet for auction */
-  maxMintsPerWallet?: Maybe<Scalars['Int']>
-  /** MerkleRoot derived from allowList */
-  merkleRoot?: Maybe<Scalars['String']>
-  /** Price per mint */
-  price: Scalars['Float']
-  /** Max supply for auction */
-  quantity: Scalars['Int']
-  /** Start time of auction */
-  startTime: Scalars['Int']
-}
-
-/** Release auction upload step input values */
-export type AuctionUploadStepInput = {
-  /** List of public addresses to allow for auction */
-  allowList?: InputMaybe<Array<Scalars['Address']>>
-  /** Max mints per wallet for auction */
-  maxMintsPerWallet?: InputMaybe<Scalars['Int']>
-  /** Price per mint */
-  price: Scalars['Float']
-  /** Max supply for auction */
-  quantity: Scalars['Int']
-  /** Auction start time */
-  startTime: Scalars['Int']
-}
-
-/** Returned when the user attempts to access a resource they are not authorized for */
-export type AuthorizationError = IError & {
-  message: Scalars['String']
-}
-
-/** Input for selectSongSlotUsingChainData mutation */
-export type ChainDataSongSlotSelection = {
-  /** Amount paid in Wei */
-  amountPaidInWei: Scalars['String']
-  /** Block number of NFT */
-  blockNumber: Scalars['Int']
-  /** Contract address of release */
-  contractAddress: Scalars['Address']
-  /** Chosen song slot */
-  songSlot: Scalars['Int']
-  /** Chain token identifier */
-  tokenId: Scalars['String']
-}
-
-/** Input of "changeRoleForUser" mutation */
-export type ChangeRoleInput = {
-  /** Wallet public address of user */
-  publicAddress: Scalars['Address']
-  /** Role to be set for specified user */
-  role: AlterRole
-  /** Set if specified role is going to be enabled or disabled */
-  value: Scalars['Boolean']
-}
-
 /** Chat Channel entity */
 export type ChatChannel = {
   /** Association identifier paired with "type" */
@@ -430,25 +209,6 @@ export type ChatChannelMember = {
   user: User
 }
 
-/** Member type in chat channels */
-export const ChatChannelMemberType = {
-  ADMIN: 'ADMIN',
-  ARTIST: 'ARTIST',
-  PARTICIPANT: 'PARTICIPANT',
-  RELEASE_HOLDER: 'RELEASE_HOLDER',
-} as const
-
-export type ChatChannelMemberType = typeof ChatChannelMemberType[keyof typeof ChatChannelMemberType]
-/** Types of chat channel permissions */
-export const ChatChannelPermissionType = {
-  ADMIN: 'ADMIN',
-  ALL: 'ALL',
-  ARTIST: 'ARTIST',
-  AUTH_USER: 'AUTH_USER',
-  SOUND_HOLDERS: 'SOUND_HOLDERS',
-} as const
-
-export type ChatChannelPermissionType = typeof ChatChannelPermissionType[keyof typeof ChatChannelPermissionType]
 /** Chat Channel Type */
 export const ChatChannelType = {
   ARTIST: 'ARTIST',
@@ -625,62 +385,6 @@ export const ContractType = {
 } as const
 
 export type ContractType = typeof ContractType[keyof typeof ContractType]
-/** Input for createChatChannel mutation */
-export type CreateChatChannelInput = {
-  /** Optional associationId to be paired with "type" */
-  associationId?: InputMaybe<Scalars['UUID']>
-  /** Name for new chat channel */
-  name: Scalars['String']
-  /** Type of new chat channel */
-  type: ChatChannelType
-}
-
-/** Input for createKeyClient mutation */
-export type CreateKeyClient = {
-  /** Human-readable name of Key Client to be created */
-  name: Scalars['NonEmptyString']
-  /** Set the initial status of the specified Key Client */
-  status?: KeyClientStatus
-}
-
-/** Input for createPresale mutation */
-export type CreatePresaleInput = {
-  /** How many minutes before the public sale */
-  minutesBefore: Scalars['Int']
-  /** Customize how many seconds of buffer are given to whitelist transactions expirations */
-  pendingTxSecondsBuffer?: InputMaybe<Scalars['Int']>
-  /** How many NFTs to be sold for presale */
-  presaleAmount: Scalars['Int']
-  /** Presale Configuration identifier */
-  presaleConfigurationId: Scalars['UUID']
-  /** Media associated with new Presale */
-  presaleMedia?: InputMaybe<Array<PresaleMediaInput>>
-  /** Whitelist rules for new presale */
-  whitelistRule: Array<WhitelistRuleInput>
-}
-
-/** Input for createRelease mutation */
-export type CreateReleaseInput = {
-  /** Behind the music text */
-  behindTheMusic: Scalars['String']
-  /** Cover image */
-  coverImage: UploadedMedia
-  /** Release description */
-  description?: InputMaybe<Scalars['String']>
-  /** Release genre */
-  genre: Scalars['String']
-  /** Special golden egg image */
-  goldenEggImage?: InputMaybe<UploadedMedia>
-  /** Custom rewards */
-  rewards?: InputMaybe<Array<RewardInput>>
-  /** Title of release */
-  title: Scalars['String']
-  /** Uploaded tracks */
-  tracks: Array<TrackUpload>
-  /** Release type */
-  type: ReleaseType
-}
-
 /** Credit allocation entity */
 export type CreditAllocation = {
   /** Credit split associated with credit allocation */
@@ -695,26 +399,6 @@ export type CreditAllocation = {
   roles: Array<Scalars['String']>
 }
 
-/** Credit allocation upload step info */
-export type CreditAllocationUploadStepInfo = {
-  /** Owner public address of allocation */
-  ownerAddress: Scalars['String']
-  /** Percent of allocation */
-  percent: Scalars['Float']
-  /** Roles associated with credit allocation */
-  roles: Array<CreditRoleType>
-}
-
-/** Credit role type */
-export const CreditRoleType = {
-  ARTIST: 'ARTIST',
-  CURATOR: 'CURATOR',
-  OTHER: 'OTHER',
-  PRODUCER: 'PRODUCER',
-  SONGWRITER: 'SONGWRITER',
-} as const
-
-export type CreditRoleType = typeof CreditRoleType[keyof typeof CreditRoleType]
 /** Credit split entity */
 export type CreditSplit = {
   /** The amount of credit to be withdrawn from the split for the authenticated user. */
@@ -754,18 +438,6 @@ export type CursorConnectionArgs = {
   sort?: SortOrder
 }
 
-/** Input fields to delete shelf */
-export type DeleteShelfInput = {
-  /** Shelf id to delete */
-  shelfId: Scalars['UUID']
-}
-
-/** Input for setQueueDisabledArtists mutation */
-export type DisabledQueueArtistInput = {
-  /** List of artists to disable queue functionality */
-  artists: Array<Scalars['String']>
-}
-
 /** Input for discoverChatChannel query */
 export type DiscoverChatChannelInput = {
   associationId?: InputMaybe<Scalars['UUID']>
@@ -790,12 +462,6 @@ export type EggGame = {
   nft: Nft
   /** Serial number of nft with egg game */
   winningSerialNum: Scalars['Int']
-}
-
-/** Base Error */
-export type Error = {
-  /** Descriptive message of error */
-  message: Scalars['String']
 }
 
 /** Event type */
@@ -839,61 +505,6 @@ export type EventV2 = Node & {
   valueExchangedPretty: ValueExchangedPrettyType
 }
 
-/** Feature flag entity to describe flagged functionality */
-export type FeatureFlag = {
-  /** Creation date of feature flag */
-  createdAt: Scalars['DateTime']
-  /** Feature flag UUID */
-  id: Scalars['ID']
-  /** Name of feature flag */
-  name: Scalars['String']
-  /** Last update of feature flag value */
-  updatedAt: Scalars['DateTime']
-  /** Arbitrary string value, it could be need to be parsed stringified json */
-  value: Scalars['String']
-}
-
-/** Type of feature to be set */
-export const FeatureType = {
-  CHAT: 'CHAT',
-  QUEUE: 'QUEUE',
-  RELEASE: 'RELEASE',
-  SPLITS: 'SPLITS',
-} as const
-
-export type FeatureType = typeof FeatureType[keyof typeof FeatureType]
-/** Filter Key Clients pagination */
-export type FilterKeyClients = {
-  status?: InputMaybe<Array<KeyClientStatus>>
-}
-
-/** Type of rules flags to be set for presale requirements */
-export const FlagType = {
-  /** Whitelist all artist holders */
-  ALL_ARTIST_HOLDERS: 'ALL_ARTIST_HOLDERS',
-  /** Whitelist all sound holders */
-  ALL_SOUND_HOLDERS: 'ALL_SOUND_HOLDERS',
-  /** Any user is eligible for whitelist */
-  UNRESTRICTED_WHITELIST: 'UNRESTRICTED_WHITELIST',
-} as const
-
-export type FlagType = typeof FlagType[keyof typeof FlagType]
-/** Input fields to follow user */
-export type FollowUserInput = {
-  /** User id to follow */
-  user: Scalars['UUID']
-}
-
-/** Result of manually synchronizing transactions */
-export type ForceSyncPendingTransactionsInfo = {
-  /** How many transactions updates failed. Check runtime logs for more information */
-  failed: Scalars['Int']
-  /** How many transactions updates were processed successfully */
-  ok: Scalars['Int']
-  /** Hash of transactions found as pending */
-  transactionHashes: Array<Scalars['String']>
-}
-
 /** Genre entity */
 export type Genre = {
   /** Date of creation */
@@ -904,33 +515,6 @@ export type Genre = {
   name: Scalars['String']
   /** Date of last update of genre */
   updatedAt: Scalars['DateTime']
-}
-
-/** User+Release specific queue status entity */
-export type GetQueueStatus = {
-  /** User UUID */
-  id: Scalars['ID']
-  /** Is user eligible to join the release queue */
-  isEligible?: Maybe<Scalars['Boolean']>
-  /** Is user currently in waiting queue */
-  isInQueue: Scalars['Boolean']
-  /** Is current queue sale schedule sold out */
-  isSoldOut?: Maybe<Scalars['Boolean']>
-  /** Presale configuration associated with queue status */
-  presaleConfig?: Maybe<PresaleConfiguration>
-  /** Whitelist information if queue has been transfered to whitelist */
-  whitelistInfo?: Maybe<WhitelistObj>
-}
-
-/** The base error type that every other error object extends from */
-export type IError = {
-  message: Scalars['String']
-}
-
-/** Input field to check if auth user is following */
-export type IsFollowingInput = {
-  /** User id to check if auth user is following */
-  user: Scalars['UUID']
 }
 
 /** Client key management entity */
@@ -949,34 +533,12 @@ export type KeyClient = Node & {
   updatedAt: Scalars['DateTime']
 }
 
-/** Paginated connection of Key Clients */
-export type KeyClientConnection = Connection & {
-  /** Edges of current page */
-  edges: Array<KeyClientConnectionEdge>
-  /** Pagination helpers information */
-  pageInfo: PageInfo
-}
-
 /** Edge of Key Client Connection */
 export type KeyClientConnectionEdge = Edge & {
   /** Cursor to be used for pagination */
   cursor: Scalars['String']
   /** Key Client node */
   node: KeyClient
-}
-
-/** Cursor connection paramaters */
-export type KeyClientCursorConnectionArgs = {
-  /** Start forwards pagination since "after" cursor */
-  after?: InputMaybe<Scalars['String']>
-  /** Start backwards pagination since "before" cursor */
-  before?: InputMaybe<Scalars['String']>
-  /** Limit the amount of nodes to be fetched, to be used with "after", with a maximum of 50 nodes. */
-  first?: InputMaybe<Scalars['NonNegativeInt']>
-  /** Limit the amount of nodes to be fetched, to be used with "before", with a maximum of 50 nodes. */
-  last?: InputMaybe<Scalars['NonNegativeInt']>
-  /** Sort the key clients ascending or descending relative to the entity creation date */
-  sort?: SortOrder
 }
 
 /** Status of Key Client */
@@ -1030,28 +592,6 @@ export type LatestSalesCursorFilterArgs = {
   eventTypes?: InputMaybe<Array<EventType>>
 }
 
-/** Given string doesn't have the minimum expected length */
-export type LengthError = Error & {
-  /** Descriptive message of error */
-  message: Scalars['String']
-  /** Minimum string length required */
-  minLength: Scalars['Int']
-}
-
-/** License for the release */
-export const LicenseType = {
-  ALL_RIGHTS_RESERVED: 'ALL_RIGHTS_RESERVED',
-  CREATIVE_COMMONS: 'CREATIVE_COMMONS',
-} as const
-
-export type LicenseType = typeof LicenseType[keyof typeof LicenseType]
-/** Returned when the input is above the maximum tolerated value */
-export type MaxValueError = IError & {
-  actual: Scalars['Int']
-  max: Scalars['Int']
-  message: Scalars['String']
-}
-
 /** Media entity */
 export type Media = {
   /** AWS S3 Bucket */
@@ -1062,27 +602,6 @@ export type Media = {
   key: Scalars['String']
   /** CDN Url */
   url: Scalars['String']
-}
-
-/** Type of media entity, either Images or Audio */
-export const MediaType = {
-  ARTIST_BANNER_IMAGE: 'ARTIST_BANNER_IMAGE',
-  AUDIO: 'AUDIO',
-  AUDIO_TRANSCODED: 'AUDIO_TRANSCODED',
-  AVATAR_IMAGE: 'AVATAR_IMAGE',
-  RELEASE_BANNER_IMAGE: 'RELEASE_BANNER_IMAGE',
-  RELEASE_COVER_IMAGE: 'RELEASE_COVER_IMAGE',
-  RELEASE_GOLDEN_EGG_IMAGE: 'RELEASE_GOLDEN_EGG_IMAGE',
-  USER_BANNER_IMAGE: 'USER_BANNER_IMAGE',
-} as const
-
-export type MediaType = typeof MediaType[keyof typeof MediaType]
-/** Release info upload step info */
-export type MediaUploadStepInfo = {
-  /** Media type to be uploaded */
-  mediaType: MediaType
-  /** Upload key received from Query.signedUploadParams */
-  uploadKey: Scalars['String']
 }
 
 /** Merkle tree entity */
@@ -1105,41 +624,6 @@ export type MerkleTreeProof = {
   proof: Array<Scalars['String']>
   /** Unhashed leaf in merkle tree */
   unhashedLeaf: Scalars['String']
-}
-
-/** Release info upload step info */
-export type MetadataUploadStepInfo = {
-  /** Release beats per minute */
-  beatsPerMinute?: Maybe<Scalars['Int']>
-  /** Release key */
-  key?: Maybe<SongKeyType>
-  /** License for the release */
-  license?: Maybe<LicenseType>
-  /** Location where the release was created */
-  location?: Maybe<Scalars['CountryCode']>
-  /** Release lyrics */
-  lyrics?: Maybe<Scalars['String']>
-}
-
-/** Release metadata upload step input values */
-export type MetadataUploadStepInput = {
-  /** Release beats per minute */
-  beatsPerMinute?: InputMaybe<Scalars['Int']>
-  /** Release key */
-  key?: InputMaybe<SongKeyType>
-  /** License for the release */
-  license?: InputMaybe<LicenseType>
-  /** Location where the release was created */
-  location?: InputMaybe<Scalars['CountryCode']>
-  /** Release lyrics */
-  lyrics?: InputMaybe<Scalars['String']>
-}
-
-/** Returned when the input is below the minimum tolerated value */
-export type MinValueError = IError & {
-  actual: Scalars['Int']
-  message: Scalars['String']
-  min: Scalars['Int']
 }
 
 /** Mint current time status */
@@ -1187,312 +671,14 @@ export type MintedReleasesCursorFilterArgs = {
 
 /** Mutations */
 export type Mutation = {
-  /** [ADMIN] Accept or reject artist invitation */
-  acceptOrRejectArtist: ArtistInvite
-  /** [ADMIN] Add sale schedule to specified Presale Configuration */
-  addSaleSchedule: SaleSchedule
-  /** [ADMIN] Add a public address as shadow banned */
-  addShadowBanAddress: Array<ShadowBannedAddress>
-  /** [ADMIN] Add Signing Key to specified artist contract */
-  addSigningKey?: Maybe<Scalars['Void']>
-  /** [ADMIN | ARTIST_RELATIONS] Configure auction meta options of specific artist */
-  artistAuctionMeta: ArtistAuctionOverrides
-  /** [ADMIN | ARTIST_RELATIONS] Configure specific artist minting options */
-  artistMintingOption: ArtistAuctionOverrides
-  /** [ARTIST] Upload metadata to Arweave */
-  arweaveUpload: Scalars['NonEmptyString']
-  /** [ADMIN] Change the role of a specified user */
-  changeRoleForUser: UserRoles
-  /** [ARTIST] Upsert release mint edition creation from the client-side. An alternative to wait until the transaction is completed and automatically acknowledged on background processes. */
-  clientCreateEditionUpsert: Release
-  /** [ARTIST] Upsert release edition based on transaction */
-  clientCreateNewEditionUpsert: Release
-  /** [AUTHENTICATED] Upsert bought NFT entity from the client-side. An alternative to wait until the transaction is completed and automatically acknowledged on background processes */
-  clientNftUpsert?: Maybe<Nft>
-  /** [AUTHENTICATED] Create artist entity for authenticated user, User has to be allowed to create artist profile beforehand */
-  createArtist: User
-  /** [ADMIN] Create chat channel */
-  createChatChannel: ChatChannel
-  /** [ARTIST] Create credit split for specified release */
-  createCreditSplit: CreditSplit
-  /** [ADMIN] Create Key Client */
-  createKeyClient: KeyClient
-  /** [ADMIN | ARTIST] Create a new presale for specified Presale Configuration */
-  createPresale: SaleSchedule
-  /** [ARTIST] Create release */
-  createRelease: Release
-  /** [ARTIST] Create release for new sound edition contracts */
-  createSoundEditionRelease: Release
-  /** [ADMIN] Delete specified sale schedule */
-  deleteSaleSchedule: Scalars['Void']
-  /** [AUTHENTICATED] Delete shelf for user */
-  deleteShelf?: Maybe<Scalars['Void']>
-  /** [ARTIST] Delete unminted release */
-  deleteUnmintedRelease: Release
-  /** [ADMIN] Update the sales schedules of the specified edition */
-  editionUpdateSchedules: Release
-  /** [ADMIN] Flush all the PENDING whitelist rows to be set as FAILED */
-  flushWhitelistRows?: Maybe<Scalars['Void']>
-  /** [AUTHENTICATED] Follow user of input userId */
-  followUser: UserRelation
-  /** [ADMIN] Manually sync pending transactions */
-  forceSyncPendingTransactions: ForceSyncPendingTransactionsInfo
   /** [PUBLIC] Generate auth challenge for given public address and give back new nonce */
   generateAuthChallenge: Scalars['Int']
-  /** [ADMIN] Invalidate API Metadata of specified artist */
-  invalidateMetadata?: Maybe<Scalars['Void']>
-  /** [ARTIST] Invite another user to be artist on the platform */
-  inviteArtist: ArtistInvite
   /** [PUBLIC] Check if specified queue is open */
   isQueueOpen?: Maybe<Scalars['Boolean']>
-  /** [AUTHENTICATED] Join the queue of specified release. If the release sale hasn't started yet it fails. Please use "isQueueOpen" mutation to prevent issues with timing of mutation */
-  joinQueue: Queue
-  /** [AUTHENTICATED] Leave the queue of specified release */
-  leaveQueue?: Maybe<Queue>
-  /** [AUTHENTICATED] Move shelf index down and swap */
-  moveShelfDown: Array<Shelf>
-  /** [AUTHENTICATED] Move shelf index up and swap */
-  moveShelfUp: Array<Shelf>
-  /** [ARTIST] Prepare release to be minted, pinning media files */
-  prepareMint: Release
-  /** [ARTIST] Prepare release before minting */
-  prepareReleaseForMint?: Maybe<Scalars['Void']>
-  /** [AUTHENTICATED] Manually register transaction of nft buy */
-  registerBuyEditionTx: Transaction
-  /** [ARTIST] Manually register transaction of artist contract creation */
-  registerCreateArtistTx: Transaction
-  /** [ARTIST] Manually register transaction of SoundEdition contract creation & mint schedule registrations on minter contracts. */
-  registerCreateSoundAndMintsTx: Transaction
-  /** [ARTIST] Manually register split transaction */
-  registerCreateSplitTx: Transaction
-  /** [AUTHENTICATED] Register split balance distribution transaction */
-  registerDistributeEthTx: Transaction
-  /** [ARTIST] Manually register transaction of minted release */
-  registerReleaseMintTx: Transaction
-  /** [AUTHENTICATED] Register transaction replacement */
-  registerReplacementTx: Transaction
-  /** [AUTHENTICATED] Manually register transaction to withdraw funds from SoundEdition contract */
-  registerWithdrawEthTx: Transaction
-  /** [AUTHENTICATED] Register withdraw from split transaction */
-  registerWithdrawFromSplitTx: Transaction
-  /** [AUTHENTICATED] Manually register transaction to withdraw funds from Artist contract */
-  registerWithdrawFundsTx: Transaction
-  /** [ADMIN] Remove public address from shadow ban list */
-  removeShadowBanAddress: Array<ShadowBannedAddress>
   /** [PUBLIC] Report a track play session stop */
   reportPlayStopped?: Maybe<Scalars['Void']>
-  /** [AUTHENTICATED] Reset twitter handle of authenticated user */
-  resetTwitter: User
-  /** [ADMIN] Configure season-based meta-auction options */
-  seasonAuctionMeta: SeasonAuctionDefaults
-  /** [ADMIN] Change season-based auction options */
-  seasonMintingOption: SeasonAuctionDefaults
-  /** [AUTHENTICATED] Select song slot using chain data instead of NFT identifier */
-  selectSongSlotUsingChainData: Nft
-  /** [AUTHENTICATED] Select song slot for owned NFT */
-  selectSongSlotUsingNftId: MutationSelectSongSlotUsingNftIdResult
-  /** [AUTHENTICATED] Send chat message to specified channel if allowed */
-  sendChatMessage: Scalars['ID']
-  /** [ARTIST_RELATIONS | ADMIN] Set artist metadata */
-  setArtistMeta: Artist
-  /** [ADMIN] Manually set the last processed block number, used primarily by sound.xyz watcher */
-  setBlockNumber: Scalars['String']
-  /** [AUTHENTICATED] Set comment for specified Nft */
-  setComment: Nft
-  /** [ARTIST] Set special configurations into artist entity */
-  setContractArgs: Artist
-  /** [AUTHENTICATED] Update authenticated user display name */
-  setDisplayName: User
-  /** [ADMIN] Set the currently enabled users with chat */
-  setEnabledChatUsers: Array<ChatChannelPermissionType>
-  /** [ADMIN] Set specified feature flag as defined */
-  setFeatureFlag: FeatureFlag
-  /** [AUTHENTICATED] Update releases to be returned in featured sounds */
-  setFeaturedSounds: User
-  /** [ADMIN] Set the invite limit for specified artist */
-  setInviteLimit: User
-  /** [ADMIN] Set if Queue Captcha is disabled for specified release */
-  setMainQueueCaptchaDisabled: Scalars['Boolean']
-  /** [ADMIN] Set the whitelisted artists to have no time restrictions for minting */
-  setNoTimeRestrictionArtistList: Array<Scalars['String']>
-  /** [ADMIN] Set the number of top collectors of specified artist */
-  setNumTopCollectors?: Maybe<Scalars['Void']>
-  /** [ARTIST | ADMIN] Set the release presale configuration (Doesn't include presales, for presales "createPresale" mutation) */
-  setPresaleConfiguration: PresaleConfiguration
-  /** [ADMIN] Set the currently-disabled list of artist without queue */
-  setQueueDisabledArtists: QueueDisabledArtists
-  /** [ADMIN] Set if the release can be minted more than once */
-  setReleaseCanBeMintedMoreThanOnce: Scalars['Boolean']
-  /** [ADMIN | ARTIST_RELATIONS] Set details of release */
-  setReleaseDetails: Release
-  /** [ADMIN | ARTIST_RELATIONS] Set special metadata of release */
-  setReleaseMeta: Release
-  /** [AUTHENTICATED] Set input list of releaseIds to input shelfId */
-  setReleasesForShelf: Shelf
-  /** [ADMIN] Set season for specified artist */
-  setSeasonForArtist: Artist
-  /** [ADMIN | ARTIST_RELATIONS] Set artist role to specified public address */
-  setUserArtistRole: User
-  /** [AUTHENTICATED] Unfollow user of input userId */
-  unfollowUser: UserRelation
-  /** [ARTIST | ARTIST_RELATIONS | ADMIN] Update specified/authenticated artist OpenSea collection URL */
-  updateArtistOpenseaHandle: User
-  /** [ARTIST] Update authenticated artist Spotify URL */
-  updateArtistSpotifyUrl: Artist
-  /** [AUTHENTICATED] Update authenticated user description */
-  updateDescription: User
-  /** [AUTHENTICATED] Update authenticated user email */
-  updateEmail: User
-  /** [ADMIN] Update existing Key Client */
-  updateKeyClient: KeyClient
-  /** [ARTIST] Update release */
-  updateRelease: Release
-  /** [ADMIN] Update the specified sale schedule */
-  updateSalesSchedule: SaleSchedule
-  /** [AUTHENTICATED] Update authenticated user Instagram handle */
-  updateUserInstagramHandle: User
-  /** [AUTHENTICATED] Upload media content for authenticated user's profile */
-  uploadUserMedia: User
-  /** [ARTIST] Upsert artist banner image */
-  upsertArtistBannerImage: Artist
-  /** [AUTHENTICATED] Upsert shelf for user. If id is passed in as input, mutation will update shelf. Otherwise, mutation will create new shelf */
-  upsertShelf: Shelf
-  /** [ARTIST] Update or create upload step of release */
-  upsertUploadStep: UploadStep
   /** [PUBLIC] Verify given auth challenge */
   verifyAuthChallenge: Scalars['String']
-  /** [AUTHENTICATED] Verify twitter handle */
-  verifyTwitter: User
-}
-
-/** Mutations */
-export type MutationacceptOrRejectArtistArgs = {
-  inviteId: Scalars['UUID']
-  isAccepted: Scalars['Boolean']
-}
-
-/** Mutations */
-export type MutationaddSaleScheduleArgs = {
-  presaleConfigurationId: Scalars['UUID']
-  saleSchedule: SaleScheduleInput
-}
-
-/** Mutations */
-export type MutationaddShadowBanAddressArgs = {
-  publicAddress: Scalars['Address']
-  reason?: InputMaybe<Scalars['String']>
-}
-
-/** Mutations */
-export type MutationaddSigningKeyArgs = {
-  artistContractAddress?: InputMaybe<Scalars['Address']>
-  privateKey: Scalars['String']
-}
-
-/** Mutations */
-export type MutationartistAuctionMetaArgs = {
-  artistAddress: Scalars['Address']
-  metaType?: InputMaybe<AuctionMetaInput>
-}
-
-/** Mutations */
-export type MutationartistMintingOptionArgs = {
-  artistAddress: Scalars['Address']
-  auctionType: AuctionInputRef
-}
-
-/** Mutations */
-export type MutationarweaveUploadArgs = {
-  releaseId: Scalars['UUID']
-}
-
-/** Mutations */
-export type MutationchangeRoleForUserArgs = {
-  input: ChangeRoleInput
-}
-
-/** Mutations */
-export type MutationclientCreateEditionUpsertArgs = {
-  txHash: Scalars['String']
-}
-
-/** Mutations */
-export type MutationclientCreateNewEditionUpsertArgs = {
-  hash: Scalars['String']
-}
-
-/** Mutations */
-export type MutationclientNftUpsertArgs = {
-  txHash: Scalars['String']
-}
-
-/** Mutations */
-export type MutationcreateArtistArgs = {
-  soundHandle: Scalars['String']
-}
-
-/** Mutations */
-export type MutationcreateChatChannelArgs = {
-  input: CreateChatChannelInput
-}
-
-/** Mutations */
-export type MutationcreateCreditSplitArgs = {
-  creditAllocations: Array<Allocation>
-  creditSplitId?: InputMaybe<Scalars['UUID']>
-  releaseId: Scalars['UUID']
-}
-
-/** Mutations */
-export type MutationcreateKeyClientArgs = {
-  input: CreateKeyClient
-}
-
-/** Mutations */
-export type MutationcreatePresaleArgs = {
-  input: CreatePresaleInput
-}
-
-/** Mutations */
-export type MutationcreateReleaseArgs = {
-  input: CreateReleaseInput
-}
-
-/** Mutations */
-export type MutationcreateSoundEditionReleaseArgs = {
-  input: CreateReleaseInput
-}
-
-/** Mutations */
-export type MutationdeleteSaleScheduleArgs = {
-  saleScheduleId: Scalars['UUID']
-}
-
-/** Mutations */
-export type MutationdeleteShelfArgs = {
-  input: DeleteShelfInput
-}
-
-/** Mutations */
-export type MutationdeleteUnmintedReleaseArgs = {
-  id: Scalars['UUID']
-}
-
-/** Mutations */
-export type MutationeditionUpdateSchedulesArgs = {
-  editionAddress?: InputMaybe<Scalars['String']>
-  releaseId?: InputMaybe<Scalars['String']>
-}
-
-/** Mutations */
-export type MutationflushWhitelistRowsArgs = {
-  cutOff?: InputMaybe<Scalars['Int']>
-  presaleConfigurationId: Scalars['UUID']
-}
-
-/** Mutations */
-export type MutationfollowUserArgs = {
-  input: FollowUserInput
 }
 
 /** Mutations */
@@ -1501,112 +687,8 @@ export type MutationgenerateAuthChallengeArgs = {
 }
 
 /** Mutations */
-export type MutationinvalidateMetadataArgs = {
-  artistSoundHandle?: Scalars['String']
-}
-
-/** Mutations */
-export type MutationinviteArtistArgs = {
-  twitterHandle: Scalars['String']
-}
-
-/** Mutations */
 export type MutationisQueueOpenArgs = {
   presaleId: Scalars['UUID']
-}
-
-/** Mutations */
-export type MutationjoinQueueArgs = {
-  captchaCode?: InputMaybe<Scalars['String']>
-  releaseId: Scalars['UUID']
-}
-
-/** Mutations */
-export type MutationleaveQueueArgs = {
-  releaseId: Scalars['UUID']
-}
-
-/** Mutations */
-export type MutationmoveShelfDownArgs = {
-  input: SetShelfOrderInput
-}
-
-/** Mutations */
-export type MutationmoveShelfUpArgs = {
-  input: SetShelfOrderInput
-}
-
-/** Mutations */
-export type MutationprepareMintArgs = {
-  input: PrepareMintInput
-}
-
-/** Mutations */
-export type MutationprepareReleaseForMintArgs = {
-  id: Scalars['UUID']
-}
-
-/** Mutations */
-export type MutationregisterBuyEditionTxArgs = {
-  hash: Scalars['String']
-  releaseId: Scalars['UUID']
-}
-
-/** Mutations */
-export type MutationregisterCreateArtistTxArgs = {
-  hash: Scalars['String']
-}
-
-/** Mutations */
-export type MutationregisterCreateSoundAndMintsTxArgs = {
-  hash: Scalars['String']
-  releaseId: Scalars['UUID']
-}
-
-/** Mutations */
-export type MutationregisterCreateSplitTxArgs = {
-  creditSplitId: Scalars['UUID']
-  hash: Scalars['String']
-}
-
-/** Mutations */
-export type MutationregisterDistributeEthTxArgs = {
-  creditSplitId: Scalars['UUID']
-  hash: Scalars['String']
-}
-
-/** Mutations */
-export type MutationregisterReleaseMintTxArgs = {
-  hash: Scalars['String']
-  releaseId: Scalars['UUID']
-}
-
-/** Mutations */
-export type MutationregisterReplacementTxArgs = {
-  originalHash: Scalars['String']
-  replacementHash: Scalars['String']
-}
-
-/** Mutations */
-export type MutationregisterWithdrawEthTxArgs = {
-  hash: Scalars['String']
-  releaseId: Scalars['UUID']
-}
-
-/** Mutations */
-export type MutationregisterWithdrawFromSplitTxArgs = {
-  hash: Scalars['String']
-}
-
-/** Mutations */
-export type MutationregisterWithdrawFundsTxArgs = {
-  hash: Scalars['String']
-  releaseId: Scalars['UUID']
-}
-
-/** Mutations */
-export type MutationremoveShadowBanAddressArgs = {
-  publicAddress: Scalars['Address']
 }
 
 /** Mutations */
@@ -1615,235 +697,9 @@ export type MutationreportPlayStoppedArgs = {
 }
 
 /** Mutations */
-export type MutationseasonAuctionMetaArgs = {
-  metaType?: InputMaybe<AuctionMetaInput>
-  seasonName: Scalars['String']
-}
-
-/** Mutations */
-export type MutationseasonMintingOptionArgs = {
-  auctionType: AuctionInputRef
-  seasonName: Scalars['String']
-}
-
-/** Mutations */
-export type MutationselectSongSlotUsingChainDataArgs = {
-  input: ChainDataSongSlotSelection
-}
-
-/** Mutations */
-export type MutationselectSongSlotUsingNftIdArgs = {
-  nftId: Scalars['UUID']
-  songSlot: Scalars['Int']
-}
-
-/** Mutations */
-export type MutationsendChatMessageArgs = {
-  input: SendChatMessageInput
-}
-
-/** Mutations */
-export type MutationsetArtistMetaArgs = {
-  input: SetArtistMetaInput
-}
-
-/** Mutations */
-export type MutationsetBlockNumberArgs = {
-  blockNumber: Scalars['String']
-}
-
-/** Mutations */
-export type MutationsetCommentArgs = {
-  message: Scalars['String']
-  nftId: Scalars['UUID']
-  signature: Scalars['String']
-}
-
-/** Mutations */
-export type MutationsetContractArgsArgs = {
-  name: Scalars['String']
-  tokenSymbol: Scalars['String']
-}
-
-/** Mutations */
-export type MutationsetDisplayNameArgs = {
-  displayName: Scalars['String']
-}
-
-/** Mutations */
-export type MutationsetEnabledChatUsersArgs = {
-  channelPermissions: Array<ChatChannelPermissionType>
-}
-
-/** Mutations */
-export type MutationsetFeatureFlagArgs = {
-  name: Scalars['String']
-  type: FeatureType
-  value: Scalars['String']
-}
-
-/** Mutations */
-export type MutationsetFeaturedSoundsArgs = {
-  releaseIds: Array<Scalars['UUID']>
-}
-
-/** Mutations */
-export type MutationsetInviteLimitArgs = {
-  artistAddress: Scalars['Address']
-  inviteLimit: Scalars['Int']
-}
-
-/** Mutations */
-export type MutationsetMainQueueCaptchaDisabledArgs = {
-  isDisabled: Scalars['Boolean']
-  releaseId: Scalars['String']
-}
-
-/** Mutations */
-export type MutationsetNoTimeRestrictionArtistListArgs = {
-  newArtists: Array<Scalars['String']>
-  shouldAppend: Scalars['Boolean']
-}
-
-/** Mutations */
-export type MutationsetNumTopCollectorsArgs = {
-  artistId: Scalars['UUID']
-  numTop: Scalars['Int']
-}
-
-/** Mutations */
-export type MutationsetPresaleConfigurationArgs = {
-  data: PresaleConfigurationInput
-}
-
-/** Mutations */
-export type MutationsetQueueDisabledArtistsArgs = {
-  input: DisabledQueueArtistInput
-}
-
-/** Mutations */
-export type MutationsetReleaseCanBeMintedMoreThanOnceArgs = {
-  releaseId: Scalars['UUID']
-  value: Scalars['Boolean']
-}
-
-/** Mutations */
-export type MutationsetReleaseDetailsArgs = {
-  input: SetReleaseDetailsInput
-}
-
-/** Mutations */
-export type MutationsetReleaseMetaArgs = {
-  input: SetReleaseMetaInput
-}
-
-/** Mutations */
-export type MutationsetReleasesForShelfArgs = {
-  input: SetReleasesForShelfInput
-}
-
-/** Mutations */
-export type MutationsetSeasonForArtistArgs = {
-  artistId: Scalars['UUID']
-  season: Scalars['String']
-}
-
-/** Mutations */
-export type MutationsetUserArtistRoleArgs = {
-  hasArtistRole: Scalars['Boolean']
-  publicAddress: Scalars['Address']
-}
-
-/** Mutations */
-export type MutationunfollowUserArgs = {
-  input: UnfollowUserInput
-}
-
-/** Mutations */
-export type MutationupdateArtistOpenseaHandleArgs = {
-  artistAddress?: InputMaybe<Scalars['Address']>
-  openseaCollectionUrl?: InputMaybe<Scalars['URL']>
-}
-
-/** Mutations */
-export type MutationupdateArtistSpotifyUrlArgs = {
-  spotifyUrl?: InputMaybe<Scalars['String']>
-}
-
-/** Mutations */
-export type MutationupdateDescriptionArgs = {
-  description: Scalars['String']
-}
-
-/** Mutations */
-export type MutationupdateEmailArgs = {
-  email?: InputMaybe<Scalars['EmailAddress']>
-}
-
-/** Mutations */
-export type MutationupdateKeyClientArgs = {
-  input: UpdateKeyClient
-}
-
-/** Mutations */
-export type MutationupdateReleaseArgs = {
-  input: UpdateReleaseInput
-}
-
-/** Mutations */
-export type MutationupdateSalesScheduleArgs = {
-  input: UpdateSaleScheduleInput
-}
-
-/** Mutations */
-export type MutationupdateUserInstagramHandleArgs = {
-  instagramHandle?: InputMaybe<Scalars['String']>
-}
-
-/** Mutations */
-export type MutationuploadUserMediaArgs = {
-  content: UploadedMedia
-}
-
-/** Mutations */
-export type MutationupsertArtistBannerImageArgs = {
-  bannerImage: UploadedMedia
-}
-
-/** Mutations */
-export type MutationupsertShelfArgs = {
-  input: UpsertShelfInput
-}
-
-/** Mutations */
-export type MutationupsertUploadStepArgs = {
-  input: UpsertReleaseUploadStepInput
-}
-
-/** Mutations */
 export type MutationverifyAuthChallengeArgs = {
   publicAddress: Scalars['String']
   signedMessage: Scalars['String']
-}
-
-/** Mutations */
-export type MutationverifyTwitterArgs = {
-  tweetId: Scalars['String']
-  twitterHandle: Scalars['String']
-}
-
-/** Auto-generated result union type for the mutation or query with the same name */
-export type MutationSelectSongSlotUsingNftIdResult =
-  | AuthorizationError
-  | MaxValueError
-  | MinValueError
-  | MutationSelectSongSlotUsingNftIdSuccess
-  | UnexpectedValueError
-  | UniqueConstraintError
-
-/** Auto-generated success type for the mutation or query with the same name */
-export type MutationSelectSongSlotUsingNftIdSuccess = {
-  data: Nft
 }
 
 /** NFT Entity */
@@ -1958,16 +814,6 @@ export type Node = {
   id: Scalars['ID']
 }
 
-/** Input for onChainStartTime query */
-export type OnChainStartTimeInput = {
-  /** Type of auction type to be used as reference */
-  auctionType: AuctionType
-  /** Release listening party start date to be used as reference */
-  listeningPartyStartDate: Scalars['DateTime']
-  /** Release identifier */
-  releaseId: Scalars['UUID']
-}
-
 /** Require only holders of specific contracts */
 export type OnlyTokenHolders = {
   /** Token Contract Address */
@@ -1978,36 +824,10 @@ export type OnlyTokenHolders = {
   tokenThresholdToQualify: Scalars['String']
 }
 
-/** Input to define configuration for OnlyTokenHolders whitelist rule */
-export type OnlyTokenHoldersInput = {
-  /** Token Contract public address */
-  tokenContractAddress?: InputMaybe<Scalars['Address']>
-  /** Token threshold to qualify */
-  tokenThresholdToQualify?: InputMaybe<Scalars['String']>
-}
-
-/** Input to define configuration for OnlyTokenHolders Media */
-export type OnlyTokenHoldersMediaInput = {
-  /** Collection Name */
-  collectionName?: InputMaybe<Scalars['String']>
-  /** URI for Icon Overlay */
-  iconOverlayURI?: InputMaybe<Scalars['String']>
-  /** List of custom Image URIs */
-  imageURIs?: InputMaybe<Array<Scalars['String']>>
-  /** Social Links */
-  socialLinks?: InputMaybe<SocialLinksInput>
-}
-
 /** Require Top Collectors flag */
 export type OnlyTopCollectors = {
   /** How many of the top collectors are allowed */
   topNum: Scalars['Int']
-}
-
-/** Input to define configuration for OnlyTopCollectors whitelist rule */
-export type OnlyTopCollectorsInput = {
-  /** How many of the first top collectors are allowed for the whitelist rule */
-  topNum?: InputMaybe<Scalars['Int']>
 }
 
 /** Pagination helper information */
@@ -2020,56 +840,6 @@ export type PageInfo = {
   hasPreviousPage: Scalars['Boolean']
   /** Cursor shorthand of the first node from current page */
   startCursor?: Maybe<Scalars['String']>
-}
-
-/** Auction options associated with permissioned sales */
-export type PermissionedAuction = {
-  /** List of different max mints per wallet quantity options for free sale */
-  freeSaleMaxMintsPerWalletOptions: Array<Scalars['Int']>
-  /** List of different max mints per wallet quantity options for presale */
-  presaleMaxMintsPerWalletOptions: Array<Scalars['Int']>
-  /** List of different eth prices options for presale */
-  presalePriceOptions?: Maybe<Array<Scalars['Float']>>
-  /** List of different eth prices options for public sale */
-  priceOptions: Array<Scalars['Float']>
-  /** List of different max mints per wallet quantity options for public sale */
-  publicSaleMaxMintsPerWalletOptions: Array<Scalars['Int']>
-  /** List of different quantity options for public sale */
-  quantityOptions: Array<Scalars['Int']>
-  /** Signing address for minting process */
-  signingAddress: Scalars['String']
-}
-
-/** Input options to customize permissioned auctions */
-export type PermissionedAuctionInput = {
-  /** List of different max mints per wallet quantity options for free sale */
-  freeSaleMaxMintsPerWalletOptions: Array<Scalars['Int']>
-  /** List of different max mints per wallet quantity options for presale */
-  presaleMaxMintsPerWalletOptions: Array<Scalars['Int']>
-  /** List of different eth prices options for presales */
-  presalePriceOptions: Array<Scalars['Float']>
-  /** List of different eth prices options for public sale */
-  priceOptions: Array<Scalars['Float']>
-  /** List of different max mints per wallet quantity options for public sale */
-  publicSaleMaxMintsPerWalletOptions: Array<Scalars['Int']>
-  /** List of different quantity options for public sale */
-  quantityOptions: Array<Scalars['Int']>
-}
-
-/** Auction options associated with permissionless sales */
-export type PermissionlessAuction = {
-  /** List of different eth prices options */
-  priceOptions: Array<Scalars['Float']>
-  /** List of different quantity options */
-  quantityOptions: Array<Scalars['Int']>
-}
-
-/** Input options to customize permisionless auctions */
-export type PermissionlessAuctionInput = {
-  /** List of different eth prices options */
-  priceOptions: Array<Scalars['Float']>
-  /** List of different quantity options */
-  quantityOptions: Array<Scalars['Int']>
 }
 
 /** Playlist entity that contains tracks */
@@ -2134,14 +904,6 @@ export const PlaylistType = {
 } as const
 
 export type PlaylistType = typeof PlaylistType[keyof typeof PlaylistType]
-/** Input for updateRelease mutation */
-export type PrepareMintInput = {
-  /** Auction type */
-  auctionType: AuctionType
-  /** Release identifier */
-  releaseId: Scalars['UUID']
-}
-
 /** Main configuration entity of release sale */
 export type PresaleConfiguration = {
   /** Currently activate sale schedule, loosely-based on requested time */
@@ -2156,20 +918,6 @@ export type PresaleConfiguration = {
   saleSchedules: Array<SaleSchedule>
   /** Signing key UUID */
   signingKeyId: Scalars['String']
-}
-
-/** Main input of "setPresaleConfiguration" mutation */
-export type PresaleConfigurationInput = {
-  /** End time of public release sale */
-  endTime: Scalars['DateTime']
-  /** Amount to be set available on public release drop */
-  presaleAmount: Scalars['String']
-  /** Release identifier */
-  releaseId: Scalars['UUID']
-  /** Start time of public release sale */
-  startTime: Scalars['DateTime']
-  /** Custom rules to be set for whitelisting process */
-  whitelistRule?: InputMaybe<Array<WhitelistRuleInput>>
 }
 
 /** Presale Media information */
@@ -2192,23 +940,8 @@ export type PresaleMediaInfo = {
   uniqueHolders?: Maybe<Scalars['Int']>
 }
 
-/** Sale Schedule media configuration */
-export type PresaleMediaInput = {
-  /** Media applied used for onlyTokenHolders whitelist rule */
-  onlyTokenHolders?: InputMaybe<OnlyTokenHoldersMediaInput>
-}
-
-/** Type of presale whitelist algorithm */
-export const PresaleType = {
-  /** First in first out */
-  FIFO: 'FIFO',
-} as const
-
-export type PresaleType = typeof PresaleType[keyof typeof PresaleType]
 /** Queries */
 export type Query = {
-  /** [ADMIN | ARTIST_RELATIONS] Get all artist invites of the platform */
-  allArtistInvites: Array<ArtistInvite>
   /**
    * [PUBLIC] Get all minted releases. Warning, this query is going to be removed soon, use paginated queries instead
    * @deprecated Use paginated queries instead
@@ -2216,31 +949,18 @@ export type Query = {
   allMintedReleases: Array<Release>
   /** [PUBLIC] Get all minted releases */
   allMintedReleasesPaginated: ReleaseConnection
-  /**
-   * [ARTIST] Get all unminted releases of authenticated artist
-   * @deprecated Use `unmintedReleasesPaginated` instead. Will be removed on September 27, 2022
-   */
-  allUnmintedReleases: Array<Release>
   /** [PUBLIC] Artist by UUID */
   artist?: Maybe<Artist>
   /** [PUBLIC] Artist by handle */
   artistByHandle?: Maybe<Artist>
   /** Get the nft collectors of the specified artist */
   artistCollectors: ArtistCollectors
-  /** [ADMIN | ARTIST_RELATIONS] Default reference artist minting release options of specified artist */
-  artistDefaultMintingOptions: ArtistDefaultOptions
-  /** [ARTIST] Get all artist invites sent by authenticated artist */
-  artistInvites: Array<ArtistInvite>
-  /** [ARTIST] Get artist minting options of authenticated artist. Given artist id has to match authenticated artist */
-  artistMintingOptions: ArtistReleaseOptions
   /** [PUBLIC] Get all artists of platform. */
   artists: ArtistConnection
   /** [PUBLIC] Get audio from track */
   audioFromTrack: TrackAudio
   /** [PUBLIC] Get authenticated user information, if any */
   authUser?: Maybe<User>
-  /** [ARTIST] Get specified release regardless of mint status. If specified release is not created by authenticated artist, it fails. */
-  authenticatedRelease: Release
   /** [PUBLIC] Get chat messages of specified chat channel */
   chatMessages: ChatMessagesConnection
   /** [PUBLIC] Get credit split by id */
@@ -2255,12 +975,8 @@ export type Query = {
   eligibleUsersForPresale: Array<User>
   /** [PUBLIC] Get currently-featured releases */
   featuredReleases: Array<Release>
-  /** [AUTHENTICATED] Returns whether auth user is following input userId */
-  isFollowing: Scalars['Boolean']
   /** [PUBLIC] Check if Queue Captcha is disabled for specified release */
   isMainQueueCaptchaDisabled?: Maybe<Scalars['Boolean']>
-  /** [ADMIN] Get all the existing Key Clients */
-  keyClients: KeyClientConnection
   /** [PUBLIC] Get the latest events */
   latestEventsPaginated: LatestSalesConnection
   /** [PUBLIC] Get merkle tree information */
@@ -2278,20 +994,12 @@ export type Query = {
   now: Scalars['Int']
   /** [PUBLIC] Test query to get the date of calculation of resolver based using response cache */
   nowCached: Scalars['Timestamp']
-  /** [ARTIST] Get the amount of top collectors associated with authenticated artist */
-  numTopCollectors?: Maybe<Scalars['Int']>
-  /** [ARTIST] Get onChainStartTime of specified release */
-  onChainStartTime: Scalars['DateTime']
   /** [PUBLIC] Past minted releases */
   pastMintedReleases: ReleaseConnection
   /** [PUBLIC] Get playlist based on given type and associationId */
   playlist?: Maybe<Playlist>
   /** [PUBLIC] Presale Configuration of specified Release */
   presaleConfiguration?: Maybe<PresaleConfiguration>
-  /** [AUTHENTICATED] Get list of artists with queue feature disabled */
-  queueDisabledArtists?: Maybe<QueueDisabledArtists>
-  /** [AUTHENTICATED] Queue status of authenticated user on specified release */
-  queueStatus?: Maybe<GetQueueStatus>
   /** [PUBLIC] Get release by id */
   release?: Maybe<Release>
   /** [PUBLIC] Can the specified release be minted more than once */
@@ -2302,20 +1010,8 @@ export type Query = {
   releaseGenres: Array<Genre>
   /** Search releases or artists based on text inputs */
   search: SearchResult
-  /** [ADMIN | ARTIST_RELATIONS] Get default reference season-based auction options */
-  seasonDefaultMintingOptions: SeasonDefaultOptions
-  /** [ADMIN] Get currently shadow-banned public addresses */
-  shadowBanAddresses: Array<ShadowBannedAddress>
   /** [PUBLIC] Get specified shelf by id */
   shelf: Shelf
-  /** [ARTIST] Get signature to be used for creating artist contract */
-  signature: Scalars['String']
-  /** [AUTHENTICATED] Request media upload */
-  signedUploadParams: AWSPresignedPost
-  /** [ARTIST] Get Signing Address for minting process */
-  signingAddress: SigningAddress
-  /** [ADMIN | ARTIST_RELATIONS] Get basic stats */
-  stats: Stats
   /** [PUBLIC] Top collectors of artist by number of nfts owned */
   topNftsOwnedCollectors?: Maybe<Array<ArtistCollector>>
   /** [PUBLIC] Get total raised of the whole platform */
@@ -2326,25 +1022,14 @@ export type Query = {
   trendingArtistInfo: Array<TrendingArtistInfo>
   /** [PUBLIC] Get trending collectors information */
   trendingCollectors: Array<TrendingCollectorInfo>
-  /** [ARTIST] Get paginated unminted releases of authenticated artist */
-  unmintedReleasesPaginated: ReleaseConnection
   /** [PUBLIC] Upcoming minted releases */
   upcomingMintedReleases: ReleaseConnection
-  /** [ARTIST] Get upload steps of specified release */
-  uploadSteps: Array<UploadStep>
   /** [PUBLIC] Get specified user by id */
   user?: Maybe<User>
   /** [PUBLIC] Get specified user by public address */
   userByAddress?: Maybe<User>
   /** [PUBLIC] Get specified user by sound handle */
   userByArtistHandle?: Maybe<User>
-  /** [AUTHENTICATED] Check status of relationship of authenticated user with specified users */
-  userRelationStatuses: Array<UserRelationStatus>
-}
-
-/** Queries */
-export type QueryallArtistInvitesArgs = {
-  pendingOnly?: InputMaybe<Scalars['Boolean']>
 }
 
 /** Queries */
@@ -2369,16 +1054,6 @@ export type QueryartistCollectorsArgs = {
 }
 
 /** Queries */
-export type QueryartistDefaultMintingOptionsArgs = {
-  artistAddress: Scalars['Address']
-}
-
-/** Queries */
-export type QueryartistMintingOptionsArgs = {
-  artistId: Scalars['UUID']
-}
-
-/** Queries */
 export type QueryartistsArgs = {
   filter?: InputMaybe<ArtistCursorFilterArgs>
   pagination?: CursorConnectionArgs
@@ -2387,11 +1062,6 @@ export type QueryartistsArgs = {
 /** Queries */
 export type QueryaudioFromTrackArgs = {
   trackId: Scalars['UUID']
-}
-
-/** Queries */
-export type QueryauthenticatedReleaseArgs = {
-  releaseId: Scalars['UUID']
 }
 
 /** Queries */
@@ -2421,19 +1091,8 @@ export type QueryeligibleUsersForPresaleArgs = {
 }
 
 /** Queries */
-export type QueryisFollowingArgs = {
-  input: IsFollowingInput
-}
-
-/** Queries */
 export type QueryisMainQueueCaptchaDisabledArgs = {
   releaseId: Scalars['String']
-}
-
-/** Queries */
-export type QuerykeyClientsArgs = {
-  filter?: InputMaybe<FilterKeyClients>
-  pagination?: KeyClientCursorConnectionArgs
 }
 
 /** Queries */
@@ -2472,11 +1131,6 @@ export type QuerynowCachedArgs = {
 }
 
 /** Queries */
-export type QueryonChainStartTimeArgs = {
-  input: OnChainStartTimeInput
-}
-
-/** Queries */
 export type QuerypastMintedReleasesArgs = {
   filter?: InputMaybe<MintedReleasesCursorFilterArgs>
   pagination?: CursorConnectionArgs
@@ -2489,11 +1143,6 @@ export type QueryplaylistArgs = {
 
 /** Queries */
 export type QuerypresaleConfigurationArgs = {
-  releaseId: Scalars['UUID']
-}
-
-/** Queries */
-export type QueryqueueStatusArgs = {
   releaseId: Scalars['UUID']
 }
 
@@ -2519,18 +1168,8 @@ export type QuerysearchArgs = {
 }
 
 /** Queries */
-export type QueryseasonDefaultMintingOptionsArgs = {
-  seasonName: Scalars['String']
-}
-
-/** Queries */
 export type QueryshelfArgs = {
   id: Scalars['UUID']
-}
-
-/** Queries */
-export type QuerysignedUploadParamsArgs = {
-  uploadRequest: UploadRequest
 }
 
 /** Queries */
@@ -2556,19 +1195,9 @@ export type QuerytrendingCollectorsArgs = {
 }
 
 /** Queries */
-export type QueryunmintedReleasesPaginatedArgs = {
-  pagination?: CursorConnectionArgs
-}
-
-/** Queries */
 export type QueryupcomingMintedReleasesArgs = {
   filter?: InputMaybe<MintedReleasesCursorFilterArgs>
   pagination?: CursorConnectionArgs
-}
-
-/** Queries */
-export type QueryuploadStepsArgs = {
-  releaseId: Scalars['UUID']
 }
 
 /** Queries */
@@ -2584,88 +1213,6 @@ export type QueryuserByAddressArgs = {
 /** Queries */
 export type QueryuserByArtistHandleArgs = {
   soundHandle: Scalars['String']
-}
-
-/** Queries */
-export type QueryuserRelationStatusesArgs = {
-  users: Array<Scalars['UUID']>
-}
-
-/** Queue entity */
-export type Queue = {
-  id: Scalars['ID']
-  presaleConfigurationId: Scalars['ID']
-  status: QueueStatus
-  userId: Scalars['ID']
-}
-
-/** Entity for artist with queue feature disabled */
-export type QueueDisabledArtists = {
-  /** List of artists with queue feature disabled */
-  disabledArtists: Array<Scalars['String']>
-}
-
-/** Types of Queue Status states */
-export const QueueStatus = {
-  /** Queue position timed out */
-  EXPIRED: 'EXPIRED',
-  /** Queue was left manually */
-  LEFT_QUEUE: 'LEFT_QUEUE',
-  /** Queue position has been transfered to whitelist */
-  TRANSFERRED_TO_WHITELIST: 'TRANSFERRED_TO_WHITELIST',
-  /** Queue active and waiting for updates */
-  WAITING: 'WAITING',
-} as const
-
-export type QueueStatus = typeof QueueStatus[keyof typeof QueueStatus]
-/** Input for queueStatus subscription */
-export type QueueStatusSubscriptionInput = {
-  /** Authentication token of user */
-  authToken: Scalars['String']
-  /** Release identifier of queue status to get queue status updates from */
-  releaseId: Scalars['UUID']
-}
-
-/** Auction options associated with range bound sales */
-export type RangeBoundAuction = {
-  /** List of different max mints per wallet quantity options for free sale */
-  freeSaleMaxMintsPerWalletOptions: Array<Scalars['Int']>
-  /** List of different options of maximum quantity for public sale */
-  maxOptions: Array<Scalars['Int']>
-  /** List of different options of minimum quantity for public sale */
-  minOptions: Array<Scalars['Int']>
-  /** Minting period duration in minutes */
-  mintingPeriodMins: Scalars['Int']
-  /** List of different max mints per wallet quantity options for presale */
-  presaleMaxMintsPerWalletOptions: Array<Scalars['Int']>
-  /** List of different eth prices options for presale */
-  presalePriceOptions?: Maybe<Array<Scalars['Float']>>
-  /** List of different eth prices options for public sale */
-  priceOptions: Array<Scalars['Float']>
-  /** List of different max mints per wallet quantity options for public sale */
-  publicSaleMaxMintsPerWalletOptions: Array<Scalars['Int']>
-  /** Signing address for minting process */
-  signingAddress: Scalars['String']
-}
-
-/** Input options to customize range bound auctions */
-export type RangeBoundAuctionInput = {
-  /** List of different max mints per wallet quantity options for free sale */
-  freeSaleMaxMintsPerWalletOptions: Array<Scalars['Int']>
-  /** List of different options of maximum quantity for public sale */
-  maxOptions: Array<Scalars['Int']>
-  /** List of different options of minimum quantity for public sale */
-  minOptions: Array<Scalars['Int']>
-  /** Minting period duration in minutes for public sale */
-  mintingPeriodMins: Scalars['Int']
-  /** List of different max mints per wallet quantity options for presale */
-  presaleMaxMintsPerWalletOptions: Array<Scalars['Int']>
-  /** List of different eth prices options for presales */
-  presalePriceOptions: Array<Scalars['Float']>
-  /** List of different eth prices options for public sale */
-  priceOptions: Array<Scalars['Float']>
-  /** List of different max mints per wallet quantity options for public sale */
-  publicSaleMaxMintsPerWalletOptions: Array<Scalars['Int']>
 }
 
 /** Release entity */
@@ -2807,74 +1354,6 @@ export type ReleaseConnectionEdge = Edge & {
   node: Release
 }
 
-/** Input values for release admin update */
-export type ReleaseDetailsInput = {
-  /** Artist story of release */
-  behindTheMusic?: InputMaybe<Scalars['String']>
-  /** Description of release */
-  description?: InputMaybe<Scalars['String']>
-  /** Description of golden egg */
-  eggDescription?: InputMaybe<Scalars['String']>
-  /** Season of release */
-  season?: InputMaybe<Scalars['String']>
-  /** Title of release */
-  title?: InputMaybe<Scalars['String']>
-  /** Title slug of release */
-  titleSlug?: InputMaybe<Scalars['String']>
-  /** E.g. Playlist, Album, EP, Single, Compilation */
-  type?: InputMaybe<Scalars['String']>
-}
-
-/** Release info upload step info */
-export type ReleaseInfoUploadStepInfo = {
-  /** Behind the music text */
-  behindTheMusic: Scalars['String']
-  /** Cover image */
-  coverImage: MediaUploadStepInfo
-  /** Text to introduce song to supporters */
-  description: Scalars['String']
-  /** Genre */
-  genre: Scalars['String']
-  /** Title */
-  title: Scalars['String']
-  /** Token symbol */
-  tokenSymbol: Scalars['String']
-  /** Uploaded tracks */
-  tracks: Array<TrackUploadStepInfo>
-  /** Release type */
-  type: Scalars['String']
-}
-
-/** Release info upload step input values */
-export type ReleaseInfoUploadStepInput = {
-  /** Behind the music text */
-  behindTheMusic: Scalars['String']
-  /** Cover image */
-  coverImage: UploadedMedia
-  /** Text to introduce song to supporters */
-  description: Scalars['String']
-  /** Release genre */
-  genre: Scalars['String']
-  /** Title */
-  title: Scalars['String']
-  /** Token symbol */
-  tokenSymbol: Scalars['String']
-  /** Uploaded tracks */
-  tracks: Array<TrackUpload>
-  /** Release type */
-  type: ReleaseType
-}
-
-/** Meta input values for release */
-export type ReleaseMetaInput = {
-  /** Associated external url */
-  externalUrl?: InputMaybe<Scalars['URL']>
-  /** Associated laylo.com url */
-  layloUrl?: InputMaybe<Scalars['URL']>
-  /** Associated opensea url */
-  openseaUrl?: InputMaybe<Scalars['URL']>
-}
-
 /** Release current status type */
 export const ReleaseStatus = {
   AVAILABLE_TO_MINT: 'AVAILABLE_TO_MINT',
@@ -2892,20 +1371,6 @@ export const ReleaseType = {
 } as const
 
 export type ReleaseType = typeof ReleaseType[keyof typeof ReleaseType]
-/** Different upload steps for a release */
-export type ReleaseUploadStepInput = {
-  /** Auction configuration inputs */
-  auctionConfiguration?: InputMaybe<AuctionConfigurationUploadStepInput>
-  /** Release metadata upload step inputs */
-  metadata?: InputMaybe<MetadataUploadStepInput>
-  /** Release info upload step inputs */
-  releaseInfo?: InputMaybe<ReleaseInfoUploadStepInput>
-  /** Rewards upload step inputs */
-  rewards?: InputMaybe<RewardsUploadStepInput>
-  /** Credit allocations of credit split */
-  splits?: InputMaybe<SplitsUploadStepInput>
-}
-
 /** Input for reportPlayStopped mutation */
 export type ReportPlayStoppedInput = {
   /** End of play session */
@@ -2951,38 +1416,6 @@ export type Reward = {
   title: Scalars['String']
 }
 
-/** Custom rewards input */
-export type RewardInput = {
-  /** Reward description */
-  description: Scalars['String']
-  /** Reward name */
-  title: Scalars['String']
-}
-
-/** Release info upload step info */
-export type RewardUploadStepInfo = {
-  /** Reward description */
-  description: Scalars['String']
-  /** Reward name */
-  title: Scalars['String']
-}
-
-/** Release info upload step info */
-export type RewardsUploadStepInfo = {
-  /** Special golden egg images */
-  goldenEggImages: Array<MediaUploadStepInfo>
-  /** Custom rewards */
-  rewards: Array<RewardUploadStepInfo>
-}
-
-/** Release rewards upload step input values */
-export type RewardsUploadStepInput = {
-  /** Special golden egg images */
-  goldenEggImages: Array<UploadedMedia>
-  /** Custom rewards */
-  rewards?: InputMaybe<Array<RewardInput>>
-}
-
 /** Single sale schedule information of Release Presale Configuration */
 export type SaleSchedule = {
   /** Amount of people to be allowed to be whitelist at the same time, it's usually better to set it as the same as presaleAmount */
@@ -3007,29 +1440,6 @@ export type SaleSchedule = {
   whitelistRulesParsed: Array<WhitelistRules>
 }
 
-/** Types of Sale Schedule flags */
-export const SaleScheduleFlagType = {
-  /** This saleSchedule is an open edition */
-  OPEN_EDITION_ENABLED: 'OPEN_EDITION_ENABLED',
-} as const
-
-export type SaleScheduleFlagType = typeof SaleScheduleFlagType[keyof typeof SaleScheduleFlagType]
-/** Input configuration of sale schedule creation and updates */
-export type SaleScheduleInput = {
-  /** Amount of people to be allowed to be whitelist at the same time, it's usually better to set it as the same as presaleAmount */
-  cohortSize: Scalars['Int']
-  /** End time of sale schedule */
-  endTime: Scalars['DateTime']
-  /** Amount to be allowed to be sold for sale schedule */
-  presaleAmount: Scalars['Int']
-  /** Custom presale media */
-  presaleMedia?: InputMaybe<Array<PresaleMediaInput>>
-  /** Start time of sale schedule */
-  startTime: Scalars['DateTime']
-  /** Custom whitelist rules */
-  whitelistRules?: InputMaybe<Array<WhitelistRuleInput>>
-}
-
 /** Input for "search" query */
 export type SearchInput = {
   /** How many entities to be fetched, maximum of 20 */
@@ -3046,78 +1456,6 @@ export type SearchResult = {
   id: Scalars['ID']
   /** Releases that match the search input, including releases where the artist name matches the given input */
   releases: Array<Release>
-}
-
-/** Season auction defaults for sales */
-export type SeasonAuctionDefaults = {
-  /** Creation date of entity */
-  createdAt: Scalars['DateTime']
-  /** Season auction defaults entity identifier */
-  id: Scalars['ID']
-  /** Default season */
-  season: Scalars['String']
-}
-
-/** Default reference season-based auction options for administration */
-export type SeasonDefaultOptions = {
-  /** Auction options union based on type */
-  auction: Array<Auction>
-}
-
-/** Input for sendChatMessage mutation */
-export type SendChatMessageInput = {
-  asAdmin?: InputMaybe<Scalars['Boolean']>
-  channelId: Scalars['UUID']
-  message: Scalars['String']
-  randomUUID: Scalars['UUID']
-}
-
-/** Input for setArtistMeta mutation */
-export type SetArtistMetaInput = {
-  /** Artist identifier */
-  artistId: Scalars['String']
-  /** Artist meta configuration data */
-  metaType?: InputMaybe<ArtistMetaInput>
-}
-
-/** Input for setReleaseDetails mutation */
-export type SetReleaseDetailsInput = {
-  /** Release details input values */
-  releaseDetails: ReleaseDetailsInput
-  /** Release identifier */
-  releaseId: Scalars['String']
-}
-
-/** Input for setReleaseMeta mutation */
-export type SetReleaseMetaInput = {
-  /** Meta input values */
-  metaType?: InputMaybe<ReleaseMetaInput>
-  /** Release identifier */
-  releaseId: Scalars['String']
-}
-
-/** Input fields to set releases to shelf */
-export type SetReleasesForShelfInput = {
-  /** List of releaseIds to set to shelf */
-  releaseIds: Array<Scalars['UUID']>
-  /** Shelf id to set releases to */
-  shelfId: Scalars['UUID']
-}
-
-/** Input fields to set index values of user shelves */
-export type SetShelfOrderInput = {
-  /** ShelfId to set index ordering */
-  shelfId: Scalars['UUID']
-}
-
-/** Shadow banned address */
-export type ShadowBannedAddress = {
-  /** Date of ban creation */
-  createdAt: Scalars['DateTime']
-  /** Public address wallet */
-  publicAddress: Scalars['String']
-  /** Optional reason behind ban */
-  reason?: Maybe<Scalars['String']>
 }
 
 /** Shelf entity */
@@ -3203,14 +1541,6 @@ export type ShelfStack = Node & {
   release: Release
 }
 
-/** Paginated shelf stacks connection */
-export type ShelfStackConnection = Connection & {
-  /** Edges of current page */
-  edges: Array<ShelfStackConnectionEdge>
-  /** Pagination helpers information */
-  pageInfo: PageInfo
-}
-
 /** Shelf stack node edge */
 export type ShelfStackConnectionEdge = Edge & {
   /** Cursor to be used for pagination */
@@ -3245,12 +1575,6 @@ export const ShelfType = {
 } as const
 
 export type ShelfType = typeof ShelfType[keyof typeof ShelfType]
-/** Signing Address Entity */
-export type SigningAddress = {
-  /** Signing Address on chain */
-  signingAddress: Scalars['String']
-}
-
 /** Social Links */
 export type SocialLinks = {
   /** Instagram Platform */
@@ -3261,45 +1585,6 @@ export type SocialLinks = {
   twitterLink?: Maybe<Scalars['String']>
 }
 
-/** Input for customizing social links */
-export type SocialLinksInput = {
-  /** Instagram Platform */
-  instagramLink?: InputMaybe<Scalars['String']>
-  /** OpenSea Platform */
-  openseaLink?: InputMaybe<Scalars['String']>
-  /** Twitter Platform */
-  twitterLink?: InputMaybe<Scalars['String']>
-}
-
-/** Key the release was written in */
-export const SongKeyType = {
-  KEY_1D: 'KEY_1D',
-  KEY_1M: 'KEY_1M',
-  KEY_2D: 'KEY_2D',
-  KEY_2M: 'KEY_2M',
-  KEY_3D: 'KEY_3D',
-  KEY_3M: 'KEY_3M',
-  KEY_4D: 'KEY_4D',
-  KEY_4M: 'KEY_4M',
-  KEY_5D: 'KEY_5D',
-  KEY_5M: 'KEY_5M',
-  KEY_6D: 'KEY_6D',
-  KEY_6M: 'KEY_6M',
-  KEY_7D: 'KEY_7D',
-  KEY_7M: 'KEY_7M',
-  KEY_8D: 'KEY_8D',
-  KEY_8M: 'KEY_8M',
-  KEY_9D: 'KEY_9D',
-  KEY_9M: 'KEY_9M',
-  KEY_10D: 'KEY_10D',
-  KEY_10M: 'KEY_10M',
-  KEY_11D: 'KEY_11D',
-  KEY_11M: 'KEY_11M',
-  KEY_12D: 'KEY_12D',
-  KEY_12M: 'KEY_12M',
-} as const
-
-export type SongKeyType = typeof SongKeyType[keyof typeof SongKeyType]
 /** Ascending or Descending sort */
 export const SortOrder = {
   ASC: 'ASC',
@@ -3307,35 +1592,11 @@ export const SortOrder = {
 } as const
 
 export type SortOrder = typeof SortOrder[keyof typeof SortOrder]
-/** Splits upload step info */
-export type SplitsUploadStepInfo = {
-  /** Splits auction configurations */
-  splits: Array<CreditAllocationUploadStepInfo>
-}
-
-/** Splits upload step input values */
-export type SplitsUploadStepInput = {
-  /** Credit allocations of credit split */
-  splits: Array<Allocation>
-}
-
-/** Basic stats information */
-export type Stats = {
-  /** Total artists in the platform */
-  totalArtists: Scalars['Float']
-  /** Total unique collectors in the platform */
-  totalUniqueCollectors: Scalars['Float']
-  /** Total users in the platform */
-  totalUsers: Scalars['Float']
-}
-
 /** Realtime Subscriptions */
 export type Subscription = {
   /** [PUBLIC] Subscribe to updates of specified chat channel messages */
   chatChannelMessages: ChatMessage
   count: Scalars['Int']
-  /** [AUTHENTICATED] Receive queue status updates. When release is sold out, the subscription is closed earlier. */
-  queueStatus: GetQueueStatus
   /** [PUBLIC] Subscribe to release updates */
   release: Release
   /** [PUBLIC] Subscribe to updates of release nfts */
@@ -3344,8 +1605,6 @@ export type Subscription = {
   releaseNftsComments: NftWithComment
   /** [PUBLIC] Subscribe to the latest token sales updates */
   tokenSales: EventV2
-  /** [AUTHENTICATED] Subscribe to transactions related to authenticated user */
-  transaction: Transaction
 }
 
 /** Realtime Subscriptions */
@@ -3356,11 +1615,6 @@ export type SubscriptionchatChannelMessagesArgs = {
 /** Realtime Subscriptions */
 export type SubscriptioncountArgs = {
   n?: Scalars['Int']
-}
-
-/** Realtime Subscriptions */
-export type SubscriptionqueueStatusArgs = {
-  input: QueueStatusSubscriptionInput
 }
 
 /** Realtime Subscriptions */
@@ -3376,11 +1630,6 @@ export type SubscriptionreleaseNftsArgs = {
 /** Realtime Subscriptions */
 export type SubscriptionreleaseNftsCommentsArgs = {
   releaseId: Scalars['UUID']
-}
-
-/** Realtime Subscriptions */
-export type SubscriptiontransactionArgs = {
-  authToken: Scalars['String']
 }
 
 /** Time period to aggregate trending table queries */
@@ -3432,34 +1681,6 @@ export type TrackAudio = {
   releaseId: Scalars['ID']
   /** Reveal time in UNIX timestamp of track based on authenticated user (if authenticated) */
   revealTime: Scalars['Int']
-}
-
-/** Uploaded track information */
-export type TrackUpload = {
-  /** Cover image */
-  coverImage?: InputMaybe<UploadedMedia>
-  /** Duration of track in seconds */
-  duration: Scalars['Int']
-  /** Details of uploaded track file */
-  fileDetail: UploadedMedia
-  /** Normalized peaks of track */
-  normalizedPeaks: Array<Scalars['Int']>
-  /** Title of track */
-  title: Scalars['String']
-}
-
-/** Release info upload step info */
-export type TrackUploadStepInfo = {
-  /** Details of uploaded track cover image */
-  coverImage?: Maybe<MediaUploadStepInfo>
-  /** Duration of track in seconds */
-  duration: Scalars['Int']
-  /** Details of uploaded track file */
-  fileDetail: MediaUploadStepInfo
-  /** Normalized peaks of track */
-  normalizedPeaks: Array<Scalars['Int']>
-  /** Title */
-  title: Scalars['String']
 }
 
 /** Transaction entity */
@@ -3542,139 +1763,6 @@ export const TypeOfRelation = {
 } as const
 
 export type TypeOfRelation = typeof TypeOfRelation[keyof typeof TypeOfRelation]
-/** Returned when a value on an entity is not within the expected range for the operation to succeed */
-export type UnexpectedValueError = IError & {
-  message: Scalars['String']
-}
-
-/** Input fields to unfollow user */
-export type UnfollowUserInput = {
-  /** User id to unfollow */
-  user: Scalars['UUID']
-}
-
-/** Returned when a unique constraint is violated */
-export type UniqueConstraintError = IError & {
-  fields: Array<Scalars['String']>
-  message: Scalars['String']
-}
-
-/** Input for updateKeyClient */
-export type UpdateKeyClient = {
-  /** Identifier of existing Key Client */
-  id: Scalars['UUID']
-  /** Change the name of the specified Key Client */
-  name?: InputMaybe<Scalars['NonEmptyString']>
-  /** Change the status of the specified Key Client */
-  status?: InputMaybe<KeyClientStatus>
-}
-
-/** Input for updateRelease mutation */
-export type UpdateReleaseInput = {
-  /** Behind the music text */
-  behindTheMusic: Scalars['String']
-  /** Cover image */
-  coverImage: UploadedMedia
-  /** Release description */
-  description?: InputMaybe<Scalars['String']>
-  /** Release genre */
-  genre: Scalars['String']
-  /** Special golden egg image */
-  goldenEggImage?: InputMaybe<UploadedMedia>
-  /** Release identifier */
-  id: Scalars['UUID']
-  /** Custom rewards */
-  rewards?: InputMaybe<Array<RewardInput>>
-  /** Title of release */
-  title: Scalars['String']
-  /** Uploaded tracks */
-  tracks: Array<TrackUpload>
-  /** Release type */
-  type: ReleaseType
-}
-
-/** Input for updateSalesSchedule mutation */
-export type UpdateSaleScheduleInput = {
-  /** Sale Schedule Flags to be set */
-  flags?: InputMaybe<Array<SaleScheduleFlagType>>
-  /** End time to be set */
-  newEndTime?: InputMaybe<Scalars['DateTime']>
-  /** Presale amount to be set */
-  newPresaleAmount?: InputMaybe<Scalars['Int']>
-  /** Start time to be set */
-  newStartTime?: InputMaybe<Scalars['DateTime']>
-  /** Presale Media configuration */
-  presaleMedia?: InputMaybe<Array<PresaleMediaInput>>
-  /** Sale Schedule identifier */
-  saleScheduleId: Scalars['UUID']
-  /** Whitelist Rules for Sale Schedule */
-  whitelistRules?: InputMaybe<Array<WhitelistRuleInput>>
-}
-
-/** Input for signedUploadParams mutation */
-export type UploadRequest = {
-  /** File name of media to be uploaded */
-  fileName: Scalars['String']
-  /** Media type to be uploaded */
-  mediaType: MediaType
-}
-
-/** Upload step entity */
-export type UploadStep = {
-  /** Upload step creation date */
-  createdAt: Scalars['DateTime']
-  /** Upload step identifier */
-  id: Scalars['ID']
-  /** Is release step already completed */
-  isComplete: Scalars['Boolean']
-  /** Upload step name */
-  name: Scalars['String']
-  /** Corresponding release of upload step */
-  release: Release
-  /** Upload step number */
-  step: Scalars['Int']
-  /** Step info */
-  stepInfo?: Maybe<UploadStepInfo>
-}
-
-/** Union of different upload step infos */
-export type UploadStepInfo =
-  | AuctionConfigurationUploadStepInfo
-  | MetadataUploadStepInfo
-  | ReleaseInfoUploadStepInfo
-  | RewardsUploadStepInfo
-  | SplitsUploadStepInfo
-
-/** Media to be uploaded */
-export type UploadedMedia = {
-  /** Media type to be uploaded */
-  mediaType: MediaType
-  /** Upload key received from Query.signedUploadParams */
-  uploadKey: Scalars['String']
-}
-
-/** Input for upsertUploadStep mutation */
-export type UpsertReleaseUploadStepInput = {
-  /** Upload step info input */
-  info: ReleaseUploadStepInput
-  /** Release identifier */
-  releaseId: Scalars['String']
-  /** Step number */
-  step: Scalars['Int']
-}
-
-/** Input fields to upsert shelf */
-export type UpsertShelfInput = {
-  /** Upsert shelf description */
-  description?: InputMaybe<Scalars['String']>
-  /** Shelf id to update */
-  id?: InputMaybe<Scalars['UUID']>
-  /** Upsert shelf name */
-  name?: InputMaybe<Scalars['String']>
-  /** Upsert shelf type */
-  type?: InputMaybe<ShelfType>
-}
-
 /** User entity */
 export type User = Node & {
   /** Optional artist entity for users with artist profile */
@@ -3715,7 +1803,7 @@ export type User = Node & {
   followingCount: Scalars['Int']
   /** Does the user have the artist role to be able to have an artist profile */
   hasArtistRole: Scalars['Boolean']
-  /** Returns whether user has at least one shelf with at least one release  */
+  /** Returns whether user has at least one shelf with at least one release */
   hasShelfWithItems: Scalars['Boolean']
   /** User UUID */
   id: Scalars['ID']
@@ -3839,14 +1927,6 @@ export type UserRelationConnectionEdge = Edge & {
   node: UserRelation
 }
 
-/** User Relation Status */
-export type UserRelationStatus = {
-  /** Is the authenticated user following the target user */
-  isFollowing: Scalars['Boolean']
-  /** ID of target user */
-  userId: Scalars['String']
-}
-
 /** Roles available for users */
 export type UserRoles = {
   /** Administrator of platform */
@@ -3859,30 +1939,6 @@ export type UserRoles = {
 export type ValueExchangedPrettyType = {
   /** Formatted Ethereum value */
   eth: Scalars['String']
-}
-
-/** Whitelist position of user */
-export type WhitelistObj = {
-  /** Expiry time of whitelist position */
-  expiryTime: Scalars['DateTime']
-  /** Mint signature associated with whitelist position */
-  signatureToMint?: Maybe<Scalars['String']>
-  /** Exclusive ticket number associated with whitelist position (To be re-used if whitelist position expires) */
-  ticketNumber: Scalars['Int']
-}
-
-/** Input to define whitelist rules to be set for the new sale schedule */
-export type WhitelistRuleInput = {
-  /** Require to hold NFTs from a specific address with a custom threshold */
-  onlyTokenHolders?: InputMaybe<OnlyTokenHoldersInput>
-  /** Require to be classified as a top collector of the platform, with custom parameters */
-  onlyTopCollectors?: InputMaybe<OnlyTopCollectorsInput>
-  /** Require to hold any other NFT from the Sound.xyz platform */
-  requireAnySoundHolder?: InputMaybe<Scalars['Boolean']>
-  /** Require to hold any other NFT from the same artist */
-  requireArtistSoundHolder?: InputMaybe<Scalars['Boolean']>
-  /** Require Twitter verification to be whitelisted */
-  requireTwitterVerification?: InputMaybe<Scalars['Boolean']>
 }
 
 /** Union of different types of whitelist rules */

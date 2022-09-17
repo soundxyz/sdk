@@ -1,4 +1,4 @@
-schema: 'https://staging.api.sound.xyz/graphql'
+schema: './schema.graphql'
 documents:
   - './graphql/**/*.gql'
 generates:
@@ -26,9 +26,6 @@ generates:
         EmailAddress: 'string'
         Address: 'string'
       documentMode: 'string'
-  schema.graphql:
-    plugins:
-      - schema-ast
 hooks:
   afterAllFileWrite:
     - pnpm prettier --write
