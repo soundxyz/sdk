@@ -27,6 +27,7 @@ query ReleaseInfo($contractAddress: Address!, $editionId: String) {
     track {
       id
       duration
+      normalizedPeaks
     }
 
     artist {
