@@ -741,8 +741,8 @@ describe('expectedEditionAddress', () => {
       ethers.provider,
     ).soundEditionAddress(deployer, getSaltAsBytes32(salt2))
 
-    const [address1, _2] = await client.expectedEditionAddress({ deployer, salt: salt1 })
-    const [address2, _3] = await client.expectedEditionAddress({ deployer, salt: salt2 })
+    const { editionAddress: address1 } = await client.expectedEditionAddress({ deployer, salt: salt1 })
+    const { editionAddress: address2 } = await client.expectedEditionAddress({ deployer, salt: salt2 })
 
     expect(address1).to.eq(expectedAddress1)
     expect(address2).to.eq(expectedAddress2)
