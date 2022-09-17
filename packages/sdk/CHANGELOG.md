@@ -1,5 +1,21 @@
 # @soundxyz/sdk
 
+## 0.4.0
+
+### Minor Changes
+
+- [#82](https://github.com/soundxyz/sdk/pull/82) [`43b92ed`](https://github.com/soundxyz/sdk/commit/43b92edd1d0c87d568b0a6097df316f28c2c98cb) Thanks [@gigamesh](https://github.com/gigamesh)! - Adds txOverrides to createEdition
+
+- [#87](https://github.com/soundxyz/sdk/pull/87) [`5d2e3ca`](https://github.com/soundxyz/sdk/commit/5d2e3caecfd89c91ef700806642efcdcd51dee44) Thanks [@PabloSzx](https://github.com/PabloSzx)! - Rework expectedEditionAddress to return named object: { editionAddress: string, exists: boolean }
+
+- [#86](https://github.com/soundxyz/sdk/pull/86) [`a86875d`](https://github.com/soundxyz/sdk/commit/a86875d8c98ddc2e256485fc6fe80f2c045b737c) Thanks [@PabloSzx](https://github.com/PabloSzx)! - Rework "client.editionInfo" into "editionInfo.api" for Sound.xyz API and "editionInfo.contract" for on-chain contract information
+
+- [#86](https://github.com/soundxyz/sdk/pull/86) [`a86875d`](https://github.com/soundxyz/sdk/commit/a86875d8c98ddc2e256485fc6fe80f2c045b737c) Thanks [@PabloSzx](https://github.com/PabloSzx)! - Rework release api query fields
+
+### Patch Changes
+
+- [#86](https://github.com/soundxyz/sdk/pull/86) [`a86875d`](https://github.com/soundxyz/sdk/commit/a86875d8c98ddc2e256485fc6fe80f2c045b737c) Thanks [@PabloSzx](https://github.com/PabloSzx)! - Simplify editionInfo trackAudio usage
+
 ## 0.3.6
 
 ### Patch Changes
