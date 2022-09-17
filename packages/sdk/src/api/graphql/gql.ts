@@ -244,19 +244,19 @@ export type ArtistMetaInput = {
 /** Filter artist minted releases based on whether artist uploaded release or artist is credited on a split */
 export type ArtistMintedReleasesCursorFilterArgs = {
   /** Includes songs where that artist has a split */
-  appearsOn?: InputMaybe<Scalars['Boolean']>
+  appearsOn?: Scalars['Boolean']
   /** Includes songs uploaded by artist */
-  sounds?: InputMaybe<Scalars['Boolean']>
+  sounds?: Scalars['Boolean']
 }
 
 /** Filter for artist minted releases. Default is only for artist sounds. */
 export type ArtistMintedReleasesFilter = {
   /** Includes songs where that artist has a split */
-  appearsOn?: InputMaybe<Scalars['Boolean']>
+  appearsOn?: Scalars['Boolean']
   /** Filter if the release has credit splits */
   hasCreditSplits?: InputMaybe<Scalars['Boolean']>
   /** Includes songs uploaded by artist */
-  sounds?: InputMaybe<Scalars['Boolean']>
+  sounds?: Scalars['Boolean']
 }
 
 /** Artist minting release options */
@@ -287,10 +287,10 @@ export type AuctionConfigurationUploadStepInfo = {
   auctionType: AuctionType
   /** Free mint auction configurations */
   freeMint?: Maybe<AuctionUploadStepInfo>
+  /** Max mint supply of auction */
+  maxMintable: Scalars['Int']
   /** Min mint supply of auction */
   minQuantity: Scalars['Int']
-  /** Max mint supply of auction */
-  permissionedQuantity: Scalars['Int']
   /** Presale mint auction configurations */
   presaleMint?: Maybe<AuctionUploadStepInfo>
   /** Public mint auction configurations */
@@ -305,10 +305,10 @@ export type AuctionConfigurationUploadStepInput = {
   auctionType: AuctionType
   /** Free mint auction configurations */
   freeMint?: InputMaybe<AuctionUploadStepInput>
+  /** Max mint supply of auction */
+  maxMintable: Scalars['Int']
   /** Min mint supply of auction */
   minQuantity: Scalars['Int']
-  /** Max mint supply of auction */
-  permissionedQuantity: Scalars['Int']
   /** Presale mint auction configurations */
   presaleMint?: InputMaybe<AuctionUploadStepInput>
   /** Public mint auction configurations */
@@ -517,6 +517,8 @@ export type CollectedRelease = Node & {
   coverImage: Media
   /** Release creation date */
   createdAt: Scalars['DateTime']
+  /** Associated external url */
+  externalUrl?: Maybe<Scalars['String']>
   /** Final quantity for a release. Will be defined once a sale finishes */
   finalQuantity?: Maybe<Scalars['Int']>
   /** Last sale schedule end time as number of milliseconds since the ECMAScript epoch. */
@@ -543,6 +545,8 @@ export type CollectedRelease = Node & {
   titleSlug: Scalars['String']
   /** Track of release */
   track: Track
+  /** Type of Release */
+  type: ReleaseType
 }
 
 /** Paginated collected releases connection */
@@ -606,6 +610,7 @@ export const ContractMethod = {
   ARTIST__CREATE_EDITION: 'ARTIST__CREATE_EDITION',
   ARTIST__WITHDRAW_FUNDS: 'ARTIST__WITHDRAW_FUNDS',
   SOUND_CREATOR__CREATE_SOUND_AND_MINTS: 'SOUND_CREATOR__CREATE_SOUND_AND_MINTS',
+  SOUND_EDITION__WITHDRAW_ETH: 'SOUND_EDITION__WITHDRAW_ETH',
   SPLIT_MAIN__CREATE_SPLIT: 'SPLIT_MAIN__CREATE_SPLIT',
   SPLIT_MAIN__DISTRIBUTE_ETH: 'SPLIT_MAIN__DISTRIBUTE_ETH',
   SPLIT_MAIN__WITHDRAW: 'SPLIT_MAIN__WITHDRAW',
@@ -1224,6 +1229,8 @@ export type Mutation = {
   deleteShelf?: Maybe<Scalars['Void']>
   /** [ARTIST] Delete unminted release */
   deleteUnmintedRelease: Release
+  /** [ADMIN] Update the sales schedules of the specified edition */
+  editionUpdateSchedules: Release
   /** [ADMIN] Flush all the PENDING whitelist rows to be set as FAILED */
   flushWhitelistRows?: Maybe<Scalars['Void']>
   /** [AUTHENTICATED] Follow user of input userId */
@@ -1258,15 +1265,17 @@ export type Mutation = {
   registerCreateSoundAndMintsTx: Transaction
   /** [ARTIST] Manually register split transaction */
   registerCreateSplitTx: Transaction
+  /** [AUTHENTICATED] Register split balance distribution transaction */
+  registerDistributeEthTx: Transaction
   /** [ARTIST] Manually register transaction of minted release */
   registerReleaseMintTx: Transaction
   /** [AUTHENTICATED] Register transaction replacement */
   registerReplacementTx: Transaction
-  /** [AUTHENTICATED] Register split balance distribution transaction */
-  registerSplitBalanceTx: Transaction
+  /** [AUTHENTICATED] Manually register transaction to withdraw funds from SoundEdition contract */
+  registerWithdrawEthTx: Transaction
   /** [AUTHENTICATED] Register withdraw from split transaction */
   registerWithdrawFromSplitTx: Transaction
-  /** [AUTHENTICATED] Manually register transaction to withdraw funds */
+  /** [AUTHENTICATED] Manually register transaction to withdraw funds from Artist contract */
   registerWithdrawFundsTx: Transaction
   /** [ADMIN] Remove public address from shadow ban list */
   removeShadowBanAddress: Array<ShadowBannedAddress>
@@ -1470,6 +1479,12 @@ export type MutationdeleteUnmintedReleaseArgs = {
 }
 
 /** Mutations */
+export type MutationeditionUpdateSchedulesArgs = {
+  editionAddress?: InputMaybe<Scalars['String']>
+  releaseId?: InputMaybe<Scalars['String']>
+}
+
+/** Mutations */
 export type MutationflushWhitelistRowsArgs = {
   cutOff?: InputMaybe<Scalars['Int']>
   presaleConfigurationId: Scalars['UUID']
@@ -1555,6 +1570,12 @@ export type MutationregisterCreateSplitTxArgs = {
 }
 
 /** Mutations */
+export type MutationregisterDistributeEthTxArgs = {
+  creditSplitId: Scalars['UUID']
+  hash: Scalars['String']
+}
+
+/** Mutations */
 export type MutationregisterReleaseMintTxArgs = {
   hash: Scalars['String']
   releaseId: Scalars['UUID']
@@ -1567,9 +1588,9 @@ export type MutationregisterReplacementTxArgs = {
 }
 
 /** Mutations */
-export type MutationregisterSplitBalanceTxArgs = {
-  creditSplitId: Scalars['UUID']
+export type MutationregisterWithdrawEthTxArgs = {
   hash: Scalars['String']
+  releaseId: Scalars['UUID']
 }
 
 /** Mutations */
@@ -2212,14 +2233,14 @@ export type Query = {
   artistInvites: Array<ArtistInvite>
   /** [ARTIST] Get artist minting options of authenticated artist. Given artist id has to match authenticated artist */
   artistMintingOptions: ArtistReleaseOptions
-  /** [ARTIST] Get specified release regardless of mint status. If specified release is not created by authenticated artist, it fails. */
-  artistRelease: Release
   /** [PUBLIC] Get all artists of platform. */
   artists: ArtistConnection
   /** [PUBLIC] Get audio from track */
   audioFromTrack: TrackAudio
   /** [PUBLIC] Get authenticated user information, if any */
   authUser?: Maybe<User>
+  /** [ARTIST] Get specified release regardless of mint status. If specified release is not created by authenticated artist, it fails. */
+  authenticatedRelease: Release
   /** [PUBLIC] Get chat messages of specified chat channel */
   chatMessages: ChatMessagesConnection
   /** [PUBLIC] Get credit split by id */
@@ -2358,11 +2379,6 @@ export type QueryartistMintingOptionsArgs = {
 }
 
 /** Queries */
-export type QueryartistReleaseArgs = {
-  releaseId: Scalars['UUID']
-}
-
-/** Queries */
 export type QueryartistsArgs = {
   filter?: InputMaybe<ArtistCursorFilterArgs>
   pagination?: CursorConnectionArgs
@@ -2371,6 +2387,11 @@ export type QueryartistsArgs = {
 /** Queries */
 export type QueryaudioFromTrackArgs = {
   trackId: Scalars['UUID']
+}
+
+/** Queries */
+export type QueryauthenticatedReleaseArgs = {
+  releaseId: Scalars['UUID']
 }
 
 /** Queries */
@@ -2972,10 +2993,14 @@ export type SaleSchedule = {
   id: Scalars['ID']
   /** Is the current sale schedule presale */
   isPresale: Scalars['Boolean']
+  /** Merkle tree root hash derived from sale schedule allowlist */
+  merkleTreeRoot?: Maybe<Scalars['String']>
   /** Special information related to onlyTokenHolders whitelist rule if present */
   onlyTokenHoldersInfo: Array<PresaleMediaInfo>
   /** Presale amount to be sold */
   presaleAmount: Scalars['Int']
+  /** Price for the specific sale schedule */
+  price: Scalars['String']
   /** Start Time of Sale Schedule */
   startTime: Scalars['DateTime']
   /** Whitelist Rules of sale schedule */
@@ -3896,39 +3921,42 @@ export type ReleaseInfoQueryVariables = Exact<{
 export type ReleaseInfoQuery = {
   release: {
     id: string
-    artistContractAddress: string
+    contractAddress: string
     editionId?: string | null
+    type: ReleaseType
     externalUrl?: string | null
-    finalQuantity?: number | null
-    mintStartTime: number
     openseaUrl?: string | null
+    layloUrl?: string | null
     title: string
+    behindTheMusic: string
     season?: string | null
-    quantity: number
-    quantityLowerBound: number
-    quantityUpperBound: number
     totalRaised: string
     totalRaisedPrimaryUsd: number
     totalRaisedSecondaryUsd: number
     genre: { id: string; name: string }
-    track: { id: string; duration: number }
-    artist: { id: string; user: { id: string; publicAddress: string } }
-    coverImage: { id: string; url: string }
-    eggGame?: {
+    track: { id: string; duration: number; normalizedPeaks: Array<number> }
+    artist: {
       id: string
-      winningSerialNum: number
-      finalSerialBlockHash: string
-      nft: {
+      gemCollectionUrl?: string | null
+      openseaCollectionUrl?: string | null
+      season?: string | null
+      soundHandle?: string | null
+      spotifyUrl?: string | null
+      bannerImage?: { id: string; url: string } | null
+      user: {
         id: string
-        songSlot?: number | null
-        tokenId: string
-        updatedAtBlockNum: number
-        isPresaleNft: boolean
-        amountPaidInWei: string
-        comment?: { id: string; message: string } | null
-        owner: { id: string; publicAddress: string }
+        publicAddress: string
+        description?: string | null
+        displayName?: string | null
+        email?: string | null
+        twitterHandle?: string | null
+        avatar?: { id: string; url: string } | null
+        bannerImage?: { id: string; url: string } | null
       }
-    } | null
+    }
+    rewards: Array<{ id: string; description: string; numOfBackers: number; price: string; title: string }>
+    coverImage: { id: string; url: string }
+    goldenEggImage: { id: string; url: string }
   }
 }
 
@@ -3947,6 +3975,6 @@ export type TestQuery = { __typename: 'Query' }
 export const GenerateAuthChallenge = `mutation GenerateAuthChallenge($publicAddress:String!){generateAuthChallenge(publicAddress:$publicAddress)}`
 export const VerifyAuthChallenge = `mutation VerifyAuthChallenge($publicAddress:String!$signedMessage:String!){verifyAuthChallenge(publicAddress:$publicAddress signedMessage:$signedMessage)}`
 export const MerkleProof = `query MerkleProof($root:String!$unhashedLeaf:String!){merkleTreeProof(root:$root unhashedLeaf:$unhashedLeaf){proof}}`
-export const ReleaseInfo = `query ReleaseInfo($contractAddress:Address!$editionId:String){release:releaseContract(contractAddress:$contractAddress editionId:$editionId){id artistContractAddress editionId externalUrl finalQuantity mintStartTime openseaUrl title season quantity quantityLowerBound quantityUpperBound totalRaised totalRaisedPrimaryUsd totalRaisedSecondaryUsd genre{id name}track{id duration}artist{id user{id publicAddress}}coverImage{id url}eggGame{id winningSerialNum finalSerialBlockHash nft{id songSlot tokenId updatedAtBlockNum isPresaleNft amountPaidInWei comment{id message}owner{id publicAddress}}}}}`
+export const ReleaseInfo = `query ReleaseInfo($contractAddress:Address!$editionId:String){release:releaseContract(contractAddress:$contractAddress editionId:$editionId){id contractAddress editionId type externalUrl openseaUrl layloUrl title behindTheMusic season totalRaised totalRaisedPrimaryUsd totalRaisedSecondaryUsd genre{id name}track{id duration normalizedPeaks}artist{id gemCollectionUrl openseaCollectionUrl season soundHandle spotifyUrl bannerImage{id url}user{id publicAddress description displayName email twitterHandle avatar{id url}bannerImage{id url}}}rewards{id description numOfBackers price title}coverImage{id url}goldenEggImage{id url}}}`
 export const AudioFromTrack = `query AudioFromTrack($trackId:UUID!){audioFromTrack(trackId:$trackId){id duration audio{id url}revealTime}}`
 export const Test = `query Test{__typename}`

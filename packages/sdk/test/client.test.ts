@@ -216,6 +216,12 @@ describe('eligibleQuantity: single RangeEditionMinter instance', () => {
       userAddress: artistWallet.address,
     })
     expect(eligibleQuantityForOther).to.equal(2)
+
+    const editionInfo = await client.editionInfo({ contractAddress: precomputedEditionAddress }).contract
+
+    expect(editionInfo.totalMinted).to.equal(1)
+
+    expect(editionInfo.editionMaxMintable).to.equal(100)
   })
 
   it(`Eligible quantity is zero outside of minting time`, async () => {
@@ -267,6 +273,12 @@ describe('eligibleQuantity: single RangeEditionMinter instance', () => {
       timestamp: endTime + 1,
     })
     expect(eligibleQuantityAtEnd).to.equal(0)
+
+    const editionInfo = await client.editionInfo({ contractAddress: precomputedEditionAddress }).contract
+
+    expect(editionInfo.totalMinted).to.equal(0)
+
+    expect(editionInfo.editionMaxMintable).to.equal(100)
   })
 
   it(`Eligible quantity becomes zero for every user if range edition mint instance is sold out before cutoffTime`, async () => {
@@ -294,25 +306,31 @@ describe('eligibleQuantity: single RangeEditionMinter instance', () => {
 
     await setupTest({ minterCalls })
 
-    for (let i = 0; i < maxMintableUpper; i++) {
-      const minter = RangeEditionMinter__factory.connect(rangeEditionMinter.address, signers[i])
-      minter.mint(precomputedEditionAddress, MINT_ID, 1, NULL_ADDRESS, { value: PRICE })
-    }
+    await Promise.all(
+      Array.from({ length: maxMintableUpper }).map((_v, i) => {
+        const minter = RangeEditionMinter__factory.connect(rangeEditionMinter.address, signers[i])
+        return minter.mint(precomputedEditionAddress, MINT_ID, 1, NULL_ADDRESS, { value: PRICE })
+      }),
+    )
 
     // Check that all users have zero eligible balance
-    for (let i = 0; i < 10; i++) {
-      const randomSigner = Wallet.createRandom()
-      randomSigner.connect(ethers.provider)
+    await Promise.all(
+      Array.from({
+        length: 10,
+      }).map(async () => {
+        const randomSigner = Wallet.createRandom()
+        randomSigner.connect(ethers.provider)
 
-      const mints = await client.activeMintSchedules({ editionAddress: precomputedEditionAddress })
-      expect(mints.length).to.equal(1)
+        const mints = await client.activeMintSchedules({ editionAddress: precomputedEditionAddress })
+        expect(mints.length).to.equal(1)
 
-      const eligibleQuantity = await client.eligibleQuantity({
-        mintSchedule: mints[0],
-        userAddress: randomSigner.address,
-      })
-      expect(eligibleQuantity).to.equal(0)
-    }
+        const eligibleQuantity = await client.eligibleQuantity({
+          mintSchedule: mints[0],
+          userAddress: randomSigner.address,
+        })
+        expect(eligibleQuantity).to.equal(0)
+      }),
+    )
   })
 
   it(`Eligible balance switches to zero after closing time if maxMintableLower has been surpassed`, async () => {

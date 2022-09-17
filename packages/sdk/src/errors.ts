@@ -114,13 +114,19 @@ export class UnexpectedApiResponse extends Error {
 
   readonly unexpectedOriginalError?: unknown
 
-  constructor(error: unknown) {
+  readonly graphqlErrors?: GraphQLExecutionErrors
+
+  constructor(error: unknown, { graphqlErrors }: { graphqlErrors?: GraphQLExecutionErrors } = {}) {
     super('Unexpected API Response')
 
     if (error instanceof Error) {
       this.originalError = error
     } else {
       this.unexpectedOriginalError = error
+    }
+
+    if (graphqlErrors) {
+      this.graphqlErrors = graphqlErrors
     }
   }
 }

@@ -16,6 +16,7 @@ import {
   NotEligibleMint,
   NotSoundEditionError,
   SoundNotFoundError,
+  UnexpectedApiResponse,
   UnsupportedMinterError,
   UnsupportedNetworkError,
 } from './errors'
@@ -23,12 +24,13 @@ import { ADDRESS_ZERO, MINTER_ROLE, minterFactoryMap, supportedChainIds, support
 import { getSaltAsBytes32, validateAddress } from './utils/helpers'
 import { LazyPromise } from './utils/promise'
 
-import type { ChainId, MinterInterfaceId, SignerOrProvider, SoundClientConfig } from './types'
+import type { ChainId, Expand, MinterInterfaceId, SignerOrProvider, SoundClientConfig } from './types'
 import type { Signer } from '@ethersproject/abstract-signer'
 import type { BigNumberish } from '@ethersproject/bignumber'
 import type { ContractTransaction, Overrides, PayableOverrides } from '@ethersproject/contracts'
 import type { ReleaseInfoQueryVariables } from './api/graphql/gql'
 import type { ContractCall, EditionConfig, MintConfig, MintSchedule } from './types'
+import type { EditionInfoStructOutput } from '@soundxyz/sound-protocol/typechain/ISoundEditionV1'
 
 export function SoundClient({
   signer,
@@ -379,24 +381,44 @@ export function SoundClient({
     )
   }
 
-  async function editionInfo(soundParams: ReleaseInfoQueryVariables) {
-    const editionContract = SoundEditionV1__factory.connect(
-      soundParams.contractAddress,
-      (await _requireSignerOrProvider()).signerOrProvider,
-    )
+  function editionInfo(soundParams: ReleaseInfoQueryVariables) {
+    const contract = LazyPromise(async () => {
+      await _requireValidSoundEdition({ editionAddress: soundParams.contractAddress })
 
-    const [{ data, errors }, editionInfo] = await Promise.all([
-      client.soundApi.releaseInfo(soundParams),
-      editionContract.editionInfo(),
-    ])
+      const editionContract = SoundEditionV1__factory.connect(
+        soundParams.contractAddress,
+        (await _requireSignerOrProvider()).signerOrProvider,
+      )
 
-    const release = data?.release
-    if (!release) throw new SoundNotFoundError({ ...soundParams, graphqlErrors: errors })
+      const info: Expand<Omit<EditionInfoStructOutput, keyof [] | number | `${number}`>> =
+        await editionContract.editionInfo()
+
+      return { ...info }
+    })
+
+    const api = LazyPromise(async () => {
+      const { data, errors } = await client.soundApi.releaseInfo(soundParams)
+
+      const release = data?.release
+      if (!release) throw new SoundNotFoundError({ ...soundParams, graphqlErrors: errors })
+
+      return {
+        ...release,
+        trackAudio: LazyPromise(() =>
+          client.soundApi.audioFromTrack({ trackId: release.track.id }).then((response) => {
+            const data: Expand<typeof response.data> = response.data
+
+            if (!data) throw new UnexpectedApiResponse(`GraphQL Errors found`, { graphqlErrors: response.errors })
+
+            return data
+          }),
+        ),
+      }
+    })
 
     return {
-      ...release,
-      editionInfo,
-      trackAudio: LazyPromise(() => client.soundApi.audioFromTrack({ trackId: release.track.id })),
+      contract,
+      api,
     }
   }
 
