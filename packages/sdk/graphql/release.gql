@@ -1,59 +1,85 @@
 query ReleaseInfo($contractAddress: Address!, $editionId: String) {
   release: releaseContract(contractAddress: $contractAddress, editionId: $editionId) {
     id
-    artistContractAddress
+    contractAddress
     editionId
+
+    type
+
     externalUrl
-    finalQuantity
-    mintStartTime
     openseaUrl
+    layloUrl
+
     title
+    behindTheMusic
+
     season
-    quantity
-    quantityLowerBound
-    quantityUpperBound
+
     totalRaised
     totalRaisedPrimaryUsd
     totalRaisedSecondaryUsd
+
     genre {
       id
       name
     }
+
     track {
       id
       duration
     }
+
     artist {
       id
+
+      gemCollectionUrl
+      openseaCollectionUrl
+      season
+      soundHandle
+      spotifyUrl
+
+      bannerImage {
+        id
+        url
+      }
+
       user {
         id
         publicAddress
+
+        description
+        displayName
+        email
+        twitterHandle
+
+        avatar {
+          id
+          url
+        }
+
+        bannerImage {
+          id
+          url
+        }
       }
     }
+
+    rewards {
+      id
+      description
+      numOfBackers
+      price
+      title
+    }
+
     coverImage {
       id
       url
     }
-    eggGame {
+
+    goldenEggImage {
       id
-      winningSerialNum
-      finalSerialBlockHash
-      nft {
-        id
-        songSlot
-        tokenId
-        updatedAtBlockNum
-        isPresaleNft
-        amountPaidInWei
-        comment {
-          id
-          message
-        }
-        owner {
-          id
-          publicAddress
-        }
-      }
+      url
     }
   }
 }

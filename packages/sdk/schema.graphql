@@ -440,12 +440,12 @@ input ArtistMintedReleasesCursorFilterArgs {
   """
   Includes songs where that artist has a split
   """
-  appearsOn: Boolean
+  appearsOn: Boolean! = false
 
   """
   Includes songs uploaded by artist
   """
-  sounds: Boolean
+  sounds: Boolean! = true
 }
 
 """
@@ -455,7 +455,7 @@ input ArtistMintedReleasesFilter {
   """
   Includes songs where that artist has a split
   """
-  appearsOn: Boolean
+  appearsOn: Boolean! = false
 
   """
   Filter if the release has credit splits
@@ -465,7 +465,7 @@ input ArtistMintedReleasesFilter {
   """
   Includes songs uploaded by artist
   """
-  sounds: Boolean
+  sounds: Boolean! = true
 }
 
 """
@@ -518,14 +518,14 @@ type AuctionConfigurationUploadStepInfo {
   freeMint: AuctionUploadStepInfo
 
   """
+  Max mint supply of auction
+  """
+  maxMintable: Int!
+
+  """
   Min mint supply of auction
   """
   minQuantity: Int!
-
-  """
-  Max mint supply of auction
-  """
-  permissionedQuantity: Int!
 
   """
   Presale mint auction configurations
@@ -558,14 +558,14 @@ input AuctionConfigurationUploadStepInput {
   freeMint: AuctionUploadStepInput
 
   """
+  Max mint supply of auction
+  """
+  maxMintable: Int!
+
+  """
   Min mint supply of auction
   """
   minQuantity: Int!
-
-  """
-  Max mint supply of auction
-  """
-  permissionedQuantity: Int!
 
   """
   Presale mint auction configurations
@@ -960,6 +960,11 @@ type CollectedRelease implements Node {
   createdAt: DateTime!
 
   """
+  Associated external url
+  """
+  externalUrl: String
+
+  """
   Final quantity for a release. Will be defined once a sale finishes
   """
   finalQuantity: Int
@@ -1023,6 +1028,11 @@ type CollectedRelease implements Node {
   Track of release
   """
   track: Track!
+
+  """
+  Type of Release
+  """
+  type: ReleaseType!
 }
 
 """
@@ -1144,6 +1154,7 @@ enum ContractMethod {
   ARTIST__CREATE_EDITION
   ARTIST__WITHDRAW_FUNDS
   SOUND_CREATOR__CREATE_SOUND_AND_MINTS
+  SOUND_EDITION__WITHDRAW_ETH
   SPLIT_MAIN__CREATE_SPLIT
   SPLIT_MAIN__DISTRIBUTE_ETH
   SPLIT_MAIN__WITHDRAW
@@ -2494,6 +2505,11 @@ type Mutation {
   ): Release!
 
   """
+  [ADMIN] Update the sales schedules of the specified edition
+  """
+  editionUpdateSchedules(editionAddress: String, releaseId: String): Release!
+
+  """
   [ADMIN] Flush all the PENDING whitelist rows to be set as FAILED
   """
   flushWhitelistRows(cutOff: Int, presaleConfigurationId: UUID!): Void
@@ -2669,6 +2685,21 @@ type Mutation {
   ): Transaction!
 
   """
+  [AUTHENTICATED] Register split balance distribution transaction
+  """
+  registerDistributeEthTx(
+    """
+    Credit split entity identifier
+    """
+    creditSplitId: UUID!
+
+    """
+    Transaction hash
+    """
+    hash: String!
+  ): Transaction!
+
+  """
   [ARTIST] Manually register transaction of minted release
   """
   registerReleaseMintTx(
@@ -2699,18 +2730,18 @@ type Mutation {
   ): Transaction!
 
   """
-  [AUTHENTICATED] Register split balance distribution transaction
+  [AUTHENTICATED] Manually register transaction to withdraw funds from SoundEdition contract
   """
-  registerSplitBalanceTx(
-    """
-    Credit split entity identifier
-    """
-    creditSplitId: UUID!
-
+  registerWithdrawEthTx(
     """
     Transaction hash
     """
     hash: String!
+
+    """
+    Release identifier
+    """
+    releaseId: UUID!
   ): Transaction!
 
   """
@@ -2724,7 +2755,7 @@ type Mutation {
   ): Transaction!
 
   """
-  [AUTHENTICATED] Manually register transaction to withdraw funds
+  [AUTHENTICATED] Manually register transaction to withdraw funds from Artist contract
   """
   registerWithdrawFundsTx(
     """
@@ -4101,16 +4132,6 @@ type Query {
   artistMintingOptions(artistId: UUID!): ArtistReleaseOptions!
 
   """
-  [ARTIST] Get specified release regardless of mint status. If specified release is not created by authenticated artist, it fails.
-  """
-  artistRelease(
-    """
-    Release identifier
-    """
-    releaseId: UUID!
-  ): Release!
-
-  """
   [PUBLIC] Get all artists of platform.
   """
   artists(
@@ -4139,6 +4160,16 @@ type Query {
   [PUBLIC] Get authenticated user information, if any
   """
   authUser: User
+
+  """
+  [ARTIST] Get specified release regardless of mint status. If specified release is not created by authenticated artist, it fails.
+  """
+  authenticatedRelease(
+    """
+    Release identifier
+    """
+    releaseId: UUID!
+  ): Release!
 
   """
   [PUBLIC] Get chat messages of specified chat channel
@@ -5451,6 +5482,11 @@ type SaleSchedule {
   isPresale: Boolean!
 
   """
+  Merkle tree root hash derived from sale schedule allowlist
+  """
+  merkleTreeRoot: String
+
+  """
   Special information related to onlyTokenHolders whitelist rule if present
   """
   onlyTokenHoldersInfo: [PresaleMediaInfo!]!
@@ -5459,6 +5495,11 @@ type SaleSchedule {
   Presale amount to be sold
   """
   presaleAmount: Int!
+
+  """
+  Price for the specific sale schedule
+  """
+  price: String!
 
   """
   Start Time of Sale Schedule
