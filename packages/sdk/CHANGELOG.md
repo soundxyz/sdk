@@ -1,5 +1,13 @@
 # @soundxyz/sdk
 
+## 0.3.6
+
+### Patch Changes
+
+- [#84](https://github.com/soundxyz/sdk/pull/84) [`9423878`](https://github.com/soundxyz/sdk/commit/9423878cf0229c7b041ea9035d6a60cf7f403189) Thanks [@PabloSzx](https://github.com/PabloSzx)! - Fix await requireValidSoundEdition
+
+- [#84](https://github.com/soundxyz/sdk/pull/84) [`9423878`](https://github.com/soundxyz/sdk/commit/9423878cf0229c7b041ea9035d6a60cf7f403189) Thanks [@PabloSzx](https://github.com/PabloSzx)! - NotSoundEditionError includes contractAddress property
+
 ## 0.3.5
 
 ### Patch Changes
