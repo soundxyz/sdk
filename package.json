@@ -23,7 +23,7 @@
     "Saihajpreet Singh <saihaj@sound.xyz> (https://saihaj.dev/)"
   ],
   "engines": {
-    "pnpm": ">=7.9.5"
+    "pnpm": ">=7.9.1"
   },
   "workspaces": [
     "packages/*"
