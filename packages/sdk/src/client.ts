@@ -6,10 +6,8 @@ import {
   SoundCreatorV1__factory,
   SoundEditionV1__factory,
 } from '@soundxyz/sound-protocol/typechain/index'
-import { contractAddresses } from '@soundxyz/sound-protocol'
 import { SoundAPI } from './api/soundApi'
 import {
-  CreatorAddressMissingForLocalError,
   InvalidQuantityError,
   MissingSignerError,
   MissingSignerOrProviderError,
@@ -20,7 +18,7 @@ import {
   UnsupportedMinterError,
   UnsupportedNetworkError,
 } from './errors'
-import { ADDRESS_ZERO, MINTER_ROLE, minterFactoryMap, supportedChainIds, supportedNetworks } from './utils/constants'
+import { ADDRESS_ZERO, MINTER_ROLE, minterFactoryMap, supportedNetworks } from './utils/constants'
 import { getSaltAsBytes32, validateAddress } from './utils/helpers'
 import { LazyPromise } from './utils/promise'
 

@@ -27,14 +27,6 @@ export class UnsupportedNetworkError extends Error {
   }
 }
 
-export class CreatorAddressMissingForLocalError extends Error {
-  readonly name = 'CreatorAddressMissingForLocalError'
-
-  constructor(message?: string) {
-    super(message || 'Must pass in soundCreatorAddress when using with a local network')
-  }
-}
-
 export class InvalidAddressError extends Error {
   readonly name = 'InvalidAddressError'
 
