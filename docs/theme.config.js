@@ -8,6 +8,7 @@ export default {
     text: 'Sound.xyz SDK',
   },
   logo: 'Sound.xyz SDK',
+  titleSuffix: ' \u2013 Sound.xyz',
   docsRepositoryBase: 'https://github.com/soundxyz/sdk/blob/main/docs',
   editLink: {
     text: 'Edit this page on GitHub',
