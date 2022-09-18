@@ -6,7 +6,6 @@ import {
   SoundCreatorV1__factory,
   SoundEditionV1__factory,
 } from '@soundxyz/sound-protocol/typechain/index'
-import { contractAddresses } from '@soundxyz/sound-protocol'
 import { SoundAPI } from './api/soundApi'
 import {
   CreatorAddressMissingForLocalError,
