@@ -2,7 +2,7 @@
 
 import { buildCode } from 'bob-ts'
 import { execSync, spawn } from 'child_process'
-import { writeFile, readFile } from 'fs/promises'
+import { writeFile, readFile, copyFile } from 'fs/promises'
 
 execSync('pnpm graphql-codegen', {
   stdio: 'inherit',
@@ -23,6 +23,8 @@ const [pkgString] = await Promise.all([
     target: 'es2020',
     sourcemap: false,
   }),
+  copyFile('README.md', 'dist/README.md'),
+  copyFile('LICENSE', 'dist/LICENSE'),
 ])
 
 /**
