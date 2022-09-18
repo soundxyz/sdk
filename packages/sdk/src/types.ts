@@ -29,7 +29,7 @@ export type SoundClientConfig = (
    * @default "production"
    */
   environment?: ApiEnvironments
-  soundCreatorAddress?: string
+  soundCreatorAddress: string
 }
 
 export type MintScheduleBase = {

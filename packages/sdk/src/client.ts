@@ -270,7 +270,7 @@ export function SoundClient({
     maxFeePerGas?: BigNumberish
     maxPriorityFeePerGas?: BigNumberish
   }) {
-    const { signer, chainId, userAddress } = await _requireSigner()
+    const { signer, userAddress } = await _requireSigner()
 
     const txnOverrides: Overrides = {
       gasLimit,
@@ -280,10 +280,8 @@ export function SoundClient({
 
     const formattedSalt = getSaltAsBytes32(customSalt || Math.random() * 1_000_000_000_000_000)
 
-    const creatorAddress = _getCreatorAddress({ chainId })
-
     // Precompute the edition address.
-    const [editionAddress, _] = await SoundCreatorV1__factory.connect(creatorAddress, signer).soundEditionAddress(
+    const [editionAddress, _] = await SoundCreatorV1__factory.connect(soundCreatorAddress, signer).soundEditionAddress(
       userAddress,
       formattedSalt,
     )
@@ -370,7 +368,7 @@ export function SoundClient({
       flags,
     ])
 
-    const soundCreatorContract = SoundCreatorV1__factory.connect(creatorAddress, signer)
+    const soundCreatorContract = SoundCreatorV1__factory.connect(soundCreatorAddress, signer)
 
     return soundCreatorContract.createSoundAndMints(
       formattedSalt,
@@ -424,8 +422,7 @@ export function SoundClient({
 
   async function expectedEditionAddress({ deployer, salt }: { deployer: string; salt: string | number }) {
     validateAddress(deployer)
-    const { signerOrProvider, chainId } = await _requireSignerOrProvider()
-    const soundCreatorAddress = _getCreatorAddress({ chainId })
+    const { signerOrProvider } = await _requireSignerOrProvider()
 
     const { addr: editionAddress, exists } = await SoundCreatorV1__factory.connect(
       soundCreatorAddress,
@@ -595,21 +592,6 @@ export function SoundClient({
 
   function _isSupportedChain(chainId: number) {
     return Object.values(supportedNetworks).includes(chainId as ChainId)
-  }
-
-  function _getCreatorAddress({ chainId }: { chainId: number }) {
-    if ((chainId === supportedChainIds.LOCAL || chainId === supportedChainIds.LOCAL_ALT) && !soundCreatorAddress) {
-      throw new CreatorAddressMissingForLocalError()
-    }
-
-    if (soundCreatorAddress) {
-      return soundCreatorAddress
-    }
-
-    const key = chainId === 1 ? 'mainnet' : environment === 'staging' ? 'staging' : 'preview'
-
-    // TODO: Remove this key type assertion when we add mainnet to contractAddresses
-    return contractAddresses[key as 'preview' | 'staging'].soundCreatorV1
   }
 
   return client
