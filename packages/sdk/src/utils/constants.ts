@@ -48,6 +48,6 @@ export const contractAddresses = {
     soundEditionV1: '0x919de384453ec121030d0d759058ed1449a7fa23',
     soundCreatorV1: '0x6cd50f684f2f08faa4a7267bb9ac4a71d9464a4d',
   },
-}
+} as const
 
 export const supportedNetworks = Object.values(supportedChainIds)

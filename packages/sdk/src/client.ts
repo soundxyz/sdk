@@ -19,7 +19,14 @@ import {
   UnsupportedMinterError,
   UnsupportedNetworkError,
 } from './errors'
-import { ADDRESS_ZERO, MINTER_ROLE, minterFactoryMap, supportedChainIds, supportedNetworks } from './utils/constants'
+import {
+  ADDRESS_ZERO,
+  MINTER_ROLE,
+  minterFactoryMap,
+  supportedChainIds,
+  supportedNetworks,
+  contractAddresses,
+} from './utils/constants'
 import { getSaltAsBytes32, validateAddress } from './utils/helpers'
 import { LazyPromise } from './utils/promise'
 
