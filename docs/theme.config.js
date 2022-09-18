@@ -7,6 +7,7 @@ export default {
     key: 'Sound.xyz SDK',
     text: 'Sound.xyz SDK',
   },
+  logo: 'Sound.xyz SDK',
   docsRepositoryBase: 'https://github.com/soundxyz/sdk/blob/main/docs',
   editLink: {
     text: 'Edit this page on GitHub',
@@ -35,7 +36,7 @@ export default {
     </>
   ),
   chat: {
-    link: 'discord.gg/soundxyz',
+    link: 'https://discord.gg/soundxyz',
   },
   unstable_faviconGlyph: '✦',
 }
