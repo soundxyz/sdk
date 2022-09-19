@@ -1,5 +1,23 @@
 # @soundxyz/sdk
 
+## 0.5.0
+
+### Minor Changes
+
+- [#98](https://github.com/soundxyz/sdk/pull/98) [`e15110b`](https://github.com/soundxyz/sdk/commit/e15110b3a2ab611e91401f3167fe94eb6351c574) Thanks [@PabloSzx](https://github.com/PabloSzx)! - Rework SoundAPI connection by specifying apiEndpoint manually, by default goes to https://api.sound.xyz/graphql
+
+### Patch Changes
+
+- [#96](https://github.com/soundxyz/sdk/pull/96) [`3f16900`](https://github.com/soundxyz/sdk/commit/3f16900741b99862da755e1f3a4a99afce314043) Thanks [@PabloSzx](https://github.com/PabloSzx)! - Fix README & LICENSE on package
+
+- [#98](https://github.com/soundxyz/sdk/pull/98) [`e15110b`](https://github.com/soundxyz/sdk/commit/e15110b3a2ab611e91401f3167fe94eb6351c574) Thanks [@PabloSzx](https://github.com/PabloSzx)! - Consistent error definitions
+
+- [#98](https://github.com/soundxyz/sdk/pull/98) [`e15110b`](https://github.com/soundxyz/sdk/commit/e15110b3a2ab611e91401f3167fe94eb6351c574) Thanks [@PabloSzx](https://github.com/PabloSzx)! - Remove unused api requests
+
+- [#98](https://github.com/soundxyz/sdk/pull/98) [`e15110b`](https://github.com/soundxyz/sdk/commit/e15110b3a2ab611e91401f3167fe94eb6351c574) Thanks [@PabloSzx](https://github.com/PabloSzx)! - new "onError" option to customize handled errors, by default is console.error
+
+- [#98](https://github.com/soundxyz/sdk/pull/98) [`e15110b`](https://github.com/soundxyz/sdk/commit/e15110b3a2ab611e91401f3167fe94eb6351c574) Thanks [@PabloSzx](https://github.com/PabloSzx)! - Rework soundCreatorAddress handling to rely on given parameter
+
 ## 0.4.1
 
 ### Patch Changes
