@@ -1,5 +1,11 @@
 # @soundxyz/sdk
 
+## 0.4.1
+
+### Patch Changes
+
+- [#90](https://github.com/soundxyz/sdk/pull/90) [`3debc4d`](https://github.com/soundxyz/sdk/commit/3debc4d51675c17311d5caf302239fce5307cb13) Thanks [@PabloSzx](https://github.com/PabloSzx)! - Trim GraphQL schema into public subgraph
+
 ## 0.4.0
 
 ### Minor Changes
