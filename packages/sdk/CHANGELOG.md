@@ -1,5 +1,11 @@
 # @soundxyz/sdk
 
+## 0.5.2
+
+### Patch Changes
+
+- [`962facf`](https://github.com/soundxyz/sdk/commit/962facf919262c7d4f6adea4ab958aa119747333) Thanks [@PabloSzx](https://github.com/PabloSzx)! - Fix CommonJS build
+
 ## 0.5.1
 
 ### Patch Changes
