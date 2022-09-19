@@ -30,7 +30,14 @@ import type { ReleaseInfoQueryVariables } from './api/graphql/gql'
 import type { ContractCall, EditionConfig, MintConfig, MintSchedule } from './types'
 import type { EditionInfoStructOutput } from '@soundxyz/sound-protocol/typechain/ISoundEditionV1'
 
-export function SoundClient({ signer, provider, apiKey, apiEndpoint, soundCreatorAddress }: SoundClientConfig) {
+export function SoundClient({
+  signer,
+  provider,
+  apiKey,
+  apiEndpoint,
+  soundCreatorAddress,
+  onError = console.error,
+}: SoundClientConfig) {
   const client = {
     soundApi: SoundAPI({
       apiKey,
@@ -56,7 +63,7 @@ export function SoundClient({ signer, provider, apiKey, apiEndpoint, soundCreato
     try {
       return await editionContract.supportsInterface(interfaceIds.ISoundEditionV1)
     } catch (err) {
-      console.error(err)
+      onError(err)
       return false
     }
   }
@@ -191,7 +198,7 @@ export function SoundClient({ signer, provider, apiKey, apiEndpoint, soundCreato
 
     const { signer, userAddress } = await _requireSigner()
 
-    const eligibleMintQuantity = await eligibleQuantity({ mintSchedule, userAddress })
+    const eligibleMintQuantity = await client.eligibleQuantity({ mintSchedule, userAddress })
     if (eligibleMintQuantity < quantity) {
       throw new NotEligibleMint({
         eligibleMintQuantity,
@@ -456,7 +463,7 @@ export function SoundClient({ signer, provider, apiKey, apiEndpoint, soundCreato
           const isMinter = await minterContract.supportsInterface(interfaceIds.IMinterModule)
           return isMinter ? minterAddress : null
         } catch (err) {
-          console.error(err)
+          onError(err)
           return null
         }
       }),
@@ -571,7 +578,7 @@ export function SoundClient({ signer, provider, apiKey, apiEndpoint, soundCreato
 
   async function _requireValidSoundEdition({ editionAddress }: { editionAddress: string }): Promise<void> {
     validateAddress(editionAddress)
-    const isEdition = await isSoundEdition({ editionAddress })
+    const isEdition = await client.isSoundEdition({ editionAddress })
     if (!isEdition) {
       throw new NotSoundEditionError({ contractAddress: editionAddress })
     }

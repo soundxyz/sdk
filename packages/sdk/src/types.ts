@@ -10,6 +10,14 @@ import type { SoundAPIConfig } from './api/soundApi'
 
 export type SignerOrProvider = Signer | Provider
 
+export interface BaseSoundClientConfig {
+  soundCreatorAddress?: string
+  /**
+   * @default console.error
+   */
+  onError?: (err: unknown) => void
+}
+
 export type SoundClientConfig = (
   | {
       provider: Provider
@@ -20,9 +28,8 @@ export type SoundClientConfig = (
       signer: Signer
     }
 ) &
-  SoundAPIConfig & {
-    soundCreatorAddress?: string
-  }
+  SoundAPIConfig &
+  BaseSoundClientConfig
 
 export type MintScheduleBase = {
   editionAddress: string
