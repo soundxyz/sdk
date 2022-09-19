@@ -2,7 +2,7 @@
 
 import { buildCode } from 'bob-ts'
 import { execSync, spawn } from 'child_process'
-import { writeFile, readFile, copyFile } from 'fs/promises'
+import { writeFile, readFile, copyFile, mkdir } from 'fs/promises'
 
 execSync('pnpm graphql-codegen', {
   stdio: 'inherit',
@@ -12,6 +12,8 @@ spawn(`pnpm tsc -p tsconfig.build.json`, {
   stdio: 'inherit',
   shell: true,
 })
+
+await mkdir('dist').catch(() => null)
 
 const [pkgString] = await Promise.all([
   readFile('package.json', 'utf-8'),
