@@ -1,5 +1,11 @@
 # @soundxyz/sdk
 
+## 0.5.1
+
+### Patch Changes
+
+- [#99](https://github.com/soundxyz/sdk/pull/99) [`ac5d15d`](https://github.com/soundxyz/sdk/commit/ac5d15d8dbc27a508d993e5c25bd7fb7efbab52f) Thanks [@vigneshka](https://github.com/vigneshka)! - "Add numberMinted and use in eligibility check"
+
 ## 0.5.0
 
 ### Minor Changes
