@@ -1,7 +1,7 @@
 {
   "name": "@soundxyz/sdk",
   "version": "0.4.1",
-  "homepage": "https://www.sound.xyz",
+  "homepage": "https://docs.sound.xyz",
   "repository": {
     "type": "git",
     "url": "https://github.com/soundxyz/sdk",
