@@ -28,7 +28,7 @@ export class UnsupportedNetworkError extends Error {
 }
 
 export class CreatorAddressMissing extends Error {
-  readonly name = 'CreatorAddressMissing'
+  readonly name = 'CreatorAddressMissingError'
 
   constructor() {
     super('"soundCreatorAddress" was not specified and it\'s required for the requested action')
@@ -72,7 +72,7 @@ export class NotSoundEditionError extends Error {
 }
 
 export class SoundNotFoundError extends Error {
-  readonly name = 'SoundNotFound'
+  readonly name = 'SoundNotFoundError'
 
   readonly contractAddress: string
   readonly editionId: string | null
@@ -117,7 +117,7 @@ export class SoundAPILoginError extends Error {
 }
 
 export class UnexpectedApiResponse extends Error {
-  readonly name = 'UnexpectedApiResponse'
+  readonly name = 'UnexpectedApiResponseError'
 
   readonly originalError?: Error
 
@@ -153,7 +153,7 @@ export class InvalidQuantityError extends Error {
 }
 
 export class NotEligibleMint extends Error {
-  readonly name = 'NotEligibleMint'
+  readonly name = 'NotEligibleMintError'
 
   readonly mintSchedule: MintScheduleBase
   readonly userAddress: string
@@ -177,7 +177,7 @@ export class NotEligibleMint extends Error {
 }
 
 export class MissingApiKey extends Error {
-  readonly name = 'MissingApiKey'
+  readonly name = 'MissingApiKeyError'
 
   constructor() {
     super('Missing "apiKey" while creating SoundAPI instance')
