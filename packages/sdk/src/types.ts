@@ -21,7 +21,7 @@ export type SoundClientConfig = (
     }
 ) &
   SoundAPIConfig & {
-    soundCreatorAddress: string
+    soundCreatorAddress?: string
   }
 
 export type MintScheduleBase = {
