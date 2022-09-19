@@ -3,16 +3,16 @@ import type { GraphQLExecutionErrors, MintScheduleBase } from './types'
 export class MissingSignerError extends Error {
   readonly name = 'MissingSignerError'
 
-  constructor(message?: string) {
-    super(message || 'Must provide signer')
+  constructor() {
+    super('Must provide signer')
   }
 }
 
 export class MissingSignerOrProviderError extends Error {
   readonly name = 'MissingSignerOrProviderError'
 
-  constructor(message?: string) {
-    super(message || 'Must provide signer or provider')
+  constructor() {
+    super('Must provide signer or provider')
   }
 }
 
@@ -27,27 +27,35 @@ export class UnsupportedNetworkError extends Error {
   }
 }
 
-export class CreatorAddressMissingForLocalError extends Error {
-  readonly name = 'CreatorAddressMissingForLocalError'
+export class CreatorAddressMissing extends Error {
+  readonly name = 'CreatorAddressMissing'
 
-  constructor(message?: string) {
-    super(message || 'Must pass in soundCreatorAddress when using with a local network')
+  constructor() {
+    super('"soundCreatorAddress" was not specified and it\'s required for the requested action')
   }
 }
 
 export class InvalidAddressError extends Error {
   readonly name = 'InvalidAddressError'
 
-  constructor(message?: string) {
-    super(message || 'Must provide valid address')
+  readonly address: string
+
+  constructor({ address }: { address: string }) {
+    super(`Invalid address: ${JSON.stringify(address)}`)
+
+    this.address = address
   }
 }
 
 export class UnsupportedMinterError extends Error {
   readonly name = 'UnsupportedMinterError'
 
-  constructor(message?: string) {
-    super(message || 'Minter not handled by sdk')
+  readonly interfaceId: string
+
+  constructor({ interfaceId }: { interfaceId: string }) {
+    super('Minter not handled by sdk')
+
+    this.interfaceId = interfaceId
   }
 }
 
@@ -55,6 +63,7 @@ export class NotSoundEditionError extends Error {
   readonly name = 'NotSoundEditionError'
 
   readonly contractAddress: string
+
   constructor({ contractAddress }: { contractAddress: string }) {
     super('Address must be a sound edition contract')
 
@@ -132,19 +141,20 @@ export class UnexpectedApiResponse extends Error {
 }
 
 export class InvalidQuantityError extends Error {
-  constructor(message?: string) {
-    super(message || 'Must provide valid quantity')
-    this.name = 'InvalidQuantityError'
-  }
-}
+  readonly name = 'InvalidQuantityError'
 
-export class NotFoundError extends Error {
-  constructor(message?: string) {
-    super(message || 'Requested resource not found')
+  readonly quantity: number
+
+  constructor({ quantity }: { quantity: number }) {
+    super('Must provide valid quantity')
+
+    this.quantity = quantity
   }
 }
 
 export class NotEligibleMint extends Error {
+  readonly name = 'NotEligibleMint'
+
   readonly mintSchedule: MintScheduleBase
   readonly userAddress: string
   readonly eligibleMintQuantity: number
@@ -167,6 +177,8 @@ export class NotEligibleMint extends Error {
 }
 
 export class MissingApiKey extends Error {
+  readonly name = 'MissingApiKey'
+
   constructor() {
     super('Missing "apiKey" while creating SoundAPI instance')
   }

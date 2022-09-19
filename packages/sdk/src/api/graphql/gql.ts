@@ -1949,19 +1949,6 @@ export type WhitelistRules =
   | RequireArtistSoundHolder
   | RequireTwitterVerification
 
-export type GenerateAuthChallengeMutationVariables = Exact<{
-  publicAddress: Scalars['String']
-}>
-
-export type GenerateAuthChallengeMutation = { generateAuthChallenge: number }
-
-export type VerifyAuthChallengeMutationVariables = Exact<{
-  publicAddress: Scalars['String']
-  signedMessage: Scalars['String']
-}>
-
-export type VerifyAuthChallengeMutation = { verifyAuthChallenge: string }
-
 export type MerkleProofQueryVariables = Exact<{
   root: Scalars['String']
   unhashedLeaf: Scalars['String']
@@ -2028,8 +2015,6 @@ export type TestQueryVariables = Exact<{ [key: string]: never }>
 
 export type TestQuery = { __typename: 'Query' }
 
-export const GenerateAuthChallenge = `mutation GenerateAuthChallenge($publicAddress:String!){generateAuthChallenge(publicAddress:$publicAddress)}`
-export const VerifyAuthChallenge = `mutation VerifyAuthChallenge($publicAddress:String!$signedMessage:String!){verifyAuthChallenge(publicAddress:$publicAddress signedMessage:$signedMessage)}`
 export const MerkleProof = `query MerkleProof($root:String!$unhashedLeaf:String!){merkleTreeProof(root:$root unhashedLeaf:$unhashedLeaf){proof}}`
 export const ReleaseInfo = `query ReleaseInfo($contractAddress:Address!$editionId:String){release:releaseContract(contractAddress:$contractAddress editionId:$editionId){id contractAddress editionId type externalUrl openseaUrl layloUrl title behindTheMusic season totalRaised totalRaisedPrimaryUsd totalRaisedSecondaryUsd genre{id name}track{id duration normalizedPeaks}artist{id gemCollectionUrl openseaCollectionUrl season soundHandle spotifyUrl bannerImage{id url}user{id publicAddress description displayName email twitterHandle avatar{id url}bannerImage{id url}}}rewards{id description numOfBackers price title}coverImage{id url}goldenEggImage{id url}}}`
 export const AudioFromTrack = `query AudioFromTrack($trackId:UUID!){audioFromTrack(trackId:$trackId){id duration audio{id url}revealTime}}`

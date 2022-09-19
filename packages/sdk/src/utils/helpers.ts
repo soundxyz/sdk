@@ -4,7 +4,7 @@ import keccak256 from 'keccak256'
 
 export function validateAddress(contractAddress: string) {
   if (!isAddress(contractAddress)) {
-    throw new InvalidAddressError(`Invalid address: ${contractAddress}`)
+    throw new InvalidAddressError({ address: contractAddress })
   }
 }
 
