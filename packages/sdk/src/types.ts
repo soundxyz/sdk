@@ -1,18 +1,22 @@
 import type { BigNumber, BigNumberish } from '@ethersproject/bignumber'
 import type { Signer } from '@ethersproject/abstract-signer'
 import type { Provider } from '@ethersproject/abstract-provider'
-import type { ApiEnvironments, supportedChainIds } from './utils/constants'
 import type { interfaceIds } from '@soundxyz/sound-protocol'
+import type { SoundAPIConfig } from './api/soundApi'
 
 /*********************************************************
                 PROTOCOL TYPES
  ********************************************************/
 
-type ValueOf<T> = T[keyof T]
-
-export type ChainId = ValueOf<typeof supportedChainIds>
-
 export type SignerOrProvider = Signer | Provider
+
+export interface BaseSoundClientConfig {
+  soundCreatorAddress?: string
+  /**
+   * @default console.error
+   */
+  onError?: (err: unknown) => void
+}
 
 export type SoundClientConfig = (
   | {
@@ -23,14 +27,9 @@ export type SoundClientConfig = (
       provider?: Provider
       signer: Signer
     }
-) & {
-  apiKey?: string
-  /**
-   * @default "production"
-   */
-  environment?: ApiEnvironments
-  soundCreatorAddress?: string
-}
+) &
+  SoundAPIConfig &
+  BaseSoundClientConfig
 
 export type MintScheduleBase = {
   editionAddress: string
