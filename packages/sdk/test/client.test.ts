@@ -159,6 +159,51 @@ describe('isSoundEdition', () => {
   })
 })
 
+describe('numberMinted', () => {
+  it('returns the number of tokens minted', async () => {
+    let minter = RangeEditionMinter__factory.connect(rangeEditionMinter.address, artistWallet)
+    const startTime = now()
+    const MINT_ID = 0
+    const minterCalls = [
+      {
+        contractAddress: rangeEditionMinter.address,
+        calldata: minter.interface.encodeFunctionData('createEditionMint', [
+          precomputedEditionAddress,
+          PRICE,
+          startTime,
+          startTime + ONE_HOUR, // cutoffTime
+          startTime + ONE_HOUR * 2, // endTime
+          0, // affiliateFeeBPS,
+          4, // maxMintableLower,
+          5, // maxMintableUpper,
+          2, // maxMintablePerAccount
+        ]),
+      },
+    ]
+    await setupTest({ minterCalls })
+
+    // numberMintedBefore shows 0
+    const numberMintedBefore = await client.numberMinted({
+      editionAddress: precomputedEditionAddress,
+      userAddress: buyerWallet.address,
+    })
+    expect(numberMintedBefore).to.equal(0)
+
+    // mint one
+    minter = RangeEditionMinter__factory.connect(rangeEditionMinter.address, buyerWallet)
+    await minter.mint(precomputedEditionAddress, MINT_ID, 1, NULL_ADDRESS, {
+      value: PRICE,
+    })
+
+    // numberMintedAfter shows 1
+    const numberMintedAfter = await client.numberMinted({
+      editionAddress: precomputedEditionAddress,
+      userAddress: buyerWallet.address,
+    })
+    expect(numberMintedAfter).to.equal(1)
+  })
+})
+
 describe('eligibleQuantity: single RangeEditionMinter instance', () => {
   it(`Eligible quantity is user specific and changes with mint`, async () => {
     const startTime = now()

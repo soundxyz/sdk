@@ -46,6 +46,7 @@ export function SoundClient({
     isSoundEdition,
     mintSchedules,
     activeMintSchedules,
+    numberMinted,
     eligibleQuantity,
     mint,
     createEdition,
@@ -95,6 +96,22 @@ export function SoundClient({
       .sort((a, b) => a.startTime - b.startTime)
   }
 
+  async function numberMinted({
+    editionAddress,
+    userAddress,
+  }: {
+    editionAddress: string
+    userAddress: string
+  }): Promise<number> {
+    await _requireValidSoundEdition({ editionAddress })
+
+    const { signerOrProvider } = await _requireSignerOrProvider()
+
+    const editionContract = SoundEditionV1__factory.connect(editionAddress, signerOrProvider)
+
+    return await (await editionContract.numberMinted(userAddress)).toNumber()
+  }
+
   async function eligibleQuantity({
     mintSchedule,
     timestamp = Math.floor(Date.now() / 1000),
@@ -128,39 +145,8 @@ export function SoundClient({
       }
     }
 
-    const { signerOrProvider } = await _requireSignerOrProvider()
-    // look up max mintable per account and user's already minted tally
-    switch (mintSchedule.mintType) {
-      case 'RangeEdition': {
-        const userBalanceBigNum = await RangeEditionMinter__factory.connect(
-          mintSchedule.minterAddress,
-          signerOrProvider,
-        ).mintedTallies(mintSchedule.editionAddress, mintSchedule.mintId, userAddress)
-
-        const userMintedBalance = userBalanceBigNum.toNumber()
-        return mintSchedule.maxMintablePerAccount - userMintedBalance
-      }
-
-      case 'MerkleDrop': {
-        const merkleDropMinter = MerkleDropMinter__factory.connect(mintSchedule.minterAddress, signerOrProvider)
-        const { merkleRootHash } = await merkleDropMinter.mintInfo(mintSchedule.editionAddress, mintSchedule.mintId)
-
-        const proof = await getMerkleProof({ root: merkleRootHash, userAddress })
-
-        if (!proof?.length) return 0
-
-        const userBalanceBigNum = await MerkleDropMinter__factory.connect(
-          mintSchedule.minterAddress,
-          signerOrProvider,
-        ).mintedTallies(mintSchedule.editionAddress, mintSchedule.mintId, userAddress)
-
-        const userMintedBalance = userBalanceBigNum.toNumber()
-        return mintSchedule.maxMintablePerAccount - userMintedBalance
-      }
-
-      default:
-        throw new Error('Unimplemented')
-    }
+    const alreadyMinted = await numberMinted({ editionAddress: mintSchedule.editionAddress, userAddress })
+    return mintSchedule.maxMintablePerAccount - alreadyMinted
   }
 
   const MerkleProofCache: Record<string, string[] | null> = {}
