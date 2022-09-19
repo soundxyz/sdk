@@ -89,8 +89,8 @@ beforeEach(async () => {
 
   client = SoundClient({
     provider: ethers.provider,
-    apiKey: '123',
-    environment: 'preview',
+    apiKey: '_',
+    apiEndpoint: 'http://_/graphql',
     soundCreatorAddress: soundCreator.address,
   })
 })
@@ -143,7 +143,7 @@ export async function setupTest({ minterCalls = [] }: { minterCalls?: ContractCa
 describe('isSoundEdition', () => {
   it("Should throw error if the address isn't valid", async () => {
     await client.isSoundEdition({ editionAddress: '0x123' }).catch((error) => {
-      expect(error.message).to.equal('Invalid address: 0x123')
+      expect(error.message).to.equal('Invalid address: "0x123"')
     })
   })
 
