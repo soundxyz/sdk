@@ -109,7 +109,7 @@ export function SoundClient({
 
     const editionContract = SoundEditionV1__factory.connect(editionAddress, signerOrProvider)
 
-    return await (await editionContract.numberMinted(userAddress)).toNumber()
+    return (await editionContract.numberMinted(userAddress)).toNumber()
   }
 
   async function eligibleQuantity({
@@ -395,7 +395,7 @@ export function SoundClient({
 
             if (!data) throw new UnexpectedApiResponse(`GraphQL Errors found`, { graphqlErrors: response.errors })
 
-            return data
+            return data.audioFromTrack
           }),
         ),
       }
@@ -543,7 +543,7 @@ export function SoundClient({
 
   async function _requireSigner(): Promise<{ signer: Signer; userAddress: string }> {
     if (signer) {
-      const userAddress = await signer?.getAddress()
+      const userAddress = await signer.getAddress()
 
       return { signer, userAddress }
     }
