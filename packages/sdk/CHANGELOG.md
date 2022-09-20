@@ -1,5 +1,11 @@
 # @soundxyz/sdk
 
+## 0.5.3
+
+### Patch Changes
+
+- [#95](https://github.com/soundxyz/sdk/pull/95) [`4c8bd16`](https://github.com/soundxyz/sdk/commit/4c8bd1657e5547694ede71ecce8a32222f11f8c8) Thanks [@PabloSzx](https://github.com/PabloSzx)! - [BREAKING CHANGE] Remove not-needed audioFromTrack in-between object of editionInfo.trackAudio
+
 ## 0.5.2
 
 ### Patch Changes
