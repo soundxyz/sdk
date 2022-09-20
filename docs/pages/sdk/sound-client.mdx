@@ -100,13 +100,13 @@ const userAddress = '0x...'
 
 const editionAddress = '0x...'
 
-const activeMintSchedule = (await client.activeMintSchedules({ editionAddress })).shift()
+const mintSchedule = (await client.activeMintSchedules({ editionAddress })).shift()
 
-if (!activeMintSchedule) throw Error(`No active mint schedule available!`)
+if (!mintSchedule) throw Error(`No active mint schedule available!`)
 
 // number
 const currentEligibleQuantity = await client.eligibleQuantity({
-  editionAddress,
+  mintSchedule,
   userAddress,
   /**
    * Customize timestamp used for validation of mint schedule range times
