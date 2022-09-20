@@ -24,13 +24,13 @@ npm install @soundxyz/sdk @soundxyz/sound-protocol
 
 This library is designed to be isomorphic, so that it can be used both on server-side or client-side leveraging the [ethers.js](https://ethers.org) ecosystem.
 
-On client-side it can be used alongside web3 integrations that follow [ethers](https://www.npmjs.com/package/ethers) like [wagmi](https://wagmi.sh/), which allows connection the user's wallet and using the contracts directly from the browsers.
+On client-side it can be used alongside web3 integrations that follow [ethers](https://www.npmjs.com/package/ethers) like [wagmi](https://wagmi.sh/), which allows connecting the user's wallet and using the contracts directly from the browsers.
 
 On server-side it's required to use an [ethers supported provider](https://docs.ethers.io/v5/api-keys/), we use and recommend [Alchemy](https://www.alchemy.com/).
 
 ### SoundClient
 
-Most of the library is contained within `SoundClient`, which based on the given `signer` or `provider` certain functions are available.
+Most of the library is contained within [`SoundClient`](/sdk/sound-client), which based on the given `signer` or `provider` certain functions are available.
 
 ```ts
 import { useAccount } from 'wagmi'

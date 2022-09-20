@@ -293,6 +293,22 @@ const trackAudio = await editionApiInfo.trackAudio
 Get the expected edition address to be set for a to-be-created edition contract based on the deployer address and given `salt`.
 
 ```ts
+import { contractAddresses } from '@soundxyz/sound-protocol'
+
+import { EditionConfig, MintConfig, SoundClient } from '@soundxyz/sdk'
+import { contractAddresses } from '@soundxyz/sound-protocol'
+
+// ...
+
+const client = SoundClient({
+  // ...
+
+  // Specify the address of the contract to be used for the sound creation
+  soundCreatorAddress: contractAddresses.mainnet.soundCreatorV1,
+})
+
+// ..
+
 const salt = crypto.randomUUID()
 
 const {
