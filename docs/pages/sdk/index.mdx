@@ -1,0 +1,86 @@
+# Sound.xyz SDK
+
+Official Sound.xyz development tools for the JavaScript ecosystem, with first-class support of [TypeScript](https://www.typescriptlang.org) and [ESM](https://nodejs.org/api/esm.html)
+
+## Install
+
+`@soundxyz/sdk` [![@soundxyz/sdk](https://badge.fury.io/js/@soundxyz%2Fsdk.svg)](https://badge.fury.io/js/@soundxyz%2Fsdk)
+
+`@soundxyz/sound-protocol` [![@soundxyz/sound-protocol](https://badge.fury.io/js/@soundxyz%2Fsound-protocol.svg)](https://badge.fury.io/js/@soundxyz%2Fsound-protocol)
+
+```sh
+pnpm add @soundxyz/sdk @soundxyz/sound-protocol
+```
+
+```sh
+yarn add @soundxyz/sdk @soundxyz/sound-protocol
+```
+
+```sh
+npm install @soundxyz/sdk @soundxyz/sound-protocol
+```
+
+## Usage
+
+This library is designed to be isomorphic, so that it can be used both on server-side or client-side leveraging the [ethers.js](https://ethers.org) ecosystem.
+
+On client-side it can be used alongside web3 integrations that follow [ethers](https://www.npmjs.com/package/ethers) like [wagmi](https://wagmi.sh/), which allows connection the user's wallet and using the contracts directly from the browsers.
+
+On server-side it's required to use an [ethers supported provider](https://docs.ethers.io/v5/api-keys/), we use and recommend [Alchemy](https://www.alchemy.com/).
+
+### SoundClient
+
+Most of the library is contained within `SoundClient`, which based on the given `signer` or `provider` certain functions are available.
+
+```ts
+import { useAccount } from 'wagmi'
+
+import { SoundClient } from '@soundxyz/sdk'
+
+function Component() {
+  const account = useAccount()
+  // ...
+
+  const signer = await account.connector?.getSigner()
+
+  // ...
+
+  const client = SoundClient({
+    signer,
+  })
+}
+```
+
+```ts
+import { StaticJsonRpcProvider } from '@ethersproject/providers'
+import { SoundClient } from '@soundxyz/sdk'
+
+const provider = new StaticJsonRpcProvider({
+  url: '[__]',
+  allowGzip: true,
+})
+
+const client = SoundClient({
+  provider,
+})
+```
+
+#### Sound.xyz API
+
+The SDK provides direct connection with [www.sound.xyz](https://www.sound.xyz) API, which needs an `API Key`. It's usage is optional, but certain functions like getting associated audio or images will require it.
+
+To get an `API Key` contact us on our discord server [`discord.gg/soundxyz`](https://discord.gg/soundxyz)
+
+```ts
+import { SoundClient } from '@soundxyz/sdk'
+
+// ...
+
+const client = SoundClient({
+  // At least one has to be specified
+  signer,
+  provider,
+
+  apiKey: process.env.SOUNDXYZ_API_KEY,
+})
+```

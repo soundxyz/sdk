@@ -1,0 +1,428 @@
+# Sound.xyz SDK - SoundClient
+
+## isSoundEdition
+
+> Requires either `signer` or `provider`
+
+Check if given address is a supported contract
+
+```ts
+// true | false
+const isAddressSoundEdition = await client.isSoundEdition({
+  editionAddress: '0x...',
+})
+```
+
+## mintSchedules
+
+> Requires either `signer` or `provider`
+
+Check all the schedules of a given contract
+
+```ts
+export type MintScheduleBase = {
+  editionAddress: string
+  minterAddress: string
+  mintId: number
+  startTime: number
+  endTime: number
+  mintPaused: boolean
+  price: BigNumber
+  maxMintablePerAccount: number
+  totalMinted: number
+}
+
+export type RangeEditionSchedule = MintScheduleBase & {
+  mintType: 'RangeEdition'
+  maxMintableLower: number
+  maxMintableUpper: number
+  cutoffTime: number
+  maxMintable: (unixTimestamp?: number) => number
+}
+
+export type MerkleDropSchedule = MintScheduleBase & {
+  mintType: 'MerkleDrop'
+  maxMintable: number
+  merkleRoot: string
+}
+
+export type MintSchedule = RangeEditionSchedule | MerkleDropSchedule
+
+// MintSchedule[]
+const editionMintSchedules = await client.mintSchedules({
+  editionAddress: '0x...',
+})
+```
+
+## activeMintSchedules
+
+> Requires either `signer` or `provider`
+
+Get all active minter schedules for a given edition and timestamp (by default current timestamp)
+
+```ts
+const activeEditionMintSchedules = await client.activeMintSchedules({
+  editionAddress: '0x...',
+  /**
+   * Specify custom timestamp to be used to check for active schedules in given timestamp
+   * By default uses current timestamp
+   */
+  // timestamp: ...
+})
+```
+
+## numberMinted
+
+> Requires either `signer` or `provider`
+
+Get the currently amount of minted NFTs of the given user address in specified edition
+
+```ts
+const userAddress = '0x...'
+
+const editionAddress = '0x...'
+
+// number
+const userNumberMinted = await client.numberMinted({
+  editionAddress,
+  userAddress,
+})
+```
+
+## eligibleQuantity
+
+> Requires either `signer` or `provider`
+
+Get the current available amount of NFTs available for the given user address
+
+```ts
+const userAddress = '0x...'
+
+const editionAddress = '0x...'
+
+const activeMintSchedule = (await client.activeMintSchedules({ editionAddress })).shift()
+
+if (!activeMintSchedule) throw Error(`No active mint schedule available!`)
+
+// number
+const currentEligibleQuantity = await client.eligibleQuantity({
+  editionAddress,
+  userAddress,
+  /**
+   * Customize timestamp used for validation of mint schedule range times
+   *  By default uses current timestamp
+   */
+  // timestamp: ...
+})
+```
+
+## mint
+
+> Requires `signer` to be specified
+
+Mint a edition given the specified schedule and using given signer
+
+```ts
+const client = SoundClient({
+  // ...
+  signer,
+
+  // Minting a MerkleDrop schedule currently requires a connection with the Sound.xyz API
+  apiKey: process.env.SOUNDXYZ_API_KEY,
+})
+
+// ...
+
+const editionAddress = '0x...'
+
+const mintSchedule = (await client.activeMintSchedules({ editionAddress })).shift()
+
+if (!mintSchedule) throw Error(`No active mint schedule available!`)
+
+// Transaction
+const mintTransaction = await client.mint({
+  mintSchedule,
+  quantity: 1,
+
+  // affiliate: ...
+
+  // gasLimit: ...
+  // maxFeePerGas: ...
+  // maxPriorityFeePerGas: ....
+})
+```
+
+```ts
+interface Transaction {
+  hash: string
+
+  // Only if a transaction has been mined
+  blockNumber?: number
+  blockHash?: string
+  timestamp?: number
+
+  confirmations: number
+
+  // Not optional (as it is in Transaction)
+  from: string
+
+  // The raw transaction
+  raw?: string
+
+  // This function waits until the transaction has been mined
+  wait: (confirmations?: number) => Promise<TransactionReceipt>
+}
+```
+
+## editionInfo
+
+Get information associated with the given edition address, both for `contract` and `Sound.xyz API` information.
+
+All the main sub-fields are `Lazy Promises` that are only evaluated once they are `awaited`.
+
+### `editionInfo({ contractAddress }).contract`
+
+> Requires either `signer` or `provider`
+
+```ts
+/**
+    baseURI: string;
+    contractURI: string;
+    name: string;
+    symbol: string;
+    fundingRecipient: string;
+    editionMaxMintable: number;
+    editionMaxMintableUpper: number;
+    editionMaxMintableLower: number;
+    editionCutoffTime: number;
+    metadataModule: string;
+    mintRandomness: BigNumber;
+    royaltyBPS: number;
+    mintRandomnessEnabled: boolean;
+    mintConcluded: boolean;
+    isMetadataFrozen: boolean;
+    nextTokenId: BigNumber;
+    totalBurned: BigNumber;
+    totalMinted: BigNumber;
+    totalSupply: BigNumber;
+ */
+const contractInfo = await client.editionInfo({
+  contractAddress: '0x...',
+}).contract
+```
+
+### `editionInfo({ contractAddress }).api`
+
+> Requires `Sound.xyz API Key`
+
+```ts
+// EditionApiInfo
+const editionApiInfo = await client.editionInfo({
+  contractAddress: '0x...',
+}).api
+```
+
+```ts
+export type EditionApiInfo = {
+  id: string
+  contractAddress: string
+  editionId?: string | null
+  type: 'ALBUM' | 'COMPILATION' | 'EP' | 'PLAYLIST' | 'SINGLE'
+  externalUrl?: string | null
+  openseaUrl?: string | null
+  layloUrl?: string | null
+  title: string
+  behindTheMusic: string
+  season?: string | null
+  totalRaised: string
+  totalRaisedPrimaryUsd: number
+  totalRaisedSecondaryUsd: number
+  genre: { id: string; name: string }
+  track: { id: string; duration: number; normalizedPeaks: Array<number> }
+  artist: {
+    id: string
+    gemCollectionUrl?: string | null
+    openseaCollectionUrl?: string | null
+    season?: string | null
+    soundHandle?: string | null
+    spotifyUrl?: string | null
+    bannerImage?: { id: string; url: string } | null
+    user: {
+      id: string
+      publicAddress: string
+      description?: string | null
+      displayName?: string | null
+      email?: string | null
+      twitterHandle?: string | null
+      avatar?: { id: string; url: string } | null
+      bannerImage?: { id: string; url: string } | null
+    }
+  }
+  rewards: Array<{ id: string; description: string; numOfBackers: number; price: string; title: string }>
+  coverImage: { id: string; url: string }
+  goldenEggImage: { id: string; url: string }
+}
+```
+
+### `editionInfo({ contractAddress }).api.trackAudio`
+
+> Requires `Sound.xyz API Key`
+
+Due to the nature of the editions associated music being revealed after specific dates, to get the track information it is required an extra step after getting the initial edition information.
+
+```ts
+const editionApiInfo = await client.editionInfo({
+  contractAddress: '0x...',
+}).api
+
+/**
+ *  {
+ *     id: string;
+ *     duration: number;
+ *     revealTime: number;
+ *     audio?: { id: string; url: string } | null
+ *  }
+ */
+const trackAudio = await editionApiInfo.trackAudio
+```
+
+## expectedEditionAddress
+
+> Requires either `signer` or `provider`
+
+Get the expected edition address to be set for a to-be-created edition contract based on the deployer address and given `salt`.
+
+```ts
+const salt = crypto.randomUUID()
+
+const {
+  // Expected edition contract address
+  editionAddress,
+  // Does the edition contract already exists
+  exists,
+} = await client.expectedEditionAddress({
+  deployer: '0x...',
+  salt,
+})
+```
+
+## createEdition
+
+> Requires `signer` to be specified
+
+Create an edition based on the given configurations
+
+```ts
+export type EditionConfig = {
+  name: string
+  symbol: string
+  metadataModule: string
+  baseURI: string
+  contractURI: string
+  fundingRecipient: string
+  royaltyBPS: number
+  editionMaxMintableLower: number
+  editionMaxMintableUpper: number
+  editionCutoffTime: number
+  shouldFreezeMetadata: boolean
+  shouldEnableMintRandomness: boolean
+}
+```
+
+```ts
+export type MintConfigBase = {
+  minterAddress: string
+  price: BigNumberish
+  startTime: number
+  endTime: number
+  affiliateFeeBPS: number
+}
+
+export type MerkleDropConfig = MintConfigBase & {
+  mintType: 'MerkleDrop'
+  merkleRoot: string
+  maxMintable: number
+  maxMintablePerAccount: number
+}
+
+export type RangeEditionConfig = MintConfigBase & {
+  mintType: 'RangeEdition'
+  cutoffTime: number
+  maxMintableLower: number
+  maxMintableUpper: number
+  maxMintablePerAccount: number
+}
+
+export type MintConfig = MerkleDropConfig | RangeEditionConfig
+```
+
+```ts
+import { EditionConfig, MintConfig, SoundClient } from '@soundxyz/sdk'
+import { contractAddresses } from '@soundxyz/sound-protocol'
+
+// ...
+
+const client = SoundClient({
+  signer,
+
+  // Specify the address of the contract to be used for the sound creation
+  soundCreatorAddress: contractAddresses.mainnet.soundCreatorV1,
+})
+
+const salt = '...'
+
+const editionConfig: EditionConfig = {
+  name: '[Edition title] ...',
+  // ...
+}
+
+const mintConfigs: MintConfig[] = []
+
+// ...
+
+mintConfigs.push({
+  mintType: 'RangeEdition',
+  minterAddress: contractAddresses.mainnet.rangeEditionMinter,
+  // ...
+})
+
+// ...
+
+mintConfigs.push({
+  mintType: 'MerkleDrop',
+  minterAddress: contractAddresses.mainnet.merkleDropMinter,
+  price: 0,
+  // ...
+})
+
+// ...
+
+// Transaction
+const transaction = await client.createEdition({
+  editionConfig,
+  mintConfigs,
+  salt,
+})
+```
+
+```ts
+interface Transaction {
+  hash: string
+
+  // Only if a transaction has been mined
+  blockNumber?: number
+  blockHash?: string
+  timestamp?: number
+
+  confirmations: number
+
+  // Not optional (as it is in Transaction)
+  from: string
+
+  // The raw transaction
+  raw?: string
+
+  // This function waits until the transaction has been mined
+  wait: (confirmations?: number) => Promise<TransactionReceipt>
+}
+```
