@@ -364,6 +364,9 @@ import { contractAddresses } from '@soundxyz/sound-protocol'
 
 const client = SoundClient({
   signer,
+
+  // Specify the address of the contract to be used for the sound creation
+  soundCreatorAddress: contractAddresses.mainnet.soundCreatorV1,
 })
 
 const salt = '...'
