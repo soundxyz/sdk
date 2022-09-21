@@ -10,12 +10,67 @@ import type { SoundAPIConfig } from './api/soundApi'
 
 export type SignerOrProvider = Signer | Provider
 
+export type MerkleProofGetter = ({
+  merkleRootHash,
+  userAddress,
+}: {
+  merkleRootHash: string
+  userAddress: string
+}) => Promise<string[] | null> | string[] | null
+
+export interface MintOptions {
+  /**
+   * Mint Schedule to mint froms
+   */
+  mintSchedule: MintSchedule
+
+  /**
+   * Amount of NFTs to be minted
+   */
+  quantity: number
+
+  /**
+   * Optional affiliate address
+   */
+  affiliate?: string
+
+  /**
+   * Customize contract's call gas limit
+   */
+  gasLimit?: BigNumberish
+
+  /**
+   * Customize contract's call max fee per gas
+   */
+  maxFeePerGas?: BigNumberish
+
+  /**
+   * Customize contract's call max priority fee per gas
+   */
+
+  maxPriorityFeePerGas?: BigNumberish
+
+  /**
+   * Customize Merkle Proof to be used for merkle drops
+   *
+   * @default SoundAPI.merkleProof
+   */
+  merkleProof?: MerkleProofGetter
+}
+
 export interface BaseSoundClientConfig {
   soundCreatorAddress?: string
   /**
    * @default console.error
    */
   onError?: (err: unknown) => void
+
+  /**
+   * Customize Merkle Proof to be used for merkle drops
+   *
+   * @default SoundAPI.merkleProof
+   */
+  merkleProof?: MerkleProofGetter
 }
 
 export type SoundClientConfig = (

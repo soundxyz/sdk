@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import { MissingApiKey, UnexpectedApiResponse } from '../errors'
+import { MissingApiKey, SoundAPIGraphQLError, UnexpectedApiResponse } from '../errors'
 import {
   AudioFromTrack,
   AudioFromTrackQuery,
@@ -105,13 +105,15 @@ export function SoundAPI({ apiEndpoint = 'https://api.sound.xyz/graphql', apiKey
       })
     },
     async merkleProof({ root, userAddress }: { root: string; userAddress: string }) {
-      const { data } = await graphqlRequest<MerkleProofQuery, MerkleProofQueryVariables>({
+      const { data, errors } = await graphqlRequest<MerkleProofQuery, MerkleProofQueryVariables>({
         query: MerkleProof,
         variables: {
           root,
           unhashedLeaf: userAddress,
         },
       })
+
+      if (errors) throw new SoundAPIGraphQLError({ graphqlErrors: errors })
 
       if (!data?.merkleTreeProof) return null
 

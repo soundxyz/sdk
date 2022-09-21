@@ -116,6 +116,18 @@ export class SoundAPILoginError extends Error {
   }
 }
 
+export class SoundAPIGraphQLError extends Error {
+  readonly name = 'SoundAPIGraphQLError'
+
+  readonly graphqlErrors: GraphQLExecutionErrors
+
+  constructor({ graphqlErrors }: { graphqlErrors: GraphQLExecutionErrors }) {
+    super('Sound.xyz API GraphQL Error')
+
+    this.graphqlErrors = graphqlErrors
+  }
+}
+
 export class UnexpectedApiResponse extends Error {
   readonly name = 'UnexpectedApiResponseError'
 
