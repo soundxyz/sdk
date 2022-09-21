@@ -625,13 +625,12 @@ describe('mint', () => {
         ethers.provider,
       ).balanceOf(buyerWallet.address)
 
-      // Mock merkle proof api call
-      client.soundApi.merkleProof = async ({ userAddress }) =>
-        merkleTestHelper.getProof({ merkleTree, address: userAddress })
-
       await client.mint({
         mintSchedule: mintSchedules[0],
         quantity,
+        merkleProof({ userAddress }) {
+          return merkleTestHelper.getProof({ merkleTree, address: userAddress })
+        },
       })
 
       const finalBalance = await SoundEditionV1__factory.connect(precomputedEditionAddress, ethers.provider).balanceOf(
@@ -641,15 +640,14 @@ describe('mint', () => {
     })
 
     it('Should throw error if merkle proof is null', async () => {
-      // Set up client so it fetches an empty merkle tree
-      client.soundApi.merkleProof = async ({ userAddress }) =>
-        merkleTestHelper.getProof({ merkleTree: merkleTestHelper.emptyMerkleTree, address: userAddress })
-
       // Test client throws expected error
       await client
         .mint({
           mintSchedule: mintSchedules[0],
           quantity: 1,
+          merkleProof({ userAddress }) {
+            return merkleTestHelper.getProof({ merkleTree, address: userAddress })
+          },
         })
         .catch((error) => {
           expect(error).instanceOf(NotEligibleMint)
