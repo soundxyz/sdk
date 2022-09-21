@@ -180,7 +180,7 @@ export function SoundClient({
     maxPriorityFeePerGas?: BigNumberish
   }): Promise<ContractTransaction> {
     await _requireValidSoundEdition({ editionAddress: mintSchedule.editionAddress })
-    if (quantity <= 0) throw new InvalidQuantityError({ quantity })
+    if (quantity <= 0 || Math.floor(quantity) !== quantity) throw new InvalidQuantityError({ quantity })
 
     const { signer, userAddress } = await _requireSigner()
 
