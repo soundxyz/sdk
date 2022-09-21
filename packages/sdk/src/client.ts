@@ -349,9 +349,9 @@ export function SoundClient({
       editionConfig.contractURI,
       editionConfig.fundingRecipient,
       editionConfig.royaltyBPS,
-      editionConfig.editionMaxMintableLower,
-      editionConfig.editionMaxMintableUpper,
-      editionConfig.editionCutoffTime,
+      Math.floor(editionConfig.editionMaxMintableLower),
+      Math.floor(editionConfig.editionMaxMintableUpper),
+      Math.floor(editionConfig.editionCutoffTime),
       flags,
     ])
 
