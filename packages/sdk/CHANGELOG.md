@@ -1,5 +1,15 @@
 # @soundxyz/sdk
 
+## 0.5.4
+
+### Patch Changes
+
+- [#103](https://github.com/soundxyz/sdk/pull/103) [`f4b3909`](https://github.com/soundxyz/sdk/commit/f4b390968129bf5a05bd5dec18983795a9f01a09) Thanks [@PabloSzx](https://github.com/PabloSzx)! - Merkle Proof api query throws on merkle tree issues
+
+- [#104](https://github.com/soundxyz/sdk/pull/104) [`ec23f1d`](https://github.com/soundxyz/sdk/commit/ec23f1d45c05aa6832cc2ac62f473745ded89c02) Thanks [@PabloSzx](https://github.com/PabloSzx)! - Math.floor preventing unexpected float numbers on createEdition contract call
+
+- [#103](https://github.com/soundxyz/sdk/pull/103) [`f4b3909`](https://github.com/soundxyz/sdk/commit/f4b390968129bf5a05bd5dec18983795a9f01a09) Thanks [@PabloSzx](https://github.com/PabloSzx)! - New "merkleProof" option on SoundClient and SoundClient.mint({ merkleProof: ... })
+
 ## 0.5.3
 
 ### Patch Changes
