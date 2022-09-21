@@ -22,7 +22,14 @@ import { ADDRESS_ZERO, MINTER_ROLE, minterFactoryMap } from './utils/constants'
 import { getSaltAsBytes32, validateAddress } from './utils/helpers'
 import { LazyPromise } from './utils/promise'
 
-import type { Expand, MinterInterfaceId, SignerOrProvider, SoundClientConfig } from './types'
+import type {
+  Expand,
+  MerkleProofGetter,
+  MinterInterfaceId,
+  MintOptions,
+  SignerOrProvider,
+  SoundClientConfig,
+} from './types'
 import type { Signer } from '@ethersproject/abstract-signer'
 import type { BigNumberish } from '@ethersproject/bignumber'
 import type { ContractTransaction, Overrides, PayableOverrides } from '@ethersproject/contracts'
@@ -37,6 +44,7 @@ export function SoundClient({
   apiEndpoint,
   soundCreatorAddress,
   onError = console.error,
+  merkleProof,
 }: SoundClientConfig) {
   const client = {
     soundApi: SoundAPI({
@@ -152,15 +160,15 @@ export function SoundClient({
   const MerkleProofCache: Record<string, string[] | null> = {}
   const MerkleProofPromises: Record<string, Promise<string[] | null>> = {}
 
-  async function getMerkleProof({ root, userAddress }: { root: string; userAddress: string }) {
-    const key = root + userAddress
+  const getMerkleProof: MerkleProofGetter = async function getMerkleProof({ merkleRootHash, userAddress }) {
+    const key = merkleRootHash + userAddress
 
     const existingCacheValue = MerkleProofCache[key]
 
     if (existingCacheValue !== undefined) return existingCacheValue
 
     return (MerkleProofCache[key] = await (MerkleProofPromises[key] ||= client.soundApi
-      .merkleProof({ root, userAddress })
+      .merkleProof({ root: merkleRootHash, userAddress })
       .finally(() => delete MerkleProofPromises[key])))
   }
 
@@ -171,14 +179,8 @@ export function SoundClient({
     gasLimit,
     maxFeePerGas,
     maxPriorityFeePerGas,
-  }: {
-    mintSchedule: MintSchedule
-    quantity: number
-    affiliate?: string
-    gasLimit?: BigNumberish
-    maxFeePerGas?: BigNumberish
-    maxPriorityFeePerGas?: BigNumberish
-  }): Promise<ContractTransaction> {
+    merkleProof: merkleProofArg,
+  }: MintOptions): Promise<ContractTransaction> {
     await _requireValidSoundEdition({ editionAddress: mintSchedule.editionAddress })
     if (quantity <= 0) throw new InvalidQuantityError({ quantity })
 
@@ -215,7 +217,7 @@ export function SoundClient({
         const merkleDropMinter = MerkleDropMinter__factory.connect(mintSchedule.minterAddress, signer)
         const { merkleRootHash } = await merkleDropMinter.mintInfo(mintSchedule.editionAddress, mintSchedule.mintId)
 
-        const proof = await getMerkleProof({ root: merkleRootHash, userAddress })
+        const proof = await (merkleProofArg || merkleProof || getMerkleProof)({ merkleRootHash, userAddress })
 
         if (!proof?.length) {
           throw new NotEligibleMint({
