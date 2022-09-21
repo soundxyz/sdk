@@ -180,7 +180,7 @@ export function SoundClient({
     maxPriorityFeePerGas?: BigNumberish
   }): Promise<ContractTransaction> {
     await _requireValidSoundEdition({ editionAddress: mintSchedule.editionAddress })
-    if (quantity <= 0) throw new InvalidQuantityError({ quantity })
+    if (quantity <= 0 || Math.floor(quantity) !== quantity) throw new InvalidQuantityError({ quantity })
 
     const { signer, userAddress } = await _requireSigner()
 
@@ -303,13 +303,13 @@ export function SoundClient({
             calldata: minterInterface.encodeFunctionData('createEditionMint', [
               editionAddress,
               mintConfig.price,
-              mintConfig.startTime,
-              mintConfig.cutoffTime,
-              mintConfig.endTime,
+              Math.floor(mintConfig.startTime),
+              Math.floor(mintConfig.cutoffTime),
+              Math.floor(mintConfig.endTime),
               mintConfig.affiliateFeeBPS,
-              mintConfig.maxMintableLower,
-              mintConfig.maxMintableUpper,
-              mintConfig.maxMintablePerAccount,
+              Math.floor(mintConfig.maxMintableLower),
+              Math.floor(mintConfig.maxMintableUpper),
+              Math.floor(mintConfig.maxMintablePerAccount),
             ]),
           })
           break
@@ -322,11 +322,11 @@ export function SoundClient({
               editionAddress,
               mintConfig.merkleRoot,
               mintConfig.price,
-              mintConfig.startTime,
-              mintConfig.endTime,
+              Math.floor(mintConfig.startTime),
+              Math.floor(mintConfig.endTime),
               mintConfig.affiliateFeeBPS,
-              mintConfig.maxMintable,
-              mintConfig.maxMintablePerAccount,
+              Math.floor(mintConfig.maxMintable),
+              Math.floor(mintConfig.maxMintablePerAccount),
             ]),
           })
           break
@@ -349,9 +349,9 @@ export function SoundClient({
       editionConfig.contractURI,
       editionConfig.fundingRecipient,
       editionConfig.royaltyBPS,
-      editionConfig.editionMaxMintableLower,
-      editionConfig.editionMaxMintableUpper,
-      editionConfig.editionCutoffTime,
+      Math.floor(editionConfig.editionMaxMintableLower),
+      Math.floor(editionConfig.editionMaxMintableUpper),
+      Math.floor(editionConfig.editionCutoffTime),
       flags,
     ])
 
