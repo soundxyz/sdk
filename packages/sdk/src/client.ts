@@ -44,7 +44,7 @@ export function SoundClient({
   apiEndpoint,
   soundCreatorAddress,
   onError = console.error,
-  merkleProof,
+  merkleProofGetter,
 }: SoundClientConfig) {
   const client = {
     soundApi: SoundAPI({
@@ -179,7 +179,7 @@ export function SoundClient({
     gasLimit,
     maxFeePerGas,
     maxPriorityFeePerGas,
-    merkleProof: merkleProofArg,
+    merkleProofGetter: mintMerkleProofGetter,
   }: MintOptions): Promise<ContractTransaction> {
     await _requireValidSoundEdition({ editionAddress: mintSchedule.editionAddress })
     if (quantity <= 0 || Math.floor(quantity) !== quantity) throw new InvalidQuantityError({ quantity })
@@ -217,7 +217,10 @@ export function SoundClient({
         const merkleDropMinter = MerkleDropMinter__factory.connect(mintSchedule.minterAddress, signer)
         const { merkleRootHash } = await merkleDropMinter.mintInfo(mintSchedule.editionAddress, mintSchedule.mintId)
 
-        const proof = await (merkleProofArg || merkleProof || getMerkleProof)({ merkleRootHash, userAddress })
+        const proof = await (mintMerkleProofGetter || merkleProofGetter || getMerkleProof)({
+          merkleRootHash,
+          userAddress,
+        })
 
         if (!proof?.length) {
           throw new NotEligibleMint({

@@ -628,7 +628,7 @@ describe('mint', () => {
       await client.mint({
         mintSchedule: mintSchedules[0],
         quantity,
-        merkleProof({ userAddress }) {
+        merkleProofGetter({ userAddress }) {
           return merkleTestHelper.getProof({ merkleTree, address: userAddress })
         },
       })
@@ -645,7 +645,7 @@ describe('mint', () => {
         .mint({
           mintSchedule: mintSchedules[0],
           quantity: 1,
-          merkleProof({ userAddress }) {
+          merkleProofGetter({ userAddress }) {
             return merkleTestHelper.getProof({ merkleTree, address: userAddress })
           },
         })

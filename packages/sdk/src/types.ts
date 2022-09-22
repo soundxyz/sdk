@@ -55,7 +55,7 @@ export interface MintOptions {
    *
    * @default SoundAPI.merkleProof
    */
-  merkleProof?: MerkleProofGetter
+  merkleProofGetter?: MerkleProofGetter
 }
 
 export interface BaseSoundClientConfig {
@@ -70,7 +70,7 @@ export interface BaseSoundClientConfig {
    *
    * @default SoundAPI.merkleProof
    */
-  merkleProof?: MerkleProofGetter
+  merkleProofGetter?: MerkleProofGetter
 }
 
 export type SoundClientConfig = (
