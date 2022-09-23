@@ -1,5 +1,11 @@
 # @soundxyz/sdk
 
+## 0.5.5
+
+### Patch Changes
+
+- [#107](https://github.com/soundxyz/sdk/pull/107) [`ae3d69b`](https://github.com/soundxyz/sdk/commit/ae3d69bdf35bbb182cb3b9499d10abdb6bb2b8bc) Thanks [@vigneshka](https://github.com/vigneshka)! - eligibleQuantity returns 0 if the user is not in the merkle list
+
 ## 0.5.4
 
 ### Patch Changes
