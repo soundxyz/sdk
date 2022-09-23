@@ -124,10 +124,12 @@ export function SoundClient({
     mintSchedule,
     timestamp = Math.floor(Date.now() / 1000),
     userAddress,
+    merkleProofGetter: mintMerkleProofGetter,
   }: {
     mintSchedule: MintSchedule
     timestamp?: number
     userAddress: string
+    merkleProofGetter?: MerkleProofGetter
   }): Promise<number> {
     // check valid mint time
     if (timestamp < mintSchedule.startTime || timestamp > mintSchedule.endTime || mintSchedule.mintPaused) {
@@ -137,11 +139,23 @@ export function SoundClient({
     // Checks for child minter custom logic
     switch (mintSchedule.mintType) {
       case 'RangeEdition': {
-        // handle range edition case
         const maxQty =
           timestamp < mintSchedule.cutoffTime ? mintSchedule.maxMintableUpper : mintSchedule.maxMintableLower
 
         if (mintSchedule.totalMinted >= maxQty) {
+          return 0
+        }
+        break
+      }
+      case 'MerkleDrop': {
+        // return 0 if the user is not in the allowlist
+        const merkleRootHash = mintSchedule.merkleRoot
+        const proof = await (mintMerkleProofGetter || merkleProofGetter || getMerkleProof)({
+          merkleRootHash,
+          userAddress,
+        })
+
+        if (!proof?.length) {
           return 0
         }
         break
@@ -186,7 +200,11 @@ export function SoundClient({
 
     const { signer, userAddress } = await _requireSigner()
 
-    const eligibleMintQuantity = await client.eligibleQuantity({ mintSchedule, userAddress })
+    const eligibleMintQuantity = await client.eligibleQuantity({
+      mintSchedule,
+      userAddress,
+      merkleProofGetter: mintMerkleProofGetter,
+    })
     if (eligibleMintQuantity < quantity) {
       throw new NotEligibleMint({
         eligibleMintQuantity,
