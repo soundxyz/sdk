@@ -204,6 +204,65 @@ describe('numberMinted', () => {
   })
 })
 
+describe('eligibleQuantity: merkleDrop', () => {
+  const merkleTestHelper = MerkleTestHelper()
+  let merkleTree: MerkleTree
+  let mintSchedules: MintSchedule[] = []
+
+  beforeEach(async () => {
+    merkleTree = merkleTestHelper.getMerkleTree()
+    const merkleRoot = merkleTestHelper.getMerkleRoot(merkleTree)
+
+    const minter = MerkleDropMinter__factory.connect(merkleDropMinter.address, artistWallet)
+    const startTime = now()
+
+    const minterCalls = [
+      {
+        contractAddress: merkleDropMinter.address,
+        calldata: minter.interface.encodeFunctionData('createEditionMint', [
+          precomputedEditionAddress,
+          merkleRoot,
+          PRICE,
+          startTime,
+          startTime + ONE_HOUR,
+          0, // affiliateFeeBPS
+          5, // maxMintable,
+          1, // maxMintablePerAccount
+        ]),
+      },
+    ]
+
+    await setupTest({ minterCalls })
+
+    // provide signer to the sdk
+    client = SoundClient({ provider: ethers.provider, signer: buyerWallet, apiKey: '123' })
+    mintSchedules = await client.activeMintSchedules({ editionAddress: precomputedEditionAddress })
+    expect(mintSchedules[0].mintType).to.eq('MerkleDrop')
+  })
+
+  it('returns eligible quantity if the user is in the allowlist', async () => {
+    const eligibleQuantity = await client.eligibleQuantity({
+      userAddress: buyerWallet.address,
+      mintSchedule: mintSchedules[0],
+      merkleProofGetter({ userAddress }) {
+        return merkleTestHelper.getProof({ merkleTree, address: userAddress })
+      },
+    })
+    expect(eligibleQuantity).to.equal(1)
+  })
+
+  it('returns 0 if the user is not in the allowlist', async () => {
+    const eligibleQuantity = await client.eligibleQuantity({
+      userAddress: '0x52D52188D89f912538fe5933F1d2307Bc8076D05',
+      mintSchedule: mintSchedules[0],
+      merkleProofGetter({ userAddress }) {
+        return merkleTestHelper.getProof({ merkleTree, address: userAddress })
+      },
+    })
+    expect(eligibleQuantity).to.equal(0)
+  })
+})
+
 describe('eligibleQuantity: single RangeEditionMinter instance', () => {
   it(`Eligible quantity is user specific and changes with mint`, async () => {
     const startTime = now()
