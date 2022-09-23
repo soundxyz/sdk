@@ -160,11 +160,6 @@ export function SoundClient({
         }
         break
       }
-      default: {
-        if (mintSchedule.totalMinted >= mintSchedule.maxMintable) {
-          return 0
-        }
-      }
     }
 
     const alreadyMinted = await numberMinted({ editionAddress: mintSchedule.editionAddress, userAddress })
