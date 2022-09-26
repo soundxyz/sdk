@@ -142,9 +142,22 @@ export async function setupTest({ minterCalls = [] }: { minterCalls?: ContractCa
 
 describe('isSoundEdition', () => {
   it("Should throw error if the address isn't valid", async () => {
-    await client.isSoundEdition({ editionAddress: '0x123' }).catch((error) => {
+    const err1 = await client.isSoundEdition({ editionAddress: '0x123' }).catch((error) => {
       expect(error.message).to.equal('Invalid address: "0x123"')
+
+      return error
     })
+
+    const err2 = await client.isSoundEdition({ editionAddress: '0x123' }).catch((error) => {
+      expect(error.message).to.equal('Invalid address: "0x123"')
+
+      return error
+    })
+
+    expect(err1).instanceOf(Error)
+    expect(err2).instanceOf(Error)
+
+    expect(err1).not.equal(err2)
   })
 
   it('Correctly identifies SoundEdition addresses', async () => {
