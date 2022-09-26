@@ -80,6 +80,8 @@ export function SoundClient({
   }
 
   async function validateChain({ address }: { address: string }) {
+    validateAddress(address)
+
     const chainProvider = provider || signer?.provider
 
     if (!chainProvider) throw new MissingSignerOrProviderError()
