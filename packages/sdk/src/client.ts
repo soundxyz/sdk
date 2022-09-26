@@ -17,7 +17,7 @@ import {
   SoundNotFoundError,
   UnexpectedApiResponse,
   UnsupportedMinterError,
-  UnsupportedNetworkError,
+  AddressUnsupportedNetworkError,
 } from './errors'
 import { ADDRESS_ZERO, MINTER_ROLE, minterFactoryMap } from './utils/constants'
 import { getSaltAsBytes32, validateAddress } from './utils/helpers'
@@ -80,19 +80,21 @@ export function SoundClient({
   }
 
   async function validateChain({ address }: { address: string }) {
-    return IdempotentCachedCall('validate-chain' + address, async function validateChainProvider() {
-      const chainProvider = provider || signer?.provider
+    const chainProvider = provider || signer?.provider
 
-      if (!chainProvider) throw new MissingSignerOrProviderError()
+    if (!chainProvider) throw new MissingSignerOrProviderError()
 
+    const addressCode = await IdempotentCachedCall('validate-chain' + address, async function validateChainProvider() {
       const addressCode = await chainProvider.getCode(address)
 
-      if (addressCode === '0x') {
-        const network = await chainProvider.getNetwork()
-
-        throw new UnsupportedNetworkError({ chainId: network.chainId })
-      }
+      return addressCode
     })
+
+    if (addressCode === '0x') {
+      const network = await chainProvider.getNetwork()
+
+      throw new AddressUnsupportedNetworkError({ chainId: network.chainId, address })
+    }
   }
 
   // If the contract address is a SoundEdition contract
