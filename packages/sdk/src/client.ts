@@ -185,9 +185,9 @@ export function SoundClient({
   }
 
   const getMerkleProof: MerkleProofGetter = async function getMerkleProof({ merkleRootHash, userAddress }) {
-    return IdempotentCachedCall('merkle-proof' + merkleRootHash + userAddress, () =>
-      client.soundApi.merkleProof({ root: merkleRootHash, userAddress }),
-    )
+    return IdempotentCachedCall('merkle-proof' + merkleRootHash + userAddress, function merkleProofSoundApi() {
+      return client.soundApi.merkleProof({ root: merkleRootHash, userAddress })
+    })
   }
 
   async function mint({
