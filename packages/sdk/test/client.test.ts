@@ -154,6 +154,9 @@ describe('isSoundEdition', () => {
       return error
     })
 
+    expect(err1).instanceOf(Error)
+    expect(err2).instanceOf(Error)
+
     expect(err1).not.equal(err2)
   })
 
