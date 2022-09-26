@@ -1,3 +1,6 @@
+import { randomBytes } from 'crypto'
+import { Wallet } from 'ethers'
+
 import { MerkleTestHelper } from './merkle'
 
 export function now() {
@@ -5,3 +8,7 @@ export function now() {
 }
 
 export { MerkleTestHelper }
+
+export function getRandomAddress() {
+  return new Wallet(`0x${randomBytes(32).toString('hex')}`).address.toLowerCase()
+}

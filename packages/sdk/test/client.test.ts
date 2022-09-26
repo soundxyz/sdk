@@ -15,15 +15,21 @@ import { expect } from 'chai'
 import { ethers } from 'hardhat'
 
 import { SoundClient } from '../src/client'
-import { InvalidAddressError, MissingSignerOrProviderError, NotEligibleMint } from '../src/errors'
+import {
+  AddressUnsupportedNetworkError,
+  InvalidAddressError,
+  MissingSignerOrProviderError,
+  NotEligibleMint,
+} from '../src/errors'
 import { MINTER_ROLE } from '../src/utils/constants'
 import { getSaltAsBytes32 } from '../src/utils/helpers'
-import { MerkleTestHelper, now } from './helpers'
+import { getRandomAddress, MerkleTestHelper, now } from './helpers'
 
 import type { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import type MerkleTree from 'merkletreejs'
 
 import type { ContractCall, EditionConfig, MintConfig, MintSchedule } from '../src/types'
+import { randomUUID } from 'crypto'
 
 const UINT32_MAX = 4294967295
 const NULL_ADDRESS = '0x0000000000000000000000000000000000000000'
@@ -880,5 +886,34 @@ describe('expectedEditionAddress', () => {
     expect(address1).to.eq(expectedAddress1)
     expect(address2).to.eq(expectedAddress2)
     expect(address1).not.to.eq(address2)
+  })
+})
+
+describe('validateChain', () => {
+  it('non-existent soundCreatorAddress', async () => {
+    const fakeSoundCreatorAddress = getRandomAddress()
+
+    client = SoundClient({
+      provider: ethers.provider,
+      apiKey: '_',
+      apiEndpoint: 'http://_/graphql',
+      soundCreatorAddress: fakeSoundCreatorAddress,
+    })
+
+    const expectedError = await client
+      .expectedEditionAddress({
+        deployer: getRandomAddress(),
+        salt: randomUUID(),
+      })
+      .catch((err) => err)
+
+    expect(expectedError).instanceOf(Error)
+
+    expect(expectedError).instanceOf(AddressUnsupportedNetworkError)
+
+    assert(expectedError instanceof AddressUnsupportedNetworkError)
+
+    expect(expectedError.address).to.equal(fakeSoundCreatorAddress)
+    expect(expectedError.chainId).to.equal((await ethers.provider.getNetwork()).chainId)
   })
 })
