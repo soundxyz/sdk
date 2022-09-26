@@ -19,7 +19,7 @@ import {
   UnsupportedMinterError,
 } from './errors'
 import { ADDRESS_ZERO, MINTER_ROLE, minterFactoryMap } from './utils/constants'
-import { getSaltAsBytes32, validateAddress } from './utils/helpers'
+import { getSaltAsBytes32, IdempotentCachedCall, validateAddress } from './utils/helpers'
 import { LazyPromise } from './utils/promise'
 
 import type {
@@ -166,19 +166,10 @@ export function SoundClient({
     return mintSchedule.maxMintablePerAccount - alreadyMinted
   }
 
-  const MerkleProofCache: Record<string, string[] | null> = {}
-  const MerkleProofPromises: Record<string, Promise<string[] | null>> = {}
-
   const getMerkleProof: MerkleProofGetter = async function getMerkleProof({ merkleRootHash, userAddress }) {
-    const key = merkleRootHash + userAddress
-
-    const existingCacheValue = MerkleProofCache[key]
-
-    if (existingCacheValue !== undefined) return existingCacheValue
-
-    return (MerkleProofCache[key] = await (MerkleProofPromises[key] ||= client.soundApi
-      .merkleProof({ root: merkleRootHash, userAddress })
-      .finally(() => delete MerkleProofPromises[key])))
+    return IdempotentCachedCall('merkle-proof' + merkleRootHash + userAddress, () =>
+      client.soundApi.merkleProof({ root: merkleRootHash, userAddress }),
+    )
   }
 
   async function mint({
