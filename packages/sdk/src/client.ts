@@ -19,7 +19,7 @@ import {
   UnsupportedMinterError,
 } from './errors'
 import { ADDRESS_ZERO, MINTER_ROLE, minterFactoryMap } from './utils/constants'
-import { getSaltAsBytes32, IdempotentCachedCall, validateAddress } from './utils/helpers'
+import { getSaltAsBytes32, validateAddress } from './utils/helpers'
 import { LazyPromise } from './utils/promise'
 
 import type {
@@ -62,19 +62,37 @@ export function SoundClient({
     expectedEditionAddress,
   }
 
+  const IdempotentCache: Record<string, unknown> = {}
+  const IdempotentCachePromises: Record<string, Promise<unknown>> = {}
+
+  function IdempotentCachedCall<T>(key: string, cb: () => Promise<T>): Promise<T> | T {
+    if (key in IdempotentCache) return IdempotentCache[key] as T
+
+    return ((IdempotentCachePromises[key] as Promise<T> | undefined) ||= cb()
+      .then((value) => {
+        IdempotentCache[key] = value
+        return value
+      })
+      .finally(() => {
+        delete IdempotentCachePromises[key]
+      }))
+  }
+
   // If the contract address is a SoundEdition contract
   async function isSoundEdition({ editionAddress }: { editionAddress: string }): Promise<boolean> {
-    validateAddress(editionAddress)
-    const { signerOrProvider } = await _requireSignerOrProvider()
+    return IdempotentCachedCall('is-sound-edition' + editionAddress, async function isSoundEdition() {
+      validateAddress(editionAddress)
+      const { signerOrProvider } = await _requireSignerOrProvider()
 
-    const editionContract = SoundEditionV1__factory.connect(editionAddress, signerOrProvider)
+      const editionContract = SoundEditionV1__factory.connect(editionAddress, signerOrProvider)
 
-    try {
-      return await editionContract.supportsInterface(interfaceIds.ISoundEditionV1)
-    } catch (err) {
-      onError(err)
-      return false
-    }
+      try {
+        return await editionContract.supportsInterface(interfaceIds.ISoundEditionV1)
+      } catch (err) {
+        onError(err)
+        return false
+      }
+    })
   }
 
   // All the minting schedules for a given edition, including past and future
