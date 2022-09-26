@@ -17,6 +17,7 @@ import {
   SoundNotFoundError,
   UnexpectedApiResponse,
   UnsupportedMinterError,
+  UnsupportedNetworkError,
 } from './errors'
 import { ADDRESS_ZERO, MINTER_ROLE, minterFactoryMap } from './utils/constants'
 import { getSaltAsBytes32, validateAddress } from './utils/helpers'
@@ -76,6 +77,22 @@ export function SoundClient({
       .finally(() => {
         delete IdempotentCachePromises[key]
       }))
+  }
+
+  async function validateChain({ address }: { address: string }) {
+    return IdempotentCachedCall('validate-chain' + address, async function validateChainProvider() {
+      const chainProvider = provider || signer?.provider
+
+      if (!chainProvider) throw new MissingSignerOrProviderError()
+
+      const addressCode = await chainProvider.getCode(address)
+
+      if (addressCode === '0x') {
+        const network = await chainProvider.getNetwork()
+
+        throw new UnsupportedNetworkError({ chainId: network.chainId })
+      }
+    })
   }
 
   // If the contract address is a SoundEdition contract
@@ -294,6 +311,8 @@ export function SoundClient({
 
     const creatorAddress = _getCreatorAddress()
 
+    await validateChain({ address: creatorAddress })
+
     // Precompute the edition address.
     const [editionAddress, _] = await SoundCreatorV1__factory.connect(creatorAddress, signer).soundEditionAddress(
       userAddress,
@@ -438,6 +457,10 @@ export function SoundClient({
     validateAddress(deployer)
     const { signerOrProvider } = await _requireSignerOrProvider()
     const soundCreatorAddress = _getCreatorAddress()
+
+    await validateChain({
+      address: soundCreatorAddress,
+    })
 
     const { addr: editionAddress, exists } = await SoundCreatorV1__factory.connect(
       soundCreatorAddress,
