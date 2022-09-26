@@ -89,8 +89,6 @@ beforeEach(async () => {
 
   client = SoundClient({
     provider: ethers.provider,
-    apiKey: '_',
-    apiEndpoint: 'http://_/graphql',
     soundCreatorAddress: soundCreator.address,
   })
 })
@@ -248,7 +246,15 @@ describe('eligibleQuantity: merkleDrop', () => {
     await setupTest({ minterCalls })
 
     // provide signer to the sdk
-    client = SoundClient({ provider: ethers.provider, signer: buyerWallet, apiKey: '123' })
+    client = SoundClient({
+      provider: ethers.provider,
+      signer: buyerWallet,
+      merkleProvider: {
+        merkleProof({ userAddress }) {
+          return merkleTestHelper.getProof({ merkleTree, address: userAddress })
+        },
+      },
+    })
     mintSchedules = await client.activeMintSchedules({ editionAddress: precomputedEditionAddress })
     expect(mintSchedules[0].mintType).to.eq('MerkleDrop')
   })
@@ -257,9 +263,6 @@ describe('eligibleQuantity: merkleDrop', () => {
     const eligibleQuantity = await client.eligibleQuantity({
       userAddress: buyerWallet.address,
       mintSchedule: mintSchedules[0],
-      merkleProofGetter({ userAddress }) {
-        return merkleTestHelper.getProof({ merkleTree, address: userAddress })
-      },
     })
     expect(eligibleQuantity).to.equal(1)
   })
@@ -268,9 +271,6 @@ describe('eligibleQuantity: merkleDrop', () => {
     const eligibleQuantity = await client.eligibleQuantity({
       userAddress: '0x52D52188D89f912538fe5933F1d2307Bc8076D05',
       mintSchedule: mintSchedules[0],
-      merkleProofGetter({ userAddress }) {
-        return merkleTestHelper.getProof({ merkleTree, address: userAddress })
-      },
     })
     expect(eligibleQuantity).to.equal(0)
   })
@@ -609,7 +609,6 @@ describe('mint', () => {
       client = SoundClient({
         provider: ethers.provider,
         signer: buyerWallet,
-        apiKey: '123',
         soundCreatorAddress: soundCreator.address,
       })
       mintSchedules = await client.activeMintSchedules({ editionAddress: precomputedEditionAddress })
@@ -685,7 +684,15 @@ describe('mint', () => {
       await setupTest({ minterCalls })
 
       // provide signer to the sdk
-      client = SoundClient({ provider: ethers.provider, signer: buyerWallet, apiKey: '123' })
+      client = SoundClient({
+        provider: ethers.provider,
+        signer: buyerWallet,
+        merkleProvider: {
+          merkleProof({ userAddress }) {
+            return merkleTestHelper.getProof({ merkleTree, address: userAddress })
+          },
+        },
+      })
       mintSchedules = await client.activeMintSchedules({ editionAddress: precomputedEditionAddress })
       expect(mintSchedules[0].mintType).to.eq('MerkleDrop')
     })
@@ -700,9 +707,6 @@ describe('mint', () => {
       await client.mint({
         mintSchedule: mintSchedules[0],
         quantity,
-        merkleProofGetter({ userAddress }) {
-          return merkleTestHelper.getProof({ merkleTree, address: userAddress })
-        },
       })
 
       const finalBalance = await SoundEditionV1__factory.connect(precomputedEditionAddress, ethers.provider).balanceOf(
@@ -717,9 +721,6 @@ describe('mint', () => {
         .mint({
           mintSchedule: mintSchedules[0],
           quantity: 1,
-          merkleProofGetter({ userAddress }) {
-            return merkleTestHelper.getProof({ merkleTree, address: userAddress })
-          },
         })
         .catch((error) => {
           expect(error).instanceOf(NotEligibleMint)
@@ -730,7 +731,7 @@ describe('mint', () => {
 
 describe('createEdition', () => {
   beforeEach(() => {
-    client = SoundClient({ signer: artistWallet, apiKey: '123', soundCreatorAddress: soundCreator.address })
+    client = SoundClient({ signer: artistWallet, soundCreatorAddress: soundCreator.address })
   })
 
   it('Creates a sound edition and mint schedules', async () => {
@@ -850,7 +851,7 @@ describe('expectedEditionAddress', () => {
   })
 
   it('throws if provider not connected', () => {
-    client = SoundClient({ provider: new ethers.providers.JsonRpcProvider(), apiKey: '123' })
+    client = SoundClient({ provider: new ethers.providers.JsonRpcProvider() })
 
     client
       .expectedEditionAddress({ deployer: '0xbf9a1fad0cbd61cc8158ccb6e1e8e111707088bb', salt: '123' })

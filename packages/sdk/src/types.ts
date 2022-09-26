@@ -2,21 +2,14 @@ import type { BigNumber, BigNumberish } from '@ethersproject/bignumber'
 import type { Signer } from '@ethersproject/abstract-signer'
 import type { Provider } from '@ethersproject/abstract-provider'
 import type { interfaceIds } from '@soundxyz/sound-protocol'
-import type { SoundAPIConfig } from './api/soundApi'
+import type { SoundAPI } from './soundApi'
+import type { MerkleProofProvider } from './merkle/types'
 
 /*********************************************************
                 PROTOCOL TYPES
  ********************************************************/
 
 export type SignerOrProvider = Signer | Provider
-
-export type MerkleProofGetter = ({
-  merkleRootHash,
-  userAddress,
-}: {
-  merkleRootHash: string
-  userAddress: string
-}) => Promise<string[] | null> | string[] | null
 
 export interface MintOptions {
   /**
@@ -49,14 +42,9 @@ export interface MintOptions {
    */
 
   maxPriorityFeePerGas?: BigNumberish
-
-  /**
-   * Customize Merkle Proof to be used for merkle drops
-   *
-   * @default SoundAPI.merkleProof
-   */
-  merkleProofGetter?: MerkleProofGetter
 }
+
+export type MerkleProvider = MerkleProofProvider
 
 export interface BaseSoundClientConfig {
   soundCreatorAddress?: string
@@ -66,11 +54,14 @@ export interface BaseSoundClientConfig {
   onError?: (err: unknown) => void
 
   /**
-   * Customize Merkle Proof to be used for merkle drops
-   *
-   * @default SoundAPI.merkleProof
+   * Sound.xyz API instance
    */
-  merkleProofGetter?: MerkleProofGetter
+  soundAPI?: SoundAPI
+
+  /**
+   * Merkle provider to be used
+   */
+  merkleProvider?: MerkleProvider
 }
 
 export type SoundClientConfig = (
@@ -83,7 +74,6 @@ export type SoundClientConfig = (
       signer: Signer
     }
 ) &
-  SoundAPIConfig &
   BaseSoundClientConfig
 
 export type MintScheduleBase = {
@@ -234,3 +224,5 @@ export interface SourceLocation {
 }
 
 export type Expand<T> = T extends infer O ? { [K in keyof O]: O[K] } : never
+
+export * from './merkle/types'

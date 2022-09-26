@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import { MissingApiKey, SoundAPIGraphQLError, UnexpectedApiResponse } from '../errors'
+import { MissingApiKey, SoundAPIGraphQLError, UnexpectedApiResponse } from './errors'
 import {
   AudioFromTrack,
   AudioFromTrackQuery,
@@ -13,9 +13,9 @@ import {
   ReleaseInfoQueryVariables,
   Test,
   TestQuery,
-} from './graphql/gql'
+} from './api/graphql/gql'
 
-import type { ExecutionResult } from '../types'
+import type { ExecutionResult, MerkleProofParameters } from './types'
 
 const graphqlRequestBody = z.object({
   data: z.record(z.unknown()).nullable().optional(),
@@ -39,7 +39,10 @@ export interface SoundAPIConfig {
    * @default "https://api.sound.xyz/graphql"
    */
   apiEndpoint?: string | URL
-  apiKey?: string
+  /**
+   * API Key required to interact with Sound.xyz endpoints
+   */
+  apiKey: string
 }
 
 export function SoundAPI({ apiEndpoint = 'https://api.sound.xyz/graphql', apiKey }: SoundAPIConfig) {
@@ -67,6 +70,7 @@ export function SoundAPI({ apiEndpoint = 'https://api.sound.xyz/graphql', apiKey
               query,
             },
       ),
+      mode: 'cors',
     })
       .then((response) =>
         response.json().then<ExecutionResult<Data>>(
@@ -104,11 +108,11 @@ export function SoundAPI({ apiEndpoint = 'https://api.sound.xyz/graphql', apiKey
         },
       })
     },
-    async merkleProof({ root, userAddress }: { root: string; userAddress: string }) {
+    async merkleProof({ merkleRoot, userAddress }: MerkleProofParameters) {
       const { data, errors } = await graphqlRequest<MerkleProofQuery, MerkleProofQueryVariables>({
         query: MerkleProof,
         variables: {
-          root,
+          root: merkleRoot,
           unhashedLeaf: userAddress,
         },
       })
@@ -121,3 +125,5 @@ export function SoundAPI({ apiEndpoint = 'https://api.sound.xyz/graphql', apiKey
     },
   }
 }
+
+export type SoundAPI = ReturnType<typeof SoundAPI>

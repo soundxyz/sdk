@@ -195,3 +195,31 @@ export class MissingApiKey extends Error {
     super('Missing "apiKey" while creating SoundAPI instance')
   }
 }
+
+export class MissingSoundAPI extends Error {
+  readonly name = 'MissingSoundAPIError'
+
+  constructor() {
+    super('Missing required "soundAPI" while creating SoundClient instance')
+  }
+}
+
+export class MissingMerkleProvider extends Error {
+  readonly name = 'MissingMerkleProviderError'
+
+  constructor() {
+    super('Missing required "merkleProvider" while creating SoundClient instance')
+  }
+}
+
+export class UnexpectedLanyardResponse extends Error {
+  readonly name = 'UnexpectedLanyardResponseError'
+
+  readonly response: Response
+
+  constructor({ response }: { response: Response }) {
+    super(`Unexpected lanyard API response, status code ${response.status}`)
+
+    this.response = response
+  }
+}
