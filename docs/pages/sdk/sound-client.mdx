@@ -1,5 +1,16 @@
 # Sound.xyz SDK - SoundClient
 
+## networkChainMatches
+
+Helper to validate the network of the client signer or provider
+
+```ts
+// boolean
+const isConnectedToMainnet = await client.networkChainMatches({
+  chainId: 1,
+})
+```
+
 ## isSoundEdition
 
 > Requires either `signer` or `provider`
