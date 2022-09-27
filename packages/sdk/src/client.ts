@@ -48,6 +48,8 @@ export function SoundClient({
 }: SoundClientConfig) {
   const client = {
     soundAPI,
+    signer,
+    provider,
     merkleProvider,
     isSoundEdition,
     mintSchedules,
@@ -592,21 +594,21 @@ export function SoundClient({
   }
 
   async function _requireSigner(): Promise<{ signer: Signer; userAddress: string }> {
-    if (signer) {
-      const userAddress = await signer.getAddress()
+    if (client.signer) {
+      const userAddress = await client.signer.getAddress()
 
-      return { signer, userAddress }
+      return { signer: client.signer, userAddress }
     }
 
     throw new MissingSignerError()
   }
 
   async function _requireSignerOrProvider(): Promise<{ signerOrProvider: SignerOrProvider }> {
-    if (signer) {
-      return { signerOrProvider: signer }
+    if (client.signer) {
+      return { signerOrProvider: client.signer }
     }
-    if (provider) {
-      return { signerOrProvider: provider }
+    if (client.provider) {
+      return { signerOrProvider: client.provider }
     }
 
     throw new MissingSignerOrProviderError()
