@@ -15,7 +15,12 @@ import { expect } from 'chai'
 import { ethers } from 'hardhat'
 
 import { SoundClient } from '../src/client'
-import { InvalidAddressError, MissingSignerOrProviderError, NotEligibleMint } from '../src/errors'
+import {
+  InvalidAddressError,
+  MissingMerkleProvider,
+  MissingSignerOrProviderError,
+  NotEligibleMint,
+} from '../src/errors'
 import { MINTER_ROLE } from '../src/utils/constants'
 import { getSaltAsBytes32 } from '../src/utils/helpers'
 import { MerkleTestHelper, now } from './helpers'
@@ -725,6 +730,19 @@ describe('mint', () => {
         .catch((error) => {
           expect(error).instanceOf(NotEligibleMint)
         })
+    })
+
+    it('Missing merkle provider', async () => {
+      client.merkleProvider = undefined
+
+      const expectedError = await client
+        .mint({
+          mintSchedule: mintSchedules[0],
+          quantity: 1,
+        })
+        .catch((err) => err)
+
+      expect(expectedError).to.instanceOf(MissingMerkleProvider)
     })
   })
 })

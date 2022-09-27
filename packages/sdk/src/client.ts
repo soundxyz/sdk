@@ -622,7 +622,7 @@ export function SoundClient({
   }
 
   function _requireMerkleProvider() {
-    if (merkleProvider) return merkleProvider
+    if (client.merkleProvider) return client.merkleProvider
 
     throw new MissingMerkleProvider()
   }
