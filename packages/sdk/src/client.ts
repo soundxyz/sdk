@@ -60,6 +60,7 @@ export function SoundClient({
     createEdition,
     editionInfo,
     expectedEditionAddress,
+    networkChainMatches,
   }
 
   const IdempotentCache: Record<string, unknown> = {}
@@ -448,6 +449,20 @@ export function SoundClient({
       editionAddress,
       exists,
     }
+  }
+
+  async function networkChainMatches({ chainId }: { chainId: number }) {
+    const networkChain = await IdempotentCachedCall('network-chain', async function networkChain() {
+      const networkProvider = signer?.provider || provider
+
+      if (!networkProvider) throw new MissingSignerOrProviderError()
+
+      const network = await networkProvider.getNetwork()
+
+      return network.chainId
+    })
+
+    return networkChain === chainId
   }
 
   /*********************************************************

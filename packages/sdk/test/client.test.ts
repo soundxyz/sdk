@@ -882,3 +882,15 @@ describe('expectedEditionAddress', () => {
     expect(address1).not.to.eq(address2)
   })
 })
+
+it('networkChainMatches', async () => {
+  const mismatch = await client.networkChainMatches({ chainId: 1 })
+
+  expect(mismatch).eq(false)
+
+  const testNet = await client.networkChainMatches({
+    chainId: 31337,
+  })
+
+  expect(testNet).eq(true)
+})
