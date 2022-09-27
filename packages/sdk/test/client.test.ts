@@ -883,14 +883,38 @@ describe('expectedEditionAddress', () => {
   })
 })
 
-it('networkChainMatches', async () => {
-  const mismatch = await client.networkChainMatches({ chainId: 1 })
+describe('networkChainMatches', () => {
+  it('provider', async () => {
+    client = SoundClient({
+      provider: ethers.provider,
+      soundCreatorAddress: soundCreator.address,
+    })
 
-  expect(mismatch).eq(false)
+    const mismatch = await client.networkChainMatches({ chainId: 1 })
 
-  const testNet = await client.networkChainMatches({
-    chainId: 31337,
+    expect(mismatch).eq(false)
+
+    const testNet = await client.networkChainMatches({
+      chainId: 31337,
+    })
+
+    expect(testNet).eq(true)
   })
 
-  expect(testNet).eq(true)
+  it('signer', async () => {
+    client = SoundClient({
+      signer: artistWallet,
+      soundCreatorAddress: soundCreator.address,
+    })
+
+    const mismatch = await client.networkChainMatches({ chainId: 1 })
+
+    expect(mismatch).eq(false)
+
+    const testNet = await client.networkChainMatches({
+      chainId: 31337,
+    })
+
+    expect(testNet).eq(true)
+  })
 })
