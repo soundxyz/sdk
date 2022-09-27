@@ -42,7 +42,7 @@ export interface SoundAPIConfig {
   /**
    * API Key required to interact with Sound.xyz endpoints
    */
-  apiKey: string
+  apiKey: string | undefined
 }
 
 export function SoundAPI({ apiEndpoint = 'https://api.sound.xyz/graphql', apiKey }: SoundAPIConfig) {
