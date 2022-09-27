@@ -19,7 +19,10 @@ import {
   InvalidAddressError,
   MissingMerkleProvider,
   MissingSignerOrProviderError,
+  MissingSoundAPI,
   NotEligibleMint,
+  SoundNotFoundError,
+  UnexpectedApiResponse,
 } from '../src/errors'
 import { MINTER_ROLE } from '../src/utils/constants'
 import { getSaltAsBytes32 } from '../src/utils/helpers'
@@ -29,6 +32,8 @@ import type { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import type MerkleTree from 'merkletreejs'
 
 import type { ContractCall, EditionConfig, MintConfig, MintSchedule } from '../src/types'
+import { MockAPI } from './helpers/api'
+import { randomUUID } from 'crypto'
 
 const UINT32_MAX = 4294967295
 const NULL_ADDRESS = '0x0000000000000000000000000000000000000000'
@@ -95,6 +100,7 @@ beforeEach(async () => {
   client = SoundClient({
     provider: ethers.provider,
     soundCreatorAddress: soundCreator.address,
+    soundAPI: MockAPI(),
   })
 })
 
@@ -935,5 +941,184 @@ describe('networkChainMatches', () => {
     })
 
     expect(testNet).eq(true)
+  })
+})
+
+describe('editionInfo', () => {
+  let editionAddress: string
+  let salt: string
+
+  beforeEach(async () => {
+    client = SoundClient({
+      signer: artistWallet,
+      merkleProvider: MockAPI(),
+      soundAPI: MockAPI(),
+      soundCreatorAddress: soundCreator.address,
+    })
+
+    salt = randomUUID()
+    editionAddress = await client
+      .expectedEditionAddress({
+        deployer: artistWallet.address,
+        salt,
+      })
+      .then((v) => v.editionAddress)
+
+    const mint1StartTime = now()
+    const mint1CutoffTime = mint1StartTime + ONE_HOUR / 2
+    const mint2StartTime = mint1StartTime + ONE_HOUR
+    const mint1MaxMintablePerAccount = 2
+
+    await client.createEdition({
+      editionConfig: {
+        name: 'Test',
+        symbol: 'TEST',
+        metadataModule: NULL_ADDRESS,
+        baseURI: 'https://test.com',
+        contractURI: 'https://test.com',
+        fundingRecipient: NON_NULL_ADDRESS,
+        royaltyBPS: 0,
+        editionMaxMintableLower: 10,
+        editionMaxMintableUpper: 10,
+        editionCutoffTime: 999999,
+        shouldEnableMintRandomness: true,
+        shouldFreezeMetadata: false,
+      },
+      mintConfigs: [
+        {
+          mintType: 'RangeEdition' as const,
+          minterAddress: rangeEditionMinter.address,
+          price: PRICE,
+          startTime: mint1StartTime,
+          cutoffTime: mint1CutoffTime,
+          endTime: mint2StartTime,
+          maxMintableLower: 5,
+          maxMintableUpper: 10,
+          maxMintablePerAccount: mint1MaxMintablePerAccount,
+          affiliateFeeBPS: 0,
+        },
+      ],
+    })
+  })
+
+  it('throws if no soundAPI', async () => {
+    client.soundAPI = undefined
+    const expectedError = await client
+      .editionInfo({
+        contractAddress: editionAddress,
+      })
+      .api.catch((err) => err)
+
+    expect(expectedError).instanceOf(MissingSoundAPI)
+  })
+
+  it('throws on non-existent editionInfo', async () => {
+    const expectedError = await client
+      .editionInfo({
+        contractAddress: editionAddress,
+      })
+      .api.catch((err) => err)
+
+    expect(expectedError).instanceOf(SoundNotFoundError)
+
+    assert(expectedError instanceof SoundNotFoundError)
+
+    expect(expectedError.contractAddress).equal(editionAddress)
+    expect(expectedError.editionId).equal(null)
+    expect(expectedError.graphqlErrors).equal(undefined)
+  })
+
+  it('throws on non-existent audio track', async () => {
+    client.soundAPI = MockAPI({
+      // @ts-expect-error
+      async releaseInfo() {
+        return {
+          data: {
+            release: {
+              track: {
+                id: randomUUID(),
+              },
+            },
+          },
+        }
+      },
+    })
+
+    const expectedError = await client
+      .editionInfo({
+        contractAddress: editionAddress,
+      })
+      .api.then((v) => v.trackAudio)
+      .catch((err) => err)
+
+    expect(expectedError).instanceOf(UnexpectedApiResponse)
+
+    assert(expectedError instanceof UnexpectedApiResponse)
+
+    expect(expectedError.message, 'Track could not be bound')
+  })
+
+  it('evaluates lazily', async () => {
+    let releaseInfoEvaluated = false
+    let audioFromTrackEvaluated = false
+
+    const trackId = randomUUID()
+
+    client.soundAPI = MockAPI({
+      // @ts-expect-error
+      async releaseInfo() {
+        releaseInfoEvaluated = true
+        return {
+          data: {
+            release: {
+              id: salt,
+              contractAddress: editionAddress,
+              track: {
+                id: trackId,
+              },
+            },
+          },
+        }
+      },
+      // @ts-expect-error
+      async audioFromTrack() {
+        audioFromTrackEvaluated = true
+        return {
+          data: {
+            audioFromTrack: {
+              id: trackId,
+            },
+          },
+        }
+      },
+    })
+
+    const editionInfoApiPromise = client.editionInfo({
+      contractAddress: editionAddress,
+    }).api
+
+    expect(releaseInfoEvaluated).eq(false)
+    expect(audioFromTrackEvaluated).eq(false)
+
+    const editionInfoApi = await editionInfoApiPromise
+
+    expect(releaseInfoEvaluated).eq(true)
+    expect(audioFromTrackEvaluated).eq(false)
+
+    expect(editionInfoApi.id).eq(salt)
+    expect(editionInfoApi.contractAddress).eq(editionAddress)
+    expect(editionInfoApi.track.id).eq(trackId)
+
+    const trackAudioPromise = editionInfoApi.trackAudio
+
+    expect(releaseInfoEvaluated).eq(true)
+    expect(audioFromTrackEvaluated).eq(false)
+
+    const trackAudio = await trackAudioPromise
+
+    expect(releaseInfoEvaluated).eq(true)
+    expect(audioFromTrackEvaluated).eq(true)
+
+    expect(trackAudio.id).eq(trackId)
   })
 })

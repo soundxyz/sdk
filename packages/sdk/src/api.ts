@@ -78,8 +78,8 @@ export function SoundAPI({ apiEndpoint = 'https://api.sound.xyz/graphql', apiKey
           graphqlRequestBody.parse,
         ),
       )
-      .catch((err) => {
-        throw new UnexpectedApiResponse(err)
+      .catch((error: unknown) => {
+        throw new UnexpectedApiResponse({ error })
       })
   }
 

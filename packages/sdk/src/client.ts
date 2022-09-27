@@ -424,7 +424,12 @@ export function SoundClient({
           soundAPI.audioFromTrack({ trackId: release.track.id }).then((response) => {
             const data: Expand<typeof response.data> = response.data
 
-            if (!data) throw new UnexpectedApiResponse(`GraphQL Errors found`, { graphqlErrors: response.errors })
+            if (!data) {
+              throw new UnexpectedApiResponse({
+                message: response.errors ? 'GraphQL Errors found' : 'Track could not be found',
+                graphqlErrors: response.errors,
+              })
+            }
 
             return data.audioFromTrack
           }),

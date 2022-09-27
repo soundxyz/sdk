@@ -137,8 +137,12 @@ export class UnexpectedApiResponse extends Error {
 
   readonly graphqlErrors?: GraphQLExecutionErrors
 
-  constructor(error: unknown, { graphqlErrors }: { graphqlErrors?: GraphQLExecutionErrors } = {}) {
-    super('Unexpected API Response')
+  constructor({
+    message,
+    error,
+    graphqlErrors,
+  }: { message?: string; error?: unknown; graphqlErrors?: GraphQLExecutionErrors } = {}) {
+    super(message || 'Unexpected API Response')
 
     if (error instanceof Error) {
       this.originalError = error
