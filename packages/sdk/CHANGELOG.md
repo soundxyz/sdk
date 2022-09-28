@@ -1,5 +1,11 @@
 # @soundxyz/sdk
 
+## 0.6.1
+
+### Patch Changes
+
+- [#116](https://github.com/soundxyz/sdk/pull/116) [`54e5728`](https://github.com/soundxyz/sdk/commit/54e572802e669c1a14326159c65135e0b5956a06) Thanks [@PabloSzx](https://github.com/PabloSzx)! - Take in account schedule total remaining for eligibleQuantity
+
 ## 0.6.0
 
 ### Minor Changes
