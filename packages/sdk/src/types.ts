@@ -66,6 +66,8 @@ export interface BaseSoundClientConfig {
 
 type LazyOption<T extends object> = T | (() => T | Promise<T>)
 
+export type { Signer, Provider }
+
 export type SoundClientConfig = (
   | {
       provider: LazyOption<Provider>
