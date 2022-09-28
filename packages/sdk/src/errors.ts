@@ -137,8 +137,12 @@ export class UnexpectedApiResponse extends Error {
 
   readonly graphqlErrors?: GraphQLExecutionErrors
 
-  constructor(error: unknown, { graphqlErrors }: { graphqlErrors?: GraphQLExecutionErrors } = {}) {
-    super('Unexpected API Response')
+  constructor({
+    message,
+    error,
+    graphqlErrors,
+  }: { message?: string; error?: unknown; graphqlErrors?: GraphQLExecutionErrors } = {}) {
+    super(message || 'Unexpected API Response')
 
     if (error instanceof Error) {
       this.originalError = error
@@ -193,5 +197,33 @@ export class MissingApiKey extends Error {
 
   constructor() {
     super('Missing "apiKey" while creating SoundAPI instance')
+  }
+}
+
+export class MissingSoundAPI extends Error {
+  readonly name = 'MissingSoundAPIError'
+
+  constructor() {
+    super('Missing required "soundAPI" while creating SoundClient instance')
+  }
+}
+
+export class MissingMerkleProvider extends Error {
+  readonly name = 'MissingMerkleProviderError'
+
+  constructor() {
+    super('Missing required "merkleProvider" while creating SoundClient instance')
+  }
+}
+
+export class UnexpectedLanyardResponse extends Error {
+  readonly name = 'UnexpectedLanyardResponseError'
+
+  readonly response: Response
+
+  constructor({ response }: { response: Response }) {
+    super(`Unexpected lanyard API response, status code ${response.status}`)
+
+    this.response = response
   }
 }

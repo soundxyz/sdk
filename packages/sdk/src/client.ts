@@ -6,12 +6,13 @@ import {
   SoundCreatorV1__factory,
   SoundEditionV1__factory,
 } from '@soundxyz/sound-protocol/typechain/index'
-import { SoundAPI } from './api/soundApi'
 import {
   CreatorAddressMissing,
   InvalidQuantityError,
+  MissingMerkleProvider,
   MissingSignerError,
   MissingSignerOrProviderError,
+  MissingSoundAPI,
   NotEligibleMint,
   NotSoundEditionError,
   SoundNotFoundError,
@@ -24,7 +25,7 @@ import { LazyPromise } from './utils/promise'
 
 import type {
   Expand,
-  MerkleProofGetter,
+  MerkleProofProvider,
   MinterInterfaceId,
   MintOptions,
   SignerOrProvider,
@@ -40,17 +41,16 @@ import type { EditionInfoStructOutput } from '@soundxyz/sound-protocol/typechain
 export function SoundClient({
   signer,
   provider,
-  apiKey,
-  apiEndpoint,
+  soundAPI,
   soundCreatorAddress,
   onError = console.error,
-  merkleProofGetter,
+  merkleProvider,
 }: SoundClientConfig) {
   const client = {
-    soundApi: SoundAPI({
-      apiKey,
-      apiEndpoint,
-    }),
+    soundAPI,
+    signer,
+    provider,
+    merkleProvider,
     isSoundEdition,
     mintSchedules,
     activeMintSchedules,
@@ -66,10 +66,10 @@ export function SoundClient({
   const IdempotentCache: Record<string, unknown> = {}
   const IdempotentCachePromises: Record<string, Promise<unknown>> = {}
 
-  function IdempotentCachedCall<T>(key: string, cb: () => Promise<T>): Promise<T> | T {
-    if (key in IdempotentCache) return IdempotentCache[key] as T
+  function IdempotentCachedCall<T>(key: string, cb: () => Promise<Awaited<T>>): Promise<Awaited<T>> | Awaited<T> {
+    if (key in IdempotentCache) return IdempotentCache[key] as Awaited<T>
 
-    return ((IdempotentCachePromises[key] as Promise<T> | undefined) ||= cb()
+    return ((IdempotentCachePromises[key] as Promise<Awaited<T>> | undefined) ||= cb()
       .then((value) => {
         IdempotentCache[key] = value
         return value
@@ -143,12 +143,10 @@ export function SoundClient({
     mintSchedule,
     timestamp = Math.floor(Date.now() / 1000),
     userAddress,
-    merkleProofGetter: mintMerkleProofGetter,
   }: {
     mintSchedule: MintSchedule
     timestamp?: number
     userAddress: string
-    merkleProofGetter?: MerkleProofGetter
   }): Promise<number> {
     // check valid mint time
     if (timestamp < mintSchedule.startTime || timestamp > mintSchedule.endTime || mintSchedule.mintPaused) {
@@ -168,9 +166,9 @@ export function SoundClient({
       }
       case 'MerkleDrop': {
         // return 0 if the user is not in the allowlist
-        const merkleRootHash = mintSchedule.merkleRoot
-        const proof = await (mintMerkleProofGetter || merkleProofGetter || getMerkleProof)({
-          merkleRootHash,
+        const merkleRoot = mintSchedule.merkleRoot
+        const proof = await getMerkleProof({
+          merkleRoot,
           userAddress,
         })
 
@@ -185,9 +183,12 @@ export function SoundClient({
     return mintSchedule.maxMintablePerAccount - alreadyMinted
   }
 
-  const getMerkleProof: MerkleProofGetter = async function getMerkleProof({ merkleRootHash, userAddress }) {
-    return IdempotentCachedCall('merkle-proof' + merkleRootHash + userAddress, function merkleProofSoundApi() {
-      return client.soundApi.merkleProof({ root: merkleRootHash, userAddress })
+  const getMerkleProof: MerkleProofProvider['merkleProof'] = async function getMerkleProof({
+    merkleRoot,
+    userAddress,
+  }) {
+    return IdempotentCachedCall('merkle-proof' + merkleRoot + userAddress, async function getMerkleProof() {
+      return _requireMerkleProvider().merkleProof({ merkleRoot, userAddress })
     })
   }
 
@@ -198,7 +199,6 @@ export function SoundClient({
     gasLimit,
     maxFeePerGas,
     maxPriorityFeePerGas,
-    merkleProofGetter: mintMerkleProofGetter,
   }: MintOptions): Promise<ContractTransaction> {
     await _requireValidSoundEdition({ editionAddress: mintSchedule.editionAddress })
     if (quantity <= 0 || Math.floor(quantity) !== quantity) throw new InvalidQuantityError({ quantity })
@@ -208,7 +208,6 @@ export function SoundClient({
     const eligibleMintQuantity = await client.eligibleQuantity({
       mintSchedule,
       userAddress,
-      merkleProofGetter: mintMerkleProofGetter,
     })
     if (eligibleMintQuantity < quantity) {
       throw new NotEligibleMint({
@@ -238,10 +237,13 @@ export function SoundClient({
 
       case 'MerkleDrop': {
         const merkleDropMinter = MerkleDropMinter__factory.connect(mintSchedule.minterAddress, signer)
-        const { merkleRootHash } = await merkleDropMinter.mintInfo(mintSchedule.editionAddress, mintSchedule.mintId)
+        const { merkleRootHash: merkleRoot } = await merkleDropMinter.mintInfo(
+          mintSchedule.editionAddress,
+          mintSchedule.mintId,
+        )
 
-        const proof = await (mintMerkleProofGetter || merkleProofGetter || getMerkleProof)({
-          merkleRootHash,
+        const proof = await getMerkleProof({
+          merkleRoot,
           userAddress,
         })
 
@@ -410,7 +412,10 @@ export function SoundClient({
     })
 
     const api = LazyPromise(async () => {
-      const { data, errors } = await client.soundApi.releaseInfo(soundParams)
+      const soundAPI = client.soundAPI
+      if (!soundAPI) throw new MissingSoundAPI()
+
+      const { data, errors } = await soundAPI.releaseInfo(soundParams)
 
       const release = data?.release
       if (!release) throw new SoundNotFoundError({ ...soundParams, graphqlErrors: errors })
@@ -418,10 +423,15 @@ export function SoundClient({
       return {
         ...release,
         trackAudio: LazyPromise(() =>
-          client.soundApi.audioFromTrack({ trackId: release.track.id }).then((response) => {
+          soundAPI.audioFromTrack({ trackId: release.track.id }).then((response) => {
             const data: Expand<typeof response.data> = response.data
 
-            if (!data) throw new UnexpectedApiResponse(`GraphQL Errors found`, { graphqlErrors: response.errors })
+            if (!data) {
+              throw new UnexpectedApiResponse({
+                message: response.errors ? 'GraphQL Errors found' : 'Track could not be found',
+                graphqlErrors: response.errors,
+              })
+            }
 
             return data.audioFromTrack
           }),
@@ -584,21 +594,21 @@ export function SoundClient({
   }
 
   async function _requireSigner(): Promise<{ signer: Signer; userAddress: string }> {
-    if (signer) {
-      const userAddress = await signer.getAddress()
+    if (client.signer) {
+      const userAddress = await client.signer.getAddress()
 
-      return { signer, userAddress }
+      return { signer: client.signer, userAddress }
     }
 
     throw new MissingSignerError()
   }
 
   async function _requireSignerOrProvider(): Promise<{ signerOrProvider: SignerOrProvider }> {
-    if (signer) {
-      return { signerOrProvider: signer }
+    if (client.signer) {
+      return { signerOrProvider: client.signer }
     }
-    if (provider) {
-      return { signerOrProvider: provider }
+    if (client.provider) {
+      return { signerOrProvider: client.provider }
     }
 
     throw new MissingSignerOrProviderError()
@@ -616,6 +626,12 @@ export function SoundClient({
     if (soundCreatorAddress) return soundCreatorAddress
 
     throw new CreatorAddressMissing()
+  }
+
+  function _requireMerkleProvider() {
+    if (client.merkleProvider) return client.merkleProvider
+
+    throw new MissingMerkleProvider()
   }
 
   return client
