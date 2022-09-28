@@ -560,8 +560,8 @@ describe('eligibleQuantity: single RangeEditionMinter instance', () => {
           mint2StartTime + ONE_HOUR, // cutoffTime,
           mint2StartTime + ONE_HOUR + 1, // endTime
           0, // affiliateFeeBPS
-          50, // maxMintableLower,
-          60, // maxMintableUpper,
+          99, // maxMintableLower,
+          100, // maxMintableUpper,
           mint2MaxMintablePerAccount,
         ]),
       },
