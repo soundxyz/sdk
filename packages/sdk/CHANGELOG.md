@@ -1,5 +1,43 @@
 # @soundxyz/sdk
 
+## 0.6.0
+
+### Minor Changes
+
+- [#112](https://github.com/soundxyz/sdk/pull/112) [`2c2a0d6`](https://github.com/soundxyz/sdk/commit/2c2a0d6dc084e9d983f691dd2f33f23fd9a8a9a7) Thanks [@PabloSzx](https://github.com/PabloSzx)! - Rework merkle drop integration with providers, accepting Lanyard or Sound.xyz API
+
+- [#112](https://github.com/soundxyz/sdk/pull/112) [`2c2a0d6`](https://github.com/soundxyz/sdk/commit/2c2a0d6dc084e9d983f691dd2f33f23fd9a8a9a7) Thanks [@PabloSzx](https://github.com/PabloSzx)! - Rework Sound API integration, SoundAPI needs to be instatiated separately and specified as parameter for SoundClient
+
+### Patch Changes
+
+- [#109](https://github.com/soundxyz/sdk/pull/109) [`38ae490`](https://github.com/soundxyz/sdk/commit/38ae490e08a51d2bbbb2e73d0316ba1eddee4e39) Thanks [@PabloSzx](https://github.com/PabloSzx)! - Idempotent cached isSoundEdition check
+
+- [#113](https://github.com/soundxyz/sdk/pull/113) [`0cbe4de`](https://github.com/soundxyz/sdk/commit/0cbe4de4653a81d1d6335fb662fa5566063c2398) Thanks [@PabloSzx](https://github.com/PabloSzx)! - New "networkChainMatches" helper to validate connected network
+
+- [#115](https://github.com/soundxyz/sdk/pull/115) [`a666999`](https://github.com/soundxyz/sdk/commit/a66699992eea5a999f0e2216163a7a3eae7ceb28) Thanks [@PabloSzx](https://github.com/PabloSzx)! - SoundClient options "provider" or "signer" can be returned from a callback
+
+  ```ts
+  import { getSigner } from './chain'
+
+  const signerClient = SoundClient({
+    signer() {
+      return getSigner()
+      // ...
+    },
+  })
+
+  // ...
+
+  import { getProvider } from './chain'
+
+  const providerClient = SoundClient({
+    provider() {
+      return getProvider()
+      // ...
+    },
+  })
+  ```
+
 ## 0.5.5
 
 ### Patch Changes
