@@ -20,7 +20,7 @@ import {
   UnsupportedMinterError,
 } from './errors'
 import { ADDRESS_ZERO, MINTER_ROLE, minterFactoryMap } from './utils/constants'
-import { getSaltAsBytes32, validateAddress } from './utils/helpers'
+import { getLazyOption, getSaltAsBytes32, validateAddress } from './utils/helpers'
 import { LazyPromise } from './utils/promise'
 
 import type {
@@ -463,7 +463,9 @@ export function SoundClient({
 
   async function networkChainMatches({ chainId }: { chainId: number }) {
     const networkChain = await IdempotentCachedCall('network-chain', async function networkChain() {
-      const networkProvider = signer?.provider || provider
+      const networkProvider =
+        (client.signer && (await getLazyOption(client.signer)).provider) ??
+        (client.provider && (await getLazyOption(client.provider)))
 
       if (!networkProvider) throw new MissingSignerOrProviderError()
 
@@ -595,9 +597,10 @@ export function SoundClient({
 
   async function _requireSigner(): Promise<{ signer: Signer; userAddress: string }> {
     if (client.signer) {
-      const userAddress = await client.signer.getAddress()
+      const signer = await getLazyOption(client.signer)
+      const userAddress = await signer.getAddress()
 
-      return { signer: client.signer, userAddress }
+      return { signer, userAddress }
     }
 
     throw new MissingSignerError()
@@ -605,10 +608,12 @@ export function SoundClient({
 
   async function _requireSignerOrProvider(): Promise<{ signerOrProvider: SignerOrProvider }> {
     if (client.signer) {
-      return { signerOrProvider: client.signer }
+      const signer = await getLazyOption(client.signer)
+      return { signerOrProvider: signer }
     }
     if (client.provider) {
-      return { signerOrProvider: client.provider }
+      const provider = await getLazyOption(client.provider)
+      return { signerOrProvider: provider }
     }
 
     throw new MissingSignerOrProviderError()

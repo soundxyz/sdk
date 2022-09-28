@@ -64,14 +64,18 @@ export interface BaseSoundClientConfig {
   merkleProvider?: MerkleProvider
 }
 
+type LazyOption<T extends object> = T | (() => T | Promise<T>)
+
+export type { Signer, Provider }
+
 export type SoundClientConfig = (
   | {
-      provider: Provider
-      signer?: Signer
+      provider: LazyOption<Provider>
+      signer?: LazyOption<Signer>
     }
   | {
-      provider?: Provider
-      signer: Signer
+      provider?: LazyOption<Provider>
+      signer: LazyOption<Signer>
     }
 ) &
   BaseSoundClientConfig
