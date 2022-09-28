@@ -179,8 +179,13 @@ export function SoundClient({
       }
     }
 
+    const remaining =
+      (typeof mintSchedule.maxMintable === 'function'
+        ? mintSchedule.maxMintable(timestamp)
+        : mintSchedule.maxMintable) - mintSchedule.totalMinted
+
     const alreadyMinted = await numberMinted({ editionAddress: mintSchedule.editionAddress, userAddress })
-    return mintSchedule.maxMintablePerAccount - alreadyMinted
+    return Math.min(remaining, mintSchedule.maxMintablePerAccount - alreadyMinted)
   }
 
   const getMerkleProof: MerkleProofProvider['merkleProof'] = async function getMerkleProof({

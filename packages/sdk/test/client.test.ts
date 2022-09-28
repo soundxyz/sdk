@@ -52,6 +52,7 @@ let signers: SignerWithAddress[]
 let soundWallet: SignerWithAddress
 let artistWallet: SignerWithAddress
 let buyerWallet: SignerWithAddress
+let buyer2Wallet: SignerWithAddress
 
 /*********************************************************
                         SETUP
@@ -89,6 +90,7 @@ beforeEach(async () => {
   soundWallet = signers[0]
   artistWallet = signers[1]
   buyerWallet = signers[2]
+  buyer2Wallet = signers[3]
 
   const fixture = await loadFixture(deployProtocol)
 
@@ -530,7 +532,7 @@ describe('eligibleQuantity: single RangeEditionMinter instance', () => {
     const mint1EndTime = mint1StartTime + ONE_HOUR
     const mint2StartTime = mint1EndTime
 
-    const mint1MaxMintablePerAccount = 1
+    const mint1MaxMintablePerAccount = 40
     const mint2MaxMintablePerAccount = 42
 
     const minter = RangeEditionMinter__factory.connect(rangeEditionMinter.address, artistWallet)
@@ -544,8 +546,8 @@ describe('eligibleQuantity: single RangeEditionMinter instance', () => {
           mint1EndTime - 1, // cutoffTime,
           mint1EndTime,
           0, // affiliateFeeBPS
-          99, // maxMintableLower,
-          100, // maxMintableUpper,
+          50, // maxMintableLower,
+          60, // maxMintableUpper,
           mint1MaxMintablePerAccount,
         ]),
       },
@@ -587,6 +589,30 @@ describe('eligibleQuantity: single RangeEditionMinter instance', () => {
 
     expect(eligibleQuantity1).to.equal(mint1MaxMintablePerAccount)
     expect(eligibleQuantity2).to.equal(mint2MaxMintablePerAccount)
+
+    client.signer = buyer2Wallet
+
+    await client.mint({
+      mintSchedule: allMints[0],
+      quantity: mint1MaxMintablePerAccount,
+    })
+
+    const mintSchedule = await client
+      .activeMintSchedules({ editionAddress: precomputedEditionAddress })
+      .then((v) => v.shift()!)
+
+    expect(mintSchedule).exist
+
+    const remainingQuantityBuyer1 = await client.eligibleQuantity({
+      mintSchedule,
+      userAddress: buyerWallet.address,
+    })
+
+    // Eligible quantity should take in account the remaining supply
+    expect(remainingQuantityBuyer1).to.equal(
+      (typeof mintSchedule.maxMintable === 'function' ? mintSchedule.maxMintable() : mintSchedule.maxMintable) -
+        mint1MaxMintablePerAccount,
+    )
   })
 })
 
