@@ -1,5 +1,5 @@
 ---
-'@soundxyz/sdk': minor
+'@soundxyz/sdk': patch
 ---
 
 Adds a new method `numberOfTokensOwned` to get the number of tokens owned by a user on a given NFT contract.
