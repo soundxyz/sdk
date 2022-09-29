@@ -652,7 +652,7 @@ describe('numberOfTokensOwned', () => {
       value: PRICE,
     })
 
-    // Transfer out the song
+    // Burn token
     const songContract = SoundEditionV1__factory.connect(precomputedEditionAddress, buyerWallet)
     const numberOfTokensOwnedBeforeBurn = await client.numberOfTokensOwned({
       editionAddress: precomputedEditionAddress,
