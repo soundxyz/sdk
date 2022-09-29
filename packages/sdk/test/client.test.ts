@@ -34,7 +34,6 @@ import type MerkleTree from 'merkletreejs'
 import type { ContractCall, EditionConfig, MintConfig, MintSchedule } from '../src/types'
 import { MockAPI } from './helpers/api'
 import { randomUUID } from 'crypto'
-import { describe } from 'node:test'
 
 const UINT32_MAX = 4294967295
 const NULL_ADDRESS = '0x0000000000000000000000000000000000000000'
@@ -618,11 +617,181 @@ describe('eligibleQuantity: single RangeEditionMinter instance', () => {
 })
 
 describe('numberOfTokensOwned', () => {
-  it.skip('should buy a token and transfer it out')
-  it.skip('should buy a token and transfer in a token')
-  it.skip('should buy tokens')
-  it.skip('should transfer in tokens')
-  it.skip('should have no tokens owned')
+  it('should buy a token and transfer it out', async () => {
+    let minter = RangeEditionMinter__factory.connect(rangeEditionMinter.address, artistWallet)
+    const startTime = now()
+    const MINT_ID = 0
+    const minterCalls = [
+      {
+        contractAddress: rangeEditionMinter.address,
+        calldata: minter.interface.encodeFunctionData('createEditionMint', [
+          precomputedEditionAddress,
+          PRICE,
+          startTime,
+          startTime + ONE_HOUR, // cutoffTime
+          startTime + ONE_HOUR * 2, // endTime
+          0, // affiliateFeeBPS,
+          4, // maxMintableLower,
+          5, // maxMintableUpper,
+          2, // maxMintablePerAccount
+        ]),
+      },
+    ]
+    await setupTest({ minterCalls })
+
+    // numberMintedBefore shows 0
+    const numberOfTokensOwnedBefore = await client.numberOfTokensOwned({
+      editionAddress: precomputedEditionAddress,
+      userAddress: buyerWallet.address,
+    })
+    expect(numberOfTokensOwnedBefore).to.equal(0)
+
+    // mint one
+    minter = RangeEditionMinter__factory.connect(rangeEditionMinter.address, buyerWallet)
+    await minter.mint(precomputedEditionAddress, MINT_ID, 1, NULL_ADDRESS, {
+      value: PRICE,
+    })
+
+    // Transfer out the song
+    const songContract = SoundEditionV1__factory.connect(precomputedEditionAddress, buyerWallet)
+    await songContract.burn(1)
+
+    // numberMintedAfter shows 0
+    const numberOfTokensOwnedAfter = await client.numberOfTokensOwned({
+      editionAddress: precomputedEditionAddress,
+      userAddress: buyerWallet.address,
+    })
+    expect(numberOfTokensOwnedAfter).to.equal(0)
+  })
+
+  it('should buy tokens', async () => {
+    let minter = RangeEditionMinter__factory.connect(rangeEditionMinter.address, artistWallet)
+    const startTime = now()
+    const MINT_ID = 0
+    const minterCalls = [
+      {
+        contractAddress: rangeEditionMinter.address,
+        calldata: minter.interface.encodeFunctionData('createEditionMint', [
+          precomputedEditionAddress,
+          PRICE,
+          startTime,
+          startTime + ONE_HOUR, // cutoffTime
+          startTime + ONE_HOUR * 2, // endTime
+          0, // affiliateFeeBPS,
+          4, // maxMintableLower,
+          5, // maxMintableUpper,
+          2, // maxMintablePerAccount
+        ]),
+      },
+    ]
+    await setupTest({ minterCalls })
+
+    // numberMintedBefore shows 0
+    const numberOfTokensOwnedBefore = await client.numberOfTokensOwned({
+      editionAddress: precomputedEditionAddress,
+      userAddress: buyerWallet.address,
+    })
+    expect(numberOfTokensOwnedBefore).to.equal(0)
+
+    // mint one
+    minter = RangeEditionMinter__factory.connect(rangeEditionMinter.address, buyerWallet)
+    await minter.mint(precomputedEditionAddress, MINT_ID, 1, NULL_ADDRESS, {
+      value: PRICE,
+    })
+
+    // numberMintedAfter shows 1
+    const numberOfTokensOwnedAfter = await client.numberOfTokensOwned({
+      editionAddress: precomputedEditionAddress,
+      userAddress: buyerWallet.address,
+    })
+    expect(numberOfTokensOwnedAfter).to.equal(1)
+  })
+
+  it('should transfer in tokens', async () => {
+    let minter = RangeEditionMinter__factory.connect(rangeEditionMinter.address, artistWallet)
+    const startTime = now()
+    const MINT_ID = 0
+    const minterCalls = [
+      {
+        contractAddress: rangeEditionMinter.address,
+        calldata: minter.interface.encodeFunctionData('createEditionMint', [
+          precomputedEditionAddress,
+          PRICE,
+          startTime,
+          startTime + ONE_HOUR, // cutoffTime
+          startTime + ONE_HOUR * 2, // endTime
+          0, // affiliateFeeBPS,
+          4, // maxMintableLower,
+          5, // maxMintableUpper,
+          2, // maxMintablePerAccount
+        ]),
+      },
+    ]
+    await setupTest({ minterCalls })
+
+    // mint one
+    minter = RangeEditionMinter__factory.connect(rangeEditionMinter.address, buyerWallet)
+    await minter.mint(precomputedEditionAddress, MINT_ID, 1, NULL_ADDRESS, {
+      value: PRICE,
+    })
+
+    const numberOfTokensOwnedBeforeBuyer1 = await client.numberOfTokensOwned({
+      editionAddress: precomputedEditionAddress,
+      userAddress: buyerWallet.address,
+    })
+    expect(numberOfTokensOwnedBeforeBuyer1).to.equal(1)
+
+    const numberOfTokensOwnedBeforeBuyer2 = await client.numberOfTokensOwned({
+      editionAddress: precomputedEditionAddress,
+      userAddress: buyer2Wallet.address,
+    })
+    expect(numberOfTokensOwnedBeforeBuyer2).to.equal(0)
+
+    // Transfer out the song
+    const songContract = SoundEditionV1__factory.connect(precomputedEditionAddress, buyerWallet)
+    await songContract.transferFrom(buyerWallet.address, buyer2Wallet.address, 1)
+
+    const numberOfTokensOwnedAfterBuyer1 = await client.numberOfTokensOwned({
+      editionAddress: precomputedEditionAddress,
+      userAddress: buyerWallet.address,
+    })
+    expect(numberOfTokensOwnedAfterBuyer1).to.equal(0)
+
+    const numberOfTokensOwnedAfterBuyer2 = await client.numberOfTokensOwned({
+      editionAddress: precomputedEditionAddress,
+      userAddress: buyer2Wallet.address,
+    })
+    expect(numberOfTokensOwnedAfterBuyer2).to.equal(1)
+  })
+
+  it('should have no tokens owned', async () => {
+    let minter = RangeEditionMinter__factory.connect(rangeEditionMinter.address, artistWallet)
+    const startTime = now()
+    const minterCalls = [
+      {
+        contractAddress: rangeEditionMinter.address,
+        calldata: minter.interface.encodeFunctionData('createEditionMint', [
+          precomputedEditionAddress,
+          PRICE,
+          startTime,
+          startTime + ONE_HOUR, // cutoffTime
+          startTime + ONE_HOUR * 2, // endTime
+          0, // affiliateFeeBPS,
+          4, // maxMintableLower,
+          5, // maxMintableUpper,
+          2, // maxMintablePerAccount
+        ]),
+      },
+    ]
+    await setupTest({ minterCalls })
+
+    // numberMintedBefore shows 0
+    const numberOfTokensOwnedBefore = await client.numberOfTokensOwned({
+      editionAddress: precomputedEditionAddress,
+      userAddress: buyerWallet.address,
+    })
+    expect(numberOfTokensOwnedBefore).to.equal(0)
+  })
 })
 
 describe('mint', () => {
