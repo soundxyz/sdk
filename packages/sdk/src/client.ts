@@ -61,6 +61,7 @@ export function SoundClient({
     editionInfo,
     expectedEditionAddress,
     networkChainMatches,
+    numberOfTokensOwned,
   }
 
   const IdempotentCache: Record<string, unknown> = {}
@@ -123,13 +124,18 @@ export function SoundClient({
       .sort((a, b) => a.startTime - b.startTime)
   }
 
-  async function numberMinted({
-    editionAddress,
-    userAddress,
-  }: {
-    editionAddress: string
-    userAddress: string
-  }): Promise<number> {
+  // Number of tokens owned by user for a given edition
+  async function numberOfTokensOwned({ editionAddress, userAddress }: { editionAddress: string; userAddress: string }) {
+    await _requireValidSoundEdition({ editionAddress })
+
+    const { signerOrProvider } = await _requireSignerOrProvider()
+
+    const editionContract = SoundEditionV1__factory.connect(editionAddress, signerOrProvider)
+
+    return (await editionContract.balanceOf(userAddress)).toNumber()
+  }
+
+  async function numberMinted({ editionAddress, userAddress }: { editionAddress: string; userAddress: string }) {
     await _requireValidSoundEdition({ editionAddress })
 
     const { signerOrProvider } = await _requireSignerOrProvider()

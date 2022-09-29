@@ -34,6 +34,7 @@ import type MerkleTree from 'merkletreejs'
 import type { ContractCall, EditionConfig, MintConfig, MintSchedule } from '../src/types'
 import { MockAPI } from './helpers/api'
 import { randomUUID } from 'crypto'
+import { describe } from 'node:test'
 
 const UINT32_MAX = 4294967295
 const NULL_ADDRESS = '0x0000000000000000000000000000000000000000'
@@ -614,6 +615,14 @@ describe('eligibleQuantity: single RangeEditionMinter instance', () => {
         mint1MaxMintablePerAccount,
     )
   })
+})
+
+describe('numberOfTokensOwned', () => {
+  it.skip('should buy a token and transfer it out')
+  it.skip('should buy a token and transfer in a token')
+  it.skip('should buy tokens')
+  it.skip('should transfer in tokens')
+  it.skip('should have no tokens owned')
 })
 
 describe('mint', () => {
