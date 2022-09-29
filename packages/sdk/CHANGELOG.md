@@ -1,5 +1,18 @@
 # @soundxyz/sdk
 
+## 0.6.2
+
+### Patch Changes
+
+- [#118](https://github.com/soundxyz/sdk/pull/118) [`2e5feaf`](https://github.com/soundxyz/sdk/commit/2e5feaf0051d195e19320bb72c12709697545b0f) Thanks [@saihaj](https://github.com/saihaj)! - Adds a new method `numberOfTokensOwned` to get the number of tokens owned by a user on a given NFT contract.
+
+  ```ts
+  const numberOfTokensOwned = await sdk.numberOfTokensOwned({
+    editionAddress: '0x...',
+    userAddress: '0x...',
+  })
+  ```
+
 ## 0.6.1
 
 ### Patch Changes
