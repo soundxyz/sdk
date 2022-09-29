@@ -654,6 +654,11 @@ describe('numberOfTokensOwned', () => {
 
     // Transfer out the song
     const songContract = SoundEditionV1__factory.connect(precomputedEditionAddress, buyerWallet)
+    const numberOfTokensOwnedBeforeBurn = await client.numberOfTokensOwned({
+      editionAddress: precomputedEditionAddress,
+      userAddress: buyerWallet.address,
+    })
+    expect(numberOfTokensOwnedBeforeBurn).to.equal(1)
     await songContract.burn(1)
 
     // numberMintedAfter shows 0
