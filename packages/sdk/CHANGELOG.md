@@ -1,5 +1,11 @@
 # @soundxyz/sdk
 
+## 0.6.3
+
+### Patch Changes
+
+- [#121](https://github.com/soundxyz/sdk/pull/121) [`3fa8782`](https://github.com/soundxyz/sdk/commit/3fa8782706063c14ade8d4ff879a0707fd62d697) Thanks [@PabloSzx](https://github.com/PabloSzx)! - Expose "getMerkleProof" on SoundClient
+
 ## 0.6.2
 
 ### Patch Changes
