@@ -174,7 +174,7 @@ export function SoundClient({
       case 'MerkleDrop': {
         // return 0 if the user is not in the allowlist
         const merkleRoot = mintSchedule.merkleRoot
-        const proof = await getMerkleProof({
+        const proof = await client.getMerkleProof({
           merkleRoot,
           userAddress,
         })
@@ -251,7 +251,7 @@ export function SoundClient({
           mintSchedule.mintId,
         )
 
-        const proof = await getMerkleProof({
+        const proof = await client.getMerkleProof({
           merkleRoot,
           userAddress,
         })
