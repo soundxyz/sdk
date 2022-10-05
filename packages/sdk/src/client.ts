@@ -93,9 +93,16 @@ export function SoundClient({
         return await editionContract.supportsInterface(interfaceIds.ISoundEditionV1)
       } catch (err) {
         onError(err)
-        const chainId = await _getNetworkChainId()
+        let chainId: number | null = null
+        try {
+          chainId = await _getNetworkChainId()
+        } catch (err) {
+          onError(err)
+        }
         onError(
-         Error(`Error checking if ${editionAddress} is a SoundEdition contract (interfaceId: ${interfaceIds.ISoundEditionV1}). Network chainId: ${chainId}`),
+          Error(
+            `Error checking if ${editionAddress} is a SoundEdition contract (interfaceId: ${interfaceIds.ISoundEditionV1}). Network chain ID: ${chainId}`,
+          ),
         )
         return false
       }
