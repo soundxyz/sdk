@@ -25,7 +25,7 @@ import { LazyPromise } from './utils/promise'
 
 import type {
   Expand,
-  MerkleProofParameters,
+  MerkleProofProvider,
   MinterInterfaceId,
   MintOptions,
   SignerOrProvider,
@@ -62,7 +62,6 @@ export function SoundClient({
     expectedEditionAddress,
     networkChainMatches,
     numberOfTokensOwned,
-    getMerkleProof,
   }
 
   const IdempotentCache: Record<string, unknown> = {}
@@ -93,6 +92,9 @@ export function SoundClient({
         return await editionContract.supportsInterface(interfaceIds.ISoundEditionV1)
       } catch (err) {
         onError(err)
+        console.error(
+          `Error checking if ${editionAddress} is a SoundEdition contract. interfaceId: ${interfaceIds.ISoundEditionV1}`,
+        )
         return false
       }
     })
@@ -174,7 +176,7 @@ export function SoundClient({
       case 'MerkleDrop': {
         // return 0 if the user is not in the allowlist
         const merkleRoot = mintSchedule.merkleRoot
-        const proof = await client.getMerkleProof({
+        const proof = await getMerkleProof({
           merkleRoot,
           userAddress,
         })
@@ -195,7 +197,10 @@ export function SoundClient({
     return Math.min(remaining, mintSchedule.maxMintablePerAccount - alreadyMinted)
   }
 
-  function getMerkleProof({ merkleRoot, userAddress }: MerkleProofParameters) {
+  const getMerkleProof: MerkleProofProvider['merkleProof'] = async function getMerkleProof({
+    merkleRoot,
+    userAddress,
+  }) {
     return IdempotentCachedCall('merkle-proof' + merkleRoot + userAddress, async function getMerkleProof() {
       return _requireMerkleProvider().merkleProof({ merkleRoot, userAddress })
     })
@@ -251,7 +256,7 @@ export function SoundClient({
           mintSchedule.mintId,
         )
 
-        const proof = await client.getMerkleProof({
+        const proof = await getMerkleProof({
           merkleRoot,
           userAddress,
         })
