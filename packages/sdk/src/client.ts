@@ -93,6 +93,17 @@ export function SoundClient({
         return await editionContract.supportsInterface(interfaceIds.ISoundEditionV1)
       } catch (err) {
         onError(err)
+        let chainId: number | null = null
+        try {
+          chainId = await _getNetworkChainId()
+        } catch (err) {
+          onError(err)
+        }
+        onError(
+          Error(
+            `Error checking if ${editionAddress} is a SoundEdition contract (interfaceId: ${interfaceIds.ISoundEditionV1}). Network chain ID: ${chainId}`,
+          ),
+        )
         return false
       }
     })
@@ -471,17 +482,7 @@ export function SoundClient({
   }
 
   async function networkChainMatches({ chainId }: { chainId: number }) {
-    const networkChain = await IdempotentCachedCall('network-chain', async function networkChain() {
-      const networkProvider =
-        (client.signer && (await getLazyOption(client.signer)).provider) ??
-        (client.provider && (await getLazyOption(client.provider)))
-
-      if (!networkProvider) throw new MissingSignerOrProviderError()
-
-      const network = await networkProvider.getNetwork()
-
-      return network.chainId
-    })
+    const networkChain = await IdempotentCachedCall('network-chain', _getNetworkChainId)
 
     return networkChain === chainId
   }
@@ -646,6 +647,18 @@ export function SoundClient({
     if (client.merkleProvider) return client.merkleProvider
 
     throw new MissingMerkleProvider()
+  }
+
+  async function _getNetworkChainId() {
+    const networkProvider =
+      (client.signer && (await getLazyOption(client.signer)).provider) ??
+      (client.provider && (await getLazyOption(client.provider)))
+
+    if (!networkProvider) throw new MissingSignerOrProviderError()
+
+    const network = await networkProvider.getNetwork()
+
+    return network.chainId
   }
 
   return client
