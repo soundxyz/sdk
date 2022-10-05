@@ -25,7 +25,7 @@ import { LazyPromise } from './utils/promise'
 
 import type {
   Expand,
-  MerkleProofProvider,
+  MerkleProofParameters,
   MinterInterfaceId,
   MintOptions,
   SignerOrProvider,
@@ -62,6 +62,7 @@ export function SoundClient({
     expectedEditionAddress,
     networkChainMatches,
     numberOfTokensOwned,
+    getMerkleProof,
   }
 
   const IdempotentCache: Record<string, unknown> = {}
@@ -176,7 +177,7 @@ export function SoundClient({
       case 'MerkleDrop': {
         // return 0 if the user is not in the allowlist
         const merkleRoot = mintSchedule.merkleRoot
-        const proof = await getMerkleProof({
+        const proof = await client.getMerkleProof({
           merkleRoot,
           userAddress,
         })
@@ -197,10 +198,7 @@ export function SoundClient({
     return Math.min(remaining, mintSchedule.maxMintablePerAccount - alreadyMinted)
   }
 
-  const getMerkleProof: MerkleProofProvider['merkleProof'] = async function getMerkleProof({
-    merkleRoot,
-    userAddress,
-  }) {
+  function getMerkleProof({ merkleRoot, userAddress }: MerkleProofParameters) {
     return IdempotentCachedCall('merkle-proof' + merkleRoot + userAddress, async function getMerkleProof() {
       return _requireMerkleProvider().merkleProof({ merkleRoot, userAddress })
     })
@@ -256,7 +254,7 @@ export function SoundClient({
           mintSchedule.mintId,
         )
 
-        const proof = await getMerkleProof({
+        const proof = await client.getMerkleProof({
           merkleRoot,
           userAddress,
         })
