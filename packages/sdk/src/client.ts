@@ -95,7 +95,7 @@ export function SoundClient({
         onError(err)
         const chainId = await _getNetworkChainId()
         onError(
-          `Error checking if ${editionAddress} is a SoundEdition contract (interfaceId: ${interfaceIds.ISoundEditionV1}). Network chainId: ${chainId}`,
+         Error(`Error checking if ${editionAddress} is a SoundEdition contract (interfaceId: ${interfaceIds.ISoundEditionV1}). Network chainId: ${chainId}`),
         )
         return false
       }
