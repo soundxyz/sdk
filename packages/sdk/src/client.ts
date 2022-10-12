@@ -519,8 +519,12 @@ export function SoundClient({
       }),
     )
     // This list may contain duplicates if MINTER_ROLE was granted multiple times
-    const allMinters = minters.filter((minter) => minter !== null) as string[]
-    return [...new Set(allMinters)]
+    const allMinters = minters.reduce((acc, minter) => {
+      if (minter) acc.add(minter)
+      return acc
+    }, new Set<string>())
+
+    return Array.from(allMinters)
   }
 
   // Minting information from a minting contract for a given edition
