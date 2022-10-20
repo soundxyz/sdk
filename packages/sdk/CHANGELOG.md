@@ -1,5 +1,17 @@
 # @soundxyz/sdk
 
+## 0.7.0
+
+### Minor Changes
+
+- [#125](https://github.com/soundxyz/sdk/pull/125) [`f5e7fc8`](https://github.com/soundxyz/sdk/commit/f5e7fc8868dab0842b05a627c65f733a926907d4) Thanks [@PabloSzx](https://github.com/PabloSzx)! - mintSchedules & activeMintSchedules accepts "fromBlockOrBlockHash" optional parameter for logs query
+
+### Patch Changes
+
+- [`dfeb644`](https://github.com/soundxyz/sdk/commit/dfeb644ad11c2ad4154aabc46c653af5cf39c890) Thanks [@PabloSzx](https://github.com/PabloSzx)! - Target ES2019, transpiling "?."
+
+- [#123](https://github.com/soundxyz/sdk/pull/123) [`ec5bb15`](https://github.com/soundxyz/sdk/commit/ec5bb159f039296e1e3803cb69b1be64e849296a) Thanks [@gigamesh](https://github.com/gigamesh)! - Improves isSoundEdition error message"
+
 ## 0.6.3
 
 ### Patch Changes
