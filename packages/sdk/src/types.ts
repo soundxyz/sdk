@@ -11,6 +11,8 @@ import type { MerkleProofProvider } from './merkle/types'
 
 export type SignerOrProvider = Signer | Provider
 
+export type BlockOrBlockHash = string | number
+
 export interface MintOptions {
   /**
    * Mint Schedule to mint froms

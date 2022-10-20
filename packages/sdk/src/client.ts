@@ -24,6 +24,7 @@ import { getLazyOption, getSaltAsBytes32, validateAddress } from './utils/helper
 import { LazyPromise } from './utils/promise'
 
 import type {
+  BlockOrBlockHash,
   Expand,
   MerkleProofParameters,
   MinterInterfaceId,
@@ -110,23 +111,31 @@ export function SoundClient({
   }
 
   // All the minting schedules for a given edition, including past and future
-  async function mintSchedules({ editionAddress }: { editionAddress: string }): Promise<MintSchedule[]> {
+  async function mintSchedules({
+    editionAddress,
+    fromBlockOrBlockHash,
+  }: {
+    editionAddress: string
+    fromBlockOrBlockHash?: BlockOrBlockHash
+  }): Promise<MintSchedule[]> {
     await _requireValidSoundEdition({ editionAddress })
 
-    return _allMintSchedules({ editionAddress })
+    return _allMintSchedules({ editionAddress, fromBlockOrBlockHash })
   }
 
   // Active minter schedules for a given edition
   async function activeMintSchedules({
     editionAddress,
     timestamp = Math.floor(Date.now() / 1000),
+    fromBlockOrBlockHash,
   }: {
     editionAddress: string
     timestamp?: number
+    fromBlockOrBlockHash?: BlockOrBlockHash
   }): Promise<MintSchedule[]> {
     await _requireValidSoundEdition({ editionAddress })
 
-    const mintSchedules = await _allMintSchedules({ editionAddress })
+    const mintSchedules = await _allMintSchedules({ editionAddress, fromBlockOrBlockHash })
 
     // Filter mints that are live during the given timestamp
     return mintSchedules
@@ -492,7 +501,13 @@ export function SoundClient({
  ********************************************************/
 
   // Addresses with MINTER_ROLE for a given edition
-  async function _registeredMinters({ editionAddress }: { editionAddress: string }): Promise<string[]> {
+  async function _registeredMinters({
+    editionAddress,
+    fromBlockOrBlockHash,
+  }: {
+    editionAddress: string
+    fromBlockOrBlockHash: BlockOrBlockHash | undefined
+  }): Promise<string[]> {
     const { signerOrProvider } = await _requireSignerOrProvider()
 
     const editionContract = SoundEditionV1__factory.connect(editionAddress, signerOrProvider)
@@ -500,8 +515,7 @@ export function SoundClient({
     const minterRole = await editionContract.MINTER_ROLE()
     const filter = editionContract.filters.RolesUpdated(undefined, minterRole)
 
-    // TODO: set start block contract deploy block
-    const roleEvents = await editionContract.queryFilter(filter)
+    const roleEvents = await editionContract.queryFilter(filter, fromBlockOrBlockHash)
     const candidateMinters = roleEvents.map((event) => event.args.user)
 
     // Check supportsInterface() to verify each address is a minter
@@ -531,16 +545,18 @@ export function SoundClient({
   async function _mintInfosFromMinter({
     editionAddress,
     minterAddress,
+    fromBlockOrBlockHash,
   }: {
     editionAddress: string
     minterAddress: string
+    fromBlockOrBlockHash: BlockOrBlockHash | undefined
   }): Promise<MintSchedule[]> {
     const { signerOrProvider } = await _requireSignerOrProvider()
 
     // Query MintConfigCreated event
     const minterContract = IMinterModule__factory.connect(minterAddress, signerOrProvider)
     const filter = minterContract.filters.MintConfigCreated(editionAddress)
-    const mintScheduleConfigEvents = await minterContract.queryFilter(filter)
+    const mintScheduleConfigEvents = await minterContract.queryFilter(filter, fromBlockOrBlockHash)
     const mintIds = mintScheduleConfigEvents.map((event) => event.args.mintId)
 
     return Promise.all(
@@ -599,11 +615,19 @@ export function SoundClient({
     )
   }
 
-  async function _allMintSchedules({ editionAddress }: { editionAddress: string }): Promise<MintSchedule[]> {
-    const registeredMinters = await _registeredMinters({ editionAddress })
+  async function _allMintSchedules({
+    editionAddress,
+    fromBlockOrBlockHash,
+  }: {
+    editionAddress: string
+    fromBlockOrBlockHash: BlockOrBlockHash | undefined
+  }): Promise<MintSchedule[]> {
+    const registeredMinters = await _registeredMinters({ editionAddress, fromBlockOrBlockHash })
 
     const mintSchedules = await Promise.all(
-      registeredMinters.map(async (minterAddress) => _mintInfosFromMinter({ editionAddress, minterAddress })),
+      registeredMinters.map(async (minterAddress) =>
+        _mintInfosFromMinter({ editionAddress, minterAddress, fromBlockOrBlockHash }),
+      ),
     )
 
     return mintSchedules.flat().sort((a, b) => a.startTime - b.startTime)
