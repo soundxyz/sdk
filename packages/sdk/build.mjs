@@ -22,7 +22,7 @@ const [pkgString] = await Promise.all([
     clean: true,
     format: 'interop',
     outDir: 'dist',
-    target: 'es2020',
+    target: 'es2019',
     sourcemap: false,
   }),
   copyFile('README.md', 'dist/README.md'),
