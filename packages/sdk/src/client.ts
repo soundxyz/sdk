@@ -64,6 +64,10 @@ export function SoundClient({
     networkChainMatches,
     numberOfTokensOwned,
     getMerkleProof,
+    editionRegisteredMinters,
+    editionMinterMintIds,
+    editionScheduleIds,
+    editionMintSchedules,
   }
 
   const IdempotentCache: Record<string, unknown> = {}
@@ -120,7 +124,12 @@ export function SoundClient({
   }): Promise<MintSchedule[]> {
     await _requireValidSoundEdition({ editionAddress })
 
-    return _allMintSchedules({ editionAddress, fromBlockOrBlockHash })
+    const scheduleIds = await editionScheduleIds({
+      editionAddress,
+      fromBlockOrBlockHash,
+    })
+
+    return editionMintSchedules({ editionAddress, scheduleIds })
   }
 
   // Active minter schedules for a given edition
@@ -135,10 +144,10 @@ export function SoundClient({
   }): Promise<MintSchedule[]> {
     await _requireValidSoundEdition({ editionAddress })
 
-    const mintSchedules = await _allMintSchedules({ editionAddress, fromBlockOrBlockHash })
+    const allMintSchedules = await mintSchedules({ editionAddress, fromBlockOrBlockHash })
 
     // Filter mints that are live during the given timestamp
-    return mintSchedules
+    return allMintSchedules
       .filter((mintSchedule) => {
         return mintSchedule.startTime <= timestamp && mintSchedule.endTime > timestamp && !mintSchedule.mintPaused
       })
@@ -496,12 +505,8 @@ export function SoundClient({
     return networkChain === chainId
   }
 
-  /*********************************************************
-                  INTERNAL FUNCTIONS
- ********************************************************/
-
   // Addresses with MINTER_ROLE for a given edition
-  async function _registeredMinters({
+  async function editionRegisteredMinters({
     editionAddress,
     fromBlockOrBlockHash,
   }: {
@@ -541,8 +546,7 @@ export function SoundClient({
     return Array.from(allMinters)
   }
 
-  // Minting information from a minting contract for a given edition
-  async function _mintInfosFromMinter({
+  async function editionMinterMintIds({
     editionAddress,
     minterAddress,
     fromBlockOrBlockHash,
@@ -550,14 +554,74 @@ export function SoundClient({
     editionAddress: string
     minterAddress: string
     fromBlockOrBlockHash: BlockOrBlockHash | undefined
-  }): Promise<MintSchedule[]> {
+  }) {
     const { signerOrProvider } = await _requireSignerOrProvider()
 
     // Query MintConfigCreated event
     const minterContract = IMinterModule__factory.connect(minterAddress, signerOrProvider)
     const filter = minterContract.filters.MintConfigCreated(editionAddress)
     const mintScheduleConfigEvents = await minterContract.queryFilter(filter, fromBlockOrBlockHash)
-    const mintIds = mintScheduleConfigEvents.map((event) => event.args.mintId)
+    return mintScheduleConfigEvents.map((event) => event.args.mintId.toNumber())
+  }
+
+  async function editionScheduleIds({
+    editionAddress,
+    fromBlockOrBlockHash,
+  }: {
+    editionAddress: string
+    fromBlockOrBlockHash?: BlockOrBlockHash
+  }) {
+    const minterAddresses = await editionRegisteredMinters({
+      editionAddress,
+      fromBlockOrBlockHash,
+    })
+
+    return Promise.all(
+      minterAddresses.map(async (minterAddress) => {
+        return {
+          minterAddress,
+          mintIds: await editionMinterMintIds({
+            editionAddress,
+            minterAddress,
+            fromBlockOrBlockHash,
+          }),
+        }
+      }),
+    )
+  }
+
+  async function editionMintSchedules({
+    editionAddress,
+    scheduleIds,
+  }: {
+    editionAddress: string
+    scheduleIds: {
+      minterAddress: string
+      mintIds: number[]
+    }[]
+  }): Promise<MintSchedule[]> {
+    const mintSchedules = await Promise.all(
+      scheduleIds.map(({ minterAddress, mintIds }) => _mintInfosFromMinter({ editionAddress, minterAddress, mintIds })),
+    )
+
+    return mintSchedules.flat().sort((a, b) => a.startTime - b.startTime)
+  }
+
+  /*********************************************************
+                  INTERNAL FUNCTIONS
+ ********************************************************/
+
+  // Minting information from a minting contract for a given edition
+  async function _mintInfosFromMinter({
+    editionAddress,
+    minterAddress,
+    mintIds,
+  }: {
+    editionAddress: string
+    minterAddress: string
+    mintIds: number[]
+  }): Promise<MintSchedule[]> {
+    const { signerOrProvider } = await _requireSignerOrProvider()
 
     return Promise.all(
       mintIds.map(async (mintId) => {
@@ -571,7 +635,7 @@ export function SoundClient({
             return {
               mintType: 'RangeEdition',
               interfaceId,
-              mintId: mintId.toNumber(),
+              mintId,
               editionAddress,
               minterAddress,
               startTime: mintSchedule.startTime,
@@ -594,7 +658,7 @@ export function SoundClient({
             const mintSchedule = await minterContract.mintInfo(editionAddress, mintId)
             return {
               mintType: 'MerkleDrop',
-              mintId: mintId.toNumber(),
+              mintId,
               merkleRoot: mintSchedule.merkleRootHash,
               editionAddress,
               minterAddress,
@@ -613,24 +677,6 @@ export function SoundClient({
         }
       }),
     )
-  }
-
-  async function _allMintSchedules({
-    editionAddress,
-    fromBlockOrBlockHash,
-  }: {
-    editionAddress: string
-    fromBlockOrBlockHash: BlockOrBlockHash | undefined
-  }): Promise<MintSchedule[]> {
-    const registeredMinters = await _registeredMinters({ editionAddress, fromBlockOrBlockHash })
-
-    const mintSchedules = await Promise.all(
-      registeredMinters.map(async (minterAddress) =>
-        _mintInfosFromMinter({ editionAddress, minterAddress, fromBlockOrBlockHash }),
-      ),
-    )
-
-    return mintSchedules.flat().sort((a, b) => a.startTime - b.startTime)
   }
 
   async function _requireSigner(): Promise<{ signer: Signer; userAddress: string }> {
