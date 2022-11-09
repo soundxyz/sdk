@@ -64,9 +64,10 @@ export function SoundClient({
     networkChainMatches,
     numberOfTokensOwned,
     getMerkleProof,
-    contractRegisteredMinters,
-    contractMinterMintIds,
-    contractMintSchedules,
+    editionRegisteredMinters,
+    editionMinterMintIds,
+    editionScheduleIds,
+    editionMintSchedules,
   }
 
   const IdempotentCache: Record<string, unknown> = {}
@@ -123,25 +124,12 @@ export function SoundClient({
   }): Promise<MintSchedule[]> {
     await _requireValidSoundEdition({ editionAddress })
 
-    const minterAddresses = await contractRegisteredMinters({
+    const scheduleIds = await editionScheduleIds({
       editionAddress,
       fromBlockOrBlockHash,
     })
 
-    const scheduleIds = await Promise.all(
-      minterAddresses.map(async (minterAddress) => {
-        return {
-          minterAddress,
-          mintIds: await contractMinterMintIds({
-            editionAddress,
-            minterAddress,
-            fromBlockOrBlockHash,
-          }),
-        }
-      }),
-    )
-
-    return contractMintSchedules({ editionAddress, scheduleIds })
+    return editionMintSchedules({ editionAddress, scheduleIds })
   }
 
   // Active minter schedules for a given edition
@@ -518,7 +506,7 @@ export function SoundClient({
   }
 
   // Addresses with MINTER_ROLE for a given edition
-  async function contractRegisteredMinters({
+  async function editionRegisteredMinters({
     editionAddress,
     fromBlockOrBlockHash,
   }: {
@@ -558,7 +546,7 @@ export function SoundClient({
     return Array.from(allMinters)
   }
 
-  async function contractMinterMintIds({
+  async function editionMinterMintIds({
     editionAddress,
     minterAddress,
     fromBlockOrBlockHash,
@@ -576,7 +564,33 @@ export function SoundClient({
     return mintScheduleConfigEvents.map((event) => event.args.mintId.toNumber())
   }
 
-  async function contractMintSchedules({
+  async function editionScheduleIds({
+    editionAddress,
+    fromBlockOrBlockHash,
+  }: {
+    editionAddress: string
+    fromBlockOrBlockHash?: BlockOrBlockHash
+  }) {
+    const minterAddresses = await editionRegisteredMinters({
+      editionAddress,
+      fromBlockOrBlockHash,
+    })
+
+    return Promise.all(
+      minterAddresses.map(async (minterAddress) => {
+        return {
+          minterAddress,
+          mintIds: await editionMinterMintIds({
+            editionAddress,
+            minterAddress,
+            fromBlockOrBlockHash,
+          }),
+        }
+      }),
+    )
+  }
+
+  async function editionMintSchedules({
     editionAddress,
     scheduleIds,
   }: {
