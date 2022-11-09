@@ -1,0 +1,159 @@
+specVersion: 0.0.4
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: SoundCreatorV1
+    network: mainnet
+    source:
+      address: '0xaef3e8c8723d9c31863be8de54df2668ef7c4b89'
+      abi: SoundCreatorV1
+      startBlock: 15570834
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - SoundEditionCreated
+      abis:
+        - name: SoundCreatorV1
+          file: ./abis/SoundCreatorV1.json
+        - name: SoundEditionV1
+          file: ./abis/SoundEditionV1.json
+      eventHandlers:
+        - event: SoundEditionCreated(indexed address,indexed address,bytes,address[],bytes[],bytes[])
+          handler: handleSoundEditionCreated
+      file: ./src/sound-creator-v-1.ts
+
+  - kind: ethereum
+    name: MerkleDropMinter
+    network: mainnet
+    source:
+      address: '0xeae422887230C0FFB91Fd8F708f5fdD354C92F2F'
+      abi: MerkleDropMinter
+      startBlock: 15570834
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - AffiliateFeeSet
+        - MerkleDropMintCreated
+        - PriceSet
+        - TimeRangeSet
+      abis:
+        - name: MerkleDropMinter
+          file: ./abis/MerkleDropMinter.json
+      eventHandlers:
+        - event: AffiliateFeeSet(indexed address,indexed uint128,uint16)
+          handler: handleAffiliateFeeSet
+        - event: MerkleDropMintCreated(indexed address,indexed uint128,bytes32,uint96,uint32,uint32,uint16,uint32,uint32)
+          handler: handleMerkleDropMintCreated
+        - event: PriceSet(indexed address,indexed uint128,uint96)
+          handler: handlePriceSet
+        - event: TimeRangeSet(indexed address,indexed uint128,uint32,uint32)
+          handler: handleTimeRangeSet
+      file: ./src/merkle-drop-minter.ts
+
+  - kind: ethereum
+    name: RangeEditionMinter
+    network: mainnet
+    source:
+      address: '0x65c25FADd9b88df5c8C101A3b99a5D614B708596'
+      abi: RangeEditionMinter
+      startBlock: 15570834
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - AffiliateFeeSet
+        - PriceSet
+        - RangeEditionMintCreated
+        - TimeRangeSet
+      abis:
+        - name: RangeEditionMinter
+          file: ./abis/RangeEditionMinter.json
+      eventHandlers:
+        - event: AffiliateFeeSet(indexed address,indexed uint128,uint16)
+          handler: handleAffiliateFeeSet
+        - event: PriceSet(indexed address,indexed uint128,uint96)
+          handler: handlePriceSet
+        - event: RangeEditionMintCreated(indexed address,indexed uint128,uint96,uint32,uint32,uint32,uint16,uint32,uint32,uint32)
+          handler: handleRangeEditionMintCreated
+        - event: TimeRangeSet(indexed address,indexed uint128,uint32,uint32)
+          handler: handleTimeRangeSet
+      file: ./src/range-edition-minter.ts
+
+templates:
+  - name: SoundEditionV1
+    kind: ethereum
+    network: mainnet
+    source:
+      abi: SoundEditionV1
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - Approval
+        - ApprovalForAll
+        - BaseURISet
+        - ConsecutiveTransfer
+        - ContractURISet
+        - EditionCutoffTimeSet
+        - EditionMaxMintableRangeSet
+        - FundingRecipientSet
+        - MetadataFrozen
+        - MetadataModuleSet
+        - MintRandomnessEnabledSet
+        - OwnershipHandoverCanceled
+        - OwnershipHandoverRequested
+        - OwnershipTransferred
+        - RolesUpdated
+        - RoyaltySet
+        - SoundEditionInitialized
+        - Transfer
+      abis:
+        - name: SoundEditionV1
+          file: ./abis/SoundEditionV1.json
+      eventHandlers:
+        - event: Approval(indexed address,indexed address,indexed uint256)
+          handler: handleApproval
+        - event: ApprovalForAll(indexed address,indexed address,bool)
+          handler: handleApprovalForAll
+        - event: BaseURISet(string)
+          handler: handleBaseURISet
+        - event: ConsecutiveTransfer(indexed uint256,uint256,indexed address,indexed address)
+          handler: handleConsecutiveTransfer
+        - event: ContractURISet(string)
+          handler: handleContractURISet
+        - event: EditionCutoffTimeSet(uint32)
+          handler: handleEditionCutoffTimeSet
+        - event: EditionMaxMintableRangeSet(uint32,uint32)
+          handler: handleEditionMaxMintableRangeSet
+        - event: FundingRecipientSet(address)
+          handler: handleFundingRecipientSet
+        - event: MetadataFrozen(address,string,string)
+          handler: handleMetadataFrozen
+        - event: MetadataModuleSet(address)
+          handler: handleMetadataModuleSet
+        - event: MintRandomnessEnabledSet(bool)
+          handler: handleMintRandomnessEnabledSet
+        - event: OwnershipHandoverCanceled(indexed address)
+          handler: handleOwnershipHandoverCanceled
+        - event: OwnershipHandoverRequested(indexed address)
+          handler: handleOwnershipHandoverRequested
+        - event: OwnershipTransferred(indexed address,indexed address)
+          handler: handleOwnershipTransferred
+        - event: RolesUpdated(indexed address,indexed uint256)
+          handler: handleRolesUpdated
+        - event: RoyaltySet(uint16)
+          handler: handleRoyaltySet
+        - event: SoundEditionInitialized(indexed address,string,string,address,string,string,address,uint16,uint32,uint32,uint32,uint8)
+          handler: handleSoundEditionInitialized
+        - event: Transfer(indexed address,indexed address,indexed uint256)
+          handler: handleTransfer
+      file: ./src/sound-edition-v-1.ts
+features:
+  - fullTextSearch
