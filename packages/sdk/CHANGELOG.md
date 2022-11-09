@@ -1,5 +1,11 @@
 # @soundxyz/sdk
 
+## 0.8.0
+
+### Minor Changes
+
+- [#126](https://github.com/soundxyz/sdk/pull/126) [`a33dd22`](https://github.com/soundxyz/sdk/commit/a33dd2279a15be4e74d150957f990bdedf006562) Thanks [@PabloSzx](https://github.com/PabloSzx)! - Composable mint schedules functions with "editionRegisteredMinters", "editionMinterMintIds", "editionScheduleIds" and "editionMintSchedules"
+
 ## 0.7.0
 
 ### Minor Changes
