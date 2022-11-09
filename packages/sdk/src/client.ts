@@ -601,9 +601,7 @@ export function SoundClient({
     }[]
   }): Promise<MintSchedule[]> {
     const mintSchedules = await Promise.all(
-      scheduleIds.map(async ({ minterAddress, mintIds }) =>
-        _mintInfosFromMinter({ editionAddress, minterAddress, mintIds }),
-      ),
+      scheduleIds.map(({ minterAddress, mintIds }) => _mintInfosFromMinter({ editionAddress, minterAddress, mintIds })),
     )
 
     return mintSchedules.flat().sort((a, b) => a.startTime - b.startTime)
