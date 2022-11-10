@@ -33,7 +33,7 @@ import type {
   SoundClientConfig,
 } from './types'
 import type { Signer } from '@ethersproject/abstract-signer'
-import type { BigNumberish } from '@ethersproject/bignumber'
+import { BigNumber, BigNumberish } from '@ethersproject/bignumber'
 import type { ContractTransaction, Overrides, PayableOverrides } from '@ethersproject/contracts'
 import type { ReleaseInfoQueryVariables } from './api/graphql/gql'
 import type { ContractCall, EditionConfig, MintConfig, MintSchedule } from './types'
@@ -43,12 +43,14 @@ export function SoundClient({
   signer,
   provider,
   soundAPI,
+  soundSubgraph,
   soundCreatorAddress,
   onError = console.error,
   merkleProvider,
 }: SoundClientConfig) {
   const client = {
     soundAPI,
+    soundSubgraph,
     signer,
     provider,
     merkleProvider,
@@ -514,6 +516,38 @@ export function SoundClient({
     editionAddress: string
     fromBlockOrBlockHash: BlockOrBlockHash | undefined
   }): Promise<string[]> {
+    const soundSubgraph = client.soundSubgraph
+    if (soundSubgraph) {
+      const { data, errors } = await soundSubgraph.minterInfo({ editionAddress })
+      const minterInfo = data?.songs
+      if (!minterInfo) {
+        throw new UnexpectedApiResponse({
+          message: errors ? 'GraphQL Errors found' : `Minters for edition "${editionAddress}" could not be found`,
+          graphqlErrors: errors,
+        })
+      }
+
+      const editionMinters = minterInfo
+        // just to to be safe we only keep the address we have
+        .filter((edition) => edition.address.toLowerCase() === editionAddress.toLowerCase())
+        // Filter out any falsy values
+        .filter((edition) => Boolean(edition.minters))
+        // Minters are an array so we have to flatten them out
+        .flatMap((edition) => edition.minters)
+
+      if (!editionMinters) {
+        throw new UnexpectedApiResponse({
+          message: 'Minter Information could not be found',
+          graphqlErrors: errors,
+        })
+      }
+
+      const minterAddresses = editionMinters.map((minter) => minter?.address).filter(Boolean) as string[]
+
+      // Filter out any duplicates
+      return Array.from(new Set(minterAddresses))
+    }
+
     const { signerOrProvider } = await _requireSignerOrProvider()
 
     const editionContract = SoundEditionV1_1__factory.connect(editionAddress, signerOrProvider)
@@ -556,6 +590,38 @@ export function SoundClient({
     minterAddress: string
     fromBlockOrBlockHash: BlockOrBlockHash | undefined
   }) {
+    const soundSubgraph = client.soundSubgraph
+    if (soundSubgraph) {
+      const { data, errors } = await soundSubgraph.minterInfo({ editionAddress })
+      const minterInfo = data?.songs
+      if (!minterInfo) {
+        throw new UnexpectedApiResponse({
+          message: errors ? 'GraphQL Errors found' : `Minters for edition "${editionAddress}" could not be found`,
+          graphqlErrors: errors,
+        })
+      }
+
+      const editionMinters = minterInfo
+        // just to to be safe we only keep the address we have
+        .filter((edition) => edition.address.toLowerCase() === editionAddress.toLowerCase())
+        // Filter out any falsy values
+        .filter((edition) => Boolean(edition.minters))
+        // Minters are an array so we have to flatten them out
+        .flatMap((edition) => edition.minters)
+
+      if (!editionMinters) {
+        throw new UnexpectedApiResponse({
+          message: 'Minter Information could not be found',
+          graphqlErrors: errors,
+        })
+      }
+
+      const minterAddresses = editionMinters.map((minter) => minter?.mintId).filter(Boolean) as string[]
+
+      // Filter out any duplicates
+      return Array.from(new Set(minterAddresses.map((mintId) => BigNumber.from(mintId).toNumber())))
+    }
+
     const { signerOrProvider } = await _requireSignerOrProvider()
 
     // Query MintConfigCreated event

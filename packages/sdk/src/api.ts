@@ -17,7 +17,7 @@ import {
 
 import type { ExecutionResult, MerkleProofParameters } from './types'
 
-const graphqlRequestBody = z.object({
+export const graphqlRequestBody = z.object({
   data: z.record(z.unknown()).nullable().optional(),
   errors: z
     .array(
