@@ -1,3 +1,3 @@
 # Sound SDK
 
-documentation coming soon :)
+https://docs.sound.xyz/sdk
