@@ -616,10 +616,15 @@ export function SoundClient({
         })
       }
 
-      const minterAddresses = editionMinters.map((minter) => minter?.mintId).filter(Boolean) as string[]
+      const mintIds = editionMinters
+        // we only want mint IDs for a given minter address
+        // NOTE: AND/OR filters in graph are not supported yet once they do that then we can write another query
+        .filter((minter) => minter?.address.toLowerCase() === minterAddress.toLowerCase())
+        .map((minter) => minter?.mintId)
+        .filter(Boolean) as string[]
 
       // Filter out any duplicates
-      return Array.from(new Set(minterAddresses.map((mintId) => BigNumber.from(mintId).toNumber())))
+      return Array.from(new Set(mintIds.map((mintId) => BigNumber.from(mintId).toNumber())))
     }
 
     const { signerOrProvider } = await _requireSignerOrProvider()
