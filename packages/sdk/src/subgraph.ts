@@ -4,6 +4,7 @@ import { Test, TestQuery } from './api/graphql/gql'
 import type { ExecutionResult } from './types'
 import { Minters } from './subgraph/graphql/gql'
 import type { MintersQueryVariables, MintersQuery } from './subgraph/graphql/gql'
+import { graphqlRequestBody } from './api'
 
 export interface SoundSubgraphConfig {
   /**
