@@ -7,13 +7,13 @@ import type { MintersQueryVariables, MintersQuery } from './subgraph/graphql/gql
 
 export interface SoundSubgraphConfig {
   /**
-   * @default "https://api.thegraph.com/subgraphs/name/saihaj/sound-sdk-mainnet/graphql"
+   * @default "https://api.thegraph.com/subgraphs/name/saihaj/sound-sdk-mainnet"
    */
   apiEndpoint?: string | URL
 }
 
 export function SoundSubgraph({
-  apiEndpoint = 'https://api.thegraph.com/subgraphs/name/saihaj/sound-sdk-mainnet/graphql',
+  apiEndpoint = 'https://api.thegraph.com/subgraphs/name/saihaj/sound-sdk-mainnet',
 }: SoundSubgraphConfig) {
   const apiUrl = new URL(apiEndpoint)
 
