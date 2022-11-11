@@ -6,9 +6,7 @@ dataSources:
     name: SoundCreatorV1
     network: mainnet
     source:
-      address: '0xaef3e8c8723d9c31863be8de54df2668ef7c4b89'
       abi: SoundCreatorV1
-      startBlock: 15570834
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
@@ -29,9 +27,7 @@ dataSources:
     name: MerkleDropMinter
     network: mainnet
     source:
-      address: '0xeae422887230C0FFB91Fd8F708f5fdD354C92F2F'
       abi: MerkleDropMinter
-      startBlock: 15570834
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
@@ -59,9 +55,7 @@ dataSources:
     name: RangeEditionMinter
     network: mainnet
     source:
-      address: '0x65c25FADd9b88df5c8C101A3b99a5D614B708596'
       abi: RangeEditionMinter
-      startBlock: 15570834
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6

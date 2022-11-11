@@ -5,10 +5,9 @@
   "scripts": {
     "codegen": "graph codegen",
     "build": "graph build",
-    "deploy": "graph deploy --node https://api.thegraph.com/deploy/ saihaj/sound-sdk-mainnet",
-    "create-local": "graph create --node http://localhost:8020/ saihaj/sound-sdk-mainnet",
-    "remove-local": "graph remove --node http://localhost:8020/ saihaj/sound-sdk-mainnet",
-    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 saihaj/sound-sdk-mainnet",
+    "deploy:production": "DEPLOY_NETWORK='mainnet' ENV_NAME='production' node deploy.js && graph deploy --product hosted-service soundxyz/sdk-production --network-file ./networks/production.json --deploy-key=$DEPLOY_KEY",
+    "deploy:staging": "DEPLOY_NETWORK='goerli' ENV_NAME='staging' node deploy.js && pnpm run setup-deploy && graph deploy --product hosted-service soundxyz/sdk-staging --network-file ./networks/staging.json --deploy-key=$DEPLOY_KEY",
+    "deploy:preview": "DEPLOY_NETWORK='goerli' ENV_NAME='preview' node deploy.js && pnpm run setup-deploy && graph deploy --product hosted-service soundxyz/sdk-preview --network-file ./networks/preview.json --deploy-key=$DEPLOY_KEY",
     "test": "graph test"
   },
   "author": "Saihajpreet Singh <saihajpreet.singh@gmail.com> (https://saihaj.dev/)",
@@ -18,7 +17,8 @@
     "@graphprotocol/graph-ts": "0.28.1"
   },
   "devDependencies": {
-    "matchstick-as": "0.5.0",
-    "@graphprotocol/graph-cli": "^0.35.0"
+    "@graphprotocol/graph-cli": "^0.35.0",
+    "js-yaml": "^4.1.0",
+    "matchstick-as": "0.5.0"
   }
 }
