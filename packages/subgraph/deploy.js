@@ -3,7 +3,7 @@ const path = require('path')
 const yaml = require('js-yaml')
 
 const subgraphYaml = yaml.load(fs.readFileSync('subgraph.yaml', 'utf8'))
-const DEPLOY_NETWORK = process.env['DEPLOY_NETWORK'] || 'mainnet'
+const DEPLOY_NETWORK = process.env['ENV_NAME'] === 'production' ? 'mainnet' : 'goerli'
 
 const network = fs.readFileSync(path.join(__dirname, 'networks', `${process.env['ENV_NAME']}.json`), 'utf8')
 const parsedNetworkFile = JSON.parse(network)
