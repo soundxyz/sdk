@@ -1,0 +1,24 @@
+{
+  "name": "@soundxyz/sdk-subgraph",
+  "version": "0.0.1",
+  "main": "index.js",
+  "scripts": {
+    "codegen": "graph codegen",
+    "build": "graph build",
+    "deploy:production": "ENV_NAME='production' node deploy.js && graph deploy --product hosted-service soundxyz/sdk-production --network-file ./networks/production.json --deploy-key=$DEPLOY_KEY",
+    "deploy:staging": "ENV_NAME='staging' node deploy.js && graph deploy --product hosted-service soundxyz/sdk-staging --network-file ./networks/staging.json --deploy-key=$DEPLOY_KEY",
+    "deploy:preview": "ENV_NAME='preview' node deploy.js && graph deploy --product hosted-service soundxyz/sdk-preview --network-file ./networks/preview.json --deploy-key=$DEPLOY_KEY",
+    "test": "graph test"
+  },
+  "author": "Saihajpreet Singh <saihajpreet.singh@gmail.com> (https://saihaj.dev/)",
+  "license": "MIT",
+  "dependencies": {
+    "@graphprotocol/graph-cli": "0.35.0",
+    "@graphprotocol/graph-ts": "0.28.1"
+  },
+  "devDependencies": {
+    "@graphprotocol/graph-cli": "^0.35.0",
+    "js-yaml": "^4.1.0",
+    "matchstick-as": "0.5.0"
+  }
+}

@@ -100,5 +100,8 @@
     // "skipDefaultLibCheck": true,                      /* Skip type checking .d.ts files that are included with TypeScript. */
     "skipLibCheck": true /* Skip type checking all .d.ts files. */
   },
-  "include": ["packages"]
+  "include": ["packages"],
+
+  // subgraph typechecking is not necessary since the build scripts there convert AS code
+  "exclude": ["node_modules", "packages/subgraph"]
 }

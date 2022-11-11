@@ -1,0 +1,20 @@
+{
+  "goerli": {
+    "SoundEditionV1": {
+      "address": "0xd00eb0e554e1ed2811b684e83ac9573bf1665818",
+      "startBlock": 7623620
+    },
+    "SoundCreatorV1": {
+      "address": "0x3e40430bb216f4669b6b7a428212344d4dbf34b0",
+      "startBlock": 7623620
+    },
+    "MerkleDropMinter": {
+      "address": "0x4e6295e620fbf25889c34c037b3cad467c894b23",
+      "startBlock": 7623620
+    },
+    "RangeEditionMinter": {
+      "address": "0x096d4b812c6a8c75c85a14f35ff084b0eeb11867",
+      "startBlock": 7623620
+    }
+  }
+}
