@@ -8,13 +8,13 @@ import { graphqlRequestBody } from './api'
 
 export interface SoundSubgraphConfig {
   /**
-   * @default "https://api.thegraph.com/subgraphs/name/saihaj/sound-sdk-mainnet"
+   * @default "https://api.thegraph.com/subgraphs/name/soundxyz/sdk-production"
    */
   apiEndpoint?: string | URL
 }
 
 export function SoundSubgraph({
-  apiEndpoint = 'https://api.thegraph.com/subgraphs/name/saihaj/sound-sdk-mainnet',
+  apiEndpoint = 'https://api.thegraph.com/subgraphs/name/soundxyz/sdk-production',
 }: SoundSubgraphConfig) {
   const apiUrl = new URL(apiEndpoint)
 

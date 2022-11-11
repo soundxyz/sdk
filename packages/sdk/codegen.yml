@@ -27,7 +27,7 @@ generates:
         Address: 'string'
       documentMode: 'string'
   ./src/subgraph/graphql/gql.ts:
-    schema: 'https://api.thegraph.com/subgraphs/name/saihaj/sound-sdk-mainnet'
+    schema: 'https://api.thegraph.com/subgraphs/name/soundxyz/sdk-production'
     documents:
       - './graphql/subgraph/**/*.gql'
     plugins:
