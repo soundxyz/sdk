@@ -19,7 +19,7 @@ import {
   UnexpectedApiResponse,
   UnsupportedMinterError,
 } from './errors'
-import { ADDRESS_ZERO, MINTER_ROLE, minterFactoryMap } from './utils/constants'
+import { ADDRESS_ZERO, MINTER_ROLE, minterFactoryMap, editionInitFlags } from './utils/constants'
 import { getLazyOption, getSaltAsBytes32, validateAddress } from './utils/helpers'
 import { LazyPromise } from './utils/promise'
 
@@ -403,8 +403,11 @@ export function SoundClient({
     }
 
     let flags = 0
-    if (editionConfig.shouldFreezeMetadata) flags |= 1
-    if (editionConfig.shouldEnableMintRandomness) flags |= 2
+    if (editionConfig.shouldFreezeMetadata) flags |= editionInitFlags.METADATA_IS_FROZEN
+    if (editionConfig.shouldEnableMintRandomness) flags |= editionInitFlags.MINT_RANDOMNESS_ENABLED
+
+    // Automatically enable Opensea OperatorFilter for royalties
+    flags |= editionInitFlags.OPERATOR_FILTERING_ENABLED
 
     /**
      * Encode the SoundEdition.initialize call.
