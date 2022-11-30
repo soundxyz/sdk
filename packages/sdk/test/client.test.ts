@@ -1039,14 +1039,12 @@ describe('createEdition', () => {
     const editionMaxMintableUpper = await editionContract.editionMaxMintableUpper()
     const editionCutoffTime = await editionContract.editionCutoffTime()
     const fundingRecipient = await editionContract.fundingRecipient()
-    const operatorFilterFlag = await editionContract.operatorFilteringEnabled()
 
     expect(editionBaseURI).to.eq(editionConfig.baseURI)
     expect(editionMaxMintableLower).to.eq(editionConfig.editionMaxMintableLower)
     expect(editionMaxMintableUpper).to.eq(editionConfig.editionMaxMintableLower)
     expect(editionCutoffTime).to.eq(editionConfig.editionCutoffTime)
     expect(fundingRecipient).to.eq(editionConfig.fundingRecipient)
-    expect(operatorFilterFlag).to.eq(true)
 
     const MINT_ID = 0
 
