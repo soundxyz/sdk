@@ -136,6 +136,7 @@ export type EditionConfig = {
   editionCutoffTime: number
   shouldFreezeMetadata: boolean
   shouldEnableMintRandomness: boolean
+  enableOperatorFiltering: boolean
 }
 
 /**
