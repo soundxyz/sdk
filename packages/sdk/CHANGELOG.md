@@ -1,5 +1,13 @@
 # @soundxyz/sdk
 
+## 0.9.0
+
+### Minor Changes
+
+- [#130](https://github.com/soundxyz/sdk/pull/130) [`ae551a0`](https://github.com/soundxyz/sdk/commit/ae551a036cdd661235291123c5da5ed5716bc332) Thanks [@gigamesh](https://github.com/gigamesh)! - Protocol SoundEditionV1_1
+
+- [#130](https://github.com/soundxyz/sdk/pull/130) [`ae551a0`](https://github.com/soundxyz/sdk/commit/ae551a036cdd661235291123c5da5ed5716bc332) Thanks [@gigamesh](https://github.com/gigamesh)! - Adds editionInitFlags and implements OPERATOR_FILTERING_ENABLED flag
+
 ## 0.8.0
 
 ### Minor Changes
