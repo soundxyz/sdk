@@ -436,12 +436,11 @@ describe('eligibleQuantity: single RangeEditionMinter instance', () => {
 
     await setupTest({ minterCalls })
 
-    await Promise.all(
-      Array.from({ length: maxMintableUpper }).map((_v, i) => {
-        const minter = RangeEditionMinter__factory.connect(rangeEditionMinter.address, signers[i])
-        return minter.mint(precomputedEditionAddress, MINT_ID, 1, NULL_ADDRESS, { value: PRICE })
-      }),
-    )
+    // Mint lower range limit
+    for (let i = 0; i < maxMintableUpper; i++) {
+      const minter = RangeEditionMinter__factory.connect(rangeEditionMinter.address, signers[i])
+      await minter.mint(precomputedEditionAddress, MINT_ID, 1, NULL_ADDRESS, { value: PRICE })
+    }
 
     // Check that all users have zero eligible balance
     await Promise.all(
@@ -491,10 +490,10 @@ describe('eligibleQuantity: single RangeEditionMinter instance', () => {
 
     await setupTest({ minterCalls })
 
-    // Mint lower range limit
+    // Mint upper range limit
     for (let i = 0; i < maxMintableLower; i++) {
       const minter = RangeEditionMinter__factory.connect(rangeEditionMinter.address, signers[i])
-      minter.mint(precomputedEditionAddress, MINT_ID, 1, NULL_ADDRESS, { value: PRICE })
+      await minter.mint(precomputedEditionAddress, MINT_ID, 1, NULL_ADDRESS, { value: PRICE })
     }
 
     const mints = await client.activeMintSchedules({ editionAddress: precomputedEditionAddress })
