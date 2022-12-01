@@ -7,7 +7,7 @@ import {
   RangeEditionMinter__factory,
   SoundCreatorV1,
   SoundCreatorV1__factory,
-  SoundEditionV1__factory,
+  SoundEditionV1_1__factory,
   SoundFeeRegistry__factory,
 } from '@soundxyz/sound-protocol/typechain/index'
 import assert from 'assert'
@@ -63,7 +63,7 @@ async function deployProtocol() {
   // the addresses are deterministically generated based on the order of deployment
 
   // Deploy edition implmementation
-  const SoundEditionV1 = new SoundEditionV1__factory()
+  const SoundEditionV1 = new SoundEditionV1_1__factory()
   const soundEditionImp = await SoundEditionV1.connect(soundWallet).deploy()
 
   // Deploy & initialize creator
@@ -110,7 +110,7 @@ beforeEach(async () => {
  * Sets up an edition and mint schedules.
  */
 export async function setupTest({ minterCalls = [] }: { minterCalls?: ContractCall[] }) {
-  const editionInterface = new ethers.utils.Interface(SoundEditionV1__factory.abi)
+  const editionInterface = new ethers.utils.Interface(SoundEditionV1_1__factory.abi)
   const editionInitData = editionInterface.encodeFunctionData('initialize', [
     'Song Name',
     'SYMBOL',
@@ -653,7 +653,7 @@ describe('numberOfTokensOwned', () => {
     })
 
     // Burn token
-    const songContract = SoundEditionV1__factory.connect(precomputedEditionAddress, buyerWallet)
+    const songContract = SoundEditionV1_1__factory.connect(precomputedEditionAddress, buyerWallet)
     const numberOfTokensOwnedBeforeBurn = await client.numberOfTokensOwned({
       editionAddress: precomputedEditionAddress,
       userAddress: buyerWallet.address,
@@ -753,7 +753,7 @@ describe('numberOfTokensOwned', () => {
     expect(numberOfTokensOwnedBeforeBuyer2).to.equal(0)
 
     // Transfer out the song
-    const songContract = SoundEditionV1__factory.connect(precomputedEditionAddress, buyerWallet)
+    const songContract = SoundEditionV1_1__factory.connect(precomputedEditionAddress, buyerWallet)
     await songContract.transferFrom(buyerWallet.address, buyer2Wallet.address, 1)
 
     const numberOfTokensOwnedAfterBuyer1 = await client.numberOfTokensOwned({
@@ -837,16 +837,17 @@ describe('mint', () => {
 
     it(`Successfully mints via RangeEditionMinter`, async () => {
       const quantity = 2
-      const initialBalance = await SoundEditionV1__factory.connect(
+      const initialBalance = await SoundEditionV1_1__factory.connect(
         precomputedEditionAddress,
         ethers.provider,
       ).balanceOf(buyerWallet.address)
 
       await client.mint({ mintSchedule: mintSchedules[0], quantity })
 
-      const finalBalance = await SoundEditionV1__factory.connect(precomputedEditionAddress, ethers.provider).balanceOf(
-        buyerWallet.address,
-      )
+      const finalBalance = await SoundEditionV1_1__factory.connect(
+        precomputedEditionAddress,
+        ethers.provider,
+      ).balanceOf(buyerWallet.address)
       expect(finalBalance.sub(initialBalance)).to.eq(quantity)
     })
 
@@ -919,7 +920,7 @@ describe('mint', () => {
 
     it(`Successfully mints via MerkleDropMinter`, async () => {
       const quantity = 1
-      const initialBalance = await SoundEditionV1__factory.connect(
+      const initialBalance = await SoundEditionV1_1__factory.connect(
         precomputedEditionAddress,
         ethers.provider,
       ).balanceOf(buyerWallet.address)
@@ -929,9 +930,10 @@ describe('mint', () => {
         quantity,
       })
 
-      const finalBalance = await SoundEditionV1__factory.connect(precomputedEditionAddress, ethers.provider).balanceOf(
-        buyerWallet.address,
-      )
+      const finalBalance = await SoundEditionV1_1__factory.connect(
+        precomputedEditionAddress,
+        ethers.provider,
+      ).balanceOf(buyerWallet.address)
       expect(finalBalance.sub(initialBalance)).to.eq(quantity)
     })
 
@@ -981,6 +983,7 @@ describe('createEdition', () => {
       editionCutoffTime: 999999,
       shouldEnableMintRandomness: true,
       shouldFreezeMetadata: false,
+      enableOperatorFiltering: true,
     }
 
     const mint1StartTime = now()
@@ -1033,18 +1036,33 @@ describe('createEdition', () => {
       salt: customSalt,
     })
 
-    const editionContract = SoundEditionV1__factory.connect(precomputedEditionAddress, ethers.provider)
-    const editionBaseURI = await editionContract.baseURI()
-    const editionMaxMintableLower = await editionContract.editionMaxMintableLower()
-    const editionMaxMintableUpper = await editionContract.editionMaxMintableUpper()
-    const editionCutoffTime = await editionContract.editionCutoffTime()
-    const fundingRecipient = await editionContract.fundingRecipient()
+    const editionContract = SoundEditionV1_1__factory.connect(precomputedEditionAddress, ethers.provider)
+
+    const [
+      editionBaseURI,
+      editionMaxMintableLower,
+      editionMaxMintableUpper,
+      editionCutoffTime,
+      fundingRecipient,
+      mintRandomnessEnabled,
+      operatorFilteringEnabled,
+    ] = await Promise.all([
+      editionContract.baseURI(),
+      editionContract.editionMaxMintableLower(),
+      editionContract.editionMaxMintableUpper(),
+      editionContract.editionCutoffTime(),
+      editionContract.fundingRecipient(),
+      editionContract.mintRandomnessEnabled(),
+      editionContract.operatorFilteringEnabled(),
+    ])
 
     expect(editionBaseURI).to.eq(editionConfig.baseURI)
     expect(editionMaxMintableLower).to.eq(editionConfig.editionMaxMintableLower)
     expect(editionMaxMintableUpper).to.eq(editionConfig.editionMaxMintableLower)
     expect(editionCutoffTime).to.eq(editionConfig.editionCutoffTime)
     expect(fundingRecipient).to.eq(editionConfig.fundingRecipient)
+    expect(mintRandomnessEnabled).to.eq(editionConfig.shouldEnableMintRandomness)
+    expect(operatorFilteringEnabled).to.eq(editionConfig.enableOperatorFiltering)
 
     const MINT_ID = 0
 
@@ -1192,6 +1210,7 @@ describe('editionInfo', () => {
         editionCutoffTime: 999999,
         shouldEnableMintRandomness: true,
         shouldFreezeMetadata: false,
+        enableOperatorFiltering: true,
       },
       mintConfigs: [
         {

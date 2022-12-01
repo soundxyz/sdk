@@ -4,7 +4,7 @@ import {
   MerkleDropMinter__factory,
   RangeEditionMinter__factory,
   SoundCreatorV1__factory,
-  SoundEditionV1__factory,
+  SoundEditionV1_1__factory,
 } from '@soundxyz/sound-protocol/typechain/index'
 import {
   CreatorAddressMissing,
@@ -92,7 +92,7 @@ export function SoundClient({
       validateAddress(editionAddress)
       const { signerOrProvider } = await _requireSignerOrProvider()
 
-      const editionContract = SoundEditionV1__factory.connect(editionAddress, signerOrProvider)
+      const editionContract = SoundEditionV1_1__factory.connect(editionAddress, signerOrProvider)
 
       try {
         return await editionContract.supportsInterface(interfaceIds.ISoundEditionV1)
@@ -160,7 +160,7 @@ export function SoundClient({
 
     const { signerOrProvider } = await _requireSignerOrProvider()
 
-    const editionContract = SoundEditionV1__factory.connect(editionAddress, signerOrProvider)
+    const editionContract = SoundEditionV1_1__factory.connect(editionAddress, signerOrProvider)
 
     return (await editionContract.balanceOf(userAddress)).toNumber()
   }
@@ -170,7 +170,7 @@ export function SoundClient({
 
     const { signerOrProvider } = await _requireSignerOrProvider()
 
-    const editionContract = SoundEditionV1__factory.connect(editionAddress, signerOrProvider)
+    const editionContract = SoundEditionV1_1__factory.connect(editionAddress, signerOrProvider)
 
     return (await editionContract.numberMinted(userAddress)).toNumber()
   }
@@ -341,7 +341,7 @@ export function SoundClient({
       formattedSalt,
     )
 
-    const editionInterface = SoundEditionV1__factory.createInterface()
+    const editionInterface = SoundEditionV1_1__factory.createInterface()
 
     /**
      * Encode all the bundled contract calls.
@@ -405,9 +405,7 @@ export function SoundClient({
     let flags = 0
     if (editionConfig.shouldFreezeMetadata) flags |= editionInitFlags.METADATA_IS_FROZEN
     if (editionConfig.shouldEnableMintRandomness) flags |= editionInitFlags.MINT_RANDOMNESS_ENABLED
-
-    // Automatically enable Opensea OperatorFilter for royalties
-    flags |= editionInitFlags.OPERATOR_FILTERING_ENABLED
+    if (editionConfig.enableOperatorFiltering) flags |= editionInitFlags.OPERATOR_FILTERING_ENABLED
 
     /**
      * Encode the SoundEdition.initialize call.
@@ -441,7 +439,7 @@ export function SoundClient({
     const contract = LazyPromise(async () => {
       await _requireValidSoundEdition({ editionAddress: soundParams.contractAddress })
 
-      const editionContract = SoundEditionV1__factory.connect(
+      const editionContract = SoundEditionV1_1__factory.connect(
         soundParams.contractAddress,
         (await _requireSignerOrProvider()).signerOrProvider,
       )
@@ -518,7 +516,7 @@ export function SoundClient({
   }): Promise<string[]> {
     const { signerOrProvider } = await _requireSignerOrProvider()
 
-    const editionContract = SoundEditionV1__factory.connect(editionAddress, signerOrProvider)
+    const editionContract = SoundEditionV1_1__factory.connect(editionAddress, signerOrProvider)
     // Get the addresses with MINTER_ROLE
     const minterRole = await editionContract.MINTER_ROLE()
     const filter = editionContract.filters.RolesUpdated(undefined, minterRole)
