@@ -436,7 +436,7 @@ describe('eligibleQuantity: single RangeEditionMinter instance', () => {
 
     await setupTest({ minterCalls })
 
-    // Mint lower range limit
+    // Mint upper range limit
     for (let i = 0; i < maxMintableUpper; i++) {
       const minter = RangeEditionMinter__factory.connect(rangeEditionMinter.address, signers[i])
       await minter.mint(precomputedEditionAddress, MINT_ID, 1, NULL_ADDRESS, { value: PRICE })
@@ -490,7 +490,7 @@ describe('eligibleQuantity: single RangeEditionMinter instance', () => {
 
     await setupTest({ minterCalls })
 
-    // Mint upper range limit
+    // Mint lower range limit
     for (let i = 0; i < maxMintableLower; i++) {
       const minter = RangeEditionMinter__factory.connect(rangeEditionMinter.address, signers[i])
       await minter.mint(precomputedEditionAddress, MINT_ID, 1, NULL_ADDRESS, { value: PRICE })
