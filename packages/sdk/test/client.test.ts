@@ -1352,7 +1352,7 @@ describe('editionInfo', () => {
 })
 
 describe('editionRegisteredMinters', () => {
-  it.only('returns registered minter addresses', async () => {
+  it('returns registered minter addresses', async () => {
     await setupTest({})
 
     let registeredMinters = await client.editionRegisteredMinters({
