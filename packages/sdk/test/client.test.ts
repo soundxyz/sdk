@@ -1554,3 +1554,30 @@ describe('editionRegisteredMinters', () => {
     expect(registeredMinters).deep.eq([merkleDropMinter.address, rangeEditionMinter.address, newMinter.address])
   })
 })
+
+describe('editionMinterMintIds', () => {
+  it.only('returns mint ids', async () => {
+    await setupTest({})
+
+    let mintIds = await client.editionMinterMintIds({
+      editionAddress: precomputedEditionAddress,
+      minterAddress: rangeEditionMinter.address,
+      fromBlockOrBlockHash: 0,
+    })
+
+    // expect(registeredMinters).deep.eq([merkleDropMinter.address, rangeEditionMinter.address])
+
+    // // Deploy a new minter and grant it minter role
+    // const newMinter = await RangeEditionMinter.connect(soundWallet).deploy('0x0000000000000000000000000000000000000001')
+    // const soundEdition = SoundEditionV1_1__factory.connect(precomputedEditionAddress, artistWallet)
+
+    // await soundEdition.grantRoles(newMinter.address, MINTER_ROLE)
+
+    // registeredMinters = await client.editionRegisteredMinters({
+    //   editionAddress: precomputedEditionAddress,
+    //   fromBlockOrBlockHash: 0,
+    // })
+
+    // expect(registeredMinters).deep.eq([merkleDropMinter.address, rangeEditionMinter.address, newMinter.address])
+  })
+})
