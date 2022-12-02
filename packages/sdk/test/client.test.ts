@@ -1527,12 +1527,6 @@ describe('editionMinterMintIds', () => {
 
     const mintConfig = getGenericRangeMintConfig({ minterAddress: rangeEditionMinter.address })
 
-    let mintIds = await client.editionMinterMintIds({
-      editionAddress: precomputedEditionAddress,
-      minterAddress: rangeEditionMinter.address,
-      fromBlockOrBlockHash: 0,
-    })
-
     // Make  mint schedules
     for (let i = 0; i < MINT_SCHEDULE_COUNT; i++) {
       await rangeEditionMinter
@@ -1550,7 +1544,7 @@ describe('editionMinterMintIds', () => {
         )
     }
 
-    mintIds = await client.editionMinterMintIds({
+    let mintIds = await client.editionMinterMintIds({
       editionAddress: precomputedEditionAddress,
       minterAddress: rangeEditionMinter.address,
       fromBlockOrBlockHash: 0,
