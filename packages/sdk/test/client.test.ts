@@ -43,6 +43,11 @@ const ONE_HOUR = 3600
 const PRICE = 420420420
 const DEFAULT_SALT = getSaltAsBytes32(Math.random())
 
+const SoundCreatorV1 = new SoundCreatorV1__factory()
+const SoundFeeRegistry = new SoundFeeRegistry__factory()
+const RangeEditionMinter = new RangeEditionMinter__factory()
+const MerkleDropMinter = new MerkleDropMinter__factory()
+
 let client: SoundClient
 let soundCreator: SoundCreatorV1
 let precomputedEditionAddress: string
@@ -67,16 +72,12 @@ async function deployProtocol() {
   const soundEditionImp = await SoundEditionV1.connect(soundWallet).deploy()
 
   // Deploy & initialize creator
-  const SoundCreatorV1 = new SoundCreatorV1__factory()
-  const soundCreator = await SoundCreatorV1.connect(soundWallet).deploy(soundEditionImp.address)
 
-  const SoundFeeRegistry = new SoundFeeRegistry__factory()
+  const soundCreator = await SoundCreatorV1.connect(soundWallet).deploy(soundEditionImp.address)
   const feeRegistry = await SoundFeeRegistry.connect(soundWallet).deploy(NON_NULL_ADDRESS, SOUND_FEE)
 
   // Deploy minters
-  const MerkleDropMinter = new MerkleDropMinter__factory()
   const merkleDropMinter = await MerkleDropMinter.connect(soundWallet).deploy(feeRegistry.address)
-  const RangeEditionMinter = new RangeEditionMinter__factory()
   const rangeEditionMinter = await RangeEditionMinter.connect(soundWallet).deploy(feeRegistry.address)
 
   // Get precomputed edition address using default salt
@@ -1347,5 +1348,31 @@ describe('editionInfo', () => {
     expect(audioFromTrackEvaluated).eq(true)
 
     expect(trackAudio.id).eq(trackId)
+  })
+})
+
+describe('editionRegisteredMinters', () => {
+  it.only('returns registered minter addresses', async () => {
+    await setupTest({})
+
+    let registeredMinters = await client.editionRegisteredMinters({
+      editionAddress: precomputedEditionAddress,
+      fromBlockOrBlockHash: 0,
+    })
+
+    expect(registeredMinters).deep.eq([merkleDropMinter.address, rangeEditionMinter.address])
+
+    // Deploy a new minter and grant it minter role
+    const newMinter = await RangeEditionMinter.connect(soundWallet).deploy('0x0000000000000000000000000000000000000001')
+    const soundEdition = SoundEditionV1_1__factory.connect(precomputedEditionAddress, artistWallet)
+
+    await soundEdition.grantRoles(newMinter.address, MINTER_ROLE)
+
+    registeredMinters = await client.editionRegisteredMinters({
+      editionAddress: precomputedEditionAddress,
+      fromBlockOrBlockHash: 0,
+    })
+
+    expect(registeredMinters).deep.eq([merkleDropMinter.address, rangeEditionMinter.address, newMinter.address])
   })
 })
