@@ -1,4 +1,4 @@
-import { getSaltAsBytes32 } from '../dist/utils/helpers'
+import { getSaltAsBytes32 } from '../src/utils/helpers'
 
 export const DEFAULT_SALT = getSaltAsBytes32(12345678)
 export const SOUND_FEE = 0
