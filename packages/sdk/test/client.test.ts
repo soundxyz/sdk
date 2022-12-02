@@ -1666,3 +1666,65 @@ describe('editionScheduleIds', () => {
     expect(scheduleIds).deep.eq([{ minterAddress: merkleDropMinter.address, mintIds: [1] }])
   })
 })
+
+describe('editionMintSchedules', () => {
+  it('returns mint schedules for given ids', async () => {
+    await setupTest({})
+    const MINT_SCHEDULE_COUNT = 10
+    const FUTURE_TIMESTAMP = now() + 1000
+
+    const mintConfig = getGenericRangeMintConfig({ minterAddress: rangeEditionMinter.address })
+
+    // Make  mint schedules
+    for (let i = 0; i < MINT_SCHEDULE_COUNT; i++) {
+      await rangeEditionMinter
+        .connect(artistWallet)
+        .createEditionMint(
+          precomputedEditionAddress,
+          mintConfig.price,
+          mintConfig.startTime,
+          mintConfig.cutoffTime,
+          mintConfig.endTime,
+          mintConfig.affiliateFeeBPS,
+          mintConfig.maxMintableLower,
+          mintConfig.maxMintableUpper,
+          mintConfig.maxMintablePerAccount,
+        )
+    }
+
+    let schedules = await client.editionMintSchedules({
+      editionAddress: precomputedEditionAddress,
+      scheduleIds: [{ minterAddress: rangeEditionMinter.address, mintIds: [0, 3, 5, 7, 9] }],
+    })
+
+    expect(schedules).deep.eq(Array.from({ length: MINT_SCHEDULE_COUNT }, (_, i) => i))
+
+    // Advance time to test fromBlockOrBlockHash
+    await ethers.provider.send('evm_setNextBlockTimestamp', [FUTURE_TIMESTAMP])
+    await ethers.provider.send('evm_mine', [])
+
+    // Create 1 more schedule
+    await rangeEditionMinter
+      .connect(artistWallet)
+      .createEditionMint(
+        precomputedEditionAddress,
+        mintConfig.price,
+        mintConfig.startTime,
+        mintConfig.cutoffTime,
+        mintConfig.endTime,
+        mintConfig.affiliateFeeBPS,
+        mintConfig.maxMintableLower,
+        mintConfig.maxMintableUpper,
+        mintConfig.maxMintablePerAccount,
+      )
+
+    mintIds = await client.editionMinterMintIds({
+      editionAddress: precomputedEditionAddress,
+      minterAddress: rangeEditionMinter.address,
+      fromBlockOrBlockHash: FUTURE_TIMESTAMP,
+    })
+
+    // This should only contain the latest mint schedule (zero-indexed)
+    expect(mintIds).deep.eq([MINT_SCHEDULE_COUNT])
+  })
+})
