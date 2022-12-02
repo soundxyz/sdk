@@ -1126,7 +1126,6 @@ describe('createEdition', () => {
         salt: SALT,
       })
       .catch((error) => {
-        console.log(error.message)
         expect(error.message).to.equal('fundingRecipient must be a valid address')
       })
   })
@@ -1143,7 +1142,6 @@ describe('createEdition', () => {
         salt: SALT,
       })
       .catch((error) => {
-        console.log(error.message)
         expect(error.message).to.equal('editionMaxMintableLower cannot be greater than editionMaxMintableUpper')
       })
   })
