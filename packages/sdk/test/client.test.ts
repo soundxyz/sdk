@@ -24,7 +24,16 @@ import {
   SoundNotFoundError,
   UnexpectedApiResponse,
 } from '../src/errors'
-import { MINTER_ROLE } from '../src/utils/constants'
+import {
+  MINTER_ROLE,
+  NULL_ADDRESS,
+  NON_NULL_ADDRESS,
+  UINT32_MAX,
+  NULL_BYTES32,
+  SOUND_FEE,
+  ONE_HOUR,
+  PRICE,
+} from '../src/utils/constants'
 import { getSaltAsBytes32 } from '../src/utils/helpers'
 import { MerkleTestHelper, now } from './helpers'
 
@@ -35,13 +44,7 @@ import type { ContractCall, MintConfig, MintSchedule } from '../src/types'
 import { MockAPI } from './helpers/api'
 import { randomUUID } from 'crypto'
 
-const UINT32_MAX = 4294967295
-const NULL_ADDRESS = '0x0000000000000000000000000000000000000000'
-const NON_NULL_ADDRESS = '0x0000000000000000000000000000000000000001'
-const SOUND_FEE = 0
-const ONE_HOUR = 3600
-const PRICE = 420420420
-const DEFAULT_SALT = getSaltAsBytes32(Math.random())
+const DEFAULT_SALT = getSaltAsBytes32(12345678)
 
 const SoundCreatorV1 = new SoundCreatorV1__factory()
 const SoundFeeRegistry = new SoundFeeRegistry__factory()
@@ -1116,7 +1119,7 @@ describe('createEdition', () => {
 
   it('throws if fundingRecipient is a null address', async () => {
     const editionConfig = getGenericEditionConfig()
-    editionConfig.fundingRecipient = '0x0000000000000000000000000000000000000000'
+    editionConfig.fundingRecipient = NULL_ADDRESS
 
     await client
       .createEdition({
@@ -1292,7 +1295,7 @@ describe('createEdition', () => {
       mintType: 'MerkleDrop' as const,
       minterAddress: merkleDropMinter.address,
       price: PRICE,
-      merkleRoot: '0x0000000000000000000000000000000000000000000000000000000000000000',
+      merkleRoot: NULL_BYTES32,
       startTime,
       endTime,
       maxMintable: 9,
