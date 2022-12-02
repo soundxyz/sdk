@@ -990,20 +990,18 @@ describe('createEdition', () => {
   const cutoffTime = startTime + ONE_HOUR / 2
   const endTime = cutoffTime + ONE_HOUR
 
-  const getGenericMintConfigs = () => [
-    {
-      mintType: 'RangeEdition' as const,
-      minterAddress: rangeEditionMinter.address,
-      price: PRICE,
-      startTime,
-      cutoffTime,
-      endTime,
-      maxMintableLower: 3,
-      maxMintableUpper: 4,
-      maxMintablePerAccount: 1,
-      affiliateFeeBPS: 0,
-    },
-  ]
+  const getGenericRangeMintConfig = () => ({
+    mintType: 'RangeEdition' as const,
+    minterAddress: rangeEditionMinter.address,
+    price: PRICE,
+    startTime,
+    cutoffTime,
+    endTime,
+    maxMintableLower: 3,
+    maxMintableUpper: 4,
+    maxMintablePerAccount: 1,
+    affiliateFeeBPS: 0,
+  })
 
   beforeEach(() => {
     client = SoundClient({ signer: artistWallet, soundCreatorAddress: soundCreator.address })
@@ -1125,7 +1123,7 @@ describe('createEdition', () => {
     await client
       .createEdition({
         editionConfig,
-        mintConfigs: getGenericMintConfigs(),
+        mintConfigs: [getGenericRangeMintConfig()],
         salt: SALT,
       })
       .catch((error) => {
@@ -1141,7 +1139,7 @@ describe('createEdition', () => {
     await client
       .createEdition({
         editionConfig,
-        mintConfigs: getGenericMintConfigs(),
+        mintConfigs: [getGenericRangeMintConfig()],
         salt: SALT,
       })
       .catch((error) => {
@@ -1152,29 +1150,13 @@ describe('createEdition', () => {
   it('throws if maxMintablePerAccount is zero', async () => {
     const editionConfig = getGenericEditionConfig()
 
-    const startTime = now()
-    const cutoffTime = startTime + ONE_HOUR / 2
-    const endTime = cutoffTime + ONE_HOUR
-
-    const mintConfigs = [
-      {
-        mintType: 'RangeEdition' as const,
-        minterAddress: rangeEditionMinter.address,
-        price: PRICE,
-        startTime,
-        cutoffTime,
-        endTime,
-        maxMintableLower: 1,
-        maxMintableUpper: 2,
-        maxMintablePerAccount: 0,
-        affiliateFeeBPS: 0,
-      },
-    ]
+    const mintConfig = getGenericRangeMintConfig()
+    mintConfig.maxMintablePerAccount = 0
 
     await client
       .createEdition({
         editionConfig,
-        mintConfigs,
+        mintConfigs: [mintConfig],
         salt: SALT,
       })
       .catch((error) => {
@@ -1185,29 +1167,14 @@ describe('createEdition', () => {
   it('throws if range mint maxMintableLower exceeds maxMintableUpper', async () => {
     const editionConfig = getGenericEditionConfig()
 
-    const startTime = now()
-    const cutoffTime = startTime + ONE_HOUR / 2
-    const endTime = cutoffTime + ONE_HOUR
-
-    const mintConfigs = [
-      {
-        mintType: 'RangeEdition' as const,
-        minterAddress: rangeEditionMinter.address,
-        price: PRICE,
-        startTime,
-        cutoffTime,
-        endTime,
-        maxMintableLower: 5,
-        maxMintableUpper: 4,
-        maxMintablePerAccount: 1,
-        affiliateFeeBPS: 0,
-      },
-    ]
+    const mintConfig = getGenericRangeMintConfig()
+    mintConfig.maxMintableLower = 2
+    mintConfig.maxMintableUpper = 1
 
     await client
       .createEdition({
         editionConfig,
-        mintConfigs,
+        mintConfigs: [mintConfig],
         salt: SALT,
       })
       .catch((error) => {
@@ -1218,29 +1185,13 @@ describe('createEdition', () => {
   it('throws if range mint startTime == cutoffTime', async () => {
     const editionConfig = getGenericEditionConfig()
 
-    const startTime = now()
-    const cutoffTime = startTime
-    const endTime = cutoffTime + ONE_HOUR
-
-    const mintConfigs = [
-      {
-        mintType: 'RangeEdition' as const,
-        minterAddress: rangeEditionMinter.address,
-        price: PRICE,
-        startTime,
-        cutoffTime,
-        endTime,
-        maxMintableLower: 1,
-        maxMintableUpper: 2,
-        maxMintablePerAccount: 1,
-        affiliateFeeBPS: 0,
-      },
-    ]
+    const mintConfig = getGenericRangeMintConfig()
+    mintConfig.startTime = mintConfig.cutoffTime
 
     await client
       .createEdition({
         editionConfig,
-        mintConfigs,
+        mintConfigs: [mintConfig],
         salt: SALT,
       })
       .catch((error) => {
@@ -1251,29 +1202,13 @@ describe('createEdition', () => {
   it('throws if range mint cutoffTime === endTime', async () => {
     const editionConfig = getGenericEditionConfig()
 
-    const startTime = now()
-    const cutoffTime = startTime + 1
-    const endTime = cutoffTime
-
-    const mintConfigs = [
-      {
-        mintType: 'RangeEdition' as const,
-        minterAddress: rangeEditionMinter.address,
-        price: PRICE,
-        startTime,
-        cutoffTime,
-        endTime,
-        maxMintableLower: 1,
-        maxMintableUpper: 2,
-        maxMintablePerAccount: 1,
-        affiliateFeeBPS: 0,
-      },
-    ]
+    const mintConfig = getGenericRangeMintConfig()
+    mintConfig.cutoffTime = mintConfig.endTime
 
     await client
       .createEdition({
         editionConfig,
-        mintConfigs,
+        mintConfigs: [mintConfig],
         salt: SALT,
       })
       .catch((error) => {
