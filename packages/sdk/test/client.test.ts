@@ -986,24 +986,23 @@ describe('createEdition', () => {
   const cutoffTime = startTime + ONE_HOUR / 2
   const endTime = cutoffTime + ONE_HOUR
 
-  let genericMintConfigs: MintConfig[]
+  const getGenericMintConfigs = () => [
+    {
+      mintType: 'RangeEdition' as const,
+      minterAddress: rangeEditionMinter.address,
+      price: PRICE,
+      startTime,
+      cutoffTime,
+      endTime,
+      maxMintableLower: 3,
+      maxMintableUpper: 4,
+      maxMintablePerAccount: 1,
+      affiliateFeeBPS: 0,
+    },
+  ]
 
   beforeEach(() => {
     client = SoundClient({ signer: artistWallet, soundCreatorAddress: soundCreator.address })
-    genericMintConfigs = [
-      {
-        mintType: 'RangeEdition' as const,
-        minterAddress: rangeEditionMinter.address,
-        price: PRICE,
-        startTime,
-        cutoffTime,
-        endTime,
-        maxMintableLower: 3,
-        maxMintableUpper: 4,
-        maxMintablePerAccount: 1,
-        affiliateFeeBPS: 0,
-      },
-    ]
   })
 
   it('Creates a sound edition and mint schedules', async () => {
@@ -1122,7 +1121,7 @@ describe('createEdition', () => {
     await client
       .createEdition({
         editionConfig,
-        mintConfigs: genericMintConfigs,
+        mintConfigs: getGenericMintConfigs(),
         salt: SALT,
       })
       .catch((error) => {
@@ -1138,7 +1137,7 @@ describe('createEdition', () => {
     await client
       .createEdition({
         editionConfig,
-        mintConfigs: genericMintConfigs,
+        mintConfigs: getGenericMintConfigs(),
         salt: SALT,
       })
       .catch((error) => {
