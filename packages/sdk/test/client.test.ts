@@ -1353,26 +1353,7 @@ describe('editionInfo', () => {
 
 describe('editionRegisteredMinters', () => {
   it.only('returns registered minter addresses', async () => {
-    let minter = RangeEditionMinter__factory.connect(rangeEditionMinter.address, artistWallet)
-    const startTime = now()
-    const MINT_ID = 0
-    const minterCalls = [
-      {
-        contractAddress: rangeEditionMinter.address,
-        calldata: minter.interface.encodeFunctionData('createEditionMint', [
-          precomputedEditionAddress,
-          PRICE,
-          startTime,
-          startTime + ONE_HOUR, // cutoffTime
-          startTime + ONE_HOUR * 2, // endTime
-          0, // affiliateFeeBPS,
-          4, // maxMintableLower,
-          5, // maxMintableUpper,
-          2, // maxMintablePerAccount
-        ]),
-      },
-    ]
-    await setupTest({ minterCalls })
+    await setupTest({})
 
     let registeredMinters = await client.editionRegisteredMinters({
       editionAddress: precomputedEditionAddress,
@@ -1381,24 +1362,17 @@ describe('editionRegisteredMinters', () => {
 
     expect(registeredMinters).deep.eq([merkleDropMinter.address, rangeEditionMinter.address])
 
-    console.log(registeredMinters)
-
     // Deploy a new minter and grant it minter role
     const newMinter = await RangeEditionMinter.connect(soundWallet).deploy('0x0000000000000000000000000000000000000001')
     const soundEdition = SoundEditionV1_1__factory.connect(precomputedEditionAddress, artistWallet)
 
     await soundEdition.grantRoles(newMinter.address, MINTER_ROLE)
 
-    // Revoke a minter role from the old minter
-    await soundEdition.revokeRoles(merkleDropMinter.address, MINTER_ROLE)
-
     registeredMinters = await client.editionRegisteredMinters({
       editionAddress: precomputedEditionAddress,
       fromBlockOrBlockHash: 0,
     })
 
-    console.log(registeredMinters, [rangeEditionMinter.address, newMinter.address])
-
-    expect(registeredMinters).deep.eq([rangeEditionMinter.address, newMinter.address])
+    expect(registeredMinters).deep.eq([merkleDropMinter.address, rangeEditionMinter.address, newMinter.address])
   })
 })
