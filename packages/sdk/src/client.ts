@@ -20,7 +20,7 @@ import {
   InvalidFundingRecipientError,
   InvalidMaxMintableError,
   InvalidTimeValuesError,
-  InvalidEditionMaxMintableRangeError,
+  InvalidEditionMaxMintableError,
   MaxMintablePerAccountError,
   InvalidMerkleRootError,
 } from './errors'
@@ -746,7 +746,7 @@ export function SoundClient({
     }
 
     if (editionMaxMintableLower > editionMaxMintableUpper) {
-      throw new InvalidEditionMaxMintableRangeError({
+      throw new InvalidEditionMaxMintableError({
         editionMaxMintableLower,
         editionMaxMintableUpper,
       })
