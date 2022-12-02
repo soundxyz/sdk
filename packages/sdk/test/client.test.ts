@@ -966,7 +966,7 @@ describe('mint', () => {
 
 describe('createEdition', () => {
   const SALT = 'hello'
-  const getGenericConfig = () => ({
+  const getGenericEditionConfig = () => ({
     name: 'Test',
     symbol: 'TEST',
     metadataModule: NULL_ADDRESS,
@@ -1006,7 +1006,7 @@ describe('createEdition', () => {
   })
 
   it('Creates a sound edition and mint schedules', async () => {
-    const editionConfig = getGenericConfig()
+    const editionConfig = getGenericEditionConfig()
 
     const mint1StartTime = now()
     const mint1CutoffTime = mint1StartTime + ONE_HOUR / 2
@@ -1115,7 +1115,7 @@ describe('createEdition', () => {
   })
 
   it('throws if fundingRecipient is a null address', async () => {
-    const editionConfig = getGenericConfig()
+    const editionConfig = getGenericEditionConfig()
     editionConfig.fundingRecipient = '0x0000000000000000000000000000000000000000'
 
     await client
@@ -1130,7 +1130,7 @@ describe('createEdition', () => {
   })
 
   it('throws if editionMaxMintableLower > editionMaxMintableUpper', async () => {
-    const editionConfig = getGenericConfig()
+    const editionConfig = getGenericEditionConfig()
     editionConfig.editionMaxMintableLower = 2
     editionConfig.editionMaxMintableUpper = 1
 
@@ -1146,7 +1146,7 @@ describe('createEdition', () => {
   })
 
   it('throws if maxMintablePerAccount is zero', async () => {
-    const editionConfig = getGenericConfig()
+    const editionConfig = getGenericEditionConfig()
 
     const startTime = now()
     const cutoffTime = startTime + ONE_HOUR / 2
@@ -1180,7 +1180,7 @@ describe('createEdition', () => {
   })
 
   it('throws if range mint maxMintableLower exceeds maxMintableUpper', async () => {
-    const editionConfig = getGenericConfig()
+    const editionConfig = getGenericEditionConfig()
 
     const startTime = now()
     const cutoffTime = startTime + ONE_HOUR / 2
@@ -1213,7 +1213,7 @@ describe('createEdition', () => {
   })
 
   it('throws if range mint startTime == cutoffTime', async () => {
-    const editionConfig = getGenericConfig()
+    const editionConfig = getGenericEditionConfig()
 
     const startTime = now()
     const cutoffTime = startTime
@@ -1248,7 +1248,7 @@ describe('createEdition', () => {
   })
 
   it('throws if range mint cutoffTime === endTime', async () => {
-    const editionConfig = getGenericConfig()
+    const editionConfig = getGenericEditionConfig()
 
     const startTime = now()
     const cutoffTime = startTime + 1
@@ -1283,7 +1283,7 @@ describe('createEdition', () => {
   })
 
   it('throws if merkle mint merkleRoot is invalid', async () => {
-    const editionConfig = getGenericConfig()
+    const editionConfig = getGenericEditionConfig()
 
     const startTime = now()
     const endTime = startTime + 1
