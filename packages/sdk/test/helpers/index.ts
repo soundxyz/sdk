@@ -1,4 +1,4 @@
-import type { MerkleDropConfig, RangeEditionConfig } from '../../dist'
+import type { MerkleDropConfig, RangeEditionConfig } from '../../src/types'
 import { NON_NULL_ADDRESS, NULL_ADDRESS } from '../../src/utils/constants'
 import { ONE_HOUR, PRICE } from '../test-constants'
 import { MerkleTestHelper } from './merkle'
