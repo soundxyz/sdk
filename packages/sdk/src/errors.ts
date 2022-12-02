@@ -240,8 +240,8 @@ export class InvalidFundingRecipientError extends Error {
   }
 }
 
-export class InvalidEditionMaxMintableRangeError extends Error {
-  readonly name = 'InvalidEditionMaxMintableRangeError'
+export class InvalidEditionMaxMintableError extends Error {
+  readonly name = 'InvalidEditionMaxMintableError'
 
   readonly editionMaxMintableLower: number
   readonly editionMaxMintableUpper: number
