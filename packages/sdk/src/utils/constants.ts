@@ -6,8 +6,6 @@ export const minterFactoryMap = {
   [interfaceIds.IMerkleDropMinter]: MerkleDropMinter__factory,
 } as const
 
-export const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000'
-
 // This is hardcoded on the contract so we always know its 2
 export const MINTER_ROLE = 2
 
@@ -16,3 +14,17 @@ export const editionInitFlags = {
   MINT_RANDOMNESS_ENABLED: 2, // 1 << 1
   OPERATOR_FILTERING_ENABLED: 4, // 1 << 2
 } as const
+
+export const UINT32_MAX = 4294967295
+
+export const NULL_ADDRESS = '0x0000000000000000000000000000000000000000'
+
+export const NON_NULL_ADDRESS = '0x0000000000000000000000000000000000000001'
+
+export const NULL_BYTES32 = '0x0000000000000000000000000000000000000000000000000000000000000000'
+
+export const SOUND_FEE = 0
+
+export const ONE_HOUR = 3600
+
+export const PRICE = 420420420

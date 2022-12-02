@@ -24,7 +24,7 @@ import {
   MaxMintablePerAccountError,
   InvalidMerkleRootError,
 } from './errors'
-import { ADDRESS_ZERO, MINTER_ROLE, minterFactoryMap, editionInitFlags } from './utils/constants'
+import { NULL_ADDRESS, MINTER_ROLE, minterFactoryMap, editionInitFlags, NULL_BYTES32 } from './utils/constants'
 import { getLazyOption, getSaltAsBytes32, validateAddress } from './utils/helpers'
 import { LazyPromise } from './utils/promise'
 
@@ -239,7 +239,7 @@ export function SoundClient({
   async function mint({
     mintSchedule,
     quantity,
-    affiliate = ADDRESS_ZERO,
+    affiliate = NULL_ADDRESS,
     gasLimit,
     maxFeePerGas,
     maxPriorityFeePerGas,
@@ -741,7 +741,7 @@ export function SoundClient({
   function _validateEditionConfig(config: EditionConfig) {
     const { editionMaxMintableLower, editionMaxMintableUpper, fundingRecipient } = config
 
-    if (!isAddress(fundingRecipient) || fundingRecipient === '0x0000000000000000000000000000000000000000') {
+    if (!isAddress(fundingRecipient) || fundingRecipient === NULL_ADDRESS) {
       throw new InvalidFundingRecipientError({ fundingRecipient })
     }
 
@@ -772,11 +772,7 @@ export function SoundClient({
 
       if (mintConfig.mintType === 'MerkleDrop') {
         const { merkleRoot } = mintConfig
-        if (
-          merkleRoot === '0x0000000000000000000000000000000000000000000000000000000000000000' ||
-          merkleRoot.slice(0, 2) !== '0x' ||
-          merkleRoot.length !== 66
-        ) {
+        if (merkleRoot === NULL_BYTES32 || merkleRoot.slice(0, 2) !== '0x' || merkleRoot.length !== 66) {
           throw new InvalidMerkleRootError({ merkleRoot })
         }
       }
