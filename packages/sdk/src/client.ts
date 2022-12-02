@@ -742,7 +742,6 @@ export function SoundClient({
     const { editionMaxMintableLower, editionMaxMintableUpper, fundingRecipient } = config
 
     if (!isAddress(fundingRecipient) || fundingRecipient === '0x0000000000000000000000000000000000000000') {
-      console.log({ fundingRecipient })
       throw new InvalidFundingRecipientError({ fundingRecipient })
     }
 
