@@ -23,7 +23,6 @@ import {
   InvalidTimeValuesError,
   MaxMintablePerAccountError,
   MissingMerkleProvider,
-  MissingSignerOrProviderError,
   InvalidMerkleRootError,
   MissingSoundAPI,
   NotEligibleMint,
