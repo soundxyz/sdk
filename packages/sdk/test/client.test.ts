@@ -33,7 +33,13 @@ import {
 import { MINTER_ROLE, NULL_ADDRESS, NON_NULL_ADDRESS, UINT32_MAX, NULL_BYTES32 } from '../src/utils/constants'
 import { DEFAULT_SALT, SOUND_FEE, ONE_HOUR, PRICE } from './test-constants'
 import { getSaltAsBytes32 } from '../src/utils/helpers'
-import { MerkleTestHelper, now, getGenericEditionConfig, getGenericRangeMintConfig } from './helpers'
+import {
+  MerkleTestHelper,
+  now,
+  getGenericEditionConfig,
+  getGenericRangeMintConfig,
+  getGenericMerkleMintConfig,
+} from './helpers'
 
 import type { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import type MerkleTree from 'merkletreejs'
@@ -1579,5 +1585,84 @@ describe('editionMinterMintIds', () => {
 
     // This should only contain the latest mint schedule (zero-indexed)
     expect(mintIds).deep.eq([MINT_SCHEDULE_COUNT])
+  })
+})
+
+describe('editionScheduleIds', () => {
+  it('returns edition schedule ids', async () => {
+    await setupTest({})
+    const FUTURE_TIMESTAMP = now() + 1000
+
+    const rangeMintConfig = getGenericRangeMintConfig({ minterAddress: rangeEditionMinter.address })
+    const merkleMintConfig = getGenericMerkleMintConfig({ minterAddress: merkleDropMinter.address })
+
+    let scheduleIds = await client.editionScheduleIds({
+      editionAddress: precomputedEditionAddress,
+      fromBlockOrBlockHash: 0,
+    })
+
+    // Make  1 mint schedule per minter
+    await rangeEditionMinter
+      .connect(artistWallet)
+      .createEditionMint(
+        precomputedEditionAddress,
+        rangeMintConfig.price,
+        rangeMintConfig.startTime,
+        rangeMintConfig.cutoffTime,
+        rangeMintConfig.endTime,
+        rangeMintConfig.affiliateFeeBPS,
+        rangeMintConfig.maxMintableLower,
+        rangeMintConfig.maxMintableUpper,
+        rangeMintConfig.maxMintablePerAccount,
+      )
+
+    await merkleDropMinter
+      .connect(artistWallet)
+      .createEditionMint(
+        precomputedEditionAddress,
+        merkleMintConfig.merkleRoot,
+        merkleMintConfig.price,
+        merkleMintConfig.startTime,
+        merkleMintConfig.endTime,
+        merkleMintConfig.affiliateFeeBPS,
+        merkleMintConfig.maxMintable,
+        merkleMintConfig.maxMintablePerAccount,
+      )
+
+    scheduleIds = await client.editionScheduleIds({
+      editionAddress: precomputedEditionAddress,
+      fromBlockOrBlockHash: 0,
+    })
+
+    expect(scheduleIds).deep.eq([
+      { minterAddress: merkleDropMinter.address, mintIds: [0] },
+      { minterAddress: rangeEditionMinter.address, mintIds: [0] },
+    ])
+
+    // Advance time to test fromBlockOrBlockHash
+    await ethers.provider.send('evm_setNextBlockTimestamp', [FUTURE_TIMESTAMP])
+    await ethers.provider.send('evm_mine', [])
+
+    // Create 1 more schedule
+    await merkleDropMinter
+      .connect(artistWallet)
+      .createEditionMint(
+        precomputedEditionAddress,
+        merkleMintConfig.merkleRoot,
+        merkleMintConfig.price,
+        merkleMintConfig.startTime,
+        merkleMintConfig.endTime,
+        merkleMintConfig.affiliateFeeBPS,
+        merkleMintConfig.maxMintable,
+        merkleMintConfig.maxMintablePerAccount,
+      )
+
+    scheduleIds = await client.editionScheduleIds({
+      editionAddress: precomputedEditionAddress,
+      fromBlockOrBlockHash: FUTURE_TIMESTAMP,
+    })
+
+    // Should only contain most-recent schedule
+    expect(scheduleIds).deep.eq([{ minterAddress: merkleDropMinter.address, mintIds: [1] }])
   })
 })

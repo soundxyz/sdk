@@ -584,10 +584,10 @@ export function SoundClient({
   }) {
     const minterAddresses = await editionRegisteredMinters({
       editionAddress,
-      fromBlockOrBlockHash,
+      fromBlockOrBlockHash: 0, // This should be zero because we want to get info from all the registered minters
     })
 
-    return Promise.all(
+    const unfilteredList = await Promise.all(
       minterAddresses.map(async (minterAddress) => {
         return {
           minterAddress,
@@ -599,6 +599,8 @@ export function SoundClient({
         }
       }),
     )
+
+    return unfilteredList.filter((minter) => minter.mintIds.length > 0)
   }
 
   async function editionMintSchedules({
