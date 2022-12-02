@@ -30,7 +30,7 @@ import { MerkleTestHelper, now } from './helpers'
 import type { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import type MerkleTree from 'merkletreejs'
 
-import type { ContractCall, EditionConfig, MintConfig, MintSchedule } from '../src/types'
+import type { ContractCall, MintConfig, MintSchedule } from '../src/types'
 import { MockAPI } from './helpers/api'
 import { randomUUID } from 'crypto'
 
