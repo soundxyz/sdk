@@ -227,3 +227,89 @@ export class UnexpectedLanyardResponse extends Error {
     this.response = response
   }
 }
+
+export class InvalidFundingRecipientError extends Error {
+  readonly name = 'InvalidFundingRecipientError'
+
+  readonly fundingRecipient: string
+
+  constructor({ fundingRecipient }: { fundingRecipient: string }) {
+    super('fundingRecipient must be a valid address')
+
+    this.fundingRecipient = fundingRecipient
+  }
+}
+
+export class InvalidEditionMaxMintableRangeError extends Error {
+  readonly name = 'InvalidEditionMaxMintableRangeError'
+
+  readonly editionMaxMintableLower: number
+  readonly editionMaxMintableUpper: number
+
+  constructor({
+    editionMaxMintableLower,
+    editionMaxMintableUpper,
+  }: {
+    editionMaxMintableLower: number
+    editionMaxMintableUpper: number
+  }) {
+    super('editionMaxMintableLower cannot be greater than editionMaxMintableUpper')
+
+    this.editionMaxMintableLower = editionMaxMintableLower
+    this.editionMaxMintableUpper = editionMaxMintableUpper
+  }
+}
+
+export class InvalidMaxMintableError extends Error {
+  readonly name = 'InvalidMaxMintableError'
+
+  readonly maxMintableLower: number
+  readonly maxMintableUpper: number
+
+  constructor({ maxMintableLower, maxMintableUpper }: { maxMintableLower: number; maxMintableUpper: number }) {
+    super('maxMintableLower cannot be greater than maxMintableUpper')
+
+    this.maxMintableLower = maxMintableLower
+    this.maxMintableUpper = maxMintableUpper
+  }
+}
+
+export class MaxMintablePerAccountError extends Error {
+  readonly name = 'MaxMintablePerAccountError'
+
+  readonly maxMintablePerAccount: number
+
+  constructor({ maxMintablePerAccount }: { maxMintablePerAccount: number }) {
+    super('maxMintablePerAccount must be greater than 0')
+
+    this.maxMintablePerAccount = maxMintablePerAccount
+  }
+}
+
+export class InvalidMerkleRootError extends Error {
+  readonly name = 'InvalidMerkleRootError'
+
+  readonly merkleRoot: string
+
+  constructor({ merkleRoot }: { merkleRoot: string }) {
+    super('merkleRoot must be a valid bytes32 hash')
+
+    this.merkleRoot = merkleRoot
+  }
+}
+
+export class InvalidTimeValuesError extends Error {
+  readonly name = 'InvalidTimeValuesError'
+
+  readonly startTime: number
+  readonly cutoffTime: number
+  readonly endTime: number
+
+  constructor({ startTime, cutoffTime, endTime }: { startTime: number; cutoffTime: number; endTime: number }) {
+    super('startTime must be earlier than cutoffTime and cutoffTime must be earlier than endTime')
+
+    this.startTime = startTime
+    this.cutoffTime = cutoffTime
+    this.endTime = endTime
+  }
+}
