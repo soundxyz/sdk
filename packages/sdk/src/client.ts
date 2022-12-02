@@ -21,7 +21,7 @@ import {
   InvalidMaxMintableError,
   InvalidTimeValuesError,
   InvalidEditionMaxMintableError,
-  MaxMintablePerAccountError,
+  InvalidMaxMintablePerAccountError,
   InvalidMerkleRootError,
 } from './errors'
 import { NULL_ADDRESS, MINTER_ROLE, minterFactoryMap, editionInitFlags, NULL_BYTES32 } from './utils/constants'
@@ -757,7 +757,7 @@ export function SoundClient({
     for (const mintConfig of mintConfigs) {
       const { maxMintablePerAccount } = mintConfig
       if (maxMintablePerAccount === 0) {
-        throw new MaxMintablePerAccountError({ maxMintablePerAccount })
+        throw new InvalidMaxMintablePerAccountError({ maxMintablePerAccount })
       }
 
       if (mintConfig.mintType === 'RangeEdition') {

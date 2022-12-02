@@ -21,7 +21,7 @@ import {
   InvalidFundingRecipientError,
   InvalidQuantityError,
   InvalidTimeValuesError,
-  MaxMintablePerAccountError,
+  InvalidMaxMintablePerAccountError,
   MissingMerkleProvider,
   InvalidMerkleRootError,
   MissingSoundAPI,
@@ -1158,7 +1158,7 @@ describe('createEdition', () => {
         salt: SALT,
       })
       .catch((error) => {
-        expect(error).instanceOf(MaxMintablePerAccountError)
+        expect(error).instanceOf(InvalidMaxMintablePerAccountError)
       })
   })
 
