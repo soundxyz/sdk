@@ -519,10 +519,16 @@ export function SoundClient({
     const editionContract = SoundEditionV1_1__factory.connect(editionAddress, signerOrProvider)
     // Get the addresses with MINTER_ROLE
     const minterRole = await editionContract.MINTER_ROLE()
-    const filter = editionContract.filters.RolesUpdated(undefined, minterRole)
+    const minterGrantedFilter = editionContract.filters.RolesUpdated(undefined, minterRole)
+    const minterRevokedFilter = editionContract.filters.RolesUpdated(undefined, 0)
 
-    const roleEvents = await editionContract.queryFilter(filter, fromBlockOrBlockHash)
-    const candidateMinters = roleEvents.map((event) => event.args.user)
+    const roleGrantedEvents = await editionContract.queryFilter(minterGrantedFilter, fromBlockOrBlockHash)
+    const candidateMinters = roleGrantedEvents
+      .filter((event) => {
+        console.log(event.args)
+        return true
+      })
+      .map((event) => event.args.user)
 
     // Check supportsInterface() to verify each address is a minter
     const minters = await Promise.all(
