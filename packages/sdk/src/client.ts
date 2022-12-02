@@ -18,6 +18,12 @@ import {
   SoundNotFoundError,
   UnexpectedApiResponse,
   UnsupportedMinterError,
+  InvalidFundingRecipientError,
+  InvalidMaxMintableError,
+  InvalidTimeValuesError,
+  InvalidEditionMaxMintableRangeError,
+  MaxMintablePerAccountError,
+  InvalidMerkleRootError,
 } from './errors'
 import { ADDRESS_ZERO, MINTER_ROLE, minterFactoryMap, editionInitFlags } from './utils/constants'
 import { getLazyOption, getSaltAsBytes32, validateAddress } from './utils/helpers'
@@ -38,6 +44,7 @@ import type { ContractTransaction, Overrides, PayableOverrides } from '@etherspr
 import type { ReleaseInfoQueryVariables } from './api/graphql/gql'
 import type { ContractCall, EditionConfig, MintConfig, MintSchedule } from './types'
 import type { EditionInfoStructOutput } from '@soundxyz/sound-protocol/typechain/ISoundEditionV1_1'
+import { isAddress } from '@ethersproject/address'
 
 export function SoundClient({
   signer,
@@ -323,6 +330,9 @@ export function SoundClient({
     maxFeePerGas?: BigNumberish
     maxPriorityFeePerGas?: BigNumberish
   }) {
+    _validateEditionConfig(editionConfig)
+    _validateMintConfigs(mintConfigs)
+
     const { signer, userAddress } = await _requireSigner()
 
     const txnOverrides: Overrides = {
@@ -734,6 +744,52 @@ export function SoundClient({
     const network = await networkProvider.getNetwork()
 
     return network.chainId
+  }
+
+  function _validateEditionConfig(config: EditionConfig) {
+    const { editionMaxMintableLower, editionMaxMintableUpper, fundingRecipient } = config
+
+    if (!isAddress(fundingRecipient) || fundingRecipient === '0x0000000000000000000000000000000000000000') {
+      console.log({ fundingRecipient })
+      throw new InvalidFundingRecipientError({ fundingRecipient })
+    }
+
+    if (editionMaxMintableLower > editionMaxMintableUpper) {
+      throw new InvalidEditionMaxMintableRangeError({
+        editionMaxMintableLower,
+        editionMaxMintableUpper,
+      })
+    }
+  }
+
+  function _validateMintConfigs(mintConfigs: MintConfig[]) {
+    for (const mintConfig of mintConfigs) {
+      const { maxMintablePerAccount } = mintConfig
+      if (maxMintablePerAccount === 0) {
+        throw new MaxMintablePerAccountError({ maxMintablePerAccount })
+      }
+
+      if (mintConfig.mintType === 'RangeEdition') {
+        const { maxMintableLower, maxMintableUpper, startTime, cutoffTime, endTime } = mintConfig
+        if (maxMintableLower > maxMintableUpper) {
+          throw new InvalidMaxMintableError({ maxMintableLower, maxMintableUpper })
+        }
+        if (!(startTime < cutoffTime && cutoffTime < endTime)) {
+          throw new InvalidTimeValuesError({ startTime, cutoffTime, endTime })
+        }
+      }
+
+      if (mintConfig.mintType === 'MerkleDrop') {
+        const { merkleRoot } = mintConfig
+        if (
+          merkleRoot === '0x0000000000000000000000000000000000000000000000000000000000000000' ||
+          merkleRoot.slice(0, 2) !== '0x' ||
+          merkleRoot.length !== 66
+        ) {
+          throw new InvalidMerkleRootError({ merkleRoot })
+        }
+      }
+    }
   }
 
   return client

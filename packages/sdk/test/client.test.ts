@@ -965,26 +965,49 @@ describe('mint', () => {
 })
 
 describe('createEdition', () => {
+  const SALT = 'hello'
+  const getGenericConfig = () => ({
+    name: 'Test',
+    symbol: 'TEST',
+    metadataModule: NULL_ADDRESS,
+    baseURI: 'https://test.com',
+    contractURI: 'https://test.com',
+    fundingRecipient: NON_NULL_ADDRESS,
+    royaltyBPS: 0,
+    editionMaxMintableLower: 10,
+    editionMaxMintableUpper: 10,
+    editionCutoffTime: 999999,
+    shouldEnableMintRandomness: true,
+    shouldFreezeMetadata: false,
+    enableOperatorFiltering: true,
+  })
+
+  const startTime = now()
+  const cutoffTime = startTime + ONE_HOUR / 2
+  const endTime = cutoffTime + ONE_HOUR
+
+  let genericMintConfigs: MintConfig[]
+
   beforeEach(() => {
     client = SoundClient({ signer: artistWallet, soundCreatorAddress: soundCreator.address })
+    genericMintConfigs = [
+      {
+        mintType: 'RangeEdition' as const,
+        minterAddress: rangeEditionMinter.address,
+        price: PRICE,
+        startTime,
+        cutoffTime,
+        endTime,
+        maxMintableLower: 3,
+        maxMintableUpper: 4,
+        maxMintablePerAccount: 1,
+        affiliateFeeBPS: 0,
+      },
+    ]
   })
 
   it('Creates a sound edition and mint schedules', async () => {
-    const editionConfig: EditionConfig = {
-      name: 'Test',
-      symbol: 'TEST',
-      metadataModule: NULL_ADDRESS,
-      baseURI: 'https://test.com',
-      contractURI: 'https://test.com',
-      fundingRecipient: NON_NULL_ADDRESS,
-      royaltyBPS: 0,
-      editionMaxMintableLower: 10,
-      editionMaxMintableUpper: 10,
-      editionCutoffTime: 999999,
-      shouldEnableMintRandomness: true,
-      shouldFreezeMetadata: false,
-      enableOperatorFiltering: true,
-    }
+    const editionConfig = getGenericConfig()
 
     const mint1StartTime = now()
     const mint1CutoffTime = mint1StartTime + ONE_HOUR / 2
@@ -1021,11 +1044,10 @@ describe('createEdition', () => {
       },
     ]
 
-    const customSalt = 'hello world'
     const [precomputedEditionAddress, _] = await SoundCreatorV1__factory.connect(
       soundCreator.address,
       ethers.provider,
-    ).soundEditionAddress(artistWallet.address, getSaltAsBytes32(customSalt))
+    ).soundEditionAddress(artistWallet.address, getSaltAsBytes32(SALT))
 
     /**
      * Create sound edition and mint schedules.
@@ -1033,7 +1055,7 @@ describe('createEdition', () => {
     await client.createEdition({
       editionConfig,
       mintConfigs,
-      salt: customSalt,
+      salt: SALT,
     })
 
     const editionContract = SoundEditionV1_1__factory.connect(precomputedEditionAddress, ethers.provider)
@@ -1091,6 +1113,229 @@ describe('createEdition', () => {
         }
       }
     }
+  })
+
+  it('throws if fundingRecipient is a null address', async () => {
+    const editionConfig = getGenericConfig()
+    editionConfig.fundingRecipient = '0x0000000000000000000000000000000000000000'
+
+    await client
+      .createEdition({
+        editionConfig,
+        mintConfigs: genericMintConfigs,
+        salt: SALT,
+      })
+      .catch((error) => {
+        console.log(error.message)
+        expect(error.message).to.equal('fundingRecipient must be a valid address')
+      })
+  })
+
+  it('throws if editionMaxMintableLower > editionMaxMintableUpper', async () => {
+    const editionConfig = getGenericConfig()
+    editionConfig.editionMaxMintableLower = 2
+    editionConfig.editionMaxMintableUpper = 1
+
+    await client
+      .createEdition({
+        editionConfig,
+        mintConfigs: genericMintConfigs,
+        salt: SALT,
+      })
+      .catch((error) => {
+        console.log(error.message)
+        expect(error.message).to.equal('editionMaxMintableLower cannot be greater than editionMaxMintableUpper')
+      })
+  })
+
+  it('throws if maxMintablePerAccount is zero', async () => {
+    const editionConfig = getGenericConfig()
+
+    const startTime = now()
+    const cutoffTime = startTime + ONE_HOUR / 2
+    const endTime = cutoffTime + ONE_HOUR
+
+    const mintConfigs = [
+      {
+        mintType: 'RangeEdition' as const,
+        minterAddress: rangeEditionMinter.address,
+        price: PRICE,
+        startTime,
+        cutoffTime,
+        endTime,
+        maxMintableLower: 1,
+        maxMintableUpper: 2,
+        maxMintablePerAccount: 0,
+        affiliateFeeBPS: 0,
+      },
+    ]
+
+    await client
+      .createEdition({
+        editionConfig,
+        mintConfigs,
+        salt: SALT,
+      })
+      .catch((error) => {
+        console.log(error.message)
+        expect(error.message).to.equal('maxMintablePerAccount must be greater than 0')
+      })
+  })
+
+  it('throws if range mint maxMintableLower exceeds maxMintableUpper', async () => {
+    const editionConfig = getGenericConfig()
+
+    const startTime = now()
+    const cutoffTime = startTime + ONE_HOUR / 2
+    const endTime = cutoffTime + ONE_HOUR
+
+    const mintConfigs = [
+      {
+        mintType: 'RangeEdition' as const,
+        minterAddress: rangeEditionMinter.address,
+        price: PRICE,
+        startTime,
+        cutoffTime,
+        endTime,
+        maxMintableLower: 5,
+        maxMintableUpper: 4,
+        maxMintablePerAccount: 1,
+        affiliateFeeBPS: 0,
+      },
+    ]
+
+    client
+      .createEdition({
+        editionConfig,
+        mintConfigs,
+        salt: SALT,
+      })
+      .catch((error) => {
+        expect(error.message).to.equal('maxMintableLower cannot be greater than maxMintableUpper')
+      })
+  })
+
+  it('throws if range mint startTime == cutoffTime', async () => {
+    const editionConfig = getGenericConfig()
+
+    const startTime = now()
+    const cutoffTime = startTime
+    const endTime = cutoffTime + ONE_HOUR
+
+    const mintConfigs = [
+      {
+        mintType: 'RangeEdition' as const,
+        minterAddress: rangeEditionMinter.address,
+        price: PRICE,
+        startTime,
+        cutoffTime,
+        endTime,
+        maxMintableLower: 5,
+        maxMintableUpper: 4,
+        maxMintablePerAccount: 1,
+        affiliateFeeBPS: 0,
+      },
+    ]
+
+    client
+      .createEdition({
+        editionConfig,
+        mintConfigs,
+        salt: SALT,
+      })
+      .catch((error) => {
+        expect(error.message).to.equal(
+          'startTime must be earlier than cutoffTime and cutoffTime must be earlier than endTime',
+        )
+      })
+  })
+
+  it('throws if range mint cutoffTime === endTime', async () => {
+    const editionConfig = getGenericConfig()
+
+    const startTime = now()
+    const cutoffTime = startTime + 1
+    const endTime = cutoffTime
+
+    const mintConfigs = [
+      {
+        mintType: 'RangeEdition' as const,
+        minterAddress: rangeEditionMinter.address,
+        price: PRICE,
+        startTime,
+        cutoffTime,
+        endTime,
+        maxMintableLower: 5,
+        maxMintableUpper: 4,
+        maxMintablePerAccount: 1,
+        affiliateFeeBPS: 0,
+      },
+    ]
+
+    client
+      .createEdition({
+        editionConfig,
+        mintConfigs,
+        salt: SALT,
+      })
+      .catch((error) => {
+        expect(error.message).to.equal(
+          'startTime must be earlier than cutoffTime and cutoffTime must be earlier than endTime',
+        )
+      })
+  })
+
+  it('throws if merkle mint merkleRoot is invalid', async () => {
+    const editionConfig = getGenericConfig()
+
+    const startTime = now()
+    const endTime = startTime + 1
+
+    const mintConfig = {
+      mintType: 'MerkleDrop' as const,
+      minterAddress: merkleDropMinter.address,
+      price: PRICE,
+      merkleRoot: '0x0000000000000000000000000000000000000000000000000000000000000000',
+      startTime,
+      endTime,
+      maxMintable: 9,
+      maxMintablePerAccount: 1,
+      affiliateFeeBPS: 0,
+    }
+
+    client
+      .createEdition({
+        editionConfig,
+        mintConfigs: [mintConfig],
+        salt: SALT,
+      })
+      .catch((error) => {
+        expect(error.message).to.equal('merkleRoot must be a valid bytes32 hash')
+      })
+
+    mintConfig.merkleRoot = '1x0000000000000000000000000000000000000000000000000000000000000000'
+
+    client
+      .createEdition({
+        editionConfig,
+        mintConfigs: [mintConfig],
+        salt: SALT,
+      })
+      .catch((error) => {
+        expect(error.message).to.equal('merkleRoot must be a valid bytes32 hash')
+      })
+
+    mintConfig.merkleRoot = ''
+
+    client
+      .createEdition({
+        editionConfig,
+        mintConfigs: [mintConfig],
+        salt: SALT,
+      })
+      .catch((error) => {
+        expect(error.message).to.equal('merkleRoot must be a valid bytes32 hash')
+      })
   })
 })
 
