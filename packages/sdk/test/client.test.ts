@@ -1520,8 +1520,11 @@ describe('editionRegisteredMinters', () => {
 })
 
 describe('editionMinterMintIds', () => {
-  it.only('returns mint ids', async () => {
+  it('returns mint ids', async () => {
     await setupTest({})
+    const MINT_SCHEDULE_COUNT = 10
+
+    const mintConfig = getGenericRangeMintConfig({ minterAddress: rangeEditionMinter.address })
 
     let mintIds = await client.editionMinterMintIds({
       editionAddress: precomputedEditionAddress,
@@ -1529,19 +1532,29 @@ describe('editionMinterMintIds', () => {
       fromBlockOrBlockHash: 0,
     })
 
-    // expect(registeredMinters).deep.eq([merkleDropMinter.address, rangeEditionMinter.address])
+    // Make  mint schedules
+    for (let i = 0; i < MINT_SCHEDULE_COUNT; i++) {
+      await rangeEditionMinter
+        .connect(artistWallet)
+        .createEditionMint(
+          precomputedEditionAddress,
+          mintConfig.price,
+          mintConfig.startTime,
+          mintConfig.cutoffTime,
+          mintConfig.endTime,
+          mintConfig.affiliateFeeBPS,
+          mintConfig.maxMintableLower,
+          mintConfig.maxMintableUpper,
+          mintConfig.maxMintablePerAccount,
+        )
+    }
 
-    // // Deploy a new minter and grant it minter role
-    // const newMinter = await RangeEditionMinter.connect(soundWallet).deploy('0x0000000000000000000000000000000000000001')
-    // const soundEdition = SoundEditionV1_1__factory.connect(precomputedEditionAddress, artistWallet)
+    mintIds = await client.editionMinterMintIds({
+      editionAddress: precomputedEditionAddress,
+      minterAddress: rangeEditionMinter.address,
+      fromBlockOrBlockHash: 0,
+    })
 
-    // await soundEdition.grantRoles(newMinter.address, MINTER_ROLE)
-
-    // registeredMinters = await client.editionRegisteredMinters({
-    //   editionAddress: precomputedEditionAddress,
-    //   fromBlockOrBlockHash: 0,
-    // })
-
-    // expect(registeredMinters).deep.eq([merkleDropMinter.address, rangeEditionMinter.address, newMinter.address])
+    expect(mintIds).deep.eq(Array.from({ length: MINT_SCHEDULE_COUNT }, (_, i) => i))
   })
 })
