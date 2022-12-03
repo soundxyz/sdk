@@ -516,69 +516,16 @@ export function SoundClient({
     editionAddress: string
     fromBlockOrBlockHash: BlockOrBlockHash | undefined
   }): Promise<string[]> {
-    const soundSubgraph = client.soundSubgraph
-    if (soundSubgraph) {
-      const { data, errors } = await soundSubgraph.minterInfo({ editionAddress })
-      const minterInfo = data?.songs
-      if (!minterInfo) {
-        throw new UnexpectedApiResponse({
-          message: errors ? 'GraphQL Errors found' : `Minters for edition "${editionAddress}" could not be found`,
-          graphqlErrors: errors,
-        })
-      }
+    const soundSubgraphResponse = await _editionRegisteredMintersFromSubgraph({
+      editionAddress,
+    })
 
-      const editionMinters = minterInfo
-        // just to to be safe we only keep the address we have
-        .filter((edition) => edition.address.toLowerCase() === editionAddress.toLowerCase())
-        // Filter out any falsy values
-        .filter((edition) => Boolean(edition.minters))
-        // Minters are an array so we have to flatten them out
-        .flatMap((edition) => edition.minters)
-
-      if (!editionMinters) {
-        throw new UnexpectedApiResponse({
-          message: 'Minter Information could not be found',
-          graphqlErrors: errors,
-        })
-      }
-
-      const minterAddresses = editionMinters.map((minter) => minter?.address).filter(Boolean) as string[]
-
-      // Filter out any duplicates
-      return Array.from(new Set(minterAddresses))
+    // Subgraph didn't had the data, so we'll fetch it from chain
+    if (!soundSubgraphResponse) {
+      return _editionRegisteredMintersFromChain({ editionAddress, fromBlockOrBlockHash })
     }
 
-    const { signerOrProvider } = await _requireSignerOrProvider()
-
-    const editionContract = SoundEditionV1_1__factory.connect(editionAddress, signerOrProvider)
-    // Get the addresses with MINTER_ROLE
-    const minterRole = await editionContract.MINTER_ROLE()
-    const filter = editionContract.filters.RolesUpdated(undefined, minterRole)
-
-    const roleEvents = await editionContract.queryFilter(filter, fromBlockOrBlockHash)
-    const candidateMinters = roleEvents.map((event) => event.args.user)
-
-    // Check supportsInterface() to verify each address is a minter
-    const minters = await Promise.all(
-      candidateMinters.map(async (minterAddress) => {
-        const minterContract = IMinterModule__factory.connect(minterAddress, signerOrProvider)
-
-        try {
-          const isMinter = await minterContract.supportsInterface(interfaceIds.IMinterModule)
-          return isMinter ? minterAddress : null
-        } catch (err) {
-          onError(err)
-          return null
-        }
-      }),
-    )
-    // This list may contain duplicates if MINTER_ROLE was granted multiple times
-    const allMinters = minters.reduce((acc, minter) => {
-      if (minter) acc.add(minter)
-      return acc
-    }, new Set<string>())
-
-    return Array.from(allMinters)
+    return soundSubgraphResponse
   }
 
   async function editionMinterMintIds({
@@ -589,51 +536,18 @@ export function SoundClient({
     editionAddress: string
     minterAddress: string
     fromBlockOrBlockHash: BlockOrBlockHash | undefined
-  }) {
-    const soundSubgraph = client.soundSubgraph
-    if (soundSubgraph) {
-      const { data, errors } = await soundSubgraph.minterInfo({ editionAddress })
-      const minterInfo = data?.songs
-      if (!minterInfo) {
-        throw new UnexpectedApiResponse({
-          message: errors ? 'GraphQL Errors found' : `Minters for edition "${editionAddress}" could not be found`,
-          graphqlErrors: errors,
-        })
-      }
+  }): Promise<number[]> {
+    const soundSubgraphResponse = await _editionMinterMintIdsFromSubgraph({
+      editionAddress,
+      minterAddress,
+    })
 
-      const editionMinters = minterInfo
-        // just to to be safe we only keep the address we have
-        .filter((edition) => edition.address.toLowerCase() === editionAddress.toLowerCase())
-        // Filter out any falsy values
-        .filter((edition) => Boolean(edition.minters))
-        // Minters are an array so we have to flatten them out
-        .flatMap((edition) => edition.minters)
-
-      if (!editionMinters) {
-        throw new UnexpectedApiResponse({
-          message: 'Minter Information could not be found',
-          graphqlErrors: errors,
-        })
-      }
-
-      const mintIds = editionMinters
-        // we only want mint IDs for a given minter address
-        // NOTE: AND/OR filters in graph are not supported yet once they do that then we can write another query
-        .filter((minter) => minter?.address.toLowerCase() === minterAddress.toLowerCase())
-        .map((minter) => minter?.mintId)
-        .filter(Boolean) as string[]
-
-      // Filter out any duplicates
-      return Array.from(new Set(mintIds.map((mintId) => BigNumber.from(mintId).toNumber())))
+    // Subgraph didn't had the data, so we'll fetch it from chain
+    if (!soundSubgraphResponse) {
+      return _editionMinterMintIdsFromChain({ editionAddress, minterAddress, fromBlockOrBlockHash })
     }
 
-    const { signerOrProvider } = await _requireSignerOrProvider()
-
-    // Query MintConfigCreated event
-    const minterContract = IMinterModule__factory.connect(minterAddress, signerOrProvider)
-    const filter = minterContract.filters.MintConfigCreated(editionAddress)
-    const mintScheduleConfigEvents = await minterContract.queryFilter(filter, fromBlockOrBlockHash)
-    return mintScheduleConfigEvents.map((event) => event.args.mintId.toNumber())
+    return soundSubgraphResponse
   }
 
   async function editionScheduleIds({
@@ -805,6 +719,151 @@ export function SoundClient({
     const network = await networkProvider.getNetwork()
 
     return network.chainId
+  }
+
+  // Addresses with MINTER_ROLE for a given edition
+  async function _editionRegisteredMintersFromChain({
+    editionAddress,
+    fromBlockOrBlockHash,
+  }: {
+    editionAddress: string
+    fromBlockOrBlockHash: BlockOrBlockHash | undefined
+  }): Promise<string[]> {
+    const { signerOrProvider } = await _requireSignerOrProvider()
+
+    const editionContract = SoundEditionV1_1__factory.connect(editionAddress, signerOrProvider)
+    // Get the addresses with MINTER_ROLE
+    const minterRole = await editionContract.MINTER_ROLE()
+    const filter = editionContract.filters.RolesUpdated(undefined, minterRole)
+
+    const roleEvents = await editionContract.queryFilter(filter, fromBlockOrBlockHash)
+    const candidateMinters = roleEvents.map((event) => event.args.user)
+
+    // Check supportsInterface() to verify each address is a minter
+    const minters = await Promise.all(
+      candidateMinters.map(async (minterAddress) => {
+        const minterContract = IMinterModule__factory.connect(minterAddress, signerOrProvider)
+
+        try {
+          const isMinter = await minterContract.supportsInterface(interfaceIds.IMinterModule)
+          return isMinter ? minterAddress : null
+        } catch (err) {
+          onError(err)
+          return null
+        }
+      }),
+    )
+    // This list may contain duplicates if MINTER_ROLE was granted multiple times
+    const allMinters = minters.reduce((acc, minter) => {
+      if (minter) acc.add(minter)
+      return acc
+    }, new Set<string>())
+
+    return Array.from(allMinters)
+  }
+
+  // Addresses with MINTER_ROLE for a given edition
+  async function _editionRegisteredMintersFromSubgraph({
+    editionAddress,
+  }: {
+    editionAddress: string
+  }): Promise<string[] | null> {
+    const soundSubgraph = client.soundSubgraph
+    if (soundSubgraph) {
+      const { data, errors } = await soundSubgraph.minterInfo({ editionAddress })
+      const minterInfo = data?.songs
+
+      // if we cannot get any data from the subgraph we return null
+      if (!minterInfo) return null
+      // if subgraph throws an error we return null
+      if (errors) return null
+
+      const editionMinters = minterInfo
+        // just to to be safe we only keep the address we have
+        .filter((edition) => edition.address.toLowerCase() === editionAddress.toLowerCase())
+        // Filter out any falsy values
+        .filter((edition) => Boolean(edition.minters))
+        // Minters are an array so we have to flatten them out
+        .flatMap((edition) => edition.minters)
+
+      if (!editionMinters) {
+        throw new UnexpectedApiResponse({
+          message: 'Minter Information could not be found',
+          graphqlErrors: errors,
+        })
+      }
+
+      const minterAddresses = editionMinters.map((minter) => minter?.address).filter(Boolean) as string[]
+
+      // Filter out any duplicates
+      return Array.from(new Set(minterAddresses))
+    }
+
+    return null
+  }
+
+  async function _editionMinterMintIdsFromSubgraph({
+    editionAddress,
+    minterAddress,
+  }: {
+    editionAddress: string
+    minterAddress: string
+  }) {
+    const soundSubgraph = client.soundSubgraph
+    if (soundSubgraph) {
+      const { data, errors } = await soundSubgraph.minterInfo({ editionAddress })
+      const minterInfo = data?.songs
+
+      // if we cannot get any data from the subgraph we return null
+      if (!minterInfo) return null
+      // subgraph throws an error we don't want to throw an error
+      if (errors) return null
+
+      const editionMinters = minterInfo
+        // just to to be safe we only keep the address we have
+        .filter((edition) => edition.address.toLowerCase() === editionAddress.toLowerCase())
+        // Filter out any falsy values
+        .filter((edition) => Boolean(edition.minters))
+        // Minters are an array so we have to flatten them out
+        .flatMap((edition) => edition.minters)
+
+      if (!editionMinters) {
+        throw new UnexpectedApiResponse({
+          message: 'Minter Information could not be found',
+          graphqlErrors: errors,
+        })
+      }
+
+      const mintIds = editionMinters
+        // we only want mint IDs for a given minter address
+        // NOTE: AND/OR filters in graph are not supported yet once they do that then we can write another query
+        .filter((minter) => minter?.address.toLowerCase() === minterAddress.toLowerCase())
+        .map((minter) => minter?.mintId)
+        .filter(Boolean) as string[]
+
+      // Filter out any duplicates
+      return Array.from(new Set(mintIds.map((mintId) => BigNumber.from(mintId).toNumber())))
+    }
+
+    return null
+  }
+
+  async function _editionMinterMintIdsFromChain({
+    editionAddress,
+    minterAddress,
+    fromBlockOrBlockHash,
+  }: {
+    editionAddress: string
+    minterAddress: string
+    fromBlockOrBlockHash: BlockOrBlockHash | undefined
+  }) {
+    const { signerOrProvider } = await _requireSignerOrProvider()
+
+    // Query MintConfigCreated event
+    const minterContract = IMinterModule__factory.connect(minterAddress, signerOrProvider)
+    const filter = minterContract.filters.MintConfigCreated(editionAddress)
+    const mintScheduleConfigEvents = await minterContract.queryFilter(filter, fromBlockOrBlockHash)
+    return mintScheduleConfigEvents.map((event) => event.args.mintId.toNumber())
   }
 
   return client
