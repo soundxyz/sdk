@@ -520,7 +520,7 @@ export function SoundClient({
       editionAddress,
     })
 
-    // Subgraph didn't had the data, so we'll fetch it from chain
+    // Subgraph didn't have the data, so we'll fetch it from chain
     if (!soundSubgraphResponse) {
       return _editionRegisteredMintersFromChain({ editionAddress, fromBlockOrBlockHash })
     }
