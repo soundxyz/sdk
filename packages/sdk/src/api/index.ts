@@ -1,6 +1,4 @@
-import { z } from 'zod'
-
-import { MissingApiKey, SoundAPIGraphQLError, UnexpectedApiResponse } from './errors'
+import { MissingApiKey, SoundAPIGraphQLError, UnexpectedApiResponse } from '../errors'
 import {
   AudioFromTrack,
   AudioFromTrackQuery,
@@ -13,24 +11,9 @@ import {
   ReleaseInfoQueryVariables,
   Test,
   TestQuery,
-} from './api/graphql/gql'
+} from './types/gql'
 
-import type { ExecutionResult, MerkleProofParameters } from './types'
-
-export const graphqlRequestBody = z.object({
-  data: z.record(z.unknown()).nullable().optional(),
-  errors: z
-    .array(
-      z.object({
-        message: z.string(),
-        locations: z.array(z.object({ line: z.number(), column: z.number() })).optional(),
-        path: z.array(z.union([z.string(), z.number()])).optional(),
-        extensions: z.record(z.unknown()).optional(),
-      }),
-    )
-    .optional(),
-  extensions: z.record(z.unknown()).optional(),
-})
+import type { ExecutionResult, MerkleProofParameters } from '../types'
 
 const CLIENT_KEY_HEADER = 'x-sound-client-key'
 

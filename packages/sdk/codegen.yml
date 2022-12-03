@@ -1,5 +1,5 @@
 generates:
-  ./src/api/graphql/gql.ts:
+  ./src/api/types/gql.ts:
     schema: './schema.graphql'
     documents:
       - './graphql/api/**/*.gql'
@@ -26,7 +26,7 @@ generates:
         EmailAddress: 'string'
         Address: 'string'
       documentMode: 'string'
-  ./src/subgraph/graphql/gql.ts:
+  ./src/subgraph/types/gql.ts:
     schema: 'https://api.thegraph.com/subgraphs/name/soundxyz/sdk-production'
     documents:
       - './graphql/subgraph/**/*.gql'

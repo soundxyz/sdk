@@ -35,7 +35,7 @@ import type {
 import type { Signer } from '@ethersproject/abstract-signer'
 import { BigNumber, BigNumberish } from '@ethersproject/bignumber'
 import type { ContractTransaction, Overrides, PayableOverrides } from '@ethersproject/contracts'
-import type { ReleaseInfoQueryVariables } from './api/graphql/gql'
+import type { ReleaseInfoQueryVariables } from './api/types/gql'
 import type { ContractCall, EditionConfig, MintConfig, MintSchedule } from './types'
 import type { EditionInfoStructOutput } from '@soundxyz/sound-protocol/typechain/ISoundEditionV1_1'
 

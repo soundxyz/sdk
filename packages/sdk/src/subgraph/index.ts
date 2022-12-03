@@ -1,10 +1,10 @@
-import { UnexpectedApiResponse } from './errors'
-import { Test, TestQuery } from './api/graphql/gql'
+import { UnexpectedApiResponse } from '../errors'
+import { Test, TestQuery } from '../api/types/gql'
 
-import type { ExecutionResult } from './types'
-import { Minters } from './subgraph/graphql/gql'
-import type { MintersQueryVariables, MintersQuery } from './subgraph/graphql/gql'
-import { graphqlRequestBody } from './api'
+import type { ExecutionResult } from '../types'
+import { Minters } from './types/gql'
+import type { MintersQueryVariables, MintersQuery } from './types/gql'
+import { graphqlRequestBody } from '../graphql'
 
 export interface SoundSubgraphConfig {
   /**
