@@ -756,7 +756,7 @@ export function SoundClient({
   function _validateMintConfigs(mintConfigs: MintConfig[]) {
     for (const mintConfig of mintConfigs) {
       const { maxMintablePerAccount } = mintConfig
-      if (maxMintablePerAccount === 0) {
+      if (maxMintablePerAccount < 1) {
         throw new InvalidMaxMintablePerAccountError({ maxMintablePerAccount })
       }
 
