@@ -1,3 +1,4 @@
+import type { SoundSubgraph } from '../../src/subgraph'
 import type { SoundAPI } from '../../src/api'
 
 export function MockAPI(api?: Partial<SoundAPI>): SoundAPI {
@@ -19,5 +20,19 @@ export function MockAPI(api?: Partial<SoundAPI>): SoundAPI {
       }
     },
     ...api,
+  }
+}
+
+export function MockSubgraph(subgraph?: Partial<SoundSubgraph>): SoundSubgraph {
+  return {
+    async check() {
+      return null
+    },
+    async minterInfo() {
+      return {
+        data: null,
+      }
+    },
+    ...subgraph,
   }
 }

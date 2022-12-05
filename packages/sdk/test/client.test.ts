@@ -32,7 +32,7 @@ import type { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import type MerkleTree from 'merkletreejs'
 
 import type { ContractCall, EditionConfig, MintConfig, MintSchedule } from '../src/types'
-import { MockAPI } from './helpers/api'
+import { MockAPI, MockSubgraph } from './helpers/api'
 import { randomUUID } from 'crypto'
 
 const UINT32_MAX = 4294967295
@@ -1374,5 +1374,142 @@ describe('editionRegisteredMinters', () => {
     })
 
     expect(registeredMinters).deep.eq([merkleDropMinter.address, rangeEditionMinter.address, newMinter.address])
+  })
+
+  it('uses subgraph to return registered minter addresses', async () => {
+    await setupTest({})
+
+    client.soundSubgraph = MockSubgraph({
+      async minterInfo() {
+        return {
+          data: {
+            songs: [
+              {
+                id: '1',
+                address: precomputedEditionAddress,
+                minters: [{ id: '1', mintId: '1', address: merkleDropMinter.address }],
+              },
+            ],
+          },
+        }
+      },
+    })
+
+    const registeredMinters = await client.editionRegisteredMinters({
+      editionAddress: precomputedEditionAddress,
+      fromBlockOrBlockHash: 0,
+    })
+
+    expect(registeredMinters).deep.eq([merkleDropMinter.address])
+  })
+
+  it('fallback to chain when subgraph does not return data', async () => {
+    await setupTest({})
+
+    client.soundSubgraph = MockSubgraph({
+      async minterInfo() {
+        return {
+          data: null,
+        }
+      },
+    })
+
+    const registeredMinters = await client.editionRegisteredMinters({
+      editionAddress: precomputedEditionAddress,
+      fromBlockOrBlockHash: 0,
+    })
+
+    expect(registeredMinters).deep.eq([merkleDropMinter.address, rangeEditionMinter.address])
+  })
+
+  it('fallback to chain when subgraph errors', async () => {
+    await setupTest({})
+
+    client.soundSubgraph = MockSubgraph({
+      async minterInfo() {
+        return {
+          data: null,
+          errors: [{ message: 'Could not connect to subgraph' }],
+        }
+      },
+    })
+
+    const registeredMinters = await client.editionRegisteredMinters({
+      editionAddress: precomputedEditionAddress,
+      fromBlockOrBlockHash: 0,
+    })
+
+    expect(registeredMinters).deep.eq([merkleDropMinter.address, rangeEditionMinter.address])
+  })
+})
+
+describe('editionMinterMintIds', () => {
+  it('uses subgraph to return mint IDs', async () => {
+    await setupTest({})
+
+    client.soundSubgraph = MockSubgraph({
+      async minterInfo() {
+        return {
+          data: {
+            songs: [
+              {
+                id: '1',
+                address: precomputedEditionAddress,
+                minters: [{ id: '1', mintId: '1', address: merkleDropMinter.address }],
+              },
+            ],
+          },
+        }
+      },
+    })
+
+    const mintIds = await client.editionMinterMintIds({
+      editionAddress: precomputedEditionAddress,
+      fromBlockOrBlockHash: 0,
+      minterAddress: merkleDropMinter.address,
+    })
+
+    expect(mintIds).deep.eq([1])
+  })
+
+  it('fallback to chain when subgraph does not return data', async () => {
+    await setupTest({})
+
+    client.soundSubgraph = MockSubgraph({
+      async minterInfo() {
+        return {
+          data: null,
+        }
+      },
+    })
+
+    const mintIds = await client.editionMinterMintIds({
+      editionAddress: precomputedEditionAddress,
+      fromBlockOrBlockHash: 0,
+      minterAddress: merkleDropMinter.address,
+    })
+
+    expect(mintIds).deep.eq([])
+  })
+
+  it('fallback to chain when subgraph errors', async () => {
+    await setupTest({})
+
+    client.soundSubgraph = MockSubgraph({
+      async minterInfo() {
+        return {
+          data: null,
+          errors: [{ message: 'Could not connect to subgraph' }],
+        }
+      },
+    })
+
+    const mintIds = await client.editionMinterMintIds({
+      editionAddress: precomputedEditionAddress,
+      fromBlockOrBlockHash: 0,
+      minterAddress: merkleDropMinter.address,
+    })
+
+    expect(mintIds).deep.eq([])
   })
 })

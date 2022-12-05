@@ -1,0 +1,11 @@
+query Minters($editionAddress: Bytes!) {
+  songs(where: { address: $editionAddress }) {
+    id
+    address
+    minters {
+      id
+      mintId
+      address
+    }
+  }
+}

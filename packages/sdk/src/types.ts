@@ -4,6 +4,7 @@ import type { Provider } from '@ethersproject/abstract-provider'
 import type { interfaceIds } from '@soundxyz/sound-protocol'
 import type { SoundAPI } from './api'
 import type { MerkleProofProvider } from './merkle/types'
+import type { SoundSubgraph } from './subgraph'
 
 /*********************************************************
                 PROTOCOL TYPES
@@ -59,6 +60,11 @@ export interface BaseSoundClientConfig {
    * Sound.xyz API instance
    */
   soundAPI?: SoundAPI
+
+  /**
+   * Sound's subgraph instance
+   */
+  soundSubgraph?: SoundSubgraph
 
   /**
    * Merkle provider to be used

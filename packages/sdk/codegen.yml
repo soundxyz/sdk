@@ -1,8 +1,8 @@
-schema: './schema.graphql'
-documents:
-  - './graphql/**/*.gql'
 generates:
-  ./src/api/graphql/gql.ts:
+  ./src/api/types/gql.ts:
+    schema: './schema.graphql'
+    documents:
+      - './graphql/api/**/*.gql'
     plugins:
       - typescript
       - typescript-operations
@@ -25,6 +25,24 @@ generates:
         URL: 'string'
         EmailAddress: 'string'
         Address: 'string'
+      documentMode: 'string'
+  ./src/subgraph/types/gql.ts:
+    schema: 'https://api.thegraph.com/subgraphs/name/soundxyz/sdk-production'
+    documents:
+      - './graphql/subgraph/**/*.gql'
+    plugins:
+      - typescript
+      - typescript-operations
+      - typescript-document-nodes
+    config:
+      useTypeImports: true
+      enumsAsConst: true
+      skipTypename: true
+      namingConvention: 'keep'
+      scalars:
+        BigInt: string
+        Bytes: string
+        BigDecimal: string
       documentMode: 'string'
 hooks:
   afterAllFileWrite:
