@@ -769,37 +769,36 @@ export function SoundClient({
     editionAddress: string
   }): Promise<string[] | null> {
     const soundSubgraph = client.soundSubgraph
-    if (soundSubgraph) {
-      const { data, errors } = await soundSubgraph.minterInfo({ editionAddress })
-      const minterInfo = data?.songs
 
-      // if we cannot get any data from the subgraph we return null
-      if (!minterInfo) return null
-      // if subgraph throws an error we return null
-      if (errors) return null
+    if (!soundSubgraph) return null
 
-      const editionMinters = minterInfo
-        // just to to be safe we only keep the address we have
-        .filter((edition) => edition.address.toLowerCase() === editionAddress.toLowerCase())
-        // Filter out any falsy values
-        .filter((edition) => Boolean(edition.minters))
-        // Minters are an array so we have to flatten them out
-        .flatMap((edition) => edition.minters)
+    const { data, errors } = await soundSubgraph.minterInfo({ editionAddress })
+    const minterInfo = data?.songs
 
-      if (!editionMinters) {
-        throw new UnexpectedApiResponse({
-          message: 'Minter Information could not be found',
-          graphqlErrors: errors,
-        })
-      }
+    // if we cannot get any data from the subgraph we return null
+    if (!minterInfo) return null
+    // if subgraph throws an error we return null
+    if (errors) return null
 
-      const minterAddresses = editionMinters.map((minter) => minter?.address).filter(Boolean) as string[]
+    const editionMinters = minterInfo
+      // just to to be safe we only keep the address we have
+      .filter((edition) => edition.address.toLowerCase() === editionAddress.toLowerCase())
+      // Filter out any falsy values
+      .filter((edition) => Boolean(edition.minters))
+      // Minters are an array so we have to flatten them out
+      .flatMap((edition) => edition.minters)
 
-      // Filter out any duplicates
-      return Array.from(new Set(minterAddresses))
+    if (!editionMinters) {
+      throw new UnexpectedApiResponse({
+        message: 'Minter Information could not be found',
+        graphqlErrors: errors,
+      })
     }
 
-    return null
+    const minterAddresses = editionMinters.map((minter) => minter?.address).filter(Boolean) as string[]
+
+    // Filter out any duplicates
+    return Array.from(new Set(minterAddresses))
   }
 
   async function _editionMinterMintIdsFromSubgraph({
@@ -810,42 +809,40 @@ export function SoundClient({
     minterAddress: string
   }) {
     const soundSubgraph = client.soundSubgraph
-    if (soundSubgraph) {
-      const { data, errors } = await soundSubgraph.minterInfo({ editionAddress })
-      const minterInfo = data?.songs
+    if (!soundSubgraph) return null
 
-      // if we cannot get any data from the subgraph we return null
-      if (!minterInfo) return null
-      // subgraph throws an error we don't want to throw an error
-      if (errors) return null
+    const { data, errors } = await soundSubgraph.minterInfo({ editionAddress })
+    const minterInfo = data?.songs
 
-      const editionMinters = minterInfo
-        // just to to be safe we only keep the address we have
-        .filter((edition) => edition.address.toLowerCase() === editionAddress.toLowerCase())
-        // Filter out any falsy values
-        .filter((edition) => Boolean(edition.minters))
-        // Minters are an array so we have to flatten them out
-        .flatMap((edition) => edition.minters)
+    // if we cannot get any data from the subgraph we return null
+    if (!minterInfo) return null
+    // subgraph throws an error we don't want to throw an error
+    if (errors) return null
 
-      if (!editionMinters) {
-        throw new UnexpectedApiResponse({
-          message: 'Minter Information could not be found',
-          graphqlErrors: errors,
-        })
-      }
+    const editionMinters = minterInfo
+      // just to to be safe we only keep the address we have
+      .filter((edition) => edition.address.toLowerCase() === editionAddress.toLowerCase())
+      // Filter out any falsy values
+      .filter((edition) => Boolean(edition.minters))
+      // Minters are an array so we have to flatten them out
+      .flatMap((edition) => edition.minters)
 
-      const mintIds = editionMinters
-        // we only want mint IDs for a given minter address
-        // NOTE: AND/OR filters in graph are not supported yet once they do that then we can write another query
-        .filter((minter) => minter?.address.toLowerCase() === minterAddress.toLowerCase())
-        .map((minter) => minter?.mintId)
-        .filter(Boolean) as string[]
-
-      // Filter out any duplicates
-      return Array.from(new Set(mintIds.map((mintId) => BigNumber.from(mintId).toNumber())))
+    if (!editionMinters) {
+      throw new UnexpectedApiResponse({
+        message: 'Minter Information could not be found',
+        graphqlErrors: errors,
+      })
     }
 
-    return null
+    const mintIds = editionMinters
+      // we only want mint IDs for a given minter address
+      // NOTE: AND/OR filters in graph are not supported yet once they do that then we can write another query
+      .filter((minter) => minter?.address.toLowerCase() === minterAddress.toLowerCase())
+      .map((minter) => minter?.mintId)
+      .filter(Boolean) as string[]
+
+    // Filter out any duplicates
+    return Array.from(new Set(mintIds.map((mintId) => BigNumber.from(mintId).toNumber())))
   }
 
   async function _editionMinterMintIdsFromChain({
