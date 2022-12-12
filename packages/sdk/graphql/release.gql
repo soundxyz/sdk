@@ -6,9 +6,12 @@ query ReleaseInfo($contractAddress: Address!, $editionId: String) {
 
     type
 
+    mintStartTime
+
     externalUrl
     openseaUrl
     layloUrl
+    marketPlaceUrl
 
     title
     behindTheMusic
@@ -28,13 +31,16 @@ query ReleaseInfo($contractAddress: Address!, $editionId: String) {
       id
       duration
       normalizedPeaks
+      revealedAudio {
+        id
+        url
+      }
     }
 
     artist {
       id
 
       gemCollectionUrl
-      openseaCollectionUrl
       season
       soundHandle
       spotifyUrl
@@ -78,9 +84,13 @@ query ReleaseInfo($contractAddress: Address!, $editionId: String) {
       url
     }
 
-    goldenEggImage {
+    eggGame {
       id
-      url
+      winningSerialNum
+      goldenEggImage {
+        id
+        url
+      }
     }
   }
 }
