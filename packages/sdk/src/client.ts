@@ -16,7 +16,6 @@ import {
   NotEligibleMint,
   NotSoundEditionError,
   SoundNotFoundError,
-  UnexpectedApiResponse,
   UnsupportedMinterError,
 } from './errors'
 import { ADDRESS_ZERO, MINTER_ROLE, minterFactoryMap, editionInitFlags } from './utils/constants'
@@ -461,20 +460,13 @@ export function SoundClient({
 
       return {
         ...release,
-        trackAudio: LazyPromise(() =>
-          soundAPI.audioFromTrack({ trackId: release.track.id }).then((response) => {
-            const data: Expand<typeof response.data> = response.data
-
-            if (!data) {
-              throw new UnexpectedApiResponse({
-                message: response.errors ? 'GraphQL Errors found' : 'Track could not be found',
-                graphqlErrors: response.errors,
-              })
-            }
-
-            return data.audioFromTrack
-          }),
-        ),
+        goldenEggImage: release.eggGame?.goldenEggImage,
+        trackAudio: {
+          id: release.track.id,
+          duration: release.track.duration,
+          revealTime: Math.max(0, Math.floor(release.mintStartTime - release.track.duration)),
+          audio: release.track.revealedAudio,
+        },
       }
     })
 

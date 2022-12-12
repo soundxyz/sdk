@@ -14,6 +14,8 @@ export type Scalars = {
   Address: string
   /** A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar. */
   DateTime: string
+  /** A string that cannot be passed as an empty value */
+  NonEmptyString: string
   /** Integers that will have a value of 0 or more. */
   NonNegativeInt: number
   /** Integers that will have a value greater than 0. */
@@ -26,24 +28,197 @@ export type Scalars = {
   Void: null
 }
 
+/** Activity Feed entity */
+export type ActivityFeed = {
+  /** Paginated activity feed groups of activity feed. */
+  activityFeedGroups: ActivityFeedGroupConnection
+  /** Activity feed UUID */
+  id: Scalars['ID']
+}
+
+/** Activity Feed entity */
+export type ActivityFeedactivityFeedGroupsArgs = {
+  filter?: ActivityFeedGroupFilterArgs
+  pagination?: CursorConnectionArgs
+}
+
+/** Filter activity feed */
+export type ActivityFeedFilterArgs = {
+  /** Only get activity feed of certain type */
+  activityFeedType?: ActivityFeedType
+}
+
+/** Activity Feed Group entity */
+export type ActivityFeedGroup = Node & {
+  /** Activity feed group UUID */
+  id: Scalars['ID']
+  /** Activity feed group info */
+  information: ActivityFeedGroupInfo
+  /** Activity feed group timestamp of most recent activity occurance */
+  latestActivityOccurenceAt: Scalars['Timestamp']
+  /** Activity feed group ranking score */
+  rankingScore: Scalars['Int']
+}
+
+/** Activity feed group collected release entity */
+export type ActivityFeedGroupCollectedRelease = {
+  /** Amount paid in Wei for all purchases of a single release within activity feed group */
+  amountPaidInWei: Scalars['String']
+  /** Returns whether user has purchased the golden egg within the activity feed group */
+  hasGoldenEgg: Scalars['Boolean']
+  /** Most recent user that release was purchased from */
+  mostRecentPurchasedFromUser: User
+  /** Release corresponding to activity feed group collected release entity */
+  release: Release
+  /** Release backers that are prioritized based on following status */
+  releaseSocialProof: ActivityFeedReleaseSocialProof
+  /** Amount of nfts of a single release within activity feed group */
+  totalOwnedEditions: Scalars['Int']
+  /** Total number of unique users that release was purchased from */
+  totalUsersPurchasedFrom: Scalars['Int']
+}
+
+/** Paginated activity feed group connection */
+export type ActivityFeedGroupConnection = Connection & {
+  /** Edges of current page */
+  edges: Array<ActivityFeedGroupConnectionEdge>
+  /** Pagination helpers information */
+  pageInfo: PageInfo
+}
+
+/** Edge of Activity Feed Group Connection */
+export type ActivityFeedGroupConnectionEdge = Edge & {
+  /** Cursor to be used for pagination */
+  cursor: Scalars['String']
+  /** Activity Feed Group node */
+  node: ActivityFeedGroup
+}
+
+/** Activity feed group featured collector entity */
+export type ActivityFeedGroupFeaturedCollector = {
+  /** Amount paid in Wei for most recent purchase action in activity feed group by collector */
+  amountPaidInWei: Scalars['String']
+  /** User corresponding to activity feed group featured collector entity */
+  user: User
+}
+
+/** Filter activity feed groups */
+export type ActivityFeedGroupFilterArgs = {
+  /** Only get activity feed groups of certain type */
+  types?: Array<ActivityFeedGroupFilterOption>
+}
+
+/** Activity feed group filter option */
+export const ActivityFeedGroupFilterOption = {
+  ADDED_TO_PLAYLIST: 'ADDED_TO_PLAYLIST',
+  ALL: 'ALL',
+  COLLECTED: 'COLLECTED',
+  RELEASE_DROPPED: 'RELEASE_DROPPED',
+} as const
+
+export type ActivityFeedGroupFilterOption =
+  typeof ActivityFeedGroupFilterOption[keyof typeof ActivityFeedGroupFilterOption]
+/** Union of activity feed group info */
+export type ActivityFeedGroupInfo =
+  | ReleaseDroppedAggregate
+  | ReleasesAddedToShelfAggregate
+  | ShelfCreatedAggregate
+  | SongCollectedByManyAggregate
+  | UserCollectedManySongsAggregate
+
+/** Social proof of release in activity feed based on user authentication */
+export type ActivityFeedReleaseSocialProof = {
+  /** Release backers that are prioritized based on following status */
+  socialProofCollectors: Array<User>
+}
+
+/** Activity feed type */
+export const ActivityFeedType = {
+  GLOBAL: 'GLOBAL',
+  USER: 'USER',
+} as const
+
+export type ActivityFeedType = typeof ActivityFeedType[keyof typeof ActivityFeedType]
+/** Pagination parameters for allCollectors */
+export type AllCollectorsCursorConnectionArgs = {
+  /** Start forwards pagination since "after" cursor */
+  after?: InputMaybe<Scalars['String']>
+  /** Start backwards pagination since "before" cursor */
+  before?: InputMaybe<Scalars['String']>
+  /** Limit the amount of nodes to be fetched, to be used with "after", with a maximum of 51 nodes. */
+  first?: InputMaybe<Scalars['NonNegativeInt']>
+  /** Limit the amount of nodes to be fetched, to be used with "before", with a maximum of 51 nodes. */
+  last?: InputMaybe<Scalars['NonNegativeInt']>
+  /** Customize sort behavior */
+  sort?: AllCollectorsCursorConnectionSort
+}
+
+/** Customize sort of collectors */
+export type AllCollectorsCursorConnectionSort = {
+  /** Sort by date of user first being connected in platform */
+  createdAt?: InputMaybe<SortOrder>
+}
+
+/** Filter the allCollectors result */
+export type AllCollectorsFilter = {
+  /** Should it include artists as collectors */
+  includeArtists?: Scalars['Boolean']
+}
+
+/** Input for allCollectors query */
+export type AllCollectorsInput = {
+  /** Filter the collectors */
+  filter?: AllCollectorsFilter
+  /** Pagination parameters of collectors */
+  pagination?: AllCollectorsCursorConnectionArgs
+}
+
+/** Pagination parameters for allShelves */
+export type AllShelvesCursorConnectionArgs = {
+  /** Start forwards pagination since "after" cursor */
+  after?: InputMaybe<Scalars['String']>
+  /** Start backwards pagination since "before" cursor */
+  before?: InputMaybe<Scalars['String']>
+  /** Limit the amount of nodes to be fetched, to be used with "after", with a maximum of 51 nodes. */
+  first?: InputMaybe<Scalars['NonNegativeInt']>
+  /** Limit the amount of nodes to be fetched, to be used with "before", with a maximum of 51 nodes. */
+  last?: InputMaybe<Scalars['NonNegativeInt']>
+  /** Customize sort behavior */
+  sort?: AllShelvesCursorConnectionSort
+}
+
+/** Customize sort of shelves */
+export type AllShelvesCursorConnectionSort = {
+  /** Sort by date of playlist being created */
+  createdAt?: InputMaybe<SortOrder>
+}
+
+/** Filter the shelves of allShelves query */
+export type AllShelvesFilter = {
+  /** Filter the shelves based on the expected types */
+  type?: Array<ShelfTypeFilter>
+}
+
+/** Input for allShelves query */
+export type AllShelvesInput = {
+  /** Filter the shelves, by default it gives all the user created shelves */
+  filter?: AllShelvesFilter
+  /** Pagination parameters, by default it gives the last 10 shelves created */
+  pagination?: AllShelvesCursorConnectionArgs
+}
+
 /** Artist Entity */
 export type Artist = Node & {
-  /** Artist contract address (public address) */
-  artistContractAddress?: Maybe<Scalars['String']>
   /** Banner image of artist page */
   bannerImage?: Maybe<Media>
   /** Paginated collectors of artist. */
   collectors: ArtistCollectorConnection
-  /** Contract artist id (acumulative unique id) */
-  contractArtistId?: Maybe<Scalars['String']>
   /** Creation date of artist entity */
   createdAt: Scalars['DateTime']
   /** Gem Collection URL */
   gemCollectionUrl?: Maybe<Scalars['String']>
   /** Artist identifier */
   id: Scalars['ID']
-  /** Invite limit */
-  inviteLimit: Scalars['Int']
   /** Paginated minted releases of artist. */
   mintedReleasesPaginated: ReleaseConnection
   /** Name of artist */
@@ -52,8 +227,6 @@ export type Artist = Node & {
   numCollectors: Scalars['Int']
   /** How many minted releases for artist */
   numMintedReleases: Scalars['Int']
-  /** OpenSea Collection URL */
-  openseaCollectionUrl?: Maybe<Scalars['String']>
   /** Genres of artist releases, with the most common genres first */
   releasesGenres: Array<Scalars['String']>
   /** Season associated with artist */
@@ -124,7 +297,7 @@ export type ArtistCollectors = {
 export type ArtistCollectorsInput = {
   /** Artist unique identifier */
   artistId: Scalars['UUID']
-  /** Cursor connection paramaters */
+  /** Cursor connection parameters */
   pagination?: UserCursorConnectionArgs
 }
 
@@ -144,6 +317,18 @@ export type ArtistConnectionEdge = Edge & {
   node: Artist
 }
 
+/** Artist contract earnings */
+export type ArtistContractEarning = {
+  /** Users split of eth on the contract */
+  balanceForUser: Scalars['String']
+  /** Address of the artist contract */
+  contractAddress: Scalars['String']
+  /** Edition id for the release */
+  editionId: Scalars['String']
+  /** Total eth on the contract */
+  totalBalance: Scalars['String']
+}
+
 /** Filter for paginated artists */
 export type ArtistCursorFilterArgs = {
   /** Specify whether artist already has at least one minted release */
@@ -152,160 +337,134 @@ export type ArtistCursorFilterArgs = {
   season?: InputMaybe<ArtistSeason>
 }
 
-/** Filter artist minted releases based on whether artist uploaded release or artist is credited on a split */
-export type ArtistMintedReleasesCursorFilterArgs = {
-  /** Includes songs where that artist has a split */
-  appearsOn?: Scalars['Boolean']
-  /** Includes songs uploaded by artist */
-  sounds?: Scalars['Boolean']
-}
+/** Artist minted releases author filter option */
+export const ArtistMintedReleasesAuthorFilterOption = {
+  ALL: 'ALL',
+  ONLY_APPEARS_ON: 'ONLY_APPEARS_ON',
+  ONLY_AUTHORED_RELEASES: 'ONLY_AUTHORED_RELEASES',
+} as const
 
+export type ArtistMintedReleasesAuthorFilterOption =
+  typeof ArtistMintedReleasesAuthorFilterOption[keyof typeof ArtistMintedReleasesAuthorFilterOption]
+/** Artist minted releases credit split filter option */
+export const ArtistMintedReleasesCreditSplitFilterOption = {
+  ALL: 'ALL',
+  ONLY_CREDIT_SPLITS: 'ONLY_CREDIT_SPLITS',
+  ONLY_NO_CREDIT_SPLITS: 'ONLY_NO_CREDIT_SPLITS',
+} as const
+
+export type ArtistMintedReleasesCreditSplitFilterOption =
+  typeof ArtistMintedReleasesCreditSplitFilterOption[keyof typeof ArtistMintedReleasesCreditSplitFilterOption]
 /** Filter for artist minted releases. Default is only for artist sounds. */
 export type ArtistMintedReleasesFilter = {
-  /** Includes songs where that artist has a split */
-  appearsOn?: Scalars['Boolean']
-  /** Filter if the release has credit splits */
-  hasCreditSplits?: InputMaybe<Scalars['Boolean']>
-  /** Includes songs uploaded by artist */
-  sounds?: Scalars['Boolean']
+  /** Filters on release credit split status */
+  creditSplit?: ArtistMintedReleasesCreditSplitFilterOption
+  /** Filters on release with specified mint time status */
+  mintTimeStatus?: Array<MintTimeStatus>
+  /** Filters on whether album releases have been revealed or not */
+  releaseAlbumRevealStatus?: ReleaseAlbumRevealFilterOption
+  /** Filters on release author status */
+  releaseAuthor?: ArtistMintedReleasesAuthorFilterOption
+  /** Filters on release type */
+  releaseType?: Array<ReleaseType>
 }
 
 /** Types of seasons for artists */
 export const ArtistSeason = {
   GENESIS: 'GENESIS',
+  SEASON_FOUR: 'SEASON_FOUR',
   SEASON_ONE: 'SEASON_ONE',
   SEASON_THREE: 'SEASON_THREE',
   SEASON_TWO: 'SEASON_TWO',
 } as const
 
 export type ArtistSeason = typeof ArtistSeason[keyof typeof ArtistSeason]
-/** Chat Channel entity */
-export type ChatChannel = {
-  /** Association identifier paired with "type" */
-  associationId?: Maybe<Scalars['String']>
-  /** Can the authenticated user send messages to the channel */
-  canSendMessage: Scalars['Boolean']
-  /** Date of creation of chat channel */
-  createdAt: Scalars['DateTime']
-  /** Unique identifier of chat channel */
-  id: Scalars['ID']
-  /** Members of chat channel */
-  members: Array<ChatChannelMember>
-  /** Name of chat channel */
-  name: Scalars['String']
-  /** Type of chat channel */
-  type: ChatChannelType
-}
-
-/** Chat channel member entity */
-export type ChatChannelMember = {
-  /** Date of creation of member in chat channel */
-  createdAt: Scalars['DateTime']
-  /** Unique identifier of Chat Channel Member entity */
-  id: Scalars['ID']
-  /** Role of member in chat channel */
-  role: Scalars['String']
-  /** User entity of member */
-  user: User
-}
-
-/** Chat Channel Type */
-export const ChatChannelType = {
-  ARTIST: 'ARTIST',
-  DIRECT: 'DIRECT',
-  GROUP: 'GROUP',
-  HOMEPAGE: 'HOMEPAGE',
-  RELEASE: 'RELEASE',
-  UNKNOWN: 'UNKNOWN',
-} as const
-
-export type ChatChannelType = typeof ChatChannelType[keyof typeof ChatChannelType]
-/** Chat message entity */
-export type ChatMessage = Node & {
-  /** Shorthand for user's avatar */
-  avatar?: Maybe<Media>
-  /** Channel identifier */
-  channelId: Scalars['ID']
-  /** Date of creation of message */
-  createdAt: Scalars['DateTime']
-  /** Unique identifier */
-  id: Scalars['ID']
-  /** Is message sent by an artist */
-  isArtist: Scalars['Boolean']
-  /** Message content */
-  message: Scalars['String']
-  /** Metadata associated with message */
-  meta: Array<Scalars['String']>
-  /** Current status of message */
-  status: ChatMessageStatus
-  /** Message creator user */
-  user: User
-  /** Message creator user identifier */
-  userId: Scalars['ID']
-}
-
-/** Pagination chat message edge */
-export type ChatMessageConnectionEdge = Edge & {
-  /** Pagination cursor */
-  cursor: Scalars['String']
-  /** Chat message node */
-  node: ChatMessage
-}
-
-/** Chat message status */
-export const ChatMessageStatus = {
-  HIDDEN: 'HIDDEN',
-  VISIBLE: 'VISIBLE',
-} as const
-
-export type ChatMessageStatus = typeof ChatMessageStatus[keyof typeof ChatMessageStatus]
-/** Paginated connection of Chat messages */
-export type ChatMessagesConnection = Connection & {
-  /** Edges of current page */
-  edges: Array<ChatMessageConnectionEdge>
-  /** Pagination helpers information */
-  pageInfo: PageInfo
-}
-
 /** Simplified version of Release entity filtered on the owner public address */
 export type CollectedRelease = Node & {
-  /** Artist of release */
+  /**
+   * Artist of release
+   * @deprecated Please use CollectedRelease.release.artist
+   */
   artist: Artist
-  /** Contract associated to Sound Edition */
+  /**
+   * Contract associated to Sound Edition
+   * @deprecated Please use CollectedRelease.release.contract
+   */
   contract: Contract
-  /** Cover image of release */
+  /**
+   * Cover image of release
+   * @deprecated Please use CollectedRelease.release.coverImage
+   */
   coverImage: Media
-  /** Release creation date */
+  /**
+   * Release creation date
+   * @deprecated Please use CollectedRelease.release.createdAt
+   */
   createdAt: Scalars['DateTime']
-  /** Associated external url */
+  /**
+   * Associated external url
+   * @deprecated Please use CollectedRelease.release.externalUrl
+   */
   externalUrl?: Maybe<Scalars['String']>
-  /** Final quantity for a release. Will be defined once a sale finishes */
+  /**
+   * Final quantity for a release. Will be defined once a sale finishes
+   * @deprecated Please use CollectedRelease.release.finalQuantity
+   */
   finalQuantity?: Maybe<Scalars['Int']>
-  /** Last sale schedule end time as number of milliseconds since the ECMAScript epoch. */
+  /**
+   * Last sale schedule end time as number of milliseconds since the ECMAScript epoch.
+   * @deprecated Please use CollectedRelease.release.finalSaleScheduleEndTimestamp
+   */
   finalSaleScheduleEndTimestamp?: Maybe<Scalars['Timestamp']>
   /** First backed nft of collected release */
   firstNftOwned?: Maybe<Nft>
   /** Returns golden egg if user owns, otherwise null */
   goldenEgg?: Maybe<EggGame>
-  /** Special golden egg image */
+  /**
+   * Special golden egg image
+   * @deprecated Please use eggGame.goldenEggImage
+   */
   goldenEggImage?: Maybe<Media>
   /** Unique identifier of release */
   id: Scalars['ID']
   /** List of owned nft serial numbers in ascending serial number order */
   ownedSerialNumbers: Array<Scalars['Int']>
-  /** Public listening party start time */
+  /**
+   * Public listening party start time
+   * @deprecated Please use CollectedRelease.release.publicListeningParty
+   */
   publicListeningPartyStart: Scalars['DateTime']
-  /** Lower bound quantity for a releases main sale. */
+  /**
+   * Lower bound quantity for a releases main sale.
+   * @deprecated Please use CollectedRelease.release.quantityLowerBound
+   */
   quantityLowerBound: Scalars['Int']
-  /** Upper bound quantity for a releases main sale. */
+  /**
+   * Upper bound quantity for a releases main sale.
+   * @deprecated Please use CollectedRelease.release.quantityUpperBound
+   */
   quantityUpperBound: Scalars['Int']
-  /** Release title */
+  /** Release entity */
+  release: Release
+  /**
+   * Release title
+   * @deprecated Please use CollectedRelease.release.title
+   */
   title: Scalars['String']
-  /** Release title slug */
+  /**
+   * Release title slug
+   * @deprecated Please use CollectedRelease.release.titleSlug
+   */
   titleSlug: Scalars['String']
-  /** Track of release */
+  /**
+   * Track of release
+   * @deprecated Please use CollectedRelease.release.track
+   */
   track: Track
-  /** Type of Release */
+  /**
+   * Type of Release
+   * @deprecated Please use CollectedRelease.release.type
+   */
   type: ReleaseType
 }
 
@@ -363,23 +522,16 @@ export type Contract = {
   updatedAt: Scalars['DateTime']
 }
 
-/** Contract methods of transactions */
-export const ContractMethod = {
-  ARTIST_CREATOR__CREATE_ARTIST: 'ARTIST_CREATOR__CREATE_ARTIST',
-  ARTIST__BUY_EDITION: 'ARTIST__BUY_EDITION',
-  ARTIST__CREATE_EDITION: 'ARTIST__CREATE_EDITION',
-  ARTIST__WITHDRAW_FUNDS: 'ARTIST__WITHDRAW_FUNDS',
-  SOUND_CREATOR__CREATE_SOUND_AND_MINTS: 'SOUND_CREATOR__CREATE_SOUND_AND_MINTS',
-  SOUND_EDITION__WITHDRAW_ETH: 'SOUND_EDITION__WITHDRAW_ETH',
-  SPLIT_MAIN__CREATE_SPLIT: 'SPLIT_MAIN__CREATE_SPLIT',
-  SPLIT_MAIN__DISTRIBUTE_ETH: 'SPLIT_MAIN__DISTRIBUTE_ETH',
-  SPLIT_MAIN__WITHDRAW: 'SPLIT_MAIN__WITHDRAW',
-} as const
+/** Input for release by contract */
+export type ContractReleaseInput = {
+  /** Contract address */
+  contractAddress: Scalars['Address']
+  /** Optional edition identifier */
+  editionId?: InputMaybe<Scalars['String']>
+}
 
-export type ContractMethod = typeof ContractMethod[keyof typeof ContractMethod]
 /** Contract type, currently the playform only supports "ARTIST" */
 export const ContractType = {
-  ALBUM: 'ALBUM',
   ARTIST: 'ARTIST',
   EDITION: 'EDITION',
 } as const
@@ -430,18 +582,12 @@ export type CursorConnectionArgs = {
   after?: InputMaybe<Scalars['String']>
   /** Start backwards pagination since "before" cursor */
   before?: InputMaybe<Scalars['String']>
-  /** Limit the amount of nodes to be fetched, to be used with "after", with a maximum of 50 nodes. */
+  /** Limit the amount of nodes to be fetched, to be used with "after", with a maximum of 51 nodes. */
   first?: InputMaybe<Scalars['NonNegativeInt']>
-  /** Limit the amount of nodes to be fetched, to be used with "before", with a maximum of 50 nodes. */
+  /** Limit the amount of nodes to be fetched, to be used with "before", with a maximum of 51 nodes. */
   last?: InputMaybe<Scalars['NonNegativeInt']>
   /** Sort the connection ascending or descending */
   sort?: SortOrder
-}
-
-/** Input for discoverChatChannel query */
-export type DiscoverChatChannelInput = {
-  associationId?: InputMaybe<Scalars['UUID']>
-  type: ChatChannelType
 }
 
 /** Container of Node and the Cursor from the Node */
@@ -452,10 +598,22 @@ export type Edge = {
   node: Node
 }
 
+/** Edition contract earnings */
+export type EditionContractEarning = {
+  /** Users split of eth on the contract */
+  balanceForUser: Scalars['String']
+  /** Address of the edition contract */
+  contractAddress: Scalars['String']
+  /** Total eth on the contract */
+  totalBalance: Scalars['String']
+}
+
 /** EggGame Entity */
 export type EggGame = {
   /** Block hash of egg game calculation */
   finalSerialBlockHash: Scalars['String']
+  /** Special golden egg image */
+  goldenEggImage?: Maybe<Media>
   /** EggGame identifier */
   id: Scalars['ID']
   /** Nft of egg game winner */
@@ -466,6 +624,7 @@ export type EggGame = {
 
 /** Event type */
 export const EventType = {
+  AIRDROP: 'AIRDROP',
   EDITION_PURCHASED: 'EDITION_PURCHASED',
   ORDERS_MATCHED: 'ORDERS_MATCHED',
   TRANSFER: 'TRANSFER',
@@ -475,14 +634,14 @@ export const EventType = {
 export type EventType = typeof EventType[keyof typeof EventType]
 /** Event entity */
 export type EventV2 = Node & {
-  /** Artist contract address */
-  artistContractAddress?: Maybe<Scalars['String']>
   /** Timestamp on blockchain of event */
   blockTimestamp: Scalars['DateTime']
   /** Contract address */
   contractAddress: Scalars['String']
   /** Date of creation of event entity */
   createdAt: Scalars['DateTime']
+  /** Edition identifier */
+  editionId?: Maybe<Scalars['String']>
   /** Event type */
   eventType: EventType
   /** Source public address */
@@ -503,6 +662,20 @@ export type EventV2 = Node & {
   valueExchanged: Scalars['String']
   /** Formatted version of value exchanged */
   valueExchangedPretty: ValueExchangedPrettyType
+}
+
+/** Feature flag entity to describe flagged functionality */
+export type FeatureFlag = {
+  /** Creation date of feature flag */
+  createdAt: Scalars['DateTime']
+  /** Feature flag UUID */
+  id: Scalars['ID']
+  /** Name of feature flag */
+  name: Scalars['String']
+  /** Last update of feature flag value */
+  updatedAt: Scalars['DateTime']
+  /** Arbitrary string value, it could be need to be parsed stringified json */
+  value: Scalars['String']
 }
 
 /** Genre entity */
@@ -570,9 +743,9 @@ export type LatestSalesCursorConnectionArgs = {
   after?: InputMaybe<Scalars['String']>
   /** Start backwards pagination since "before" cursor */
   before?: InputMaybe<Scalars['String']>
-  /** Limit the amount of nodes to be fetched, to be used with "after", with a maximum of 50 nodes. */
+  /** Limit the amount of nodes to be fetched, to be used with "after", with a maximum of 51 nodes. */
   first?: InputMaybe<Scalars['NonNegativeInt']>
-  /** Limit the amount of nodes to be fetched, to be used with "before", with a maximum of 50 nodes. */
+  /** Limit the amount of nodes to be fetched, to be used with "before", with a maximum of 51 nodes. */
   last?: InputMaybe<Scalars['NonNegativeInt']>
   /** Customize sorting latest sales */
   sort?: LatestSalesCursorConnectionSort
@@ -590,6 +763,12 @@ export type LatestSalesCursorConnectionSort = {
 export type LatestSalesCursorFilterArgs = {
   /** Specify event types to be filtered */
   eventTypes?: InputMaybe<Array<EventType>>
+}
+
+/** Input used for link query */
+export type LinkInput = {
+  /** Link slug */
+  slug: Scalars['NonEmptyString']
 }
 
 /** Media entity */
@@ -639,9 +818,9 @@ export type MintedReleasesCursorConnectionArgs = {
   after?: InputMaybe<Scalars['String']>
   /** Start backwards pagination since "before" cursor */
   before?: InputMaybe<Scalars['String']>
-  /** Limit the amount of nodes to be fetched, to be used with "after", with a maximum of 50 nodes. */
+  /** Limit the amount of nodes to be fetched, to be used with "after", with a maximum of 51 nodes. */
   first?: InputMaybe<Scalars['NonNegativeInt']>
-  /** Limit the amount of nodes to be fetched, to be used with "before", with a maximum of 50 nodes. */
+  /** Limit the amount of nodes to be fetched, to be used with "before", with a maximum of 51 nodes. */
   last?: InputMaybe<Scalars['NonNegativeInt']>
   /** Customize sort behavior of minted releases pagination */
   sort?: MintedReleasesCursorConnectionSort
@@ -657,24 +836,60 @@ export type MintedReleasesCursorConnectionSort = {
 
 /** Filter minted releases */
 export type MintedReleasesCursorFilterArgs = {
+  /** Specify up to 50 contracts to filter the releases */
+  contracts?: InputMaybe<Array<ContractReleaseInput>>
   /** Only get releases from specified genres */
   genre?: InputMaybe<Array<Scalars['String']>>
   /** Remove currently-featured releases from results */
   hideFeatured?: InputMaybe<Scalars['Boolean']>
+  /** Only get releases less or equal to than specified mint time */
+  mintTimeMaxDate?: InputMaybe<Scalars['Timestamp']>
+  /** Only get releases greater than or equal to specified mint time */
+  mintTimeMinDate?: InputMaybe<Scalars['Timestamp']>
   /** Only get release with specified mint time status */
   mintTimeStatus?: InputMaybe<Array<MintTimeStatus>>
+  /** Filters on whether album releases have been revealed or not */
+  releaseAlbumRevealStatus?: InputMaybe<ReleaseAlbumRevealFilterOption>
   /** Only get release with specified status */
   releaseStatus?: InputMaybe<Array<ReleaseStatus>>
+  /** Filters on release type */
+  releaseType?: Array<ReleaseType>
   /** Only get releases from specified seasons */
   season?: InputMaybe<Array<ArtistSeason>>
 }
 
+/** Minting access configuration information. */
+export type MintingAccess = {
+  /** Whether the access list was manually uploaded. */
+  manuallyUploaded: Scalars['Boolean']
+  /** The time when sound holders for artist were captured. */
+  soundCollectorsSnapshotAt: Scalars['Timestamp']
+  /** Whether the sound toggle was used to give sale access. */
+  soundToggleUsed: Scalars['Boolean']
+}
+
+/** Input for mintingAccessConfig query */
+export type MintingAccessConfigInput = {
+  /** Merkle root of the sale. */
+  merkleRoot: Scalars['String']
+  /** Minting type identifier. */
+  mintingType: MintingAccessConfigMintingType
+  /** Release identifier. */
+  releaseId: Scalars['UUID']
+}
+
+/** Different minting types for mintingAccessConfig query */
+export const MintingAccessConfigMintingType = {
+  FREE: 'FREE',
+  PRESALE: 'PRESALE',
+} as const
+
+export type MintingAccessConfigMintingType =
+  typeof MintingAccessConfigMintingType[keyof typeof MintingAccessConfigMintingType]
 /** Mutations */
 export type Mutation = {
   /** [PUBLIC] Generate auth challenge for given public address and give back new nonce */
   generateAuthChallenge: Scalars['Int']
-  /** [PUBLIC] Check if specified queue is open */
-  isQueueOpen?: Maybe<Scalars['Boolean']>
   /** [PUBLIC] Report a track play session stop */
   reportPlayStopped?: Maybe<Scalars['Void']>
   /** [PUBLIC] Verify given auth challenge */
@@ -684,11 +899,6 @@ export type Mutation = {
 /** Mutations */
 export type MutationgenerateAuthChallengeArgs = {
   publicAddress: Scalars['String']
-}
-
-/** Mutations */
-export type MutationisQueueOpenArgs = {
-  presaleId: Scalars['UUID']
 }
 
 /** Mutations */
@@ -720,8 +930,8 @@ export type Nft = Node & {
   id: Scalars['ID']
   /** Is the NFT a golden egg */
   isGoldenEgg: Scalars['Boolean']
-  /** Was the NFT bought on a presale */
-  isPresaleNft: Scalars['Boolean']
+  /** OpenSea metadata attributes. */
+  openSeaMetadataAttributes: Array<OpenSeaMetadataAttribute>
   /** Owner of NFT */
   owner: User
   /** Release associated with NFT */
@@ -736,6 +946,11 @@ export type Nft = Node & {
   updatedAt: Scalars['DateTime']
   /** Block number of the last transfer state */
   updatedAtBlockNum: Scalars['Int']
+  /**
+   * Blockchain date of the last transfer state
+   * @deprecated Please use Nft.updatedAt
+   */
+  updatedAtBlockTime: Scalars['DateTime']
 }
 
 /** Paginated NFTs connection */
@@ -760,9 +975,9 @@ export type NftCursorConnectionArgs = {
   after?: InputMaybe<Scalars['String']>
   /** Start backwards pagination since "before" cursor */
   before?: InputMaybe<Scalars['String']>
-  /** Limit the amount of nodes to be fetched, to be used with "after", with a maximum of 50 nodes. */
+  /** Limit the amount of nodes to be fetched, to be used with "after", with a maximum of 51 nodes. */
   first?: InputMaybe<Scalars['NonNegativeInt']>
-  /** Limit the amount of nodes to be fetched, to be used with "before", with a maximum of 50 nodes. */
+  /** Limit the amount of nodes to be fetched, to be used with "before", with a maximum of 51 nodes. */
   last?: InputMaybe<Scalars['NonNegativeInt']>
   /** Customize sort behavior */
   sort?: NftCursorConnectionSort
@@ -778,6 +993,14 @@ export type NftCursorConnectionSort = {
   serialNumber?: InputMaybe<SortOrder>
 }
 
+/** Input for "nft" Query */
+export type NftInput = {
+  /** Contract address of edition */
+  contractAddress: Scalars['Address']
+  /** Token unique identifier within edition */
+  tokenId: Scalars['String']
+}
+
 /** Simplified version of Nft entity filtered to be with non-nullable comment */
 export type NftWithComment = {
   /** Amount paid in Wei for NFT */
@@ -790,15 +1013,20 @@ export type NftWithComment = {
   contractAddress: Scalars['String']
   /** Unique identifier of Nft */
   id: Scalars['ID']
-  /** Was the NFT bought on a presale */
-  isPresaleNft: Scalars['Boolean']
   /** If the Nft owner is an artist, returns the name of the artist */
   ownerArtistName?: Maybe<Scalars['String']>
+  /** Display name of owner */
+  ownerDisplayName?: Maybe<Scalars['String']>
   /** Public wallet address of owner */
   ownerPublicAddress: Scalars['String']
   /** Twitter handle of owner */
   ownerTwitterHandle?: Maybe<Scalars['String']>
-  /** Timestamp of purchased date */
+  /** Nft owner username */
+  ownerUsername: Scalars['String']
+  /**
+   * Timestamp of purchased date
+   * @deprecated Please use NftWithComment.updatedAt
+   */
   purchasedAt: Scalars['Timestamp']
   /** Acumulative serial number */
   serialNumber: Scalars['Int']
@@ -806,6 +1034,8 @@ export type NftWithComment = {
   songSlot: Scalars['Int']
   /** Unique chain token identifier */
   tokenId: Scalars['String']
+  /** Last update date of NFT */
+  updatedAt: Scalars['Timestamp']
 }
 
 /** Base node */
@@ -814,20 +1044,12 @@ export type Node = {
   id: Scalars['ID']
 }
 
-/** Require only holders of specific contracts */
-export type OnlyTokenHolders = {
-  /** Token Contract Address */
-  tokenContractAddress: Scalars['String']
-  /** Token Symbol from Contract */
-  tokenSymbol?: Maybe<Scalars['String']>
-  /** Token Threshold to qualify on whitelist */
-  tokenThresholdToQualify: Scalars['String']
-}
-
-/** Require Top Collectors flag */
-export type OnlyTopCollectors = {
-  /** How many of the top collectors are allowed */
-  topNum: Scalars['Int']
+/** OpenSea Metadata Attribute */
+export type OpenSeaMetadataAttribute = {
+  /** Trait type */
+  traitType?: Maybe<Scalars['String']>
+  /** Value */
+  value: Scalars['String']
 }
 
 /** Pagination helper information */
@@ -848,6 +1070,28 @@ export type Playlist = {
   id: Scalars['ID']
   /** Track list */
   tracks: Array<PlaylistTrack>
+}
+
+/** Playlist action entity */
+export type PlaylistAction = {
+  /** Playlist action id */
+  id: Scalars['ID']
+}
+
+/** Paginated playlist action connection */
+export type PlaylistActionConnection = Connection & {
+  /** Edges of current page */
+  edges: Array<PlaylistActionConnectionEdge>
+  /** Pagination helpers information */
+  pageInfo: PageInfo
+}
+
+/** Edge of playlist action connection */
+export type PlaylistActionConnectionEdge = Edge & {
+  /** Cursor to be used for pagination */
+  cursor: Scalars['String']
+  /** Playlist action node */
+  node: PlaylistAction
 }
 
 /** Playlist of tracks of an artist */
@@ -904,56 +1148,21 @@ export const PlaylistType = {
 } as const
 
 export type PlaylistType = typeof PlaylistType[keyof typeof PlaylistType]
-/** Main configuration entity of release sale */
-export type PresaleConfiguration = {
-  /** Currently activate sale schedule, loosely-based on requested time */
-  currentSaleSchedule?: Maybe<SaleSchedule>
-  /** Most recent past sale schedule, loosely-based on requested time */
-  getMostRecentSaleSchedule?: Maybe<SaleSchedule>
-  /** Entity UUID */
-  id: Scalars['ID']
-  /** Release UUID of Presale Configuration */
-  releaseId: Scalars['ID']
-  /** List of sale schedule information of Release */
-  saleSchedules: Array<SaleSchedule>
-  /** Signing key UUID */
-  signingKeyId: Scalars['String']
-}
-
-/** Presale Media information */
-export type PresaleMediaInfo = {
-  /** Collection Name */
-  collectionName?: Maybe<Scalars['String']>
-  /** Size of collection */
-  collectionSize?: Maybe<Scalars['Int']>
-  /** Contract Address */
-  contractAddress?: Maybe<Scalars['String']>
-  /** Custom description */
-  description?: Maybe<Scalars['String']>
-  /** Icon Overlay URIs */
-  iconOverlayURI?: Maybe<Scalars['String']>
-  /** Image URIs */
-  imageURIs?: Maybe<Array<Scalars['String']>>
-  /** Social Links of Sale */
-  socialLinks?: Maybe<SocialLinks>
-  /** Amount of unique holders */
-  uniqueHolders?: Maybe<Scalars['Int']>
-}
-
 /** Queries */
 export type Query = {
-  /**
-   * [PUBLIC] Get all minted releases. Warning, this query is going to be removed soon, use paginated queries instead
-   * @deprecated Use paginated queries instead
-   */
-  allMintedReleases: Array<Release>
+  /** [PUBLIC] Activity Feed with filter parameters */
+  activityFeed?: Maybe<ActivityFeed>
+  /** Paginate through all collectors of the system */
+  allCollectors: UserConnection
   /** [PUBLIC] Get all minted releases */
   allMintedReleasesPaginated: ReleaseConnection
+  /** Paginate through all shelves of the system */
+  allShelves: ShelfConnection
   /** [PUBLIC] Artist by UUID */
   artist?: Maybe<Artist>
   /** [PUBLIC] Artist by handle */
   artistByHandle?: Maybe<Artist>
-  /** Get the nft collectors of the specified artist */
+  /** [PUBLIC] Get the nft collectors of the specified artist */
   artistCollectors: ArtistCollectors
   /** [PUBLIC] Get all artists of platform. */
   artists: ArtistConnection
@@ -961,52 +1170,50 @@ export type Query = {
   audioFromTrack: TrackAudio
   /** [PUBLIC] Get authenticated user information, if any */
   authUser?: Maybe<User>
-  /** [PUBLIC] Get chat messages of specified chat channel */
-  chatMessages: ChatMessagesConnection
   /** [PUBLIC] Get credit split by id */
   creditSplit?: Maybe<CreditSplit>
   /** [PUBLIC] Get currencies conversions */
   currencies: Currencies
-  /** [PUBLIC] Check if specified chat channel type+id is available for specified authenticated user */
-  discoverChatChannel?: Maybe<ChatChannel>
   /** [PUBLIC] Get EggGame of specified release */
   eggGame?: Maybe<EggGame>
-  /** [PUBLIC] Get eligible users for presale on specified presale configuration */
-  eligibleUsersForPresale: Array<User>
+  /** [PUBLIC] Get feature flag value by name */
+  featureFlag?: Maybe<FeatureFlag>
   /** [PUBLIC] Get currently-featured releases */
   featuredReleases: Array<Release>
-  /** [PUBLIC] Check if Queue Captcha is disabled for specified release */
-  isMainQueueCaptchaDisabled?: Maybe<Scalars['Boolean']>
+  /**
+   * [PUBLIC] Global Activity Feed
+   * @deprecated Please use activityFeed query with activityFeedType.GLOBAL filter
+   */
+  globalActivityFeed?: Maybe<ActivityFeed>
   /** [PUBLIC] Get the latest events */
   latestEventsPaginated: LatestSalesConnection
+  /** [PUBLIC] Get a node based on specific slug */
+  link?: Maybe<Node>
   /** [PUBLIC] Get merkle tree information */
   merkleTree: MerkleTree
   /** [PUBLIC] Get merkle tree information */
   merkleTreeProof?: Maybe<MerkleTreeProof>
   /** [PUBLIC] Get minted release by Artist sound handle and release title slug */
   mintedRelease?: Maybe<Release>
-  /**
-   * [PUBLIC] Get all minted releases of an artist
-   * @deprecated Use Artist.mintedReleasesPaginated instead
-   */
-  mintedReleases: ReleaseConnection
+  /** [PUBLIC] Get minting access configuration for a merkle root. */
+  mintingAccessConfig?: Maybe<MintingAccess>
+  /** [PUBLIC] Request nft with contract fields */
+  nft: Nft
   /** [PUBLIC] Current UNIX date to test caching */
   now: Scalars['Int']
   /** [PUBLIC] Test query to get the date of calculation of resolver based using response cache */
   nowCached: Scalars['Timestamp']
-  /** [PUBLIC] Past minted releases */
-  pastMintedReleases: ReleaseConnection
   /** [PUBLIC] Get playlist based on given type and associationId */
   playlist?: Maybe<Playlist>
-  /** [PUBLIC] Presale Configuration of specified Release */
-  presaleConfiguration?: Maybe<PresaleConfiguration>
+  /** [PUBLIC] Activity Feed with filter parameters */
+  playlistActivityFeed?: Maybe<PlaylistActionConnection>
   /** [PUBLIC] Get release by id */
   release?: Maybe<Release>
-  /** [PUBLIC] Can the specified release be minted more than once */
-  releaseCanBeMintedMoreThanOnce: Scalars['Boolean']
+  /** [PUBLIC] Get all users that collected the same release in one activity feed group. */
+  releaseCollectedByManyUsers: UserConnection
   /** [PUBLIC] Get release by contract address */
   releaseContract: Release
-  /** [PUBLIC] List of genres that have at least 1 past minted release */
+  /** [PUBLIC] List of genres that have at least 1 past minted release, sorted by popularity */
   releaseGenres: Array<Genre>
   /** Search releases or artists based on text inputs */
   search: SearchResult
@@ -1016,14 +1223,14 @@ export type Query = {
   topNftsOwnedCollectors?: Maybe<Array<ArtistCollector>>
   /** [PUBLIC] Get total raised of the whole platform */
   totalRaised: TotalRaised
+  /** [PUBLIC] Total count of minted releases */
+  totalReleasesCount: Scalars['Int']
   /** [PUBLIC] Get track by id */
   track?: Maybe<Track>
   /** [PUBLIC] Get trending artists information */
   trendingArtistInfo: Array<TrendingArtistInfo>
   /** [PUBLIC] Get trending collectors information */
   trendingCollectors: Array<TrendingCollectorInfo>
-  /** [PUBLIC] Upcoming minted releases */
-  upcomingMintedReleases: ReleaseConnection
   /** [PUBLIC] Get specified user by id */
   user?: Maybe<User>
   /** [PUBLIC] Get specified user by public address */
@@ -1033,9 +1240,24 @@ export type Query = {
 }
 
 /** Queries */
+export type QueryactivityFeedArgs = {
+  filter?: ActivityFeedFilterArgs
+}
+
+/** Queries */
+export type QueryallCollectorsArgs = {
+  input?: AllCollectorsInput
+}
+
+/** Queries */
 export type QueryallMintedReleasesPaginatedArgs = {
   filter?: InputMaybe<MintedReleasesCursorFilterArgs>
   pagination?: MintedReleasesCursorConnectionArgs
+}
+
+/** Queries */
+export type QueryallShelvesArgs = {
+  input?: AllShelvesInput
 }
 
 /** Queries */
@@ -1065,19 +1287,8 @@ export type QueryaudioFromTrackArgs = {
 }
 
 /** Queries */
-export type QuerychatMessagesArgs = {
-  channelId: Scalars['UUID']
-  pagination?: CursorConnectionArgs
-}
-
-/** Queries */
 export type QuerycreditSplitArgs = {
   id: Scalars['UUID']
-}
-
-/** Queries */
-export type QuerydiscoverChatChannelArgs = {
-  input: DiscoverChatChannelInput
 }
 
 /** Queries */
@@ -1086,19 +1297,19 @@ export type QueryeggGameArgs = {
 }
 
 /** Queries */
-export type QueryeligibleUsersForPresaleArgs = {
-  presaleConfigurationId: Scalars['UUID']
-}
-
-/** Queries */
-export type QueryisMainQueueCaptchaDisabledArgs = {
-  releaseId: Scalars['String']
+export type QueryfeatureFlagArgs = {
+  name: Scalars['String']
 }
 
 /** Queries */
 export type QuerylatestEventsPaginatedArgs = {
   filter?: InputMaybe<LatestSalesCursorFilterArgs>
   pagination?: LatestSalesCursorConnectionArgs
+}
+
+/** Queries */
+export type QuerylinkArgs = {
+  input: LinkInput
 }
 
 /** Queries */
@@ -1119,10 +1330,13 @@ export type QuerymintedReleaseArgs = {
 }
 
 /** Queries */
-export type QuerymintedReleasesArgs = {
-  filter: ArtistMintedReleasesCursorFilterArgs
-  id: Scalars['UUID']
-  pagination?: CursorConnectionArgs
+export type QuerymintingAccessConfigArgs = {
+  input: MintingAccessConfigInput
+}
+
+/** Queries */
+export type QuerynftArgs = {
+  input: NftInput
 }
 
 /** Queries */
@@ -1131,19 +1345,14 @@ export type QuerynowCachedArgs = {
 }
 
 /** Queries */
-export type QuerypastMintedReleasesArgs = {
-  filter?: InputMaybe<MintedReleasesCursorFilterArgs>
-  pagination?: CursorConnectionArgs
-}
-
-/** Queries */
 export type QueryplaylistArgs = {
   input: PlaylistInput
 }
 
 /** Queries */
-export type QuerypresaleConfigurationArgs = {
-  releaseId: Scalars['UUID']
+export type QueryplaylistActivityFeedArgs = {
+  pagination?: CursorConnectionArgs
+  playlistId: Scalars['UUID']
 }
 
 /** Queries */
@@ -1152,8 +1361,9 @@ export type QueryreleaseArgs = {
 }
 
 /** Queries */
-export type QueryreleaseCanBeMintedMoreThanOnceArgs = {
-  releaseId: Scalars['String']
+export type QueryreleaseCollectedByManyUsersArgs = {
+  activityFeedGroupId: Scalars['UUID']
+  pagination?: CursorConnectionArgs
 }
 
 /** Queries */
@@ -1178,6 +1388,11 @@ export type QuerytopNftsOwnedCollectorsArgs = {
 }
 
 /** Queries */
+export type QuerytotalReleasesCountArgs = {
+  filter?: InputMaybe<MintedReleasesCursorFilterArgs>
+}
+
+/** Queries */
 export type QuerytrackArgs = {
   id: Scalars['UUID']
 }
@@ -1192,12 +1407,6 @@ export type QuerytrendingArtistInfoArgs = {
 export type QuerytrendingCollectorsArgs = {
   sort: TrendingCollectorsSortEnum
   timePeriod: TimePeriodAggEnum
-}
-
-/** Queries */
-export type QueryupcomingMintedReleasesArgs = {
-  filter?: InputMaybe<MintedReleasesCursorFilterArgs>
-  pagination?: CursorConnectionArgs
 }
 
 /** Queries */
@@ -1217,13 +1426,12 @@ export type QueryuserByArtistHandleArgs = {
 
 /** Release entity */
 export type Release = Node & {
+  /** Number of nfts airdropped */
+  airdropCount: Scalars['Int']
   /** Artist of release */
   artist: Artist
-  /**
-   * Artist contract address
-   * @deprecated Use contractAddress instead
-   */
-  artistContractAddress: Scalars['String']
+  /** CDN url CSV of users that own a release nft or null if no release backers */
+  backerCSVUrl?: Maybe<Scalars['String']>
   /** Available balance to withdraw for an edition */
   balanceToWithdraw?: Maybe<Scalars['String']>
   /** Behind the music text */
@@ -1244,8 +1452,6 @@ export type Release = Node & {
   credits: Array<User>
   /** The current maximum quantity for a sale. */
   currentMaxQuantity: Scalars['Int']
-  /** Description of release */
-  description?: Maybe<Scalars['String']>
   /** Edition ID */
   editionId?: Maybe<Scalars['String']>
   /** EggGame of Release */
@@ -1258,9 +1464,14 @@ export type Release = Node & {
   finalSaleScheduleEndTime?: Maybe<Scalars['DateTime']>
   /** Last sale schedule end time as number of milliseconds since the ECMAScript epoch. */
   finalSaleScheduleEndTimestamp?: Maybe<Scalars['Timestamp']>
+  /** Address set as funds recipient on the contract */
+  fundingAddress: Scalars['String']
   /** Genre of Release */
   genre: Genre
-  /** Special golden egg image */
+  /**
+   * Special golden egg image
+   * @deprecated Please use eggGame.goldenEggImage
+   */
   goldenEggImage: Media
   /** Is the release a range bound edition */
   hasRangeBoundSale: Scalars['Boolean']
@@ -1268,32 +1479,30 @@ export type Release = Node & {
   id: Scalars['ID']
   /** Is release sold out relative to the final quantity */
   isFinalSoldOut: Scalars['Boolean']
+  /** Whether release is minted */
+  isMinted: Scalars['Boolean']
   /** Associated laylo.com url */
   layloUrl?: Maybe<Scalars['String']>
+  /** Associated market place url */
+  marketPlaceUrl?: Maybe<Scalars['String']>
   /** Public sale start time in UNIX timestamp */
   mintStartTime: Scalars['Int']
+  /** Public sale start timestamp */
+  mintStartTimestamp: Scalars['Timestamp']
   /** NFTs of Release */
   nftsPaginated: NftConnection
+  /** Unique number of users that own a release nft */
+  numBackers: Scalars['Int']
   /** Amount of sold NFTs */
   numSold: Scalars['Int']
-  /** On blockchain start time */
-  onChainStartDateTime: Scalars['DateTime']
-  /** On blockchain start time in UNIX timestamp */
-  onChainStartTime: Scalars['Int']
   /** Associated opensea url */
   openseaUrl?: Maybe<Scalars['String']>
-  /** Presale listening party start time */
-  presaleListeningPartyStart?: Maybe<Scalars['DateTime']>
-  /** Presale minting party start time */
-  presaleMintStart?: Maybe<Scalars['DateTime']>
   /** Max Quantity for a releases presale. */
   presaleUpperBound?: Maybe<Scalars['Int']>
   /** Price in Wei */
   price: Scalars['String']
-  /** Public listening party timestamp */
-  publicListeningParty?: Maybe<Scalars['Timestamp']>
-  /** Public listening party start time */
-  publicListeningPartyStart: Scalars['DateTime']
+  /** Public listening party start time as number of milliseconds since the ECMAScript epoch. */
+  publicListeningParty: Scalars['Timestamp']
   /** Public minting start time */
   publicMintStart: Scalars['DateTime']
   /** Quantity of available NFTs */
@@ -1304,8 +1513,16 @@ export type Release = Node & {
   quantityUpperBound: Scalars['Int']
   /** Rewards of Release */
   rewards: Array<Reward>
+  /** Creator royalty basis points */
+  royaltyBps: Scalars['Int']
+  /** Minting periods */
+  saleSchedules: Array<SaleSchedule>
+  /** Edition schedule identifiers, used to optimize chain calls */
+  scheduleIds?: Maybe<Array<ScheduleIdentifier>>
   /** Season associated to release */
   season?: Maybe<Scalars['String']>
+  /** Shelves where the release has been added to */
+  shelves: ShelfConnection
   /** Release title */
   title: Scalars['String']
   /** Slugified title */
@@ -1320,11 +1537,6 @@ export type Release = Node & {
   totalRaisedSecondaryUsd: Scalars['Float']
   /** Track of release */
   track: Track
-  /**
-   * Tracks of release
-   * @deprecated Prefer using Release.track instead
-   */
-  tracks: Array<Track>
   /** Type of Release */
   type: ReleaseType
   /** Total number of upload steps */
@@ -1338,6 +1550,21 @@ export type ReleasenftsPaginatedArgs = {
   pagination?: NftCursorConnectionArgs
 }
 
+/** Release entity */
+export type ReleaseshelvesArgs = {
+  filter?: InputMaybe<ReleaseShelvesFilter>
+  pagination?: ReleaseShelvesCursorConnectionArgs
+}
+
+/** Release album reveal filter option */
+export const ReleaseAlbumRevealFilterOption = {
+  ALL: 'ALL',
+  ONLY_NOT_REVEALED_ALBUMS: 'ONLY_NOT_REVEALED_ALBUMS',
+  ONLY_REVEALED_ALBUMS: 'ONLY_REVEALED_ALBUMS',
+} as const
+
+export type ReleaseAlbumRevealFilterOption =
+  typeof ReleaseAlbumRevealFilterOption[keyof typeof ReleaseAlbumRevealFilterOption]
 /** Paginated releases connection */
 export type ReleaseConnection = Connection & {
   /** Edges of current page */
@@ -1354,6 +1581,71 @@ export type ReleaseConnectionEdge = Edge & {
   node: Release
 }
 
+/** Union of release contract types */
+export type ReleaseContractEarning = ArtistContractEarning | EditionContractEarning
+
+/** Release dropped aggregate */
+export type ReleaseDroppedAggregate = {
+  /** Release dropped action in activity feed group */
+  release: Release
+}
+
+/** Release earnings of a user */
+export type ReleaseEarnings = Node & {
+  /** Earnings on a contract. */
+  earning: ReleaseContractEarning
+  /** Id of the associated release */
+  id: Scalars['ID']
+  /** Ownership percentage of the user in the release */
+  ownershipPercent: Scalars['Float']
+  /** release primary revenue */
+  primaryRevenue: Scalars['String']
+  /** Release entity */
+  release: Release
+  /** Release secondary royalties */
+  secondaryRoyalties: Scalars['String']
+  /** Split contract earnings associated to release. */
+  splitContract?: Maybe<SplitsContractEarning>
+  /** Split main balance attributable to release */
+  splitMainBalanceFromRelease: Scalars['String']
+  /** Total withdrawable amount for user */
+  totalWithdrawableForUser: Scalars['String']
+}
+
+/** Edge of Release Earnings Connection */
+export type ReleaseEarningsConnectionEdge = Edge & {
+  /** Cursor to be used for pagination */
+  cursor: Scalars['String']
+  /** Release Earnings node */
+  node: ReleaseEarnings
+}
+
+/** Pagination parameters of release shelves */
+export type ReleaseShelvesCursorConnectionArgs = {
+  /** Start forwards pagination since "after" cursor */
+  after?: InputMaybe<Scalars['String']>
+  /** Start backwards pagination since "before" cursor */
+  before?: InputMaybe<Scalars['String']>
+  /** Limit the amount of nodes to be fetched, to be used with "after", with a maximum of 51 nodes. */
+  first?: InputMaybe<Scalars['NonNegativeInt']>
+  /** Limit the amount of nodes to be fetched, to be used with "before", with a maximum of 51 nodes. */
+  last?: InputMaybe<Scalars['NonNegativeInt']>
+  /** Customize sort behavior */
+  sort?: ReleaseShelvesCursorConnectionSort
+}
+
+/** Customize sort of release shelves */
+export type ReleaseShelvesCursorConnectionSort = {
+  /** Sort by date of release being added in the shelf */
+  addedAtDate?: InputMaybe<SortOrder>
+}
+
+/** Filter release shelves */
+export type ReleaseShelvesFilter = {
+  /** Filter shelves to be included by identifier. You can only specify up to 51 shelves. */
+  shelfIds?: InputMaybe<Array<Scalars['UUID']>>
+}
+
 /** Release current status type */
 export const ReleaseStatus = {
   AVAILABLE_TO_MINT: 'AVAILABLE_TO_MINT',
@@ -1364,13 +1656,43 @@ export type ReleaseStatus = typeof ReleaseStatus[keyof typeof ReleaseStatus]
 /** Release type, currently the platform only supports "SINGLE" */
 export const ReleaseType = {
   ALBUM: 'ALBUM',
-  COMPILATION: 'COMPILATION',
-  EP: 'EP',
-  PLAYLIST: 'PLAYLIST',
+  ALBUM_TRACK: 'ALBUM_TRACK',
   SINGLE: 'SINGLE',
 } as const
 
 export type ReleaseType = typeof ReleaseType[keyof typeof ReleaseType]
+/** Releases added to playlist action entity */
+export type ReleasesAddedToPlaylist = Node &
+  PlaylistAction & {
+    /** Date of action */
+    date: Scalars['DateTime']
+    /** Action id */
+    id: Scalars['ID']
+    /** Returns whether playlist was created with this action */
+    isPlaylistCreated: Scalars['Boolean']
+    /** New releases added to playlist in action */
+    releasesAdded: Array<Release>
+  }
+
+/** Releases added to shelf aggregate */
+export type ReleasesAddedToShelfAggregate = {
+  /** New releases added to shelf in an activity feed group */
+  releasesAdded: Array<ShelfRelease>
+  /** Shelf that releases are added to in activity feed group */
+  shelf?: Maybe<Shelf>
+}
+
+/** Release removed from playlist entity */
+export type ReleasesRemovedFromPlaylist = Node &
+  PlaylistAction & {
+    /** Date of action */
+    date: Scalars['DateTime']
+    /** Action id */
+    id: Scalars['ID']
+    /** Release removed from playlist */
+    releaseRemoved: Release
+  }
+
 /** Input for reportPlayStopped mutation */
 export type ReportPlayStoppedInput = {
   /** End of play session */
@@ -1385,21 +1707,6 @@ export type ReportPlayStoppedInput = {
   trackId: Scalars['UUID']
   /** Random UUID generated by client-side */
   uuid: Scalars['String']
-}
-
-/** Require Any Sound Holder flag */
-export type RequireAnySoundHolder = {
-  enabled: Scalars['Boolean']
-}
-
-/** Require Artist Sound Holder flag */
-export type RequireArtistSoundHolder = {
-  enabled: Scalars['Boolean']
-}
-
-/** Require Twitter Verification flag */
-export type RequireTwitterVerification = {
-  enabled: Scalars['Boolean']
 }
 
 /** Reward entity */
@@ -1418,31 +1725,43 @@ export type Reward = {
 
 /** Single sale schedule information of Release Presale Configuration */
 export type SaleSchedule = {
-  /** Amount of people to be allowed to be whitelist at the same time, it's usually better to set it as the same as presaleAmount */
-  cohortSize: Scalars['Int']
+  /** Total minted for specific sale schedule associated with artist contracts. To not be used for new editions */
+  artistContractTotalMinted?: Maybe<Scalars['Int']>
   /** End Time of Sale Schedule */
   endTime: Scalars['DateTime']
   /** UUID of Sale Schedule entity */
   id: Scalars['ID']
   /** Is the current sale schedule presale */
   isPresale: Scalars['Boolean']
+  /** Amount to be allowed to be sold for sale schedule */
+  maxMintable: Scalars['Int']
   /** Merkle tree root hash derived from sale schedule allowlist */
   merkleTreeRoot?: Maybe<Scalars['String']>
-  /** Special information related to onlyTokenHolders whitelist rule if present */
-  onlyTokenHoldersInfo: Array<PresaleMediaInfo>
-  /** Presale amount to be sold */
-  presaleAmount: Scalars['Int']
   /** Price for the specific sale schedule */
   price: Scalars['String']
   /** Start Time of Sale Schedule */
   startTime: Scalars['DateTime']
-  /** Whitelist Rules of sale schedule */
-  whitelistRulesParsed: Array<WhitelistRules>
+}
+
+/** Edition schedule identifiers, used to optimize chain calls */
+export type ScheduleIdentifier = {
+  /** Identifier of schedules by minter address */
+  mintIds: Array<Scalars['Int']>
+  /** Minter address of schedule */
+  minterAddress: Scalars['String']
+}
+
+/** Pagination arguments for search */
+export type SearchConnectionArgs = {
+  /** Start forwards pagination since "after" cursor */
+  after?: InputMaybe<Scalars['String']>
+  /** Limit the amount of nodes to be fetched, to be used with "after", with a maximum of 20 nodes. */
+  first?: Scalars['PositiveInt']
 }
 
 /** Input for "search" query */
 export type SearchInput = {
-  /** How many entities to be fetched, maximum of 20 */
+  /** How many entities to be fetched for fixed lists, maximum of 20 */
   limit?: Scalars['PositiveInt']
   /** Text search */
   text: Scalars['String']
@@ -1452,34 +1771,84 @@ export type SearchInput = {
 export type SearchResult = {
   /** Artists that match the search input, including artists where any of their releases matches the given input */
   artists: Array<Artist>
+  /** Paginated artists that match the search input, including artists where any of their releases matches the given input */
+  artistsPaginated: ArtistConnection
+  /** Paginated collectors that match the search input within the ens, twitter handle, displayName and publicAddress */
+  collectors: UserConnection
   /** Unique identifier of search result */
   id: Scalars['ID']
   /** Releases that match the search input, including releases where the artist name matches the given input */
   releases: Array<Release>
+  /** Paginated releases that match the search input, including releases where the artist name matches the given input */
+  releasesPaginated: ReleaseConnection
+  /** Paginated shelves that match the search input within the shelf name, releases titles and artists names */
+  shelves: ShelfConnection
+}
+
+/** Search result */
+export type SearchResultartistsArgs = {
+  limit?: InputMaybe<Scalars['PositiveInt']>
+}
+
+/** Search result */
+export type SearchResultartistsPaginatedArgs = {
+  pagination?: SearchConnectionArgs
+}
+
+/** Search result */
+export type SearchResultcollectorsArgs = {
+  pagination?: SearchConnectionArgs
+}
+
+/** Search result */
+export type SearchResultreleasesArgs = {
+  limit?: InputMaybe<Scalars['PositiveInt']>
+}
+
+/** Search result */
+export type SearchResultreleasesPaginatedArgs = {
+  pagination?: SearchConnectionArgs
+}
+
+/** Search result */
+export type SearchResultshelvesArgs = {
+  pagination?: SearchConnectionArgs
 }
 
 /** Shelf entity */
 export type Shelf = Node & {
-  /** Paginated collected releases of shelf */
-  collectedReleases: CollectedReleaseConnection
+  /** Top 4 releases to be used as cover for shelf */
+  coverReleases: Array<Release>
   /** Shelf creation date */
   createdAt: Scalars['DateTime']
   /** Shelf deletion date */
   deletedAt?: Maybe<Scalars['DateTime']>
   /** Description of shelf */
   description?: Maybe<Scalars['String']>
+  /** Return shelves from where it was possibly extended. If the source shelf is not currently available, it's returned as null */
+  extendedFrom?: Maybe<Array<Maybe<Shelf>>>
   /** Shelf identifier */
   id: Scalars['ID']
   /** Relative ordering of the shelves for each user */
   index: Scalars['Int']
+  /** Number of likes for the shelf. */
+  likes: Scalars['Int']
+  /** Link slug used to reference and request specific shelf */
+  linkSlug: Scalars['String']
   /** Shelf name */
   name: Scalars['String']
   /** Total play time of all releases in a shelf in seconds */
   playTimeInSeconds: Scalars['Int']
+  /** Top 10 releases to be used as preview for shelf */
+  previewReleases: Array<ShelfRelease>
   /** Number of releases in a shelf */
   releaseCount: Scalars['Int']
-  /** List of trackIds in a shelf */
-  trackIds: Array<Scalars['UUID']>
+  /** List of release identifiers in the shelf, ordered ascendingly by index within shelf */
+  releaseIds: Array<Scalars['String']>
+  /** Paginated releases of shelf */
+  releases: ShelfReleaseConnection
+  /** List of track identifiers in the shelf, ordered ascendingly by index within shelf */
+  trackIds: Array<Scalars['String']>
   /** Type of shelf */
   type: ShelfType
   /** Owner of shelf */
@@ -1487,8 +1856,8 @@ export type Shelf = Node & {
 }
 
 /** Shelf entity */
-export type ShelfcollectedReleasesArgs = {
-  pagination?: ShelfStackCursorConnectionArgs
+export type ShelfreleasesArgs = {
+  pagination?: ShelfReleaseCursorConnectionArgs
 }
 
 /** Paginated shelves connection */
@@ -1507,82 +1876,109 @@ export type ShelfConnectionEdge = Edge & {
   node: Shelf
 }
 
+/** Shelf created aggregate */
+export type ShelfCreatedAggregate = {
+  /** Shelf creation action in activity feed group */
+  shelf?: Maybe<Shelf>
+}
+
 /** Cursor connection parameters for shelves */
 export type ShelfCursorConnectionArgs = {
   /** Start forwards pagination since "after" cursor */
   after?: InputMaybe<Scalars['String']>
   /** Start backwards pagination since "before" cursor */
   before?: InputMaybe<Scalars['String']>
-  /** Limit the amount of nodes to be fetched, to be used with "after", with a maximum of 50 nodes. */
+  /** Limit the amount of nodes to be fetched, to be used with "after", with a maximum of 51 nodes. */
   first?: InputMaybe<Scalars['NonNegativeInt']>
-  /** Limit the amount of nodes to be fetched, to be used with "before", with a maximum of 50 nodes. */
+  /** Limit the amount of nodes to be fetched, to be used with "before", with a maximum of 51 nodes. */
   last?: InputMaybe<Scalars['NonNegativeInt']>
   /** Customize sort behavior */
   sort?: ShelfCursorConnectionSort
 }
 
-/** Customize the sort behavior of Nfts pagination */
+/** Customize the sort behavior of shelves pagination */
 export type ShelfCursorConnectionSort = {
   /** Sort by shelf index value */
   index?: InputMaybe<SortOrder>
 }
 
-/** Shelf stack entity */
-export type ShelfStack = Node & {
-  /** Release creation date */
-  createdAt: Scalars['DateTime']
-  /** Release identifier */
+/** Shelf release entity */
+export type ShelfRelease = Node & {
+  /** Date of release being added in shelf */
+  addedAt: Scalars['Timestamp']
+  /** Shelf Release identifier */
   id: Scalars['ID']
-  /** Release creation date */
+  /** Index of release within shelf */
   index: Scalars['Int']
-  /** NFTs of Shelf stack */
-  nfts: Array<Nft>
-  /** Release of the shelf stack */
+  /** First backed nft of possibly collected release */
+  ownedFirstNft?: Maybe<Nft>
+  /** Returns golden egg if user owns, otherwise null */
+  ownedGoldenEgg?: Maybe<EggGame>
+  /** List of possibly owned nft serial numbers in ascending serial number order. If user does not own the release, it returns null */
+  ownedSerialNumbers?: Maybe<Array<Scalars['Int']>>
+  /** Release of the shelf */
   release: Release
 }
 
-/** Shelf stack node edge */
-export type ShelfStackConnectionEdge = Edge & {
-  /** Cursor to be used for pagination */
-  cursor: Scalars['String']
-  /** Shelf stack entity */
-  node: ShelfStack
+/** Paginated shelf release connection */
+export type ShelfReleaseConnection = Connection & {
+  /** Edges of current page */
+  edges: Array<ShelfReleaseConnectionEdge>
+  /** Pagination helpers information */
+  pageInfo: PageInfo
 }
 
-/** Cursor connection parameters for shelf stacks */
-export type ShelfStackCursorConnectionArgs = {
+/** Shelf release node edge */
+export type ShelfReleaseConnectionEdge = Edge & {
+  /** Cursor to be used for pagination */
+  cursor: Scalars['String']
+  /** Shelf release entity */
+  node: ShelfRelease
+}
+
+/** Cursor connection parameters for shelf releases */
+export type ShelfReleaseCursorConnectionArgs = {
   /** Start forwards pagination since "after" cursor */
   after?: InputMaybe<Scalars['String']>
   /** Start backwards pagination since "before" cursor */
   before?: InputMaybe<Scalars['String']>
-  /** Limit the amount of nodes to be fetched, to be used with "after", with a maximum of 50 nodes. */
+  /** Limit the amount of nodes to be fetched, to be used with "after", with a maximum of 51 nodes. */
   first?: InputMaybe<Scalars['NonNegativeInt']>
-  /** Limit the amount of nodes to be fetched, to be used with "before", with a maximum of 50 nodes. */
+  /** Limit the amount of nodes to be fetched, to be used with "before", with a maximum of 51 nodes. */
   last?: InputMaybe<Scalars['NonNegativeInt']>
   /** Customize sort behavior */
-  sort?: ShelfStackCursorConnectionSort
+  sort?: ShelfReleaseCursorConnectionSort
 }
 
-/** Customize the sort behavior of Nfts pagination */
-export type ShelfStackCursorConnectionSort = {
-  /** Sort by shelf index value */
+/** Customize the sort behavior of releases within shelf pagination */
+export type ShelfReleaseCursorConnectionSort = {
+  /** Sort by date when the release was added into shelf */
+  addedAtDate?: InputMaybe<SortOrder>
+  /** Sort by release index value */
   index?: InputMaybe<SortOrder>
 }
 
 /** Shelf type */
 export const ShelfType = {
   DEFAULT: 'DEFAULT',
+  USER_LIKED_SOUNDS: 'USER_LIKED_SOUNDS',
 } as const
 
 export type ShelfType = typeof ShelfType[keyof typeof ShelfType]
-/** Social Links */
-export type SocialLinks = {
-  /** Instagram Platform */
-  instagramLink?: Maybe<Scalars['String']>
-  /** OpenSea Platform */
-  openseaLink?: Maybe<Scalars['String']>
-  /** Twitter Platform */
-  twitterLink?: Maybe<Scalars['String']>
+/** Filter based the type of shelf */
+export const ShelfTypeFilter = {
+  USER_CREATED: 'USER_CREATED',
+} as const
+
+export type ShelfTypeFilter = typeof ShelfTypeFilter[keyof typeof ShelfTypeFilter]
+/** Song collected by many aggregate */
+export type SongCollectedByManyAggregate = {
+  /** Release corresponding to most recent purchase action in activity feed group */
+  collectedRelease: ActivityFeedGroupCollectedRelease
+  /** Featured collectors that purchased same release in an activity feed group */
+  featuredCollectors: Array<ActivityFeedGroupFeaturedCollector>
+  /** Number of collectors that purchased same release in an activity feed group */
+  numCollectors: Scalars['Int']
 }
 
 /** Ascending or Descending sort */
@@ -1592,10 +1988,24 @@ export const SortOrder = {
 } as const
 
 export type SortOrder = typeof SortOrder[keyof typeof SortOrder]
+/** Splits contract earnings */
+export type SplitsContractEarning = {
+  /** Users split of eth on the contract */
+  balanceForUser: Scalars['String']
+  /** Address of the split wallet */
+  contractAddress: Scalars['String']
+  /** List of addresses that are on the split. Sorted for passing into distributeEth transaction */
+  participantAddresses: Array<Scalars['String']>
+  /** List of allocations for each participant. Matches ordering of participantAddresses */
+  participantAllocations: Array<Scalars['Int']>
+  /** Total eth on the contract */
+  totalBalance: Scalars['String']
+}
+
 /** Realtime Subscriptions */
 export type Subscription = {
-  /** [PUBLIC] Subscribe to updates of specified chat channel messages */
-  chatChannelMessages: ChatMessage
+  /** [PUBLIC] Subscribe to updates of activity feed groups of a particular activity feed */
+  activityFeedGroup: SubscriptionActivityFeedGroup
   count: Scalars['Int']
   /** [PUBLIC] Subscribe to release updates */
   release: Release
@@ -1608,8 +2018,8 @@ export type Subscription = {
 }
 
 /** Realtime Subscriptions */
-export type SubscriptionchatChannelMessagesArgs = {
-  chatChannelId: Scalars['UUID']
+export type SubscriptionactivityFeedGroupArgs = {
+  activityFeedId: Scalars['UUID']
 }
 
 /** Realtime Subscriptions */
@@ -1630,6 +2040,25 @@ export type SubscriptionreleaseNftsArgs = {
 /** Realtime Subscriptions */
 export type SubscriptionreleaseNftsCommentsArgs = {
   releaseId: Scalars['UUID']
+}
+
+/** Union of subscription activity feed group types */
+export type SubscriptionActivityFeedGroup = SubscriptionNewActivityFeedGroup | SubscriptionUpdatedActivityFeedGroup
+
+/** Entity of new activity feed group created */
+export type SubscriptionNewActivityFeedGroup = {
+  /** New activity feed group id created */
+  activityFeedGroupId: Scalars['String']
+  /** Typename of activity feed group information */
+  activityFeedGroupInformationTypename: Scalars['String']
+}
+
+/** Entity of updated activity feed group */
+export type SubscriptionUpdatedActivityFeedGroup = {
+  /** Updated activity feed group id */
+  activityFeedGroupId: Scalars['String']
+  /** Typename of activity feed group information */
+  activityFeedGroupInformationTypename: Scalars['String']
 }
 
 /** Time period to aggregate trending table queries */
@@ -1659,6 +2088,10 @@ export type Track = {
   release: Release
   /** Release Identifier */
   releaseId: Scalars['ID']
+  /** Track audio post-reveal of release */
+  revealedAudio?: Maybe<Media>
+  /** Track original audio (non-transcoded) post-reveal of release */
+  revealedAudioOriginal?: Maybe<Media>
   /** Track title */
   title: Scalars['String']
   /** Track number relative to other tracks (unused) */
@@ -1681,22 +2114,6 @@ export type TrackAudio = {
   releaseId: Scalars['ID']
   /** Reveal time in UNIX timestamp of track based on authenticated user (if authenticated) */
   revealTime: Scalars['Int']
-}
-
-/** Transaction entity */
-export type Transaction = {
-  /** Chain identifier used for transaction */
-  chainId: Scalars['Int']
-  /** Contract method of transaction */
-  contractMethod: ContractMethod
-  /** Transaction hash on chain */
-  hash: Scalars['String']
-  /** Transaction identifier */
-  id: Scalars['ID']
-  /** Release identifier */
-  releaseId?: Maybe<Scalars['String']>
-  /** Transaction status, "pending", "failed" or "confirmed") */
-  status: Scalars['String']
 }
 
 /** Trending Artist Info */
@@ -1777,12 +2194,18 @@ export type User = Node & {
   bannerImage?: Maybe<Media>
   /** Paginated collected releases of user */
   collectedReleases: CollectedReleaseConnection
+  /** Total amount of collected release of user */
+  collectedReleasesCount: Scalars['Int']
+  /** List of all the identifiers of releases currently collected by the user. If no releases have been collected yet, it returns null instead of an empty list */
+  collectedReleasesIds?: Maybe<Array<Scalars['String']>>
   /** Rank of user for number of bought nfts */
   collectorPosition?: Maybe<Scalars['Int']>
   /** User entity creation */
   createdAt: Scalars['DateTime']
   /** Credit allocations associated with user */
   creditAllocations: Array<CreditAllocation>
+  /** Delegate wallet public address */
+  delegateWalletAddress?: Maybe<Scalars['String']>
   /** User custom description */
   description?: Maybe<Scalars['String']>
   /** Custom display name */
@@ -1821,20 +2244,23 @@ export type User = Node & {
   roles: UserRoles
   /** Paginated shelves of user */
   shelves: ShelfConnection
+  /** Shelves count of the user */
+  shelvesCount: Scalars['Int']
   /** Should the user show the splits feature */
   showSplitsFeature: Scalars['Boolean']
   /** The user's aggregated balance on the 0xSplits SplitMain contract */
   splitBalance: Scalars['String']
-  /** List of pending transactions associated with user */
-  transactions: Array<Transaction>
   /** Verifier twitter handle */
   twitterHandle?: Maybe<Scalars['String']>
+  /** Returns user username */
+  username: Scalars['String']
   /** The total amount of Sound revenue the user has fully withdrawn */
   withdrawnAmount: Scalars['String']
 }
 
 /** User entity */
 export type UsercollectedReleasesArgs = {
+  filter?: InputMaybe<UserCollectedReleasesFilter>
   pagination?: CursorConnectionArgs
 }
 
@@ -1856,7 +2282,31 @@ export type UsernftsPaginatedArgs = {
 
 /** User entity */
 export type UsershelvesArgs = {
+  filter?: InputMaybe<UserShelvesFilter>
   pagination?: ShelfCursorConnectionArgs
+}
+
+/** User entity */
+export type UsershelvesCountArgs = {
+  filter?: InputMaybe<UserShelvesFilter>
+}
+
+/** User collected many songs aggregate */
+export type UserCollectedManySongsAggregate = {
+  /** Releases corresponding to user collected many songs activity feed group */
+  collectedReleases: Array<ActivityFeedGroupCollectedRelease>
+  /** Number of releases that a user purchased in an activity feed group */
+  numReleases: Scalars['Int']
+  /** User that collected many songs in activity feed group */
+  user: User
+}
+
+/** Filter of User.collectedReleases paginated field */
+export type UserCollectedReleasesFilter = {
+  /** Filters on whether album releases have been revealed or not */
+  releaseAlbumRevealStatus?: ReleaseAlbumRevealFilterOption
+  /** Text search on release title or artist's name or handle */
+  text?: InputMaybe<Scalars['NonEmptyString']>
 }
 
 /** Paginated connection of Users */
@@ -1875,15 +2325,15 @@ export type UserConnectionEdge = Edge & {
   node: User
 }
 
-/** Cursor connection paramaters */
+/** Cursor connection parameters */
 export type UserCursorConnectionArgs = {
   /** Start forwards pagination since "after" cursor */
   after?: InputMaybe<Scalars['String']>
   /** Start backwards pagination since "before" cursor */
   before?: InputMaybe<Scalars['String']>
-  /** Limit the amount of nodes to be fetched, to be used with "after", with a maximum of 50 nodes. */
+  /** Limit the amount of nodes to be fetched, to be used with "after", with a maximum of 51 nodes. */
   first?: InputMaybe<Scalars['NonNegativeInt']>
-  /** Limit the amount of nodes to be fetched, to be used with "before", with a maximum of 50 nodes. */
+  /** Limit the amount of nodes to be fetched, to be used with "before", with a maximum of 51 nodes. */
   last?: InputMaybe<Scalars['NonNegativeInt']>
   /** Sort the users ascending or descending relative to the user creation date */
   sort?: SortOrder
@@ -1891,8 +2341,6 @@ export type UserCursorConnectionArgs = {
 
 /** Filter the NFTs of User */
 export type UserNftsConnectionFilters = {
-  /** Only include Nfts that are already in a user shelf */
-  isInShelf?: InputMaybe<Scalars['Boolean']>
   /** Only include Nfts from specified releases */
   releases?: InputMaybe<Array<Scalars['UUID']>>
 }
@@ -1935,19 +2383,17 @@ export type UserRoles = {
   isArtistRelations: Scalars['Boolean']
 }
 
-/** Exchanged ammounts pretty equivalents */
+/** Filter the shelves of a user */
+export type UserShelvesFilter = {
+  /** Case-insensitive text search on shelves names */
+  text?: InputMaybe<Scalars['NonEmptyString']>
+}
+
+/** Exchanged amount pretty equivalent */
 export type ValueExchangedPrettyType = {
   /** Formatted Ethereum value */
   eth: Scalars['String']
 }
-
-/** Union of different types of whitelist rules */
-export type WhitelistRules =
-  | OnlyTokenHolders
-  | OnlyTopCollectors
-  | RequireAnySoundHolder
-  | RequireArtistSoundHolder
-  | RequireTwitterVerification
 
 export type MerkleProofQueryVariables = Exact<{
   root: Scalars['String']
@@ -1970,6 +2416,8 @@ export type ReleaseInfoQuery = {
     externalUrl?: string | null
     openseaUrl?: string | null
     layloUrl?: string | null
+    marketPlaceUrl?: string | null
+    mintStartTime: number
     title: string
     behindTheMusic: string
     season?: string | null
@@ -1977,11 +2425,15 @@ export type ReleaseInfoQuery = {
     totalRaisedPrimaryUsd: number
     totalRaisedSecondaryUsd: number
     genre: { id: string; name: string }
-    track: { id: string; duration: number; normalizedPeaks: Array<number> }
+    track: {
+      id: string
+      duration: number
+      normalizedPeaks: Array<number>
+      revealedAudio?: { id: string; url: string } | null
+    }
     artist: {
       id: string
       gemCollectionUrl?: string | null
-      openseaCollectionUrl?: string | null
       season?: string | null
       soundHandle?: string | null
       spotifyUrl?: string | null
@@ -1999,7 +2451,7 @@ export type ReleaseInfoQuery = {
     }
     rewards: Array<{ id: string; description: string; numOfBackers: number; price: string; title: string }>
     coverImage: { id: string; url: string }
-    goldenEggImage: { id: string; url: string }
+    eggGame?: { id: string; winningSerialNum: number; goldenEggImage?: { id: string; url: string } | null } | null
   }
 }
 
@@ -2016,6 +2468,6 @@ export type TestQueryVariables = Exact<{ [key: string]: never }>
 export type TestQuery = { __typename: 'Query' }
 
 export const MerkleProof = `query MerkleProof($root:String!$unhashedLeaf:String!){merkleTreeProof(root:$root unhashedLeaf:$unhashedLeaf){proof}}`
-export const ReleaseInfo = `query ReleaseInfo($contractAddress:Address!$editionId:String){release:releaseContract(contractAddress:$contractAddress editionId:$editionId){id contractAddress editionId type externalUrl openseaUrl layloUrl title behindTheMusic season totalRaised totalRaisedPrimaryUsd totalRaisedSecondaryUsd genre{id name}track{id duration normalizedPeaks}artist{id gemCollectionUrl openseaCollectionUrl season soundHandle spotifyUrl bannerImage{id url}user{id publicAddress description displayName email twitterHandle avatar{id url}bannerImage{id url}}}rewards{id description numOfBackers price title}coverImage{id url}goldenEggImage{id url}}}`
+export const ReleaseInfo = `query ReleaseInfo($contractAddress:Address!$editionId:String){release:releaseContract(contractAddress:$contractAddress editionId:$editionId){id contractAddress editionId type externalUrl openseaUrl layloUrl marketPlaceUrl mintStartTime title behindTheMusic season totalRaised totalRaisedPrimaryUsd totalRaisedSecondaryUsd genre{id name}track{id duration normalizedPeaks revealedAudio{id url}}artist{id gemCollectionUrl season soundHandle spotifyUrl bannerImage{id url}user{id publicAddress description displayName email twitterHandle avatar{id url}bannerImage{id url}}}rewards{id description numOfBackers price title}coverImage{id url}eggGame{id winningSerialNum goldenEggImage{id url}}}}`
 export const AudioFromTrack = `query AudioFromTrack($trackId:UUID!){audioFromTrack(trackId:$trackId){id duration audio{id url}revealTime}}`
 export const Test = `query Test{__typename}`

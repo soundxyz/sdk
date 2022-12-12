@@ -30,7 +30,8 @@
     "prepack": "node build.mjs",
     "postpublish": "gh-release",
     "pull-env": "dotenv-vault pull",
-    "test": "hardhat test"
+    "test": "hardhat test",
+    "validate": "graphql-inspector validate \"./graphql/*.gql\" \"./schema.graphql\" --deprecated"
   },
   "dependencies": {
     "@ethersproject/abstract-provider": "^5.7.0",
@@ -53,6 +54,9 @@
     "@graphql-codegen/typescript": "^2.7.3",
     "@graphql-codegen/typescript-document-nodes": "^2.3.3",
     "@graphql-codegen/typescript-operations": "^2.5.3",
+    "@graphql-inspector/cli": "^3.4.0",
+    "@graphql-inspector/config": "^3.4.0",
+    "@graphql-tools/utils": "^9.1.3",
     "@nomicfoundation/hardhat-chai-matchers": "^1.0.3",
     "@nomicfoundation/hardhat-network-helpers": "^1.0.4",
     "@nomiclabs/hardhat-ethers": "^2.1.1",
