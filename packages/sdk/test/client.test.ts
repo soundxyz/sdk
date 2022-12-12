@@ -1667,7 +1667,7 @@ describe('editionScheduleIds', () => {
   })
 })
 
-describe.only('editionMintSchedules', () => {
+describe('editionMintSchedules', () => {
   it('returns mint schedules for given ids', async () => {
     await setupTest({})
     const MINT_SCHEDULE_COUNT = 10
