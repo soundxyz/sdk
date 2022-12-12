@@ -584,7 +584,9 @@ export function SoundClient({
   }) {
     const minterAddresses = await editionRegisteredMinters({
       editionAddress,
-      fromBlockOrBlockHash: 0, // This should be zero because we want to get info from all the registered minters
+      // This should be zero because if we set it to a block number, we may miss mintIds
+      // created after that block by minters deployed before that block.
+      fromBlockOrBlockHash: 0,
     })
 
     const unfilteredList = await Promise.all(
