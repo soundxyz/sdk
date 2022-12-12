@@ -274,8 +274,8 @@ export class InvalidMaxMintableError extends Error {
   }
 }
 
-export class MaxMintablePerAccountError extends Error {
-  readonly name = 'MaxMintablePerAccountError'
+export class InvalidMaxMintablePerAccountError extends Error {
+  readonly name = 'InvalidMaxMintablePerAccountError'
 
   readonly maxMintablePerAccount: number
 
