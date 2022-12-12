@@ -1,5 +1,21 @@
 # @soundxyz/sdk
 
+## 0.10.0
+
+### Minor Changes
+
+- [#139](https://github.com/soundxyz/sdk/pull/139) [`04146d9`](https://github.com/soundxyz/sdk/commit/04146d9d94871ca99219d0764ad867f9bed4648d) Thanks [@PabloSzx](https://github.com/PabloSzx)! - Use new "Release.eggGame" field, with backwards compatible "Release.goldenEggImage" field
+
+- [#139](https://github.com/soundxyz/sdk/pull/139) [`04146d9`](https://github.com/soundxyz/sdk/commit/04146d9d94871ca99219d0764ad867f9bed4648d) Thanks [@PabloSzx](https://github.com/PabloSzx)! - Update Release API info query, using track.revealedAudio, with backwards-compatible "trackAudio" object
+
+- [#139](https://github.com/soundxyz/sdk/pull/139) [`04146d9`](https://github.com/soundxyz/sdk/commit/04146d9d94871ca99219d0764ad867f9bed4648d) Thanks [@PabloSzx](https://github.com/PabloSzx)! - Remove Release.artist.openseaCollectionUrl field from query
+
+### Patch Changes
+
+- [#132](https://github.com/soundxyz/sdk/pull/132) [`ae826b8`](https://github.com/soundxyz/sdk/commit/ae826b83641149cc51e6824edc00b3d4460c9d33) Thanks [@gigamesh](https://github.com/gigamesh)! - Adds test for editionRegisteredMinters
+
+- [`19a45f2`](https://github.com/soundxyz/sdk/commit/19a45f2ecaaef58a3e2546c7d2ad421d76825cee) Thanks [@gigamesh](https://github.com/gigamesh)! - Removes .only
+
 ## 0.9.0
 
 ### Minor Changes
