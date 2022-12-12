@@ -16,13 +16,12 @@ import {
   NotEligibleMint,
   NotSoundEditionError,
   SoundNotFoundError,
-  UnexpectedApiResponse,
   UnsupportedMinterError,
   InvalidFundingRecipientError,
   InvalidMaxMintableError,
   InvalidTimeValuesError,
   InvalidEditionMaxMintableError,
-  MaxMintablePerAccountError,
+  InvalidMaxMintablePerAccountError,
   InvalidMerkleRootError,
 } from './errors'
 import { NULL_ADDRESS, MINTER_ROLE, minterFactoryMap, editionInitFlags, NULL_BYTES32 } from './utils/constants'
@@ -471,20 +470,13 @@ export function SoundClient({
 
       return {
         ...release,
-        trackAudio: LazyPromise(() =>
-          soundAPI.audioFromTrack({ trackId: release.track.id }).then((response) => {
-            const data: Expand<typeof response.data> = response.data
-
-            if (!data) {
-              throw new UnexpectedApiResponse({
-                message: response.errors ? 'GraphQL Errors found' : 'Track could not be found',
-                graphqlErrors: response.errors,
-              })
-            }
-
-            return data.audioFromTrack
-          }),
-        ),
+        goldenEggImage: release.eggGame?.goldenEggImage,
+        trackAudio: {
+          id: release.track.id,
+          duration: release.track.duration,
+          revealTime: Math.max(0, Math.floor(release.mintStartTime - release.track.duration)),
+          audio: release.track.revealedAudio,
+        },
       }
     })
 
@@ -764,8 +756,8 @@ export function SoundClient({
   function _validateMintConfigs(mintConfigs: MintConfig[]) {
     for (const mintConfig of mintConfigs) {
       const { maxMintablePerAccount } = mintConfig
-      if (maxMintablePerAccount === 0) {
-        throw new MaxMintablePerAccountError({ maxMintablePerAccount })
+      if (maxMintablePerAccount < 1) {
+        throw new InvalidMaxMintablePerAccountError({ maxMintablePerAccount })
       }
 
       if (mintConfig.mintType === 'RangeEdition') {
@@ -776,11 +768,14 @@ export function SoundClient({
         if (!(startTime < cutoffTime && cutoffTime < endTime)) {
           throw new InvalidTimeValuesError({ startTime, cutoffTime, endTime })
         }
-      }
-
-      if (mintConfig.mintType === 'MerkleDrop') {
+      } else if (mintConfig.mintType === 'MerkleDrop') {
         const { merkleRoot } = mintConfig
-        if (merkleRoot === NULL_BYTES32 || merkleRoot.slice(0, 2) !== '0x' || merkleRoot.length !== 66) {
+        if (
+          merkleRoot === NULL_BYTES32 ||
+          merkleRoot.slice(0, 2) !== '0x' ||
+          // Merkle root is 32 bytes, which is 64 hex characters + '0x'
+          merkleRoot.length !== 66
+        ) {
           throw new InvalidMerkleRootError({ merkleRoot })
         }
       }

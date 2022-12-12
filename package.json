@@ -1,36 +1,32 @@
 {
   "name": "sound-sdk",
   "private": true,
+  "homepage": "https://github.com/soundxyz/sdk#readme",
+  "bugs": {
+    "url": "https://github.com/soundxyz/sdk/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/soundxyz/sdk"
+  },
+  "license": "MIT",
+  "contributors": [
+    "Saihajpreet Singh <saihaj@sound.xyz> (https://saihaj.dev/)"
+  ],
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
+    "build": "pnpm -r --filter=sdk-subgraph build",
+    "changeset": "changeset",
+    "codegen": "pnpm -r --filter=sdk-subgraph codegen",
     "format": "prettier . --write",
     "postinstall": "husky install",
     "pretty-quick": "pretty-quick --staged",
     "release": "pnpm -r --access=public publish --no-git-checks",
     "release:canary": "(node scripts/canary-release.js && pnpm -r publish --access public --no-git-checks --tag alpha) || echo Skipping Canary...",
-    "test": "pnpm -r --filter=sdk test",
-    "build": "pnpm -r --filter=sdk-subgraph build",
-    "codegen": "pnpm -r --filter=sdk-subgraph codegen",
-    "changeset": "changeset"
+    "test": "pnpm -r --filter=sdk test"
   },
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/soundxyz/sdk"
-  },
-  "bugs": {
-    "url": "https://github.com/soundxyz/sdk/issues"
-  },
-  "homepage": "https://github.com/soundxyz/sdk#readme",
-  "contributors": [
-    "Saihajpreet Singh <saihaj@sound.xyz> (https://saihaj.dev/)"
-  ],
-  "engines": {
-    "pnpm": ">=7.9.1"
-  },
-  "workspaces": [
-    "packages/*"
-  ],
-  "packageManager": "pnpm@7.0.0",
   "devDependencies": {
     "@changesets/apply-release-plan": "^6.1.0",
     "@changesets/assemble-release-plan": "^5.2.1",
@@ -53,9 +49,18 @@
     "semver": "^7.3.7",
     "typescript": "4.8.3"
   },
+  "packageManager": "pnpm@7.0.0",
+  "engines": {
+    "pnpm": ">=7.9.1"
+  },
   "pnpm": {
     "patchedDependencies": {
       "@graphql-codegen/visitor-plugin-common@2.12.1": "patches/@graphql-codegen__visitor-plugin-common@2.12.1.patch"
+    },
+    "peerDependencyRules": {
+      "allowedVersions": {
+        "@graphql-tools/utils": "*"
+      }
     }
   }
 }

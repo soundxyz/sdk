@@ -21,17 +21,16 @@ import {
   InvalidFundingRecipientError,
   InvalidQuantityError,
   InvalidTimeValuesError,
-  MaxMintablePerAccountError,
   MissingMerkleProvider,
   InvalidMerkleRootError,
   MissingSoundAPI,
   NotEligibleMint,
   SoundNotFoundError,
-  UnexpectedApiResponse,
   InvalidMaxMintableError,
+  InvalidMaxMintablePerAccountError,
 } from '../src/errors'
-import { MINTER_ROLE, NULL_ADDRESS, NON_NULL_ADDRESS, UINT32_MAX, NULL_BYTES32 } from '../src/utils/constants'
 import { DEFAULT_SALT, SOUND_FEE, ONE_HOUR, PRICE } from './test-constants'
+import { MINTER_ROLE, NULL_ADDRESS, NON_NULL_ADDRESS, UINT32_MAX, NULL_BYTES32 } from '../src/utils/constants'
 import { getSaltAsBytes32 } from '../src/utils/helpers'
 import { MerkleTestHelper, now, getGenericEditionConfig, getGenericRangeMintConfig } from './helpers'
 
@@ -852,9 +851,14 @@ describe('mint', () => {
 
     it(`Should throw error if invalid quantity requested`, async () => {
       const quantity = 0
-      await client.mint({ mintSchedule: mintSchedules[0], quantity }).catch((error) => {
-        expect(error).instanceOf(InvalidQuantityError)
-      })
+      await client
+        .mint({ mintSchedule: mintSchedules[0], quantity })
+        .then(() => {
+          throw Error(`Didn't throw expected error`)
+        })
+        .catch((error) => {
+          expect(error).instanceOf(InvalidQuantityError)
+        })
     })
 
     it(`Should throw error if more than eligibleQuantity requested`, async () => {
@@ -863,13 +867,18 @@ describe('mint', () => {
         mintSchedule: mintSchedules[0],
         userAddress: buyerWallet.address,
       })
-      await client.mint({ mintSchedule: mintSchedules[0], quantity }).catch((error) => {
-        expect(error).instanceOf(NotEligibleMint)
+      await client
+        .mint({ mintSchedule: mintSchedules[0], quantity })
+        .then(() => {
+          throw Error(`Didn't throw expected error`)
+        })
+        .catch((error) => {
+          expect(error).instanceOf(NotEligibleMint)
 
-        assert(error instanceof NotEligibleMint)
+          assert(error instanceof NotEligibleMint)
 
-        expect(error.eligibleMintQuantity).equal(eligibleQuantity)
-      })
+          expect(error.eligibleMintQuantity).equal(eligibleQuantity)
+        })
     })
   })
 
@@ -937,11 +946,16 @@ describe('mint', () => {
     })
 
     it('Should throw error if merkle proof is null', async () => {
+      client.merkleProvider!.merkleProof = () => null
+
       // Test client throws expected error
       await client
         .mint({
           mintSchedule: mintSchedules[0],
           quantity: 1,
+        })
+        .then(() => {
+          throw Error(`Didn't throw expected error`)
         })
         .catch((error) => {
           expect(error).instanceOf(NotEligibleMint)
@@ -1089,6 +1103,9 @@ describe('createEdition', () => {
         mintConfigs: [getGenericRangeMintConfig({ minterAddress: rangeEditionMinter.address })],
         salt: SALT,
       })
+      .then(() => {
+        throw Error(`Didn't throw expected error`)
+      })
       .catch((error) => {
         expect(error).instanceOf(InvalidFundingRecipientError)
       })
@@ -1104,6 +1121,9 @@ describe('createEdition', () => {
         editionConfig,
         mintConfigs: [getGenericRangeMintConfig({ minterAddress: rangeEditionMinter.address })],
         salt: SALT,
+      })
+      .then(() => {
+        throw Error(`Didn't throw expected error`)
       })
       .catch((error) => {
         expect(error).instanceOf(InvalidEditionMaxMintableError)
@@ -1122,8 +1142,11 @@ describe('createEdition', () => {
         mintConfigs: [mintConfig],
         salt: SALT,
       })
+      .then(() => {
+        throw Error(`Didn't throw expected error`)
+      })
       .catch((error) => {
-        expect(error).instanceOf(MaxMintablePerAccountError)
+        expect(error).instanceOf(InvalidMaxMintablePerAccountError)
       })
   })
 
@@ -1139,6 +1162,9 @@ describe('createEdition', () => {
         editionConfig,
         mintConfigs: [mintConfig],
         salt: SALT,
+      })
+      .then(() => {
+        throw Error(`Didn't throw expected error`)
       })
       .catch((error) => {
         expect(error).instanceOf(InvalidMaxMintableError)
@@ -1157,6 +1183,9 @@ describe('createEdition', () => {
         mintConfigs: [mintConfig],
         salt: SALT,
       })
+      .then(() => {
+        throw Error(`Didn't throw expected error`)
+      })
       .catch((error) => {
         expect(error).instanceOf(InvalidTimeValuesError)
       })
@@ -1173,6 +1202,9 @@ describe('createEdition', () => {
         editionConfig,
         mintConfigs: [mintConfig],
         salt: SALT,
+      })
+      .then(() => {
+        throw Error(`Didn't throw expected error`)
       })
       .catch((error) => {
         expect(error).instanceOf(InvalidTimeValuesError)
@@ -1203,6 +1235,9 @@ describe('createEdition', () => {
         mintConfigs: [mintConfig],
         salt: SALT,
       })
+      .then(() => {
+        throw Error(`Didn't throw expected error`)
+      })
       .catch((error) => {
         expect(error).instanceOf(InvalidMerkleRootError)
       })
@@ -1214,6 +1249,9 @@ describe('createEdition', () => {
         editionConfig,
         mintConfigs: [mintConfig],
         salt: SALT,
+      })
+      .then(() => {
+        throw Error(`Didn't throw expected error`)
       })
       .catch((error) => {
         expect(error).instanceOf(InvalidMerkleRootError)
@@ -1227,6 +1265,9 @@ describe('createEdition', () => {
         mintConfigs: [mintConfig],
         salt: SALT,
       })
+      .then(() => {
+        throw Error(`Didn't throw expected error`)
+      })
       .catch((error) => {
         expect(error).instanceOf(InvalidMerkleRootError)
       })
@@ -1235,9 +1276,14 @@ describe('createEdition', () => {
 
 describe('expectedEditionAddress', () => {
   it('throws if provided deployerAddress is invalid', async () => {
-    await client.expectedEditionAddress({ deployer: '0x0', salt: '123' }).catch((error) => {
-      expect(error).instanceOf(InvalidAddressError)
-    })
+    await client
+      .expectedEditionAddress({ deployer: '0x0', salt: '123' })
+      .then(() => {
+        throw Error(`Didn't throw expected error`)
+      })
+      .catch((error) => {
+        expect(error).instanceOf(InvalidAddressError)
+      })
   })
 
   it('throws if provider not connected', async () => {
@@ -1248,6 +1294,9 @@ describe('expectedEditionAddress', () => {
 
     await client
       .expectedEditionAddress({ deployer: '0xbf9a1fad0cbd61cc8158ccb6e1e8e111707088bb', salt: '123' })
+      .then(() => {
+        throw Error(`Didn't throw expected error`)
+      })
       .catch((error) => {
         expect(error.message).includes('could not detect network')
       })
@@ -1396,100 +1445,6 @@ describe('editionInfo', () => {
     expect(expectedError.contractAddress).equal(editionAddress)
     expect(expectedError.editionId).equal(null)
     expect(expectedError.graphqlErrors).equal(undefined)
-  })
-
-  it('throws on non-existent audio track', async () => {
-    client.soundAPI = MockAPI({
-      // @ts-expect-error
-      async releaseInfo() {
-        return {
-          data: {
-            release: {
-              track: {
-                id: randomUUID(),
-              },
-            },
-          },
-        }
-      },
-    })
-
-    const expectedError = await client
-      .editionInfo({
-        contractAddress: editionAddress,
-      })
-      .api.then((v) => v.trackAudio)
-      .catch((err) => err)
-
-    expect(expectedError).instanceOf(UnexpectedApiResponse)
-
-    assert(expectedError instanceof UnexpectedApiResponse)
-
-    expect(expectedError.message, 'Track could not be bound')
-  })
-
-  it('evaluates lazily', async () => {
-    let releaseInfoEvaluated = false
-    let audioFromTrackEvaluated = false
-
-    const trackId = randomUUID()
-
-    client.soundAPI = MockAPI({
-      // @ts-expect-error
-      async releaseInfo() {
-        releaseInfoEvaluated = true
-        return {
-          data: {
-            release: {
-              id: salt,
-              contractAddress: editionAddress,
-              track: {
-                id: trackId,
-              },
-            },
-          },
-        }
-      },
-      // @ts-expect-error
-      async audioFromTrack() {
-        audioFromTrackEvaluated = true
-        return {
-          data: {
-            audioFromTrack: {
-              id: trackId,
-            },
-          },
-        }
-      },
-    })
-
-    const editionInfoApiPromise = client.editionInfo({
-      contractAddress: editionAddress,
-    }).api
-
-    expect(releaseInfoEvaluated).eq(false)
-    expect(audioFromTrackEvaluated).eq(false)
-
-    const editionInfoApi = await editionInfoApiPromise
-
-    expect(releaseInfoEvaluated).eq(true)
-    expect(audioFromTrackEvaluated).eq(false)
-
-    expect(editionInfoApi.id).eq(salt)
-    expect(editionInfoApi.contractAddress).eq(editionAddress)
-    expect(editionInfoApi.track.id).eq(trackId)
-
-    const trackAudioPromise = editionInfoApi.trackAudio
-
-    expect(releaseInfoEvaluated).eq(true)
-    expect(audioFromTrackEvaluated).eq(false)
-
-    const trackAudio = await trackAudioPromise
-
-    expect(releaseInfoEvaluated).eq(true)
-    expect(audioFromTrackEvaluated).eq(true)
-
-    expect(trackAudio.id).eq(trackId)
   })
 })
 
