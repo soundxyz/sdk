@@ -28,6 +28,7 @@
   "types": "./dist/index.d.ts",
   "scripts": {
     "prepack": "node build.mjs",
+    "prepare": "graphql-codegen",
     "postpublish": "gh-release",
     "pull-env": "dotenv-vault pull",
     "test": "hardhat test",
