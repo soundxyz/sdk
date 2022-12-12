@@ -22,7 +22,6 @@ import {
   MissingSoundAPI,
   NotEligibleMint,
   SoundNotFoundError,
-  UnexpectedApiResponse,
 } from '../src/errors'
 import { MINTER_ROLE } from '../src/utils/constants'
 import { getSaltAsBytes32 } from '../src/utils/helpers'
@@ -1254,100 +1253,6 @@ describe('editionInfo', () => {
     expect(expectedError.contractAddress).equal(editionAddress)
     expect(expectedError.editionId).equal(null)
     expect(expectedError.graphqlErrors).equal(undefined)
-  })
-
-  it('throws on non-existent audio track', async () => {
-    client.soundAPI = MockAPI({
-      // @ts-expect-error
-      async releaseInfo() {
-        return {
-          data: {
-            release: {
-              track: {
-                id: randomUUID(),
-              },
-            },
-          },
-        }
-      },
-    })
-
-    const expectedError = await client
-      .editionInfo({
-        contractAddress: editionAddress,
-      })
-      .api.then((v) => v.trackAudio)
-      .catch((err) => err)
-
-    expect(expectedError).instanceOf(UnexpectedApiResponse)
-
-    assert(expectedError instanceof UnexpectedApiResponse)
-
-    expect(expectedError.message, 'Track could not be bound')
-  })
-
-  it('evaluates lazily', async () => {
-    let releaseInfoEvaluated = false
-    let audioFromTrackEvaluated = false
-
-    const trackId = randomUUID()
-
-    client.soundAPI = MockAPI({
-      // @ts-expect-error
-      async releaseInfo() {
-        releaseInfoEvaluated = true
-        return {
-          data: {
-            release: {
-              id: salt,
-              contractAddress: editionAddress,
-              track: {
-                id: trackId,
-              },
-            },
-          },
-        }
-      },
-      // @ts-expect-error
-      async audioFromTrack() {
-        audioFromTrackEvaluated = true
-        return {
-          data: {
-            audioFromTrack: {
-              id: trackId,
-            },
-          },
-        }
-      },
-    })
-
-    const editionInfoApiPromise = client.editionInfo({
-      contractAddress: editionAddress,
-    }).api
-
-    expect(releaseInfoEvaluated).eq(false)
-    expect(audioFromTrackEvaluated).eq(false)
-
-    const editionInfoApi = await editionInfoApiPromise
-
-    expect(releaseInfoEvaluated).eq(true)
-    expect(audioFromTrackEvaluated).eq(false)
-
-    expect(editionInfoApi.id).eq(salt)
-    expect(editionInfoApi.contractAddress).eq(editionAddress)
-    expect(editionInfoApi.track.id).eq(trackId)
-
-    const trackAudioPromise = editionInfoApi.trackAudio
-
-    expect(releaseInfoEvaluated).eq(true)
-    expect(audioFromTrackEvaluated).eq(false)
-
-    const trackAudio = await trackAudioPromise
-
-    expect(releaseInfoEvaluated).eq(true)
-    expect(audioFromTrackEvaluated).eq(true)
-
-    expect(trackAudio.id).eq(trackId)
   })
 })
 
