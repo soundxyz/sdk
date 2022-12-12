@@ -21,17 +21,18 @@ import {
   InvalidFundingRecipientError,
   InvalidQuantityError,
   InvalidTimeValuesError,
-  InvalidMaxMintablePerAccountError,
   MissingMerkleProvider,
   InvalidMerkleRootError,
   MissingSoundAPI,
   NotEligibleMint,
   SoundNotFoundError,
   InvalidMaxMintableError,
+  InvalidMaxMintablePerAccountError,
 } from '../src/errors'
+import { DEFAULT_SALT, SOUND_FEE, ONE_HOUR, PRICE } from './test-constants'
 import { MINTER_ROLE, NULL_ADDRESS, NON_NULL_ADDRESS, UINT32_MAX, NULL_BYTES32 } from '../src/utils/constants'
 import { getSaltAsBytes32 } from '../src/utils/helpers'
-import { MerkleTestHelper, now } from './helpers'
+import { MerkleTestHelper, now, getGenericEditionConfig, getGenericRangeMintConfig } from './helpers'
 
 import type { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import type MerkleTree from 'merkletreejs'
@@ -39,11 +40,6 @@ import type MerkleTree from 'merkletreejs'
 import type { ContractCall, MintConfig, MintSchedule } from '../src/types'
 import { MockAPI } from './helpers/api'
 import { randomUUID } from 'crypto'
-
-const DEFAULT_SALT = getSaltAsBytes32(12345678)
-const SOUND_FEE = 0
-const ONE_HOUR = 3600
-const PRICE = 420420420
 
 const SoundCreatorV1 = new SoundCreatorV1__factory()
 const SoundFeeRegistry = new SoundFeeRegistry__factory()
@@ -983,38 +979,6 @@ describe('mint', () => {
 
 describe('createEdition', () => {
   const SALT = 'hello'
-  const getGenericEditionConfig = () => ({
-    name: 'Test',
-    symbol: 'TEST',
-    metadataModule: NULL_ADDRESS,
-    baseURI: 'https://test.com',
-    contractURI: 'https://test.com',
-    fundingRecipient: NON_NULL_ADDRESS,
-    royaltyBPS: 0,
-    editionMaxMintableLower: 10,
-    editionMaxMintableUpper: 10,
-    editionCutoffTime: 999999,
-    shouldEnableMintRandomness: true,
-    shouldFreezeMetadata: false,
-    enableOperatorFiltering: true,
-  })
-
-  const startTime = now()
-  const cutoffTime = startTime + ONE_HOUR / 2
-  const endTime = cutoffTime + ONE_HOUR
-
-  const getGenericRangeMintConfig = () => ({
-    mintType: 'RangeEdition' as const,
-    minterAddress: rangeEditionMinter.address,
-    price: PRICE,
-    startTime,
-    cutoffTime,
-    endTime,
-    maxMintableLower: 3,
-    maxMintableUpper: 4,
-    maxMintablePerAccount: 1,
-    affiliateFeeBPS: 0,
-  })
 
   beforeEach(() => {
     client = SoundClient({ signer: artistWallet, soundCreatorAddress: soundCreator.address })
@@ -1136,7 +1100,7 @@ describe('createEdition', () => {
     await client
       .createEdition({
         editionConfig,
-        mintConfigs: [getGenericRangeMintConfig()],
+        mintConfigs: [getGenericRangeMintConfig({ minterAddress: rangeEditionMinter.address })],
         salt: SALT,
       })
       .then(() => {
@@ -1155,7 +1119,7 @@ describe('createEdition', () => {
     await client
       .createEdition({
         editionConfig,
-        mintConfigs: [getGenericRangeMintConfig()],
+        mintConfigs: [getGenericRangeMintConfig({ minterAddress: rangeEditionMinter.address })],
         salt: SALT,
       })
       .then(() => {
@@ -1169,7 +1133,7 @@ describe('createEdition', () => {
   it('throws if maxMintablePerAccount is zero', async () => {
     const editionConfig = getGenericEditionConfig()
 
-    const mintConfig = getGenericRangeMintConfig()
+    const mintConfig = getGenericRangeMintConfig({ minterAddress: rangeEditionMinter.address })
     mintConfig.maxMintablePerAccount = 0
 
     await client
@@ -1189,7 +1153,7 @@ describe('createEdition', () => {
   it('throws if range mint maxMintableLower exceeds maxMintableUpper', async () => {
     const editionConfig = getGenericEditionConfig()
 
-    const mintConfig = getGenericRangeMintConfig()
+    const mintConfig = getGenericRangeMintConfig({ minterAddress: rangeEditionMinter.address })
     mintConfig.maxMintableLower = 2
     mintConfig.maxMintableUpper = 1
 
@@ -1210,7 +1174,7 @@ describe('createEdition', () => {
   it('throws if range mint startTime == cutoffTime', async () => {
     const editionConfig = getGenericEditionConfig()
 
-    const mintConfig = getGenericRangeMintConfig()
+    const mintConfig = getGenericRangeMintConfig({ minterAddress: rangeEditionMinter.address })
     mintConfig.startTime = mintConfig.cutoffTime
 
     await client
@@ -1230,7 +1194,7 @@ describe('createEdition', () => {
   it('throws if range mint cutoffTime === endTime', async () => {
     const editionConfig = getGenericEditionConfig()
 
-    const mintConfig = getGenericRangeMintConfig()
+    const mintConfig = getGenericRangeMintConfig({ minterAddress: rangeEditionMinter.address })
     mintConfig.cutoffTime = mintConfig.endTime
 
     await client
@@ -1507,5 +1471,68 @@ describe('editionRegisteredMinters', () => {
     })
 
     expect(registeredMinters).deep.eq([merkleDropMinter.address, rangeEditionMinter.address, newMinter.address])
+  })
+})
+
+describe('editionMinterMintIds', () => {
+  it('returns mint ids', async () => {
+    await setupTest({})
+    const MINT_SCHEDULE_COUNT = 10
+    const FUTURE_TIMESTAMP = now() + 1000
+
+    const mintConfig = getGenericRangeMintConfig({ minterAddress: rangeEditionMinter.address })
+
+    // Make  mint schedules
+    for (let i = 0; i < MINT_SCHEDULE_COUNT; i++) {
+      await rangeEditionMinter
+        .connect(artistWallet)
+        .createEditionMint(
+          precomputedEditionAddress,
+          mintConfig.price,
+          mintConfig.startTime,
+          mintConfig.cutoffTime,
+          mintConfig.endTime,
+          mintConfig.affiliateFeeBPS,
+          mintConfig.maxMintableLower,
+          mintConfig.maxMintableUpper,
+          mintConfig.maxMintablePerAccount,
+        )
+    }
+
+    let mintIds = await client.editionMinterMintIds({
+      editionAddress: precomputedEditionAddress,
+      minterAddress: rangeEditionMinter.address,
+      fromBlockOrBlockHash: 0,
+    })
+
+    expect(mintIds).deep.eq(Array.from({ length: MINT_SCHEDULE_COUNT }, (_, i) => i))
+
+    // Advance time to test fromBlockOrBlockHash
+    await ethers.provider.send('evm_setNextBlockTimestamp', [FUTURE_TIMESTAMP])
+    await ethers.provider.send('evm_mine', [])
+
+    // Create 1 more schedule
+    await rangeEditionMinter
+      .connect(artistWallet)
+      .createEditionMint(
+        precomputedEditionAddress,
+        mintConfig.price,
+        mintConfig.startTime,
+        mintConfig.cutoffTime,
+        mintConfig.endTime,
+        mintConfig.affiliateFeeBPS,
+        mintConfig.maxMintableLower,
+        mintConfig.maxMintableUpper,
+        mintConfig.maxMintablePerAccount,
+      )
+
+    mintIds = await client.editionMinterMintIds({
+      editionAddress: precomputedEditionAddress,
+      minterAddress: rangeEditionMinter.address,
+      fromBlockOrBlockHash: FUTURE_TIMESTAMP,
+    })
+
+    // This should only contain the latest mint schedule (zero-indexed)
+    expect(mintIds).deep.eq([MINT_SCHEDULE_COUNT])
   })
 })
