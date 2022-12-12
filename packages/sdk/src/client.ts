@@ -768,9 +768,7 @@ export function SoundClient({
         if (!(startTime < cutoffTime && cutoffTime < endTime)) {
           throw new InvalidTimeValuesError({ startTime, cutoffTime, endTime })
         }
-      }
-
-      if (mintConfig.mintType === 'MerkleDrop') {
+      } else if (mintConfig.mintType === 'MerkleDrop') {
         const { merkleRoot } = mintConfig
         if (merkleRoot === NULL_BYTES32 || merkleRoot.slice(0, 2) !== '0x' || merkleRoot.length !== 66) {
           throw new InvalidMerkleRootError({ merkleRoot })
