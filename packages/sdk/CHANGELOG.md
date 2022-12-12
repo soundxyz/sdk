@@ -1,5 +1,11 @@
 # @soundxyz/sdk
 
+## 0.11.0
+
+### Minor Changes
+
+- [#133](https://github.com/soundxyz/sdk/pull/133) [`fa8ae9f`](https://github.com/soundxyz/sdk/commit/fa8ae9f3d6adc189493c1c347c0f5c3f1204e44c) Thanks [@gigamesh](https://github.com/gigamesh)! - Adds validation for edition & mint configs
+
 ## 0.10.0
 
 ### Minor Changes
