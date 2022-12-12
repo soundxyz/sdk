@@ -770,7 +770,12 @@ export function SoundClient({
         }
       } else if (mintConfig.mintType === 'MerkleDrop') {
         const { merkleRoot } = mintConfig
-        if (merkleRoot === NULL_BYTES32 || merkleRoot.slice(0, 2) !== '0x' || merkleRoot.length !== 66) {
+        if (
+          merkleRoot === NULL_BYTES32 ||
+          merkleRoot.slice(0, 2) !== '0x' ||
+          // Merkle root is 32 bytes, which is 64 hex characters + '0x'
+          merkleRoot.length !== 66
+        ) {
           throw new InvalidMerkleRootError({ merkleRoot })
         }
       }
