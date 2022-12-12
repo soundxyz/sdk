@@ -17,8 +17,14 @@ import {
   NotSoundEditionError,
   SoundNotFoundError,
   UnsupportedMinterError,
+  InvalidFundingRecipientError,
+  InvalidMaxMintableError,
+  InvalidTimeValuesError,
+  InvalidEditionMaxMintableError,
+  InvalidMaxMintablePerAccountError,
+  InvalidMerkleRootError,
 } from './errors'
-import { ADDRESS_ZERO, MINTER_ROLE, minterFactoryMap, editionInitFlags } from './utils/constants'
+import { NULL_ADDRESS, MINTER_ROLE, minterFactoryMap, editionInitFlags, NULL_BYTES32 } from './utils/constants'
 import { getLazyOption, getSaltAsBytes32, validateAddress } from './utils/helpers'
 import { LazyPromise } from './utils/promise'
 
@@ -37,6 +43,7 @@ import type { ContractTransaction, Overrides, PayableOverrides } from '@etherspr
 import type { ReleaseInfoQueryVariables } from './api/graphql/gql'
 import type { ContractCall, EditionConfig, MintConfig, MintSchedule } from './types'
 import type { EditionInfoStructOutput } from '@soundxyz/sound-protocol/typechain/ISoundEditionV1_1'
+import { isAddress } from '@ethersproject/address'
 
 export function SoundClient({
   signer,
@@ -232,7 +239,7 @@ export function SoundClient({
   async function mint({
     mintSchedule,
     quantity,
-    affiliate = ADDRESS_ZERO,
+    affiliate = NULL_ADDRESS,
     gasLimit,
     maxFeePerGas,
     maxPriorityFeePerGas,
@@ -322,6 +329,9 @@ export function SoundClient({
     maxFeePerGas?: BigNumberish
     maxPriorityFeePerGas?: BigNumberish
   }) {
+    _validateEditionConfig(editionConfig)
+    _validateMintConfigs(mintConfigs)
+
     const { signer, userAddress } = await _requireSigner()
 
     const txnOverrides: Overrides = {
@@ -726,6 +736,50 @@ export function SoundClient({
     const network = await networkProvider.getNetwork()
 
     return network.chainId
+  }
+
+  function _validateEditionConfig(config: EditionConfig) {
+    const { editionMaxMintableLower, editionMaxMintableUpper, fundingRecipient } = config
+
+    if (!isAddress(fundingRecipient) || fundingRecipient === NULL_ADDRESS) {
+      throw new InvalidFundingRecipientError({ fundingRecipient })
+    }
+
+    if (editionMaxMintableLower > editionMaxMintableUpper) {
+      throw new InvalidEditionMaxMintableError({
+        editionMaxMintableLower,
+        editionMaxMintableUpper,
+      })
+    }
+  }
+
+  function _validateMintConfigs(mintConfigs: MintConfig[]) {
+    for (const mintConfig of mintConfigs) {
+      const { maxMintablePerAccount } = mintConfig
+      if (maxMintablePerAccount < 1) {
+        throw new InvalidMaxMintablePerAccountError({ maxMintablePerAccount })
+      }
+
+      if (mintConfig.mintType === 'RangeEdition') {
+        const { maxMintableLower, maxMintableUpper, startTime, cutoffTime, endTime } = mintConfig
+        if (maxMintableLower > maxMintableUpper) {
+          throw new InvalidMaxMintableError({ maxMintableLower, maxMintableUpper })
+        }
+        if (!(startTime < cutoffTime && cutoffTime < endTime)) {
+          throw new InvalidTimeValuesError({ startTime, cutoffTime, endTime })
+        }
+      } else if (mintConfig.mintType === 'MerkleDrop') {
+        const { merkleRoot } = mintConfig
+        if (
+          merkleRoot === NULL_BYTES32 ||
+          merkleRoot.slice(0, 2) !== '0x' ||
+          // Merkle root is 32 bytes, which is 64 hex characters + '0x'
+          merkleRoot.length !== 66
+        ) {
+          throw new InvalidMerkleRootError({ merkleRoot })
+        }
+      }
+    }
   }
 
   return client

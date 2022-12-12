@@ -17,30 +17,33 @@ import { ethers } from 'hardhat'
 import { SoundClient } from '../src/client'
 import {
   InvalidAddressError,
+  InvalidEditionMaxMintableError,
+  InvalidFundingRecipientError,
+  InvalidQuantityError,
+  InvalidTimeValuesError,
+  InvalidMaxMintablePerAccountError,
   MissingMerkleProvider,
-  MissingSignerOrProviderError,
+  InvalidMerkleRootError,
   MissingSoundAPI,
   NotEligibleMint,
   SoundNotFoundError,
+  InvalidMaxMintableError,
 } from '../src/errors'
-import { MINTER_ROLE } from '../src/utils/constants'
+import { MINTER_ROLE, NULL_ADDRESS, NON_NULL_ADDRESS, UINT32_MAX, NULL_BYTES32 } from '../src/utils/constants'
 import { getSaltAsBytes32 } from '../src/utils/helpers'
 import { MerkleTestHelper, now } from './helpers'
 
 import type { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import type MerkleTree from 'merkletreejs'
 
-import type { ContractCall, EditionConfig, MintConfig, MintSchedule } from '../src/types'
+import type { ContractCall, MintConfig, MintSchedule } from '../src/types'
 import { MockAPI } from './helpers/api'
 import { randomUUID } from 'crypto'
 
-const UINT32_MAX = 4294967295
-const NULL_ADDRESS = '0x0000000000000000000000000000000000000000'
-const NON_NULL_ADDRESS = '0x0000000000000000000000000000000000000001'
+const DEFAULT_SALT = getSaltAsBytes32(12345678)
 const SOUND_FEE = 0
 const ONE_HOUR = 3600
 const PRICE = 420420420
-const DEFAULT_SALT = getSaltAsBytes32(Math.random())
 
 const SoundCreatorV1 = new SoundCreatorV1__factory()
 const SoundFeeRegistry = new SoundFeeRegistry__factory()
@@ -852,9 +855,14 @@ describe('mint', () => {
 
     it(`Should throw error if invalid quantity requested`, async () => {
       const quantity = 0
-      await client.mint({ mintSchedule: mintSchedules[0], quantity }).catch((error) => {
-        expect(error.message).to.equal('Must provide valid quantity')
-      })
+      await client
+        .mint({ mintSchedule: mintSchedules[0], quantity })
+        .then(() => {
+          throw Error(`Didn't throw expected error`)
+        })
+        .catch((error) => {
+          expect(error).instanceOf(InvalidQuantityError)
+        })
     })
 
     it(`Should throw error if more than eligibleQuantity requested`, async () => {
@@ -863,13 +871,18 @@ describe('mint', () => {
         mintSchedule: mintSchedules[0],
         userAddress: buyerWallet.address,
       })
-      await client.mint({ mintSchedule: mintSchedules[0], quantity }).catch((error) => {
-        expect(error).instanceOf(NotEligibleMint)
+      await client
+        .mint({ mintSchedule: mintSchedules[0], quantity })
+        .then(() => {
+          throw Error(`Didn't throw expected error`)
+        })
+        .catch((error) => {
+          expect(error).instanceOf(NotEligibleMint)
 
-        assert(error instanceof NotEligibleMint)
+          assert(error instanceof NotEligibleMint)
 
-        expect(error.eligibleMintQuantity).equal(eligibleQuantity)
-      })
+          expect(error.eligibleMintQuantity).equal(eligibleQuantity)
+        })
     })
   })
 
@@ -937,11 +950,16 @@ describe('mint', () => {
     })
 
     it('Should throw error if merkle proof is null', async () => {
+      client.merkleProvider!.merkleProof = () => null
+
       // Test client throws expected error
       await client
         .mint({
           mintSchedule: mintSchedules[0],
           quantity: 1,
+        })
+        .then(() => {
+          throw Error(`Didn't throw expected error`)
         })
         .catch((error) => {
           expect(error).instanceOf(NotEligibleMint)
@@ -964,26 +982,46 @@ describe('mint', () => {
 })
 
 describe('createEdition', () => {
+  const SALT = 'hello'
+  const getGenericEditionConfig = () => ({
+    name: 'Test',
+    symbol: 'TEST',
+    metadataModule: NULL_ADDRESS,
+    baseURI: 'https://test.com',
+    contractURI: 'https://test.com',
+    fundingRecipient: NON_NULL_ADDRESS,
+    royaltyBPS: 0,
+    editionMaxMintableLower: 10,
+    editionMaxMintableUpper: 10,
+    editionCutoffTime: 999999,
+    shouldEnableMintRandomness: true,
+    shouldFreezeMetadata: false,
+    enableOperatorFiltering: true,
+  })
+
+  const startTime = now()
+  const cutoffTime = startTime + ONE_HOUR / 2
+  const endTime = cutoffTime + ONE_HOUR
+
+  const getGenericRangeMintConfig = () => ({
+    mintType: 'RangeEdition' as const,
+    minterAddress: rangeEditionMinter.address,
+    price: PRICE,
+    startTime,
+    cutoffTime,
+    endTime,
+    maxMintableLower: 3,
+    maxMintableUpper: 4,
+    maxMintablePerAccount: 1,
+    affiliateFeeBPS: 0,
+  })
+
   beforeEach(() => {
     client = SoundClient({ signer: artistWallet, soundCreatorAddress: soundCreator.address })
   })
 
   it('Creates a sound edition and mint schedules', async () => {
-    const editionConfig: EditionConfig = {
-      name: 'Test',
-      symbol: 'TEST',
-      metadataModule: NULL_ADDRESS,
-      baseURI: 'https://test.com',
-      contractURI: 'https://test.com',
-      fundingRecipient: NON_NULL_ADDRESS,
-      royaltyBPS: 0,
-      editionMaxMintableLower: 10,
-      editionMaxMintableUpper: 10,
-      editionCutoffTime: 999999,
-      shouldEnableMintRandomness: true,
-      shouldFreezeMetadata: false,
-      enableOperatorFiltering: true,
-    }
+    const editionConfig = getGenericEditionConfig()
 
     const mint1StartTime = now()
     const mint1CutoffTime = mint1StartTime + ONE_HOUR / 2
@@ -1020,11 +1058,10 @@ describe('createEdition', () => {
       },
     ]
 
-    const customSalt = 'hello world'
     const [precomputedEditionAddress, _] = await SoundCreatorV1__factory.connect(
       soundCreator.address,
       ethers.provider,
-    ).soundEditionAddress(artistWallet.address, getSaltAsBytes32(customSalt))
+    ).soundEditionAddress(artistWallet.address, getSaltAsBytes32(SALT))
 
     /**
      * Create sound edition and mint schedules.
@@ -1032,7 +1069,7 @@ describe('createEdition', () => {
     await client.createEdition({
       editionConfig,
       mintConfigs,
-      salt: customSalt,
+      salt: SALT,
     })
 
     const editionContract = SoundEditionV1_1__factory.connect(precomputedEditionAddress, ethers.provider)
@@ -1091,22 +1128,213 @@ describe('createEdition', () => {
       }
     }
   })
+
+  it('throws if fundingRecipient is a null address', async () => {
+    const editionConfig = getGenericEditionConfig()
+    editionConfig.fundingRecipient = NULL_ADDRESS
+
+    await client
+      .createEdition({
+        editionConfig,
+        mintConfigs: [getGenericRangeMintConfig()],
+        salt: SALT,
+      })
+      .then(() => {
+        throw Error(`Didn't throw expected error`)
+      })
+      .catch((error) => {
+        expect(error).instanceOf(InvalidFundingRecipientError)
+      })
+  })
+
+  it('throws if editionMaxMintableLower > editionMaxMintableUpper', async () => {
+    const editionConfig = getGenericEditionConfig()
+    editionConfig.editionMaxMintableLower = 2
+    editionConfig.editionMaxMintableUpper = 1
+
+    await client
+      .createEdition({
+        editionConfig,
+        mintConfigs: [getGenericRangeMintConfig()],
+        salt: SALT,
+      })
+      .then(() => {
+        throw Error(`Didn't throw expected error`)
+      })
+      .catch((error) => {
+        expect(error).instanceOf(InvalidEditionMaxMintableError)
+      })
+  })
+
+  it('throws if maxMintablePerAccount is zero', async () => {
+    const editionConfig = getGenericEditionConfig()
+
+    const mintConfig = getGenericRangeMintConfig()
+    mintConfig.maxMintablePerAccount = 0
+
+    await client
+      .createEdition({
+        editionConfig,
+        mintConfigs: [mintConfig],
+        salt: SALT,
+      })
+      .then(() => {
+        throw Error(`Didn't throw expected error`)
+      })
+      .catch((error) => {
+        expect(error).instanceOf(InvalidMaxMintablePerAccountError)
+      })
+  })
+
+  it('throws if range mint maxMintableLower exceeds maxMintableUpper', async () => {
+    const editionConfig = getGenericEditionConfig()
+
+    const mintConfig = getGenericRangeMintConfig()
+    mintConfig.maxMintableLower = 2
+    mintConfig.maxMintableUpper = 1
+
+    await client
+      .createEdition({
+        editionConfig,
+        mintConfigs: [mintConfig],
+        salt: SALT,
+      })
+      .then(() => {
+        throw Error(`Didn't throw expected error`)
+      })
+      .catch((error) => {
+        expect(error).instanceOf(InvalidMaxMintableError)
+      })
+  })
+
+  it('throws if range mint startTime == cutoffTime', async () => {
+    const editionConfig = getGenericEditionConfig()
+
+    const mintConfig = getGenericRangeMintConfig()
+    mintConfig.startTime = mintConfig.cutoffTime
+
+    await client
+      .createEdition({
+        editionConfig,
+        mintConfigs: [mintConfig],
+        salt: SALT,
+      })
+      .then(() => {
+        throw Error(`Didn't throw expected error`)
+      })
+      .catch((error) => {
+        expect(error).instanceOf(InvalidTimeValuesError)
+      })
+  })
+
+  it('throws if range mint cutoffTime === endTime', async () => {
+    const editionConfig = getGenericEditionConfig()
+
+    const mintConfig = getGenericRangeMintConfig()
+    mintConfig.cutoffTime = mintConfig.endTime
+
+    await client
+      .createEdition({
+        editionConfig,
+        mintConfigs: [mintConfig],
+        salt: SALT,
+      })
+      .then(() => {
+        throw Error(`Didn't throw expected error`)
+      })
+      .catch((error) => {
+        expect(error).instanceOf(InvalidTimeValuesError)
+      })
+  })
+
+  it('throws if merkle mint merkleRoot is invalid', async () => {
+    const editionConfig = getGenericEditionConfig()
+
+    const startTime = now()
+    const endTime = startTime + 1
+
+    const mintConfig = {
+      mintType: 'MerkleDrop' as const,
+      minterAddress: merkleDropMinter.address,
+      price: PRICE,
+      merkleRoot: NULL_BYTES32,
+      startTime,
+      endTime,
+      maxMintable: 9,
+      maxMintablePerAccount: 1,
+      affiliateFeeBPS: 0,
+    }
+
+    await client
+      .createEdition({
+        editionConfig,
+        mintConfigs: [mintConfig],
+        salt: SALT,
+      })
+      .then(() => {
+        throw Error(`Didn't throw expected error`)
+      })
+      .catch((error) => {
+        expect(error).instanceOf(InvalidMerkleRootError)
+      })
+
+    mintConfig.merkleRoot = '1x0000000000000000000000000000000000000000000000000000000000000000'
+
+    await client
+      .createEdition({
+        editionConfig,
+        mintConfigs: [mintConfig],
+        salt: SALT,
+      })
+      .then(() => {
+        throw Error(`Didn't throw expected error`)
+      })
+      .catch((error) => {
+        expect(error).instanceOf(InvalidMerkleRootError)
+      })
+
+    mintConfig.merkleRoot = ''
+
+    client
+      .createEdition({
+        editionConfig,
+        mintConfigs: [mintConfig],
+        salt: SALT,
+      })
+      .then(() => {
+        throw Error(`Didn't throw expected error`)
+      })
+      .catch((error) => {
+        expect(error).instanceOf(InvalidMerkleRootError)
+      })
+  })
 })
 
 describe('expectedEditionAddress', () => {
-  it('throws if provided deployerAddress is invalid', () => {
-    client.expectedEditionAddress({ deployer: '0x0', salt: '123' }).catch((error) => {
-      expect(error).instanceOf(InvalidAddressError)
-    })
+  it('throws if provided deployerAddress is invalid', async () => {
+    await client
+      .expectedEditionAddress({ deployer: '0x0', salt: '123' })
+      .then(() => {
+        throw Error(`Didn't throw expected error`)
+      })
+      .catch((error) => {
+        expect(error).instanceOf(InvalidAddressError)
+      })
   })
 
-  it('throws if provider not connected', () => {
-    client = SoundClient({ provider: new ethers.providers.JsonRpcProvider() })
+  it('throws if provider not connected', async () => {
+    client = SoundClient({
+      provider: new ethers.providers.JsonRpcProvider(),
+      soundCreatorAddress: soundCreator.address,
+    })
 
-    client
+    await client
       .expectedEditionAddress({ deployer: '0xbf9a1fad0cbd61cc8158ccb6e1e8e111707088bb', salt: '123' })
+      .then(() => {
+        throw Error(`Didn't throw expected error`)
+      })
       .catch((error) => {
-        expect(error).instanceOf(MissingSignerOrProviderError)
+        expect(error.message).includes('could not detect network')
       })
   })
 
