@@ -855,9 +855,14 @@ describe('mint', () => {
 
     it(`Should throw error if invalid quantity requested`, async () => {
       const quantity = 0
-      await client.mint({ mintSchedule: mintSchedules[0], quantity }).catch((error) => {
-        expect(error).instanceOf(InvalidQuantityError)
-      })
+      await client
+        .mint({ mintSchedule: mintSchedules[0], quantity })
+        .then(() => {
+          throw Error(`Didn't throw expected error`)
+        })
+        .catch((error) => {
+          expect(error).instanceOf(InvalidQuantityError)
+        })
     })
 
     it(`Should throw error if more than eligibleQuantity requested`, async () => {
@@ -866,13 +871,18 @@ describe('mint', () => {
         mintSchedule: mintSchedules[0],
         userAddress: buyerWallet.address,
       })
-      await client.mint({ mintSchedule: mintSchedules[0], quantity }).catch((error) => {
-        expect(error).instanceOf(NotEligibleMint)
+      await client
+        .mint({ mintSchedule: mintSchedules[0], quantity })
+        .then(() => {
+          throw Error(`Didn't throw expected error`)
+        })
+        .catch((error) => {
+          expect(error).instanceOf(NotEligibleMint)
 
-        assert(error instanceof NotEligibleMint)
+          assert(error instanceof NotEligibleMint)
 
-        expect(error.eligibleMintQuantity).equal(eligibleQuantity)
-      })
+          expect(error.eligibleMintQuantity).equal(eligibleQuantity)
+        })
     })
   })
 
@@ -940,11 +950,16 @@ describe('mint', () => {
     })
 
     it('Should throw error if merkle proof is null', async () => {
+      client.merkleProvider!.merkleProof = () => null
+
       // Test client throws expected error
       await client
         .mint({
           mintSchedule: mintSchedules[0],
           quantity: 1,
+        })
+        .then(() => {
+          throw Error(`Didn't throw expected error`)
         })
         .catch((error) => {
           expect(error).instanceOf(NotEligibleMint)
@@ -1124,6 +1139,9 @@ describe('createEdition', () => {
         mintConfigs: [getGenericRangeMintConfig()],
         salt: SALT,
       })
+      .then(() => {
+        throw Error(`Didn't throw expected error`)
+      })
       .catch((error) => {
         expect(error).instanceOf(InvalidFundingRecipientError)
       })
@@ -1139,6 +1157,9 @@ describe('createEdition', () => {
         editionConfig,
         mintConfigs: [getGenericRangeMintConfig()],
         salt: SALT,
+      })
+      .then(() => {
+        throw Error(`Didn't throw expected error`)
       })
       .catch((error) => {
         expect(error).instanceOf(InvalidEditionMaxMintableError)
@@ -1156,6 +1177,9 @@ describe('createEdition', () => {
         editionConfig,
         mintConfigs: [mintConfig],
         salt: SALT,
+      })
+      .then(() => {
+        throw Error(`Didn't throw expected error`)
       })
       .catch((error) => {
         expect(error).instanceOf(InvalidMaxMintablePerAccountError)
@@ -1175,6 +1199,9 @@ describe('createEdition', () => {
         mintConfigs: [mintConfig],
         salt: SALT,
       })
+      .then(() => {
+        throw Error(`Didn't throw expected error`)
+      })
       .catch((error) => {
         expect(error).instanceOf(InvalidMaxMintableError)
       })
@@ -1192,6 +1219,9 @@ describe('createEdition', () => {
         mintConfigs: [mintConfig],
         salt: SALT,
       })
+      .then(() => {
+        throw Error(`Didn't throw expected error`)
+      })
       .catch((error) => {
         expect(error).instanceOf(InvalidTimeValuesError)
       })
@@ -1208,6 +1238,9 @@ describe('createEdition', () => {
         editionConfig,
         mintConfigs: [mintConfig],
         salt: SALT,
+      })
+      .then(() => {
+        throw Error(`Didn't throw expected error`)
       })
       .catch((error) => {
         expect(error).instanceOf(InvalidTimeValuesError)
@@ -1238,6 +1271,9 @@ describe('createEdition', () => {
         mintConfigs: [mintConfig],
         salt: SALT,
       })
+      .then(() => {
+        throw Error(`Didn't throw expected error`)
+      })
       .catch((error) => {
         expect(error).instanceOf(InvalidMerkleRootError)
       })
@@ -1249,6 +1285,9 @@ describe('createEdition', () => {
         editionConfig,
         mintConfigs: [mintConfig],
         salt: SALT,
+      })
+      .then(() => {
+        throw Error(`Didn't throw expected error`)
       })
       .catch((error) => {
         expect(error).instanceOf(InvalidMerkleRootError)
@@ -1262,6 +1301,9 @@ describe('createEdition', () => {
         mintConfigs: [mintConfig],
         salt: SALT,
       })
+      .then(() => {
+        throw Error(`Didn't throw expected error`)
+      })
       .catch((error) => {
         expect(error).instanceOf(InvalidMerkleRootError)
       })
@@ -1270,9 +1312,14 @@ describe('createEdition', () => {
 
 describe('expectedEditionAddress', () => {
   it('throws if provided deployerAddress is invalid', async () => {
-    await client.expectedEditionAddress({ deployer: '0x0', salt: '123' }).catch((error) => {
-      expect(error).instanceOf(InvalidAddressError)
-    })
+    await client
+      .expectedEditionAddress({ deployer: '0x0', salt: '123' })
+      .then(() => {
+        throw Error(`Didn't throw expected error`)
+      })
+      .catch((error) => {
+        expect(error).instanceOf(InvalidAddressError)
+      })
   })
 
   it('throws if provider not connected', async () => {
@@ -1283,6 +1330,9 @@ describe('expectedEditionAddress', () => {
 
     await client
       .expectedEditionAddress({ deployer: '0xbf9a1fad0cbd61cc8158ccb6e1e8e111707088bb', salt: '123' })
+      .then(() => {
+        throw Error(`Didn't throw expected error`)
+      })
       .catch((error) => {
         expect(error.message).includes('could not detect network')
       })
