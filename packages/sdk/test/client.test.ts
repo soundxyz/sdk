@@ -1621,3 +1621,67 @@ describe('editionScheduleIds', () => {
     expect(scheduleIds).deep.eq([{ minterAddress: merkleDropMinter.address, mintIds: [1] }])
   })
 })
+
+describe('editionMintSchedules', () => {
+  it('returns mint schedules for given ids', async () => {
+    await setupTest({})
+    const MINT_SCHEDULE_COUNT = 10
+
+    const rangeMintConfig = getGenericRangeMintConfig({ minterAddress: rangeEditionMinter.address })
+    const merkleMintConfig = getGenericMerkleMintConfig({ minterAddress: merkleDropMinter.address })
+
+    // Make  mint schedules
+    for (let i = 0; i < MINT_SCHEDULE_COUNT; i++) {
+      await rangeEditionMinter.connect(artistWallet).createEditionMint(
+        precomputedEditionAddress,
+        rangeMintConfig.price,
+        i, // Using startTime to make unique
+        rangeMintConfig.cutoffTime,
+        rangeMintConfig.endTime,
+        rangeMintConfig.affiliateFeeBPS,
+        rangeMintConfig.maxMintableLower,
+        rangeMintConfig.maxMintableUpper,
+        rangeMintConfig.maxMintablePerAccount,
+      )
+
+      await merkleDropMinter.connect(artistWallet).createEditionMint(
+        precomputedEditionAddress,
+        merkleMintConfig.merkleRoot,
+        merkleMintConfig.price,
+        merkleMintConfig.startTime,
+        merkleMintConfig.endTime,
+        merkleMintConfig.affiliateFeeBPS,
+        i, // Using maxMintable to make unique
+        merkleMintConfig.maxMintablePerAccount,
+      )
+    }
+
+    const rangeMintIds = [0, 3, 5, 7, 9]
+    const merkleMintIds = [0, 2, 4, 6, 8]
+
+    let schedules = await client.editionMintSchedules({
+      editionAddress: precomputedEditionAddress,
+      scheduleIds: [
+        { minterAddress: rangeEditionMinter.address, mintIds: rangeMintIds },
+        { minterAddress: merkleDropMinter.address, mintIds: merkleMintIds },
+      ],
+    })
+
+    expect(schedules.length).to.equal(rangeMintIds.length + merkleMintIds.length)
+
+    const rangeSchedules = schedules.filter((s) => s.minterAddress === rangeEditionMinter.address)
+    const merkleSchedules = schedules.filter((s) => s.minterAddress === merkleDropMinter.address)
+
+    rangeSchedules.forEach((schedule, i) => {
+      const id = rangeMintIds[i]
+      expect(schedule.mintType).to.equal('RangeEdition')
+      expect(schedule.startTime).to.equal(id)
+    })
+
+    merkleSchedules.forEach((schedule, i) => {
+      const id = merkleMintIds[i]
+      expect(schedule.mintType).to.equal('MerkleDrop')
+      expect(schedule.maxMintable).to.equal(id)
+    })
+  })
+})
