@@ -1286,22 +1286,6 @@ describe('expectedEditionAddress', () => {
       })
   })
 
-  it('throws if provider not connected', async () => {
-    client = SoundClient({
-      provider: new ethers.providers.JsonRpcProvider(),
-      soundCreatorAddress: soundCreator.address,
-    })
-
-    await client
-      .expectedEditionAddress({ deployer: '0xbf9a1fad0cbd61cc8158ccb6e1e8e111707088bb', salt: '123' })
-      .then(() => {
-        throw Error(`Didn't throw expected error`)
-      })
-      .catch((error) => {
-        expect(error.message).includes('could not detect network')
-      })
-  })
-
   it('returns expected address', async () => {
     const deployer = artistWallet.address
     const salt1 = Math.random()
