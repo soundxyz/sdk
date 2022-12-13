@@ -32,7 +32,13 @@ import {
 import { DEFAULT_SALT, SOUND_FEE, ONE_HOUR, PRICE } from './test-constants'
 import { MINTER_ROLE, NULL_ADDRESS, NON_NULL_ADDRESS, UINT32_MAX, NULL_BYTES32 } from '../src/utils/constants'
 import { getSaltAsBytes32 } from '../src/utils/helpers'
-import { MerkleTestHelper, now, getGenericEditionConfig, getGenericRangeMintConfig } from './helpers'
+import {
+  MerkleTestHelper,
+  now,
+  getGenericEditionConfig,
+  getGenericRangeMintConfig,
+  didntThrowExpectedError,
+} from './helpers'
 
 import type { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import type MerkleTree from 'merkletreejs'
@@ -152,17 +158,23 @@ export async function setupTest({ minterCalls = [] }: { minterCalls?: ContractCa
 
 describe('isSoundEdition', () => {
   it("Should throw error if the address isn't valid", async () => {
-    const err1 = await client.isSoundEdition({ editionAddress: '0x123' }).catch((error) => {
-      expect(error.message).to.equal('Invalid address: "0x123"')
+    const err1 = await client
+      .isSoundEdition({ editionAddress: '0x123' })
+      .then(didntThrowExpectedError)
+      .catch((error) => {
+        expect(error.message).to.equal('Invalid address: "0x123"')
 
-      return error
-    })
+        return error
+      })
 
-    const err2 = await client.isSoundEdition({ editionAddress: '0x123' }).catch((error) => {
-      expect(error.message).to.equal('Invalid address: "0x123"')
+    const err2 = await client
+      .isSoundEdition({ editionAddress: '0x123' })
+      .then(didntThrowExpectedError)
+      .catch((error) => {
+        expect(error.message).to.equal('Invalid address: "0x123"')
 
-      return error
-    })
+        return error
+      })
 
     expect(err1).instanceOf(Error)
     expect(err2).instanceOf(Error)
@@ -853,9 +865,7 @@ describe('mint', () => {
       const quantity = 0
       await client
         .mint({ mintSchedule: mintSchedules[0], quantity })
-        .then(() => {
-          throw Error(`Didn't throw expected error`)
-        })
+        .then(didntThrowExpectedError)
         .catch((error) => {
           expect(error).instanceOf(InvalidQuantityError)
         })
@@ -869,9 +879,7 @@ describe('mint', () => {
       })
       await client
         .mint({ mintSchedule: mintSchedules[0], quantity })
-        .then(() => {
-          throw Error(`Didn't throw expected error`)
-        })
+        .then(didntThrowExpectedError)
         .catch((error) => {
           expect(error).instanceOf(NotEligibleMint)
 
@@ -954,9 +962,7 @@ describe('mint', () => {
           mintSchedule: mintSchedules[0],
           quantity: 1,
         })
-        .then(() => {
-          throw Error(`Didn't throw expected error`)
-        })
+        .then(didntThrowExpectedError)
         .catch((error) => {
           expect(error).instanceOf(NotEligibleMint)
         })
@@ -1103,9 +1109,7 @@ describe('createEdition', () => {
         mintConfigs: [getGenericRangeMintConfig({ minterAddress: rangeEditionMinter.address })],
         salt: SALT,
       })
-      .then(() => {
-        throw Error(`Didn't throw expected error`)
-      })
+      .then(didntThrowExpectedError)
       .catch((error) => {
         expect(error).instanceOf(InvalidFundingRecipientError)
       })
@@ -1122,9 +1126,7 @@ describe('createEdition', () => {
         mintConfigs: [getGenericRangeMintConfig({ minterAddress: rangeEditionMinter.address })],
         salt: SALT,
       })
-      .then(() => {
-        throw Error(`Didn't throw expected error`)
-      })
+      .then(didntThrowExpectedError)
       .catch((error) => {
         expect(error).instanceOf(InvalidEditionMaxMintableError)
       })
@@ -1142,9 +1144,7 @@ describe('createEdition', () => {
         mintConfigs: [mintConfig],
         salt: SALT,
       })
-      .then(() => {
-        throw Error(`Didn't throw expected error`)
-      })
+      .then(didntThrowExpectedError)
       .catch((error) => {
         expect(error).instanceOf(InvalidMaxMintablePerAccountError)
       })
@@ -1163,9 +1163,7 @@ describe('createEdition', () => {
         mintConfigs: [mintConfig],
         salt: SALT,
       })
-      .then(() => {
-        throw Error(`Didn't throw expected error`)
-      })
+      .then(didntThrowExpectedError)
       .catch((error) => {
         expect(error).instanceOf(InvalidMaxMintableError)
       })
@@ -1183,9 +1181,7 @@ describe('createEdition', () => {
         mintConfigs: [mintConfig],
         salt: SALT,
       })
-      .then(() => {
-        throw Error(`Didn't throw expected error`)
-      })
+      .then(didntThrowExpectedError)
       .catch((error) => {
         expect(error).instanceOf(InvalidTimeValuesError)
       })
@@ -1203,9 +1199,7 @@ describe('createEdition', () => {
         mintConfigs: [mintConfig],
         salt: SALT,
       })
-      .then(() => {
-        throw Error(`Didn't throw expected error`)
-      })
+      .then(didntThrowExpectedError)
       .catch((error) => {
         expect(error).instanceOf(InvalidTimeValuesError)
       })
@@ -1235,9 +1229,7 @@ describe('createEdition', () => {
         mintConfigs: [mintConfig],
         salt: SALT,
       })
-      .then(() => {
-        throw Error(`Didn't throw expected error`)
-      })
+      .then(didntThrowExpectedError)
       .catch((error) => {
         expect(error).instanceOf(InvalidMerkleRootError)
       })
@@ -1250,9 +1242,7 @@ describe('createEdition', () => {
         mintConfigs: [mintConfig],
         salt: SALT,
       })
-      .then(() => {
-        throw Error(`Didn't throw expected error`)
-      })
+      .then(didntThrowExpectedError)
       .catch((error) => {
         expect(error).instanceOf(InvalidMerkleRootError)
       })
@@ -1265,9 +1255,7 @@ describe('createEdition', () => {
         mintConfigs: [mintConfig],
         salt: SALT,
       })
-      .then(() => {
-        throw Error(`Didn't throw expected error`)
-      })
+      .then(didntThrowExpectedError)
       .catch((error) => {
         expect(error).instanceOf(InvalidMerkleRootError)
       })
@@ -1278,9 +1266,7 @@ describe('expectedEditionAddress', () => {
   it('throws if provided deployerAddress is invalid', async () => {
     await client
       .expectedEditionAddress({ deployer: '0x0', salt: '123' })
-      .then(() => {
-        throw Error(`Didn't throw expected error`)
-      })
+      .then(didntThrowExpectedError)
       .catch((error) => {
         expect(error).instanceOf(InvalidAddressError)
       })
