@@ -24,7 +24,14 @@ import {
   InvalidMaxMintablePerAccountError,
   InvalidMerkleRootError,
 } from './errors'
-import { NULL_ADDRESS, MINTER_ROLE, minterFactoryMap, editionInitFlags, NULL_BYTES32 } from './utils/constants'
+import {
+  NULL_ADDRESS,
+  MINTER_ROLE,
+  minterFactoryMap,
+  editionInitFlags,
+  NULL_BYTES32,
+  genesisBlockByChainId,
+} from './utils/constants'
 import { getLazyOption, getSaltAsBytes32, validateAddress } from './utils/helpers'
 import { LazyPromise } from './utils/promise'
 
@@ -574,11 +581,13 @@ export function SoundClient({
     editionAddress: string
     fromBlockOrBlockHash?: BlockOrBlockHash
   }) {
+    const chainId = await _getNetworkChainId()
+
     const minterAddresses = await editionRegisteredMinters({
       editionAddress,
-      // This should be zero because if we set it to a block number, we may miss mintIds
+      // If we set it to fromBlockOrBlockHash, we may miss mintIds
       // created after that block by minters deployed before that block.
-      fromBlockOrBlockHash: 0,
+      fromBlockOrBlockHash: genesisBlockByChainId[chainId],
     })
 
     const unfilteredList = await Promise.all(

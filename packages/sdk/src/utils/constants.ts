@@ -22,3 +22,11 @@ export const NULL_ADDRESS = '0x0000000000000000000000000000000000000000'
 export const NON_NULL_ADDRESS = '0x0000000000000000000000000000000000000001'
 
 export const NULL_BYTES32 = '0x0000000000000000000000000000000000000000000000000000000000000000'
+
+// Block numbers of Sound Protocol deployment for each network
+export const genesisBlockByChainId: { [index: number]: number } = {
+  // Mainnet
+  1: 15570834,
+  // Goerli
+  5: 7623620,
+} as const
