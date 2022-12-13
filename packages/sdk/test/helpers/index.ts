@@ -1,6 +1,7 @@
 import { NON_NULL_ADDRESS, NULL_ADDRESS } from '../../src/utils/constants'
 import { ONE_HOUR, PRICE } from '../test-constants'
-import { MerkleTestHelper } from './merkle'
+
+export { MerkleTestHelper } from './merkle'
 
 export function now() {
   return Math.floor(Date.now() / 1000)
@@ -39,4 +40,6 @@ export const getGenericRangeMintConfig = ({ minterAddress }: { minterAddress: st
   affiliateFeeBPS: 0,
 })
 
-export { MerkleTestHelper }
+export const didntThrowExpectedError = () => {
+  throw Error(`Didn't throw expected error`)
+}
