@@ -24,7 +24,14 @@ import {
   InvalidMaxMintablePerAccountError,
   InvalidMerkleRootError,
 } from './errors'
-import { NULL_ADDRESS, MINTER_ROLE, minterFactoryMap, editionInitFlags, NULL_BYTES32 } from './utils/constants'
+import {
+  NULL_ADDRESS,
+  MINTER_ROLE,
+  minterFactoryMap,
+  editionInitFlags,
+  NULL_BYTES32,
+  MINT_GAS_LIMIT_BUFFER,
+} from './utils/constants'
 import { getLazyOption, getSaltAsBytes32, validateAddress } from './utils/helpers'
 import { LazyPromise } from './utils/promise'
 
@@ -270,13 +277,16 @@ export function SoundClient({
 
     switch (mintSchedule.mintType) {
       case 'RangeEdition': {
-        return RangeEditionMinter__factory.connect(mintSchedule.minterAddress, signer).mint(
-          mintSchedule.editionAddress,
-          mintSchedule.mintId,
-          quantity,
-          affiliate,
-          txnOverrides,
-        )
+        const mintArgs = [mintSchedule.editionAddress, mintSchedule.mintId, quantity, affiliate, txnOverrides] as const
+
+        const gasEstimate = await RangeEditionMinter__factory.connect(
+          mintSchedule.minterAddress,
+          signer,
+        ).estimateGas.mint(...mintArgs)
+
+        txnOverrides.gasLimit = gasLimit || gasEstimate.add(MINT_GAS_LIMIT_BUFFER)
+
+        return RangeEditionMinter__factory.connect(mintSchedule.minterAddress, signer).mint(...mintArgs)
       }
 
       case 'MerkleDrop': {
@@ -299,14 +309,20 @@ export function SoundClient({
           })
         }
 
-        return merkleDropMinter.mint(
+        const mintArgs = [
           mintSchedule.editionAddress,
           mintSchedule.mintId,
           quantity,
           proof,
           affiliate,
           txnOverrides,
-        )
+        ] as const
+
+        const gasEstimate = await merkleDropMinter.estimateGas.mint(...mintArgs)
+
+        txnOverrides.gasLimit = gasLimit || gasEstimate.add(MINT_GAS_LIMIT_BUFFER)
+
+        return merkleDropMinter.mint(...mintArgs)
       }
 
       default:

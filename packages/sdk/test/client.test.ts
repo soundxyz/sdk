@@ -30,7 +30,14 @@ import {
   InvalidMaxMintablePerAccountError,
 } from '../src/errors'
 import { DEFAULT_SALT, SOUND_FEE, ONE_HOUR, PRICE } from './test-constants'
-import { MINTER_ROLE, NULL_ADDRESS, NON_NULL_ADDRESS, UINT32_MAX, NULL_BYTES32 } from '../src/utils/constants'
+import {
+  MINTER_ROLE,
+  NULL_ADDRESS,
+  NON_NULL_ADDRESS,
+  UINT32_MAX,
+  NULL_BYTES32,
+  MINT_GAS_LIMIT_BUFFER,
+} from '../src/utils/constants'
 import { getSaltAsBytes32 } from '../src/utils/helpers'
 import {
   MerkleTestHelper,
@@ -859,6 +866,19 @@ describe('mint', () => {
         ethers.provider,
       ).balanceOf(buyerWallet.address)
       expect(finalBalance.sub(initialBalance)).to.eq(quantity)
+    })
+
+    it(`Adds ${MINT_GAS_LIMIT_BUFFER / 1000}k gasLimit buffer to mint call`, async () => {
+      const gasEstimate = await RangeEditionMinter__factory.connect(
+        rangeEditionMinter.address,
+        buyerWallet,
+      ).estimateGas.mint(precomputedEditionAddress, 0, 1, NULL_ADDRESS, {
+        value: PRICE,
+      })
+
+      const clientMintCall = await client.mint({ mintSchedule: mintSchedules[0], quantity: 1 })
+
+      expect(clientMintCall.gasLimit.sub(gasEstimate)).to.equal(MINT_GAS_LIMIT_BUFFER)
     })
 
     it(`Should throw error if invalid quantity requested`, async () => {
