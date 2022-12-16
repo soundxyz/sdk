@@ -1,6 +1,7 @@
 import type { MerkleDropConfig, RangeEditionConfig } from '../../src/types'
 import { NON_NULL_ADDRESS, NULL_ADDRESS } from '../../src/utils/constants'
 import { ONE_HOUR, PRICE } from '../test-constants'
+
 import { MerkleTestHelper } from './merkle'
 
 export function now() {
@@ -56,6 +57,10 @@ export const getGenericMerkleMintConfig = ({ minterAddress }: { minterAddress: s
     affiliateFeeBPS: 0,
     merkleRoot,
   }
+}
+
+export const didntThrowExpectedError = () => {
+  throw Error(`Didn't throw expected error`)
 }
 
 export { MerkleTestHelper }

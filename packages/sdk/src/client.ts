@@ -234,7 +234,7 @@ export function SoundClient({
         : mintSchedule.maxMintable) - mintSchedule.totalMinted
 
     const alreadyMinted = await numberMinted({ editionAddress: mintSchedule.editionAddress, userAddress })
-    return Math.min(remaining, mintSchedule.maxMintablePerAccount - alreadyMinted)
+    return Math.max(Math.min(remaining, mintSchedule.maxMintablePerAccount - alreadyMinted), 0)
   }
 
   function getMerkleProof({ merkleRoot, userAddress }: MerkleProofParameters) {
