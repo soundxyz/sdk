@@ -1,7 +1,23 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["github>the-guild-org/shared-config:renovate", ":preserveSemverRanges"],
-  "packageRules": [],
+  "packageRules": [
+    {
+      "matchPackagePatterns": ["^@soundxyz/"],
+      "groupName": "Sound packages",
+      "dependencyDashboardApproval": false
+    },
+    {
+      "matchPackagePatterns": ["^@graphqlprotocol/"],
+      "groupName": "Graph packages",
+      "dependencyDashboardApproval": false
+    },
+    {
+      "matchPackagePatterns": ["^@changesets/"],
+      "groupName": "Changesets packages",
+      "dependencyDashboardApproval": false
+    }
+  ],
   "rangeStrategy": "bump",
   "rebaseWhen": "behind-base-branch"
 }
