@@ -8,7 +8,7 @@
       "dependencyDashboardApproval": false
     },
     {
-      "matchPackagePatterns": ["^@graphqlprotocol/"],
+      "matchPackagePatterns": ["^@graphprotocol/"],
       "groupName": "Graph packages",
       "dependencyDashboardApproval": false
     },
