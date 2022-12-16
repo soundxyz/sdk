@@ -1,5 +1,11 @@
 # @soundxyz/sdk
 
+## 0.11.1
+
+### Patch Changes
+
+- [#146](https://github.com/soundxyz/sdk/pull/146) [`500f7cd`](https://github.com/soundxyz/sdk/commit/500f7cd6dbce7199bf0f67073df9e3c2a16267a5) Thanks [@PabloSzx](https://github.com/PabloSzx)! - "eligibleQuantity" should never return less than 0
+
 ## 0.11.0
 
 ### Minor Changes
