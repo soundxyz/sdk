@@ -1,6 +1,7 @@
 import { isAddress } from '@ethersproject/address'
 import { InvalidAddressError } from '../errors'
 import keccak256 from 'keccak256'
+import type { BigNumber } from '@ethersproject/bignumber'
 
 export function validateAddress(contractAddress: string) {
   if (!isAddress(contractAddress)) {
@@ -14,4 +15,8 @@ export function getSaltAsBytes32(salt: string | number) {
 
 export function getLazyOption<T extends object>(option: T | (() => T | Promise<T>)) {
   return typeof option === 'function' ? option() : option
+}
+
+export function scaleAmount({ amount, multiplier }: { amount: BigNumber; multiplier: number }) {
+  return amount.mul(multiplier * 100).div(100)
 }

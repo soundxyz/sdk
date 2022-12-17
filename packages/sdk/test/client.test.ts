@@ -36,9 +36,9 @@ import {
   NON_NULL_ADDRESS,
   UINT32_MAX,
   NULL_BYTES32,
-  MINT_GAS_LIMIT_BUFFER,
+  MINT_GAS_LIMIT_MULTIPLIER,
 } from '../src/utils/constants'
-import { getSaltAsBytes32 } from '../src/utils/helpers'
+import { getSaltAsBytes32, scaleAmount } from '../src/utils/helpers'
 import {
   MerkleTestHelper,
   now,
@@ -868,7 +868,7 @@ describe('mint', () => {
       expect(finalBalance.sub(initialBalance)).to.eq(quantity)
     })
 
-    it(`Adds ${MINT_GAS_LIMIT_BUFFER / 1000}k gasLimit buffer to mint call`, async () => {
+    it(`Scales gasLimit by ${MINT_GAS_LIMIT_MULTIPLIER * 100}% if gasLimit not provided`, async () => {
       const gasEstimate = await RangeEditionMinter__factory.connect(
         rangeEditionMinter.address,
         buyerWallet,
@@ -876,9 +876,19 @@ describe('mint', () => {
         value: PRICE,
       })
 
+      const expectedGasLimit = scaleAmount({ amount: gasEstimate, multiplier: MINT_GAS_LIMIT_MULTIPLIER })
+
       const clientMintCall = await client.mint({ mintSchedule: mintSchedules[0], quantity: 1 })
 
-      expect(clientMintCall.gasLimit.sub(gasEstimate)).to.equal(MINT_GAS_LIMIT_BUFFER)
+      expect(clientMintCall.gasLimit).to.equal(expectedGasLimit)
+    })
+
+    it(`Doesn't scale gasLimit if custom gasLimit not provided`, async () => {
+      const gasLimit = 12345678
+
+      const clientMintCall = await client.mint({ mintSchedule: mintSchedules[0], quantity: 1, gasLimit })
+
+      expect(clientMintCall.gasLimit).to.equal(gasLimit)
     })
 
     it(`Should throw error if invalid quantity requested`, async () => {
