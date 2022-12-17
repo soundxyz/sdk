@@ -284,6 +284,7 @@ export function SoundClient({
           signer,
         ).estimateGas.mint(...mintArgs)
 
+        // Add a buffer to the gas estimate to account for node provider estimate variance due to edition mintRandomness calculation
         txnOverrides.gasLimit = gasLimit || gasEstimate.add(MINT_GAS_LIMIT_BUFFER)
 
         return RangeEditionMinter__factory.connect(mintSchedule.minterAddress, signer).mint(...mintArgs)
@@ -320,6 +321,7 @@ export function SoundClient({
 
         const gasEstimate = await merkleDropMinter.estimateGas.mint(...mintArgs)
 
+        // Add a buffer to the gas estimate to account for node provider estimate variance due to edition mintRandomness calculation
         txnOverrides.gasLimit = gasLimit || gasEstimate.add(MINT_GAS_LIMIT_BUFFER)
 
         return merkleDropMinter.mint(...mintArgs)
