@@ -17,7 +17,6 @@ import {
   NotSoundEditionError,
   SoundNotFoundError,
   UnsupportedMinterError,
-  InvalidFundingRecipientError,
   InvalidMaxMintableError,
   InvalidTimeValuesError,
   InvalidEditionMaxMintableError,
@@ -50,7 +49,6 @@ import type { ContractTransaction, Overrides, PayableOverrides } from '@etherspr
 import type { ReleaseInfoQueryVariables } from './api/graphql/gql'
 import type { ContractCall, EditionConfig, MintConfig, MintSchedule } from './types'
 import type { EditionInfoStructOutput } from '@soundxyz/sound-protocol/typechain/ISoundEditionV1_1'
-import { isAddress } from '@ethersproject/address'
 
 export function SoundClient({
   signer,
@@ -102,7 +100,7 @@ export function SoundClient({
   // If the contract address is a SoundEdition contract
   async function isSoundEdition({ editionAddress }: { editionAddress: string }): Promise<boolean> {
     return IdempotentCachedCall('is-sound-edition' + editionAddress, async function isSoundEdition() {
-      validateAddress(editionAddress)
+      validateAddress({ type: 'SOUND_EDITION', address: editionAddress })
       const { signerOrProvider } = await _requireSignerOrProvider()
 
       const editionContract = SoundEditionV1_1__factory.connect(editionAddress, signerOrProvider)
@@ -509,7 +507,7 @@ export function SoundClient({
   }
 
   async function expectedEditionAddress({ deployer, salt }: { deployer: string; salt: string | number }) {
-    validateAddress(deployer)
+    validateAddress({ type: 'DEPLOYER', address: deployer })
     const { signerOrProvider } = await _requireSignerOrProvider()
     const soundCreatorAddress = _getCreatorAddress()
 
@@ -729,7 +727,8 @@ export function SoundClient({
   }
 
   async function _requireValidSoundEdition({ editionAddress }: { editionAddress: string }): Promise<void> {
-    validateAddress(editionAddress)
+    validateAddress({ type: 'SOUND_EDITION', address: editionAddress })
+
     const isEdition = await client.isSoundEdition({ editionAddress })
     if (!isEdition) {
       throw new NotSoundEditionError({ contractAddress: editionAddress })
@@ -761,11 +760,18 @@ export function SoundClient({
   }
 
   function _validateEditionConfig(config: EditionConfig) {
-    const { editionMaxMintableLower, editionMaxMintableUpper, fundingRecipient } = config
+    const { editionMaxMintableLower, editionMaxMintableUpper, fundingRecipient, metadataModule } = config
 
-    if (!isAddress(fundingRecipient) || fundingRecipient === NULL_ADDRESS) {
-      throw new InvalidFundingRecipientError({ fundingRecipient })
-    }
+    validateAddress({
+      type: 'FUNDING_RECIPIENT',
+      address: fundingRecipient,
+      notNull: true,
+    })
+
+    validateAddress({
+      type: 'METADATA_MODULE',
+      address: metadataModule,
+    })
 
     if (editionMaxMintableLower > editionMaxMintableUpper) {
       throw new InvalidEditionMaxMintableError({
@@ -777,7 +783,13 @@ export function SoundClient({
 
   function _validateMintConfigs(mintConfigs: MintConfig[]) {
     for (const mintConfig of mintConfigs) {
-      const { maxMintablePerAccount } = mintConfig
+      const { maxMintablePerAccount, minterAddress } = mintConfig
+
+      validateAddress({
+        type: 'MINTER',
+        address: minterAddress,
+      })
+
       if (maxMintablePerAccount < 1) {
         throw new InvalidMaxMintablePerAccountError({ maxMintablePerAccount })
       }

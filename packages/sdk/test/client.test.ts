@@ -18,7 +18,6 @@ import { SoundClient } from '../src/client'
 import {
   InvalidAddressError,
   InvalidEditionMaxMintableError,
-  InvalidFundingRecipientError,
   InvalidQuantityError,
   InvalidTimeValuesError,
   MissingMerkleProvider,
@@ -29,7 +28,7 @@ import {
   InvalidMaxMintableError,
   InvalidMaxMintablePerAccountError,
 } from '../src/errors'
-import { DEFAULT_SALT, SOUND_FEE, ONE_HOUR, PRICE } from './test-constants'
+import { DEFAULT_SALT, SOUND_FEE, ONE_HOUR, PRICE, BAD_ADDRESS } from './test-constants'
 import {
   MINTER_ROLE,
   NULL_ADDRESS,
@@ -166,19 +165,24 @@ export async function setupTest({ minterCalls = [] }: { minterCalls?: ContractCa
 describe('isSoundEdition', () => {
   it("Should throw error if the address isn't valid", async () => {
     const err1 = await client
-      .isSoundEdition({ editionAddress: '0x123' })
+      .isSoundEdition({ editionAddress: BAD_ADDRESS })
       .then(didntThrowExpectedError)
       .catch((error) => {
-        expect(error.message).to.equal('Invalid address: "0x123"')
+        expect(error.message).to.equal('Invalid address')
+        expect(error.type).equal('SOUND_EDITION')
+        expect(error.address).equal(BAD_ADDRESS)
 
         return error
       })
 
     const err2 = await client
-      .isSoundEdition({ editionAddress: '0x123' })
+      .isSoundEdition({ editionAddress: BAD_ADDRESS })
       .then(didntThrowExpectedError)
       .catch((error) => {
-        expect(error.message).to.equal('Invalid address: "0x123"')
+        expect(error).to.be.instanceOf(InvalidAddressError)
+        expect(error.message).to.equal('Invalid address')
+        expect(error.type).equal('SOUND_EDITION')
+        expect(error.address).equal(BAD_ADDRESS)
 
         return error
       })
@@ -1141,7 +1145,66 @@ describe('createEdition', () => {
       })
       .then(didntThrowExpectedError)
       .catch((error) => {
-        expect(error).instanceOf(InvalidFundingRecipientError)
+        expect(error).instanceOf(InvalidAddressError)
+        expect(error.type).equal('FUNDING_RECIPIENT')
+        expect(error.message).equal('Address cannot be null address')
+        expect(error.address).equal(NULL_ADDRESS)
+      })
+  })
+
+  it(`throws if fundingRecipient isn't an address`, async () => {
+    const editionConfig = getGenericEditionConfig()
+    editionConfig.fundingRecipient = BAD_ADDRESS
+
+    await client
+      .createEdition({
+        editionConfig,
+        mintConfigs: [getGenericRangeMintConfig({ minterAddress: rangeEditionMinter.address })],
+        salt: SALT,
+      })
+      .then(didntThrowExpectedError)
+      .catch((error) => {
+        expect(error).instanceOf(InvalidAddressError)
+        expect(error.type).equal('FUNDING_RECIPIENT')
+        expect(error.message).equal('Invalid address')
+        expect(error.address).equal(BAD_ADDRESS)
+      })
+  })
+
+  it(`throws if minterAddress isn't an address`, async () => {
+    const editionConfig = getGenericEditionConfig()
+
+    await client
+      .createEdition({
+        editionConfig,
+        mintConfigs: [getGenericRangeMintConfig({ minterAddress: BAD_ADDRESS })],
+        salt: SALT,
+      })
+      .then(didntThrowExpectedError)
+      .catch((error) => {
+        expect(error).instanceOf(InvalidAddressError)
+        expect(error.type).equal('MINTER')
+        expect(error.message).equal('Invalid address')
+        expect(error.address).equal(BAD_ADDRESS)
+      })
+  })
+
+  it(`throws if metadataModule isn't an address`, async () => {
+    const editionConfig = getGenericEditionConfig()
+    editionConfig.metadataModule = BAD_ADDRESS
+
+    await client
+      .createEdition({
+        editionConfig,
+        mintConfigs: [getGenericRangeMintConfig({ minterAddress: rangeEditionMinter.address })],
+        salt: SALT,
+      })
+      .then(didntThrowExpectedError)
+      .catch((error) => {
+        expect(error).instanceOf(InvalidAddressError)
+        expect(error.type).equal('METADATA_MODULE')
+        expect(error.message).equal('Invalid address')
+        expect(error.address).equal(BAD_ADDRESS)
       })
   })
 

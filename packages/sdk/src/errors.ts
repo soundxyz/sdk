@@ -1,4 +1,4 @@
-import type { GraphQLExecutionErrors, MintScheduleBase } from './types'
+import type { GraphQLExecutionErrors, MintScheduleBase, Address } from './types'
 
 export class MissingSignerError extends Error {
   readonly name = 'MissingSignerError'
@@ -34,15 +34,16 @@ export class CreatorAddressMissing extends Error {
     super('"soundCreatorAddress" was not specified and it\'s required for the requested action')
   }
 }
-
 export class InvalidAddressError extends Error {
   readonly name = 'InvalidAddressError'
 
+  readonly type: Address
   readonly address: string
 
-  constructor({ address }: { address: string }) {
-    super(`Invalid address: ${JSON.stringify(address)}`)
+  constructor({ type, address, message }: { type: Address; address: string; message?: string }) {
+    super(message || 'Invalid address')
 
+    this.type = type
     this.address = address
   }
 }
@@ -225,18 +226,6 @@ export class UnexpectedLanyardResponse extends Error {
     super(`Unexpected lanyard API response, status code ${response.status}`)
 
     this.response = response
-  }
-}
-
-export class InvalidFundingRecipientError extends Error {
-  readonly name = 'InvalidFundingRecipientError'
-
-  readonly fundingRecipient: string
-
-  constructor({ fundingRecipient }: { fundingRecipient: string }) {
-    super('fundingRecipient must be a valid address')
-
-    this.fundingRecipient = fundingRecipient
   }
 }
 
