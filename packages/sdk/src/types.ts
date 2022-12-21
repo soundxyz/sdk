@@ -82,6 +82,11 @@ export type SoundClientConfig = (
 ) &
   BaseSoundClientConfig
 
+export type MinterInterfaceId =
+  | typeof interfaceIds.IMerkleDropMinter
+  | typeof interfaceIds.IRangeEditionMinter
+  | typeof interfaceIds.IEditionMaxMinter
+
 export type MintScheduleBase = {
   editionAddress: string
   minterAddress: string
@@ -91,16 +96,14 @@ export type MintScheduleBase = {
   mintPaused: boolean
   price: BigNumber
   maxMintablePerAccount: number
-  totalMinted: number
 }
-
-export type MinterInterfaceId = typeof interfaceIds.IMerkleDropMinter | typeof interfaceIds.IRangeEditionMinter
 
 export type RangeEditionSchedule = MintScheduleBase & {
   mintType: 'RangeEdition'
   maxMintableLower: number
   maxMintableUpper: number
   cutoffTime: number
+  totalMinted: number
   maxMintable: (unixTimestamp?: number) => number
 }
 
@@ -108,9 +111,15 @@ export type MerkleDropSchedule = MintScheduleBase & {
   mintType: 'MerkleDrop'
   maxMintable: number
   merkleRoot: string
+  totalMinted: number
 }
 
-export type MintSchedule = RangeEditionSchedule | MerkleDropSchedule
+export type EditionMaxSchedule = MintScheduleBase & {
+  mintType: 'EditionMax'
+  maxMintable: (unixTimestamp?: number) => number
+}
+
+export type MintSchedule = RangeEditionSchedule | MerkleDropSchedule | EditionMaxSchedule
 
 export function isRangeEditionSchedule(schedule: MintSchedule): schedule is RangeEditionSchedule {
   return schedule.mintType === 'RangeEdition'
@@ -118,6 +127,10 @@ export function isRangeEditionSchedule(schedule: MintSchedule): schedule is Rang
 
 export function isMerkleDropSchedule(schedule: MintSchedule): schedule is MerkleDropSchedule {
   return schedule.mintType === 'MerkleDrop'
+}
+
+export function isEditionMaxSchedule(schedule: MintSchedule): schedule is EditionMaxSchedule {
+  return schedule.mintType === 'EditionMax'
 }
 
 /**
@@ -148,6 +161,7 @@ export type MintConfigBase = {
   startTime: number
   endTime: number
   affiliateFeeBPS: number
+  maxMintablePerAccount: number
 }
 
 /**
@@ -157,7 +171,6 @@ export type MerkleDropConfig = MintConfigBase & {
   mintType: 'MerkleDrop'
   merkleRoot: string
   maxMintable: number
-  maxMintablePerAccount: number
 }
 
 export type RangeEditionConfig = MintConfigBase & {
@@ -165,10 +178,13 @@ export type RangeEditionConfig = MintConfigBase & {
   cutoffTime: number
   maxMintableLower: number
   maxMintableUpper: number
-  maxMintablePerAccount: number
 }
 
-export type MintConfig = MerkleDropConfig | RangeEditionConfig
+export type EditionMaxMinterConfig = MintConfigBase & {
+  mintType: 'EditionMax'
+}
+
+export type MintConfig = MerkleDropConfig | RangeEditionConfig | EditionMaxMinterConfig
 
 export function isMerkleDropConfig(config: MintConfig): config is MerkleDropConfig {
   return config.mintType === 'MerkleDrop'
@@ -176,6 +192,10 @@ export function isMerkleDropConfig(config: MintConfig): config is MerkleDropConf
 
 export function isRangeEditionConfig(config: MintConfig): config is RangeEditionConfig {
   return config.mintType === 'RangeEdition'
+}
+
+export function isExitionMaxMinterConfig(config: MintConfig): config is EditionMaxMinterConfig {
+  return config.mintType === 'EditionMax'
 }
 
 export type ContractCall = {

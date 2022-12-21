@@ -4,16 +4,19 @@ import {
   MerkleDropMinter__factory,
   SoundEditionV1_1__factory,
   IMinterModule__factory,
+  EditionMaxMinter__factory,
 } from '@soundxyz/sound-protocol/typechain/index'
 
 const editionInterface = SoundEditionV1_1__factory.createInterface()
 const iMinterModuleInterface = IMinterModule__factory.createInterface()
 const rangeMinterInterface = RangeEditionMinter__factory.createInterface()
 const merkleMinterInteface = MerkleDropMinter__factory.createInterface()
+const editionMaxMinterInterface = EditionMaxMinter__factory.createInterface()
 
 export const minterFactoryMap = {
   [interfaceIds.IRangeEditionMinter]: RangeEditionMinter__factory,
   [interfaceIds.IMerkleDropMinter]: MerkleDropMinter__factory,
+  [interfaceIds.IEditionMaxMinter]: EditionMaxMinter__factory,
 } as const
 
 // This is hardcoded on the contract so we always know its 2
@@ -134,6 +137,9 @@ export const ContractErrorSigHashToName = {
   [merkleMinterInteface.getSighash(ExceedsMaxPerAccount)]: ExceedsMaxPerAccount,
   [merkleMinterInteface.getSighash(MerkleRootHashIsEmpty)]: MerkleRootHashIsEmpty,
   [merkleMinterInteface.getSighash(MaxMintablePerAccountIsZero)]: MaxMintablePerAccountIsZero,
+  // EditionMaxMinter
+  [editionMaxMinterInterface.getSighash(ExceedsMaxPerAccount)]: ExceedsMaxPerAccount,
+  [editionMaxMinterInterface.getSighash(MaxMintablePerAccountIsZero)]: MaxMintablePerAccountIsZero,
 } as const
 
 export type ContractErrorSigHashToName = typeof ContractErrorSigHashToName[keyof typeof ContractErrorSigHashToName]

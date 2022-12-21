@@ -1,5 +1,6 @@
 import { interfaceIds } from '@soundxyz/sound-protocol'
 import {
+  EditionMaxMinter__factory,
   IMinterModule__factory,
   MerkleDropMinter__factory,
   RangeEditionMinter__factory,
@@ -39,9 +40,10 @@ import {
 import { getLazyOption, getSaltAsBytes32, validateAddress, scaleAmount } from './utils/helpers'
 import { LazyPromise } from './utils/promise'
 
-import type {
+import {
   BlockOrBlockHash,
   Expand,
+  isEditionMaxSchedule,
   MerkleProofParameters,
   MinterInterfaceId,
   MintOptions,
@@ -258,6 +260,11 @@ export function SoundClient({
       return 0
     }
 
+    // EditionMaxMinter uses the edition contract's totalMinted
+    if (isEditionMaxSchedule(mintSchedule)) {
+      return editionRemainingQty
+    }
+
     // Get eligible quantity for the user on this mint schedule.
     const remainingForSchedule =
       (typeof mintSchedule.maxMintable === 'function'
@@ -467,6 +474,21 @@ export function SoundClient({
               Math.floor(mintConfig.endTime),
               mintConfig.affiliateFeeBPS,
               Math.floor(mintConfig.maxMintable),
+              Math.floor(mintConfig.maxMintablePerAccount),
+            ]),
+          })
+          break
+        }
+        case 'EditionMax': {
+          const minterInterface = EditionMaxMinter__factory.createInterface()
+          contractCalls.push({
+            contractAddress: mintConfig.minterAddress,
+            calldata: minterInterface.encodeFunctionData('createEditionMint', [
+              editionAddress,
+              mintConfig.price,
+              Math.floor(mintConfig.startTime),
+              Math.floor(mintConfig.endTime),
+              mintConfig.affiliateFeeBPS,
               Math.floor(mintConfig.maxMintablePerAccount),
             ]),
           })
@@ -783,6 +805,25 @@ export function SoundClient({
               totalMinted: mintSchedule.totalMinted,
             }
           }
+          case interfaceIds.IEditionMaxMinter: {
+            const minterContract = minterFactoryMap[interfaceId].connect(minterAddress, signerOrProvider)
+            const mintSchedule = await minterContract.mintInfo(editionAddress, mintId)
+            return {
+              mintType: 'EditionMax',
+              mintId,
+              editionAddress,
+              minterAddress,
+              startTime: mintSchedule.startTime,
+              endTime: mintSchedule.endTime,
+              mintPaused: mintSchedule.mintPaused,
+              price: mintSchedule.price,
+              maxMintablePerAccount: mintSchedule.maxMintablePerAccount,
+              maxMintable: (unixTimestamp?: number) =>
+                (unixTimestamp || Math.floor(Date.now() / 1000)) < mintSchedule.cutoffTime
+                  ? mintSchedule.maxMintableUpper
+                  : mintSchedule.maxMintableLower,
+            }
+          }
           default: {
             throw new UnsupportedMinterError({ interfaceId })
           }
@@ -893,24 +934,42 @@ export function SoundClient({
         throw new InvalidMaxMintablePerAccountError({ maxMintablePerAccount })
       }
 
-      if (mintConfig.mintType === 'RangeEdition') {
-        const { maxMintableLower, maxMintableUpper, startTime, cutoffTime, endTime } = mintConfig
-        if (maxMintableLower > maxMintableUpper) {
-          throw new InvalidMaxMintableError({ maxMintableLower, maxMintableUpper })
+      switch (mintConfig.mintType) {
+        case 'RangeEdition': {
+          const { maxMintableLower, maxMintableUpper, startTime, cutoffTime, endTime } = mintConfig
+          if (maxMintableLower > maxMintableUpper) {
+            throw new InvalidMaxMintableError({ maxMintableLower, maxMintableUpper })
+          }
+          if (!(startTime < cutoffTime && cutoffTime < endTime)) {
+            throw new InvalidTimeValuesError({ startTime, cutoffTime, endTime })
+          }
+          break
         }
-        if (!(startTime < cutoffTime && cutoffTime < endTime)) {
-          throw new InvalidTimeValuesError({ startTime, cutoffTime, endTime })
+        case 'MerkleDrop': {
+          const { merkleRoot } = mintConfig
+          if (
+            merkleRoot === NULL_BYTES32 ||
+            merkleRoot.slice(0, 2) !== '0x' ||
+            // Merkle root is 32 bytes, which is 64 hex characters + '0x'
+            merkleRoot.length !== 66
+          ) {
+            throw new InvalidMerkleRootError({ merkleRoot })
+          }
+          break
         }
-      } else if (mintConfig.mintType === 'MerkleDrop') {
-        const { merkleRoot } = mintConfig
-        if (
-          merkleRoot === NULL_BYTES32 ||
-          merkleRoot.slice(0, 2) !== '0x' ||
-          // Merkle root is 32 bytes, which is 64 hex characters + '0x'
-          merkleRoot.length !== 66
-        ) {
-          throw new InvalidMerkleRootError({ merkleRoot })
-        }
+        // TODO
+        // case 'EditionMax': {
+        //   const { merkleRoot } = mintConfig
+        //   if (
+        //     merkleRoot === NULL_BYTES32 ||
+        //     merkleRoot.slice(0, 2) !== '0x' ||
+        //     // Merkle root is 32 bytes, which is 64 hex characters + '0x'
+        //     merkleRoot.length !== 66
+        //   ) {
+        //     throw new InvalidMerkleRootError({ merkleRoot })
+        //   }
+        //   break;
+        // }
       }
     }
   }
