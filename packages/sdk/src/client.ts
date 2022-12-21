@@ -30,9 +30,10 @@ import {
   minterFactoryMap,
   editionInitFlags,
   NULL_BYTES32,
+  MINT_GAS_LIMIT_MULTIPLIER,
   genesisBlockByChainId,
 } from './utils/constants'
-import { getLazyOption, getSaltAsBytes32, validateAddress } from './utils/helpers'
+import { getLazyOption, getSaltAsBytes32, validateAddress, scaleAmount } from './utils/helpers'
 import { LazyPromise } from './utils/promise'
 
 import type {
@@ -277,17 +278,26 @@ export function SoundClient({
 
     switch (mintSchedule.mintType) {
       case 'RangeEdition': {
-        return RangeEditionMinter__factory.connect(mintSchedule.minterAddress, signer).mint(
-          mintSchedule.editionAddress,
-          mintSchedule.mintId,
-          quantity,
-          affiliate,
-          txnOverrides,
-        )
+        const rangeMinter = RangeEditionMinter__factory.connect(mintSchedule.minterAddress, signer)
+        const mintArgs = [mintSchedule.editionAddress, mintSchedule.mintId, quantity, affiliate] as const
+
+        if (txnOverrides.gasLimit) {
+          return rangeMinter.mint(...mintArgs, txnOverrides)
+        }
+
+        try {
+          // Add a buffer to the gas estimate to account for node provider estimate variance
+          const gasEstimate = await rangeMinter.estimateGas.mint(...mintArgs, txnOverrides)
+
+          txnOverrides.gasLimit = scaleAmount({ amount: gasEstimate, multiplier: MINT_GAS_LIMIT_MULTIPLIER })
+        } catch (err) {}
+
+        return rangeMinter.mint(...mintArgs, txnOverrides)
       }
 
       case 'MerkleDrop': {
         const merkleDropMinter = MerkleDropMinter__factory.connect(mintSchedule.minterAddress, signer)
+
         const { merkleRootHash: merkleRoot } = await merkleDropMinter.mintInfo(
           mintSchedule.editionAddress,
           mintSchedule.mintId,
@@ -306,14 +316,20 @@ export function SoundClient({
           })
         }
 
-        return merkleDropMinter.mint(
-          mintSchedule.editionAddress,
-          mintSchedule.mintId,
-          quantity,
-          proof,
-          affiliate,
-          txnOverrides,
-        )
+        const mintArgs = [mintSchedule.editionAddress, mintSchedule.mintId, quantity, proof, affiliate] as const
+
+        if (txnOverrides.gasLimit) {
+          return merkleDropMinter.mint(...mintArgs, txnOverrides)
+        }
+
+        try {
+          // Add a buffer to the gas estimate to account for node provider estimate variance
+          const gasEstimate = await merkleDropMinter.estimateGas.mint(...mintArgs, txnOverrides)
+
+          txnOverrides.gasLimit = scaleAmount({ amount: gasEstimate, multiplier: MINT_GAS_LIMIT_MULTIPLIER })
+        } catch (err) {}
+
+        return merkleDropMinter.mint(...mintArgs, txnOverrides)
       }
 
       default:

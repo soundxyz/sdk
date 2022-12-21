@@ -1,5 +1,17 @@
 # @soundxyz/sdk
 
+## 0.12.0
+
+### Minor Changes
+
+- [#162](https://github.com/soundxyz/sdk/pull/162) [`a343777`](https://github.com/soundxyz/sdk/commit/a3437770af1c2271a29458e9a2a34a61188c07c8) Thanks [@gigamesh](https://github.com/gigamesh)! - Adds 20% gas limit buffer to mint call
+
+## 0.11.1
+
+### Patch Changes
+
+- [#146](https://github.com/soundxyz/sdk/pull/146) [`500f7cd`](https://github.com/soundxyz/sdk/commit/500f7cd6dbce7199bf0f67073df9e3c2a16267a5) Thanks [@PabloSzx](https://github.com/PabloSzx)! - "eligibleQuantity" should never return less than 0
+
 ## 0.11.0
 
 ### Minor Changes

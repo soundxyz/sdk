@@ -30,3 +30,5 @@ export const genesisBlockByChainId: { [index: number]: number } = {
   // Goerli
   5: 7623620,
 } as const
+
+export const MINT_GAS_LIMIT_MULTIPLIER = 1.2
