@@ -31,7 +31,6 @@ import {
   editionInitFlags,
   NULL_BYTES32,
   MINT_GAS_LIMIT_MULTIPLIER,
-  genesisBlockByChainId,
 } from './utils/constants'
 import { getLazyOption, getSaltAsBytes32, validateAddress, scaleAmount } from './utils/helpers'
 import { LazyPromise } from './utils/promise'
@@ -597,16 +596,12 @@ export function SoundClient({
     editionAddress: string
     fromBlockOrBlockHash?: BlockOrBlockHash
   }) {
-    const chainId = await _getNetworkChainId()
-
     const minterAddresses = await editionRegisteredMinters({
       editionAddress,
-      // If we set it to fromBlockOrBlockHash, we may miss mintIds
-      // created after that block by minters deployed before that block.
-      fromBlockOrBlockHash: genesisBlockByChainId[chainId],
+      fromBlockOrBlockHash,
     })
 
-    const unfilteredList = await Promise.all(
+    return Promise.all(
       minterAddresses.map(async (minterAddress) => {
         return {
           minterAddress,
@@ -618,8 +613,6 @@ export function SoundClient({
         }
       }),
     )
-
-    return unfilteredList.filter((minter) => minter.mintIds.length > 0)
   }
 
   async function editionMintSchedules({

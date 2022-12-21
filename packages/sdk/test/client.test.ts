@@ -1479,7 +1479,6 @@ describe('editionMinterMintIds', () => {
   it('returns mint ids', async () => {
     await setupTest({})
     const MINT_SCHEDULE_COUNT = 10
-    const FUTURE_TIMESTAMP = now() + 1000
 
     const mintConfig = getGenericRangeMintConfig({ minterAddress: rangeEditionMinter.address })
 
@@ -1507,41 +1506,12 @@ describe('editionMinterMintIds', () => {
     })
 
     expect(mintIds).deep.eq(Array.from({ length: MINT_SCHEDULE_COUNT }, (_, i) => i))
-
-    // Advance time to test fromBlockOrBlockHash
-    await ethers.provider.send('evm_setNextBlockTimestamp', [FUTURE_TIMESTAMP])
-    await ethers.provider.send('evm_mine', [])
-
-    // Create 1 more schedule
-    await rangeEditionMinter
-      .connect(artistWallet)
-      .createEditionMint(
-        precomputedEditionAddress,
-        mintConfig.price,
-        mintConfig.startTime,
-        mintConfig.cutoffTime,
-        mintConfig.endTime,
-        mintConfig.affiliateFeeBPS,
-        mintConfig.maxMintableLower,
-        mintConfig.maxMintableUpper,
-        mintConfig.maxMintablePerAccount,
-      )
-
-    mintIds = await client.editionMinterMintIds({
-      editionAddress: precomputedEditionAddress,
-      minterAddress: rangeEditionMinter.address,
-      fromBlockOrBlockHash: FUTURE_TIMESTAMP,
-    })
-
-    // This should only contain the latest mint schedule (zero-indexed)
-    expect(mintIds).deep.eq([MINT_SCHEDULE_COUNT])
   })
 })
 
 describe('editionScheduleIds', () => {
   it('returns edition schedule ids', async () => {
     await setupTest({})
-    const FUTURE_TIMESTAMP = now() + 1000
 
     const rangeMintConfig = getGenericRangeMintConfig({ minterAddress: rangeEditionMinter.address })
     const merkleMintConfig = getGenericMerkleMintConfig({ minterAddress: merkleDropMinter.address })
@@ -1588,32 +1558,6 @@ describe('editionScheduleIds', () => {
       { minterAddress: merkleDropMinter.address, mintIds: [0] },
       { minterAddress: rangeEditionMinter.address, mintIds: [0] },
     ])
-
-    // Advance time to test fromBlockOrBlockHash
-    await ethers.provider.send('evm_setNextBlockTimestamp', [FUTURE_TIMESTAMP])
-    await ethers.provider.send('evm_mine', [])
-
-    // Create 1 more schedule
-    await merkleDropMinter
-      .connect(artistWallet)
-      .createEditionMint(
-        precomputedEditionAddress,
-        merkleMintConfig.merkleRoot,
-        merkleMintConfig.price,
-        merkleMintConfig.startTime,
-        merkleMintConfig.endTime,
-        merkleMintConfig.affiliateFeeBPS,
-        merkleMintConfig.maxMintable,
-        merkleMintConfig.maxMintablePerAccount,
-      )
-
-    scheduleIds = await client.editionScheduleIds({
-      editionAddress: precomputedEditionAddress,
-      fromBlockOrBlockHash: FUTURE_TIMESTAMP,
-    })
-
-    // Should only contain most-recent schedule
-    expect(scheduleIds).deep.eq([{ minterAddress: merkleDropMinter.address, mintIds: [1] }])
   })
 })
 
