@@ -58,6 +58,8 @@ import type { ReleaseInfoQueryVariables } from './api/graphql/gql'
 import type { ContractCall, EditionConfig, MintConfig, MintSchedule } from './types'
 import type { EditionInfoStructOutput } from '@soundxyz/sound-protocol/typechain/ISoundEditionV1_1'
 
+/* eslint no-fallthrough: ["error", { "allowEmptyCase": true }] */
+
 export function SoundClient({
   signer,
   provider,
@@ -378,6 +380,24 @@ export function SoundClient({
         }
 
         return merkleDropMinter.mint(...mintArgs, txnOverrides)
+      }
+
+      case 'EditionMax': {
+        const editionMaxMinter = EditionMaxMinter__factory.connect(mintSchedule.minterAddress, signer)
+        const mintArgs = [mintSchedule.editionAddress, mintSchedule.mintId, quantity, affiliate] as const
+
+        if (txnOverrides.gasLimit) {
+          return editionMaxMinter.mint(...mintArgs, txnOverrides)
+        }
+
+        try {
+          // Add a buffer to the gas estimate to account for node provider estimate variance
+          const gasEstimate = await editionMaxMinter.estimateGas.mint(...mintArgs, txnOverrides)
+
+          txnOverrides.gasLimit = scaleAmount({ amount: gasEstimate, multiplier: MINT_GAS_LIMIT_MULTIPLIER })
+        } catch (err) {}
+
+        return editionMaxMinter.mint(...mintArgs, txnOverrides)
       }
 
       default:
@@ -922,6 +942,7 @@ export function SoundClient({
 
   function _validateMintConfigs(mintConfigs: MintConfig[]) {
     for (const mintConfig of mintConfigs) {
+<<<<<<< HEAD
       const { maxMintablePerAccount, minterAddress } = mintConfig
 
       validateAddress({
@@ -930,13 +951,19 @@ export function SoundClient({
         notNull: true,
       })
 
+=======
+      const { startTime, endTime, maxMintablePerAccount } = mintConfig
+>>>>>>> changeset
       if (maxMintablePerAccount < 1) {
         throw new InvalidMaxMintablePerAccountError({ maxMintablePerAccount })
+      }
+      if (!(startTime < endTime)) {
+        throw new InvalidTimeValuesError({ startTime, endTime })
       }
 
       switch (mintConfig.mintType) {
         case 'RangeEdition': {
-          const { maxMintableLower, maxMintableUpper, startTime, cutoffTime, endTime } = mintConfig
+          const { maxMintableLower, maxMintableUpper, cutoffTime } = mintConfig
           if (maxMintableLower > maxMintableUpper) {
             throw new InvalidMaxMintableError({ maxMintableLower, maxMintableUpper })
           }
@@ -957,19 +984,6 @@ export function SoundClient({
           }
           break
         }
-        // TODO
-        // case 'EditionMax': {
-        //   const { merkleRoot } = mintConfig
-        //   if (
-        //     merkleRoot === NULL_BYTES32 ||
-        //     merkleRoot.slice(0, 2) !== '0x' ||
-        //     // Merkle root is 32 bytes, which is 64 hex characters + '0x'
-        //     merkleRoot.length !== 66
-        //   ) {
-        //     throw new InvalidMerkleRootError({ merkleRoot })
-        //   }
-        //   break;
-        // }
       }
     }
   }

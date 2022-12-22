@@ -156,6 +156,10 @@ export async function setupTest({ minterCalls = [] }: { minterCalls?: ContractCa
       contractAddress: editionAddress,
       calldata: editionInterface.encodeFunctionData('grantRoles', [rangeEditionMinter.address, MINTER_ROLE]),
     },
+    {
+      contractAddress: editionAddress,
+      calldata: editionInterface.encodeFunctionData('grantRoles', [editionMaxMinter.address, MINTER_ROLE]),
+    },
   ]
 
   const allContractCalls = [...grantRolesCalls, ...minterCalls]
@@ -686,7 +690,7 @@ describe('eligibleQuantity: multiple sale schedules', () => {
         ]),
       },
       {
-        contractAddress: rangeEditionMinter.address,
+        contractAddress: editionMaxMinter.address,
         calldata: rangeMinter.interface.encodeFunctionData('createEditionMint', [
           precomputedEditionAddress,
           PRICE,
@@ -963,57 +967,6 @@ describe('mint', () => {
       ).balanceOf(buyerWallet.address)
       expect(finalBalance.sub(initialBalance)).to.eq(quantity)
     })
-
-    it(`Scales gasLimit by ${MINT_GAS_LIMIT_MULTIPLIER * 100}% if gasLimit not provided`, async () => {
-      const gasEstimate = await RangeEditionMinter__factory.connect(
-        rangeEditionMinter.address,
-        buyerWallet,
-      ).estimateGas.mint(precomputedEditionAddress, 0, 1, NULL_ADDRESS, {
-        value: PRICE,
-      })
-
-      const expectedGasLimit = scaleAmount({ amount: gasEstimate, multiplier: MINT_GAS_LIMIT_MULTIPLIER })
-
-      const clientMintCall = await client.mint({ mintSchedule: mintSchedules[0], quantity: 1 })
-
-      expect(clientMintCall.gasLimit).to.equal(expectedGasLimit)
-    })
-
-    it(`Doesn't scale gasLimit if custom gasLimit not provided`, async () => {
-      const gasLimit = 12345678
-
-      const clientMintCall = await client.mint({ mintSchedule: mintSchedules[0], quantity: 1, gasLimit })
-
-      expect(clientMintCall.gasLimit).to.equal(gasLimit)
-    })
-
-    it(`Should throw error if invalid quantity requested`, async () => {
-      const quantity = 0
-      await client
-        .mint({ mintSchedule: mintSchedules[0], quantity })
-        .then(didntThrowExpectedError)
-        .catch((error) => {
-          expect(error).instanceOf(InvalidQuantityError)
-        })
-    })
-
-    it(`Should throw error if more than eligibleQuantity requested`, async () => {
-      const quantity = 5
-      const eligibleQuantity = await client.eligibleQuantity({
-        mintSchedule: mintSchedules[0],
-        userAddress: buyerWallet.address,
-      })
-      await client
-        .mint({ mintSchedule: mintSchedules[0], quantity })
-        .then(didntThrowExpectedError)
-        .catch((error) => {
-          expect(error).instanceOf(NotEligibleMint)
-
-          assert(error instanceof NotEligibleMint)
-
-          expect(error.eligibleMintQuantity).equal(eligibleQuantity)
-        })
-    })
   })
 
   describe('MerkleDropMinter', () => {
@@ -1106,6 +1059,141 @@ describe('mint', () => {
 
       expect(expectedError).to.instanceOf(MissingMerkleProvider)
     })
+  })
+})
+
+describe('EditionMaxMinter', () => {
+  let mintSchedules: MintSchedule[] = []
+  beforeEach(async () => {
+    const startTime = now()
+
+    const minter = EditionMaxMinter__factory.connect(editionMaxMinter.address, artistWallet)
+    const minterCalls = [
+      {
+        contractAddress: editionMaxMinter.address,
+        calldata: minter.interface.encodeFunctionData('createEditionMint', [
+          precomputedEditionAddress,
+          PRICE,
+          startTime,
+          startTime + ONE_HOUR,
+          0, // affiliateFeeBPS
+          2, // maxMintablePerAccount,
+        ]),
+      },
+    ]
+
+    await setupTest({ minterCalls })
+
+    // provide signer to the sdk
+    client = SoundClient({
+      provider: ethers.provider,
+      signer: buyerWallet,
+      soundCreatorAddress: soundCreator.address,
+    })
+    mintSchedules = await client.activeMintSchedules({ editionAddress: precomputedEditionAddress })
+    expect(mintSchedules[0].mintType).to.eq('EditionMax')
+  })
+
+  it(`Successfully mints via EditionMaxMinter`, async () => {
+    const quantity = 2
+    const initialBalance = await SoundEditionV1_1__factory.connect(
+      precomputedEditionAddress,
+      ethers.provider,
+    ).balanceOf(buyerWallet.address)
+
+    await client.mint({ mintSchedule: mintSchedules[0], quantity })
+
+    const finalBalance = await SoundEditionV1_1__factory.connect(precomputedEditionAddress, ethers.provider).balanceOf(
+      buyerWallet.address,
+    )
+    expect(finalBalance.sub(initialBalance)).to.eq(quantity)
+  })
+})
+
+describe('BaseMinter functionality', () => {
+  let mintSchedules: MintSchedule[] = []
+  beforeEach(async () => {
+    const startTime = now()
+
+    const minter = EditionMaxMinter__factory.connect(editionMaxMinter.address, artistWallet)
+    const minterCalls = [
+      {
+        contractAddress: editionMaxMinter.address,
+        calldata: minter.interface.encodeFunctionData('createEditionMint', [
+          precomputedEditionAddress,
+          PRICE,
+          startTime,
+          startTime + ONE_HOUR,
+          0, // affiliateFeeBPS
+          2, // maxMintablePerAccount,
+        ]),
+      },
+    ]
+
+    await setupTest({ minterCalls })
+
+    // provide signer to the sdk
+    client = SoundClient({
+      provider: ethers.provider,
+      signer: buyerWallet,
+      soundCreatorAddress: soundCreator.address,
+    })
+    mintSchedules = await client.activeMintSchedules({ editionAddress: precomputedEditionAddress })
+    expect(mintSchedules[0].mintType).to.eq('EditionMax')
+  })
+
+  it(`Scales gasLimit by ${MINT_GAS_LIMIT_MULTIPLIER * 100}% if gasLimit not provided`, async () => {
+    const gasEstimate = await EditionMaxMinter__factory.connect(editionMaxMinter.address, buyerWallet).estimateGas.mint(
+      precomputedEditionAddress,
+      0,
+      1,
+      NULL_ADDRESS,
+      {
+        value: PRICE,
+      },
+    )
+
+    const expectedGasLimit = scaleAmount({ amount: gasEstimate, multiplier: MINT_GAS_LIMIT_MULTIPLIER })
+
+    const clientMintCall = await client.mint({ mintSchedule: mintSchedules[0], quantity: 1 })
+
+    expect(clientMintCall.gasLimit).to.equal(expectedGasLimit)
+  })
+
+  it(`Doesn't scale gasLimit if custom gasLimit not provided`, async () => {
+    const gasLimit = 12345678
+
+    const clientMintCall = await client.mint({ mintSchedule: mintSchedules[0], quantity: 1, gasLimit })
+
+    expect(clientMintCall.gasLimit).to.equal(gasLimit)
+  })
+
+  it(`Should throw error if invalid quantity requested`, async () => {
+    const quantity = 0
+    await client
+      .mint({ mintSchedule: mintSchedules[0], quantity })
+      .then(didntThrowExpectedError)
+      .catch((error) => {
+        expect(error).instanceOf(InvalidQuantityError)
+      })
+  })
+
+  it(`Should throw error if more than eligibleQuantity requested`, async () => {
+    const quantity = 5
+    const eligibleQuantity = await client.eligibleQuantity({
+      mintSchedule: mintSchedules[0],
+      userAddress: buyerWallet.address,
+    })
+    await client
+      .mint({ mintSchedule: mintSchedules[0], quantity })
+      .then(didntThrowExpectedError)
+      .catch((error) => {
+        expect(error).instanceOf(NotEligibleMint)
+
+        assert(error instanceof NotEligibleMint)
+
+        expect(error.eligibleMintQuantity).equal(eligibleQuantity)
+      })
   })
 })
 
@@ -1643,7 +1731,9 @@ describe('editionRegisteredMinters', () => {
       fromBlockOrBlockHash: 0,
     })
 
-    expect(registeredMinters).deep.eq([merkleDropMinter.address, rangeEditionMinter.address])
+    const expectedAddresses = [merkleDropMinter.address, rangeEditionMinter.address, editionMaxMinter.address]
+
+    expect(registeredMinters).deep.eq(expectedAddresses)
 
     // Deploy a new minter and grant it minter role
     const newMinter = await RangeEditionMinter.connect(soundWallet).deploy('0x0000000000000000000000000000000000000001')
@@ -1656,7 +1746,9 @@ describe('editionRegisteredMinters', () => {
       fromBlockOrBlockHash: 0,
     })
 
-    expect(registeredMinters).deep.eq([merkleDropMinter.address, rangeEditionMinter.address, newMinter.address])
+    expectedAddresses.push(newMinter.address)
+
+    expect(registeredMinters).deep.eq(expectedAddresses)
   })
 })
 
