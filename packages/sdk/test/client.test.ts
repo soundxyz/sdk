@@ -443,7 +443,7 @@ describe('eligibleQuantity: single RangeEditionMinter instance', () => {
     expect(editionInfo.editionMaxMintable).to.equal(EDITION_MAX)
   })
 
-  it(`Eligible quantity becomes zero for every user if range edition mint instance is sold out before cutoffTime`, async () => {
+  it(`Eligible quantity becomes zero for every user if range edition mint schedule is sold out before cutoffTime`, async () => {
     const maxMintableUpper = 8
     const startTime = now()
     const MINT_ID = 0
@@ -557,7 +557,9 @@ describe('eligibleQuantity: single RangeEditionMinter instance', () => {
       expect(eligibleQuantity).to.equal(0)
     }
   })
+})
 
+describe('eligibleQuantity: multiple sale schedules', () => {
   it(`Eligible quantity changes if querying between multiple mints with different start times and max mintable quantities.`, async () => {
     const mint1StartTime = now()
     const mint1EndTime = mint1StartTime + ONE_HOUR
