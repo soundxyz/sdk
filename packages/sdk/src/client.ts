@@ -58,8 +58,6 @@ import type { ReleaseInfoQueryVariables } from './api/graphql/gql'
 import type { ContractCall, EditionConfig, MintConfig, MintSchedule } from './types'
 import type { EditionInfoStructOutput } from '@soundxyz/sound-protocol/typechain/ISoundEditionV1_1'
 
-/* eslint no-fallthrough: ["error", { "allowEmptyCase": true }] */
-
 export function SoundClient({
   signer,
   provider,
@@ -942,8 +940,7 @@ export function SoundClient({
 
   function _validateMintConfigs(mintConfigs: MintConfig[]) {
     for (const mintConfig of mintConfigs) {
-<<<<<<< HEAD
-      const { maxMintablePerAccount, minterAddress } = mintConfig
+      const { startTime, endTime, maxMintablePerAccount, minterAddress } = mintConfig
 
       validateAddress({
         type: 'MINTER',
@@ -951,9 +948,6 @@ export function SoundClient({
         notNull: true,
       })
 
-=======
-      const { startTime, endTime, maxMintablePerAccount } = mintConfig
->>>>>>> changeset
       if (maxMintablePerAccount < 1) {
         throw new InvalidMaxMintablePerAccountError({ maxMintablePerAccount })
       }
