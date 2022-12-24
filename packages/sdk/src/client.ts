@@ -244,6 +244,10 @@ export function SoundClient({
     const editionMaxMintable = await editionContract.editionMaxMintable()
     const editionRemainingQty = editionMaxMintable - editionTotalMinted
 
+    if (!editionRemainingQty) {
+      return 0
+    }
+
     // Get eligible quantity for the user on this mint schedule.
     const remainingForSchedule =
       (typeof mintSchedule.maxMintable === 'function'
