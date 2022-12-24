@@ -637,7 +637,7 @@ describe('eligibleQuantity: single RangeEditionMinter instance', () => {
     )
   })
 
-  it('eligibleQuantity respects the available quantity on the edition over the eligible amount on mint schedules', async () => {
+  it('eligibleQuantity respects the available quantity on the edition over the eligible quantity on mint schedules', async () => {
     const client = SoundClient({
       provider: ethers.provider,
       signer: buyerWallet,
@@ -692,7 +692,7 @@ describe('eligibleQuantity: single RangeEditionMinter instance', () => {
 
     await setupTest({ minterCalls })
 
-    let mintSchedules = await client.activeMintSchedules({ editionAddress: precomputedEditionAddress })
+    const mintSchedules = await client.activeMintSchedules({ editionAddress: precomputedEditionAddress })
 
     expect(mintSchedules.length).to.equal(2)
 
@@ -701,8 +701,6 @@ describe('eligibleQuantity: single RangeEditionMinter instance', () => {
       mintSchedule: mintSchedules[0],
       quantity: EDITION_MAX,
     })
-
-    mintSchedules = await client.activeMintSchedules({ editionAddress: precomputedEditionAddress })
 
     // Check that the eligible quantity for the next mint schedule is zero for both buyers
     const eligibleQuantityBuyer1 = await client.eligibleQuantity({

@@ -250,8 +250,8 @@ export function SoundClient({
         ? mintSchedule.maxMintable(timestamp)
         : mintSchedule.maxMintable) - mintSchedule.totalMinted
 
-    const alreadyMintedByUser = await numberMinted({ editionAddress: mintSchedule.editionAddress, userAddress })
-    const eligibleForUserOnSchedule = mintSchedule.maxMintablePerAccount - alreadyMintedByUser
+    const mintedByUserFromSchedule = await numberMinted({ editionAddress: mintSchedule.editionAddress, userAddress })
+    const eligibleForUserOnSchedule = mintSchedule.maxMintablePerAccount - mintedByUserFromSchedule
     const scheduleEligibleQty = Math.min(remainingForSchedule, eligibleForUserOnSchedule)
 
     // Return the minimum of the two. The number of tokens minted within the mint schedule
