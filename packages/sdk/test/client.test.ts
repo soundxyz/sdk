@@ -637,7 +637,7 @@ describe('eligibleQuantity: single RangeEditionMinter instance', () => {
     )
   })
 
-  it('eligible quantity is always zero if the edition is sold out, regardless of mint schedule eligible quantity', async () => {
+  it('eligibleQuantity respects the available quantity on the edition over the eligible amount on mint schedules', async () => {
     const client = SoundClient({
       provider: ethers.provider,
       signer: buyerWallet,

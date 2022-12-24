@@ -237,12 +237,14 @@ export function SoundClient({
       }
     }
 
+    // Get eligible quantity for the edition
     const { signerOrProvider } = await _requireSignerOrProvider()
     const editionContract = SoundEditionV1_1__factory.connect(mintSchedule.editionAddress, signerOrProvider)
     const editionTotalMinted = (await editionContract.totalMinted()).toNumber()
     const editionMaxMintable = await editionContract.editionMaxMintable()
     const editionEligibleQuantity = editionMaxMintable - editionTotalMinted
 
+    // Get eligible quantity for the mint schedule
     const remainingForSchedule =
       (typeof mintSchedule.maxMintable === 'function'
         ? mintSchedule.maxMintable(timestamp)
@@ -252,6 +254,8 @@ export function SoundClient({
     const eligibleForUserOnSchedule = mintSchedule.maxMintablePerAccount - alreadyMintedByUser
     const scheduleEligibleQuantity = Math.min(remainingForSchedule, eligibleForUserOnSchedule)
 
+    // Return the minimum of the two, because the number of tokens minted within the mint schedule
+    // can never exceed the number of tokens available for the edition.
     return Math.min(scheduleEligibleQuantity, editionEligibleQuantity)
   }
 
