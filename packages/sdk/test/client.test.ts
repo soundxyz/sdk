@@ -28,7 +28,7 @@ import {
   InvalidMaxMintablePerAccountError,
   InvalidMaxMintableError,
 } from '../src/errors'
-import { DEFAULT_SALT, SOUND_FEE, ONE_HOUR, PRICE, BAD_ADDRESS } from './test-constants'
+import { DEFAULT_SALT, SOUND_FEE, ONE_HOUR, PRICE, BAD_ADDRESS, EDITION_MAX } from './test-constants'
 import {
   MINTER_ROLE,
   NULL_ADDRESS,
@@ -131,8 +131,8 @@ export async function setupTest({ minterCalls = [] }: { minterCalls?: ContractCa
     'https://contractURI.com',
     NON_NULL_ADDRESS,
     0, //royaltyBPS,
-    100, // maxMintableLower
-    100, // maxMintableUpper
+    EDITION_MAX, // maxMintableLower
+    EDITION_MAX, // maxMintableUpper
     UINT32_MAX, // cutoffTime
     2,
   ])
@@ -374,7 +374,7 @@ describe('eligibleQuantity: single RangeEditionMinter instance', () => {
 
     expect(editionInfo.totalMinted).to.equal(1)
 
-    expect(editionInfo.editionMaxMintable).to.equal(100)
+    expect(editionInfo.editionMaxMintable).to.equal(EDITION_MAX)
   })
 
   it(`Eligible quantity is zero outside of minting time`, async () => {
@@ -431,7 +431,7 @@ describe('eligibleQuantity: single RangeEditionMinter instance', () => {
 
     expect(editionInfo.totalMinted).to.equal(0)
 
-    expect(editionInfo.editionMaxMintable).to.equal(100)
+    expect(editionInfo.editionMaxMintable).to.equal(EDITION_MAX)
   })
 
   it(`Eligible quantity becomes zero for every user if range edition mint instance is sold out before cutoffTime`, async () => {
@@ -635,6 +635,88 @@ describe('eligibleQuantity: single RangeEditionMinter instance', () => {
       (typeof mintSchedule.maxMintable === 'function' ? mintSchedule.maxMintable() : mintSchedule.maxMintable) -
         mint1MaxMintablePerAccount,
     )
+  })
+
+  it('eligible quantity is always zero if the edition is sold out, regardless of mint schedule eligible quantity', async () => {
+    const client = SoundClient({
+      provider: ethers.provider,
+      signer: buyerWallet,
+      merkleProvider: {
+        merkleProof({ userAddress }) {
+          return merkleTestHelper.getProof({ merkleTree, address: userAddress })
+        },
+      },
+    })
+
+    const merkleTestHelper = MerkleTestHelper()
+    const startTimeForBoth = now()
+    const endTimeForBoth = UINT32_MAX
+    const maxMintable = EDITION_MAX
+    const maxMintablePerAccount = EDITION_MAX
+
+    const merkleMinter = MerkleDropMinter__factory.connect(merkleDropMinter.address, artistWallet)
+    const rangeMinter = RangeEditionMinter__factory.connect(rangeEditionMinter.address, artistWallet)
+
+    const merkleTree = merkleTestHelper.getMerkleTree()
+    const merkleRoot = merkleTestHelper.getMerkleRoot(merkleTree)
+
+    const minterCalls = [
+      {
+        contractAddress: merkleDropMinter.address,
+        calldata: merkleMinter.interface.encodeFunctionData('createEditionMint', [
+          precomputedEditionAddress,
+          merkleRoot,
+          PRICE,
+          startTimeForBoth,
+          endTimeForBoth,
+          0, // affiliateFeeBPS
+          maxMintable,
+          maxMintablePerAccount,
+        ]),
+      },
+      {
+        contractAddress: rangeEditionMinter.address,
+        calldata: rangeMinter.interface.encodeFunctionData('createEditionMint', [
+          precomputedEditionAddress,
+          PRICE,
+          startTimeForBoth,
+          startTimeForBoth + ONE_HOUR, // cutoffTime,
+          startTimeForBoth + ONE_HOUR + 1, // endTime
+          0, // affiliateFeeBPS
+          maxMintable - 1, // maxMintableLower,
+          maxMintable, // maxMintableUpper,
+          maxMintablePerAccount,
+        ]),
+      },
+    ]
+
+    await setupTest({ minterCalls })
+
+    let mintSchedules = await client.activeMintSchedules({ editionAddress: precomputedEditionAddress })
+
+    expect(mintSchedules.length).to.equal(2)
+
+    // Mint entire supply from first mint schedule
+    await client.mint({
+      mintSchedule: mintSchedules[0],
+      quantity: EDITION_MAX,
+    })
+
+    mintSchedules = await client.activeMintSchedules({ editionAddress: precomputedEditionAddress })
+
+    // Check that the eligible quantity for the next mint schedule is zero for both buyers
+    const eligibleQuantityBuyer1 = await client.eligibleQuantity({
+      mintSchedule: mintSchedules[1],
+      userAddress: buyerWallet.address,
+    })
+
+    const eligibleQuantityBuyer2 = await client.eligibleQuantity({
+      mintSchedule: mintSchedules[1],
+      userAddress: buyer2Wallet.address,
+    })
+
+    expect(eligibleQuantityBuyer1).to.equal(0)
+    expect(eligibleQuantityBuyer2).to.equal(0)
   })
 })
 

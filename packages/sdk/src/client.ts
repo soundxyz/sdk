@@ -237,13 +237,22 @@ export function SoundClient({
       }
     }
 
-    const remaining =
+    const { signerOrProvider } = await _requireSignerOrProvider()
+    const editionContract = SoundEditionV1_1__factory.connect(mintSchedule.editionAddress, signerOrProvider)
+    const editionTotalMinted = (await editionContract.totalMinted()).toNumber()
+    const editionMaxMintable = await editionContract.editionMaxMintable()
+    const editionEligibleQuantity = editionMaxMintable - editionTotalMinted
+
+    const remainingForSchedule =
       (typeof mintSchedule.maxMintable === 'function'
         ? mintSchedule.maxMintable(timestamp)
         : mintSchedule.maxMintable) - mintSchedule.totalMinted
 
-    const alreadyMinted = await numberMinted({ editionAddress: mintSchedule.editionAddress, userAddress })
-    return Math.max(Math.min(remaining, mintSchedule.maxMintablePerAccount - alreadyMinted), 0)
+    const alreadyMintedByUser = await numberMinted({ editionAddress: mintSchedule.editionAddress, userAddress })
+    const eligibleForUserOnSchedule = mintSchedule.maxMintablePerAccount - alreadyMintedByUser
+    const scheduleEligibleQuantity = Math.min(remainingForSchedule, eligibleForUserOnSchedule)
+
+    return Math.min(scheduleEligibleQuantity, editionEligibleQuantity)
   }
 
   function getMerkleProof({ merkleRoot, userAddress }: MerkleProofParameters) {
