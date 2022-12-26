@@ -1,5 +1,11 @@
 # @soundxyz/sdk
 
+## 0.12.1
+
+### Patch Changes
+
+- [#170](https://github.com/soundxyz/sdk/pull/170) [`20df074`](https://github.com/soundxyz/sdk/commit/20df074788e1f21b6c749be84762b8c39280a2b0) Thanks [@PabloSzx](https://github.com/PabloSzx)! - "activeMintSchedules" accepts optional "scheduleIds" to optimize chain calls
+
 ## 0.12.0
 
 ### Minor Changes
