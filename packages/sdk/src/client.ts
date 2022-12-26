@@ -150,14 +150,24 @@ export function SoundClient({
     editionAddress,
     timestamp = Math.floor(Date.now() / 1000),
     fromBlockOrBlockHash,
+    scheduleIds,
   }: {
     editionAddress: string
     timestamp?: number
     fromBlockOrBlockHash?: BlockOrBlockHash
+    /**
+     * Specify `scheduleIds` to optimiza chain calls on known mint schedules
+     */
+    scheduleIds?: {
+      minterAddress: string
+      mintIds: number[]
+    }[]
   }): Promise<MintSchedule[]> {
     await _requireValidSoundEdition({ editionAddress })
 
-    const allMintSchedules = await mintSchedules({ editionAddress, fromBlockOrBlockHash })
+    const allMintSchedules = await (scheduleIds
+      ? editionMintSchedules({ editionAddress, scheduleIds })
+      : mintSchedules({ editionAddress, fromBlockOrBlockHash }))
 
     // Filter mints that are live during the given timestamp
     return allMintSchedules
