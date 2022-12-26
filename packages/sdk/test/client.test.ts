@@ -1536,3 +1536,84 @@ describe('editionMinterMintIds', () => {
     expect(mintIds).deep.eq([MINT_SCHEDULE_COUNT])
   })
 })
+
+describe('mintSchedules', () => {
+  beforeEach(async () => {
+    const mint1StartTime = now()
+    const mint1EndTime = mint1StartTime + ONE_HOUR
+    const mint2StartTime = mint1EndTime
+
+    const mint1MaxMintablePerAccount = 40
+    const mint2MaxMintablePerAccount = 42
+
+    const minter = RangeEditionMinter__factory.connect(rangeEditionMinter.address, artistWallet)
+    const minterCalls = [
+      {
+        contractAddress: rangeEditionMinter.address,
+        calldata: minter.interface.encodeFunctionData('createEditionMint', [
+          precomputedEditionAddress,
+          PRICE,
+          mint1StartTime,
+          mint1EndTime - 1, // cutoffTime,
+          mint1EndTime,
+          0, // affiliateFeeBPS
+          50, // maxMintableLower,
+          60, // maxMintableUpper,
+          mint1MaxMintablePerAccount,
+        ]),
+      },
+      {
+        contractAddress: rangeEditionMinter.address,
+        calldata: minter.interface.encodeFunctionData('createEditionMint', [
+          precomputedEditionAddress,
+          PRICE,
+          mint2StartTime,
+          mint2StartTime + ONE_HOUR, // cutoffTime,
+          mint2StartTime + ONE_HOUR + 1, // endTime
+          0, // affiliateFeeBPS
+          99, // maxMintableLower,
+          100, // maxMintableUpper,
+          mint2MaxMintablePerAccount,
+        ]),
+      },
+    ]
+
+    await setupTest({ minterCalls })
+  })
+
+  it('activeMintSchedules matches and accepts scheduleIds', async () => {
+    const [dataRaw, scheduleIds] = await Promise.all([
+      client.mintSchedules({
+        editionAddress: precomputedEditionAddress,
+      }),
+      client.editionScheduleIds({
+        editionAddress: precomputedEditionAddress,
+      }),
+    ])
+
+    expect(dataRaw.length).to.equal(2)
+
+    const [first, second] = dataRaw
+
+    assert(first && second)
+
+    expect(first.mintId).not.equal(second.mintId)
+
+    const [dataWithScheduleIds, dataNoScheduleIds] = await Promise.all([
+      client.activeMintSchedules({
+        editionAddress: precomputedEditionAddress,
+        scheduleIds,
+      }),
+      client.activeMintSchedules({
+        editionAddress: precomputedEditionAddress,
+      }),
+    ])
+
+    expect(dataNoScheduleIds.length).to.equal(1)
+    expect(dataWithScheduleIds.length).to.equal(1)
+
+    expect(dataWithScheduleIds[0].mintId).equal(dataNoScheduleIds[0].mintId)
+
+    expect(dataNoScheduleIds[0].mintId).to.equal(first.mintId)
+  })
+})
