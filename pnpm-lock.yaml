@@ -78,7 +78,7 @@ importers:
       '@nomiclabs/hardhat-waffle': ^2.0.3
       '@soundxyz/sound-protocol': 1.2.0
       '@types/chai': ^4.3.3
-      '@types/mocha': ^9.1.1
+      '@types/mocha': ^10.0.0
       '@types/node': 18.7.18
       bob-ts: ^4.1.1
       bob-tsm: ^1.1.2
@@ -127,7 +127,7 @@ importers:
       '@nomiclabs/hardhat-waffle': 2.0.3_tvu7uzjfxrhmjgvpduzktxn2me
       '@soundxyz/sound-protocol': 1.2.0
       '@types/chai': 4.3.3
-      '@types/mocha': 9.1.1
+      '@types/mocha': 10.0.1
       '@types/node': 18.7.18
       bob-ts: 4.1.1_kl74nmbj7v5o5inj3bgi45qkdq
       bob-tsm: 1.1.2_n22gxnsfwsiw6aybpmw4tnhq7m
@@ -3457,8 +3457,8 @@ packages:
       '@types/node': 18.7.18
     dev: true
 
-  /@types/mocha/9.1.1:
-    resolution: {integrity: sha512-Z61JK7DKDtdKTWwLeElSEBcWGRLY8g95ic5FoQqI9CMx0ns/Ghep3B4DfcEimiKMvtamNVULVNKEsiwV3aQmXw==}
+  /@types/mocha/10.0.1:
+    resolution: {integrity: sha512-/fvYntiO1GeICvqbQ3doGDIP97vWmvFt83GKguJ6prmQM2iXZfFcq6YE8KteFyRtX2/h5Hf91BYvPodJKFYv5Q==}
     dev: true
 
   /@types/node-fetch/2.6.2:

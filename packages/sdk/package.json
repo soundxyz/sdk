@@ -64,7 +64,7 @@
     "@nomiclabs/hardhat-waffle": "^2.0.3",
     "@soundxyz/sound-protocol": "1.2.0",
     "@types/chai": "^4.3.3",
-    "@types/mocha": "^9.1.1",
+    "@types/mocha": "^10.0.0",
     "@types/node": "18.7.18",
     "bob-ts": "^4.1.1",
     "bob-tsm": "^1.1.2",
