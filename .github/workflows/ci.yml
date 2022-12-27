@@ -1,9 +1,6 @@
 name: Continuous Integration
 on:
   push:
-    branches:
-      - main
-  pull_request:
 
 env:
   MNEMONIC: ${{ secrets.MNEMONIC }}
@@ -23,6 +20,8 @@ jobs:
         with:
           node-version: '^18.7.0'
           cache: 'pnpm'
+      - name: Test
+        run: npm -v
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
       - name: Codegen
