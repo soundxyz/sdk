@@ -31,6 +31,7 @@ import {
   editionInitFlags,
   NULL_BYTES32,
   MINT_GAS_LIMIT_MULTIPLIER,
+  MINT_FALLBACK_GAS_LIMIT,
 } from './utils/constants'
 import { getLazyOption, getSaltAsBytes32, validateAddress, scaleAmount } from './utils/helpers'
 import { LazyPromise } from './utils/promise'
@@ -295,11 +296,14 @@ export function SoundClient({
         }
 
         try {
-          // Add a buffer to the gas estimate to account for node provider estimate variance
+          // Add a buffer to the gas estimate to account for node provider estimate variance.
           const gasEstimate = await rangeMinter.estimateGas.mint(...mintArgs, txnOverrides)
 
           txnOverrides.gasLimit = scaleAmount({ amount: gasEstimate, multiplier: MINT_GAS_LIMIT_MULTIPLIER })
-        } catch (err) {}
+        } catch (err) {
+          // If estimation fails, provide a hardcoded gas limit that is guaranteed to succeed.
+          txnOverrides.gasLimit = MINT_FALLBACK_GAS_LIMIT
+        }
 
         return rangeMinter.mint(...mintArgs, txnOverrides)
       }
@@ -332,11 +336,14 @@ export function SoundClient({
         }
 
         try {
-          // Add a buffer to the gas estimate to account for node provider estimate variance
+          // Add a buffer to the gas estimate to account for node provider estimate variance.
           const gasEstimate = await merkleDropMinter.estimateGas.mint(...mintArgs, txnOverrides)
 
           txnOverrides.gasLimit = scaleAmount({ amount: gasEstimate, multiplier: MINT_GAS_LIMIT_MULTIPLIER })
-        } catch (err) {}
+        } catch (err) {
+          // If estimation fails, provide a hardcoded gas limit that is guaranteed to succeed.
+          txnOverrides.gasLimit = MINT_FALLBACK_GAS_LIMIT
+        }
 
         return merkleDropMinter.mint(...mintArgs, txnOverrides)
       }
