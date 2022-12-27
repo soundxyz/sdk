@@ -2,10 +2,18 @@ import { isAddress } from '@ethersproject/address'
 import { InvalidAddressError } from '../errors'
 import keccak256 from 'keccak256'
 import type { BigNumber } from '@ethersproject/bignumber'
-import type { Address } from '../types'
+import type { AddressInputType } from '../types'
 import { NULL_ADDRESS } from './constants'
 
-export function validateAddress({ type, address, notNull }: { type: Address; address: string; notNull?: boolean }) {
+export function validateAddress({
+  type,
+  address,
+  notNull,
+}: {
+  type: AddressInputType
+  address: string
+  notNull?: boolean
+}) {
   if (notNull && address === NULL_ADDRESS) {
     throw new InvalidAddressError({ type, address, message: 'Address cannot be null address' })
   }

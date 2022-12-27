@@ -1,4 +1,4 @@
-import type { GraphQLExecutionErrors, MintScheduleBase, Address } from './types'
+import type { GraphQLExecutionErrors, MintScheduleBase, AddressInputType } from './types'
 
 export class MissingSignerError extends Error {
   readonly name = 'MissingSignerError'
@@ -37,10 +37,10 @@ export class CreatorAddressMissing extends Error {
 export class InvalidAddressError extends Error {
   readonly name = 'InvalidAddressError'
 
-  readonly type: Address
+  readonly type: AddressInputType
   readonly address: string
 
-  constructor({ type, address, message }: { type: Address; address: string; message?: string }) {
+  constructor({ type, address, message }: { type: AddressInputType; address: string; message?: string }) {
     super(message || 'Invalid address')
 
     this.type = type
