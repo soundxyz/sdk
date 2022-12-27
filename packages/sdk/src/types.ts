@@ -233,3 +233,5 @@ export interface SourceLocation {
 export type Expand<T> = T extends infer O ? { [K in keyof O]: O[K] } : never
 
 export * from './merkle/types'
+
+export type AddressInputType = 'DEPLOYER' | 'SOUND_EDITION' | 'MINTER' | 'FUNDING_RECIPIENT' | 'METADATA_MODULE'
