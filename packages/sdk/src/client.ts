@@ -788,6 +788,7 @@ export function SoundClient({
       validateAddress({
         type: 'MINTER',
         address: minterAddress,
+        notNull: true,
       })
 
       if (maxMintablePerAccount < 1) {
