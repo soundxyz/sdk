@@ -1767,4 +1767,38 @@ describe('mintSchedules', () => {
 
     expect(dataNoScheduleIds[0].mintId).to.equal(first.mintId)
   })
+
+  describe('getFailureReason', () => {
+    it('returns expected tx failure reason for a mint attempt on a sold-out edition (ExceedsEditionAvailableSupply)', async () => {
+      const maxMintableUpper = 8
+      const startTime = now()
+      const MINT_ID = 0
+
+      const minter = RangeEditionMinter__factory.connect(rangeEditionMinter.address, artistWallet)
+      const minterCalls = [
+        {
+          contractAddress: rangeEditionMinter.address,
+          calldata: minter.interface.encodeFunctionData('createEditionMint', [
+            precomputedEditionAddress,
+            PRICE,
+            startTime,
+            startTime + ONE_HOUR, // cutoffTime,
+            startTime + ONE_HOUR * 2, // endTime,
+            0, // affiliateFeeBPS
+            4, // maxMintableLower
+            maxMintableUpper, // maxMintableUpper
+            1, // maxMintablePerAccount,
+          ]),
+        },
+      ]
+
+      await setupTest({ minterCalls })
+
+      // Mint upper range limit
+      for (let i = 0; i < maxMintableUpper; i++) {
+        const minter = RangeEditionMinter__factory.connect(rangeEditionMinter.address, signers[i])
+        await minter.mint(precomputedEditionAddress, MINT_ID, 1, NULL_ADDRESS, { value: PRICE })
+      }
+    })
+  })
 })

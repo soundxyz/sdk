@@ -647,6 +647,8 @@ export function SoundClient({
     return mintSchedules.flat().sort((a, b) => a.startTime - b.startTime)
   }
 
+  // function getFailureReason({ method, transaction }: { method: MethodName; transaction: any }) {}
+
   /*********************************************************
                   INTERNAL FUNCTIONS
  ********************************************************/
