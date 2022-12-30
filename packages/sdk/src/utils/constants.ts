@@ -39,22 +39,14 @@ export const CUSTOM_ERRORS = {
   ExceedsEditionAvailableSupply: 'ExceedsEditionAvailableSupply',
   ExceedsAvailableSupply: 'ExceedsAvailableSupply',
   ExceedsMaxPerAccount: 'ExceedsMaxPerAccount',
-}
+} as const
+
+const { ExceedsEditionAvailableSupply, ExceedsAvailableSupply, ExceedsMaxPerAccount } = CUSTOM_ERRORS
 
 export const errorSigHashToName = {
-  [editionInterface.getSighash(CUSTOM_ERRORS.ExceedsEditionAvailableSupply)]: editionInterface.getError(
-    CUSTOM_ERRORS.ExceedsEditionAvailableSupply,
-  ).name,
-  [rangeMinterInterface.getSighash(CUSTOM_ERRORS.ExceedsAvailableSupply)]: rangeMinterInterface.getError(
-    CUSTOM_ERRORS.ExceedsAvailableSupply,
-  ).name,
-  [rangeMinterInterface.getSighash(CUSTOM_ERRORS.ExceedsMaxPerAccount)]: rangeMinterInterface.getError(
-    CUSTOM_ERRORS.ExceedsMaxPerAccount,
-  ).name,
-  [merkleMinterInteface.getSighash(CUSTOM_ERRORS.ExceedsAvailableSupply)]: merkleMinterInteface.getError(
-    CUSTOM_ERRORS.ExceedsAvailableSupply,
-  ).name,
-  [merkleMinterInteface.getSighash(CUSTOM_ERRORS.ExceedsMaxPerAccount)]: merkleMinterInteface.getError(
-    CUSTOM_ERRORS.ExceedsMaxPerAccount,
-  ).name,
+  [editionInterface.getSighash(ExceedsEditionAvailableSupply)]: ExceedsEditionAvailableSupply,
+  [rangeMinterInterface.getSighash(ExceedsAvailableSupply)]: ExceedsAvailableSupply,
+  [rangeMinterInterface.getSighash(ExceedsMaxPerAccount)]: ExceedsMaxPerAccount,
+  [merkleMinterInteface.getSighash(ExceedsAvailableSupply)]: ExceedsAvailableSupply,
+  [merkleMinterInteface.getSighash(ExceedsMaxPerAccount)]: ExceedsMaxPerAccount,
 } as const
