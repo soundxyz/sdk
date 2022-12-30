@@ -3,7 +3,7 @@ import { InvalidAddressError } from '../errors'
 import keccak256 from 'keccak256'
 import type { BigNumber } from '@ethersproject/bignumber'
 import type { AddressInputType } from '../types'
-import { failureReasons, NULL_ADDRESS } from './constants'
+import { CUSTOM_ERRORS, NULL_ADDRESS } from './constants'
 import {
   MerkleDropMinter__factory,
   RangeEditionMinter__factory,
@@ -41,37 +41,29 @@ export function scaleAmount({ amount, multiplier }: { amount: BigNumber; multipl
 }
 
 export function getErrorMessages(data: string) {
-  const firstFourBytes = data.slice(0, 10)
+  const functionSelector = data.slice(0, 10)
 
   const editionInterface = SoundEditionV1_1__factory.createInterface()
   const rangeMinterInterface = RangeEditionMinter__factory.createInterface()
   const merkleMinterInteface = MerkleDropMinter__factory.createInterface()
 
-  const editionMintSignature = editionInterface.getSighash('mint')
-  const rangeMintSignature = rangeMinterInterface.getSighash('mint')
-  const merkleMintSignature = merkleMinterInteface.getSighash('mint')
-
-  switch (firstFourBytes) {
-    case editionMintSignature: {
+  switch (functionSelector) {
+    case rangeMinterInterface.getSighash('mint'): {
       return {
-        [editionInterface.getSighash('ExceedsEditionAvailableSupply')]:
-          failureReasons.edition.ExceedsEditionAvailableSupply,
+        [editionInterface.getSighash('ExceedsEditionAvailableSupply')]: CUSTOM_ERRORS.ExceedsEditionAvailableSupply,
+        [rangeMinterInterface.getSighash('ExceedsAvailableSupply')]: CUSTOM_ERRORS.ExceedsAvailableSupply,
+        [rangeMinterInterface.getSighash('ExceedsMaxPerAccount')]: CUSTOM_ERRORS.ExceedsMaxPerAccount,
       }
     }
-    case rangeMintSignature: {
+    case merkleMinterInteface.getSighash('mint'): {
       return {
-        [rangeMinterInterface.getSighash('ExceedsAvailableSupply')]: failureReasons.minters.ExceedsAvailableSupply,
-        [rangeMinterInterface.getSighash('ExceedsMaxPerAccount')]: failureReasons.minters.ExceedsMaxPerAccount,
-      }
-    }
-    case merkleMintSignature: {
-      return {
-        [merkleMinterInteface.getSighash('ExceedsAvailableSupply')]: failureReasons.minters.ExceedsAvailableSupply,
-        [merkleMinterInteface.getSighash('ExceedsMaxPerAccount')]: failureReasons.minters.ExceedsMaxPerAccount,
+        [editionInterface.getSighash('ExceedsEditionAvailableSupply')]: CUSTOM_ERRORS.ExceedsEditionAvailableSupply,
+        [merkleMinterInteface.getSighash('ExceedsAvailableSupply')]: CUSTOM_ERRORS.ExceedsAvailableSupply,
+        [merkleMinterInteface.getSighash('ExceedsMaxPerAccount')]: CUSTOM_ERRORS.ExceedsMaxPerAccount,
       }
     }
     default: {
-      console.error('Unknown function selector:', firstFourBytes)
+      console.error('Unknown function selector:', functionSelector)
       return {}
     }
   }

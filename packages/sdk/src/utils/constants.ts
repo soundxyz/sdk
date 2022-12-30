@@ -27,12 +27,8 @@ export const MINT_GAS_LIMIT_MULTIPLIER = 1.2
 
 export const MINT_FALLBACK_GAS_LIMIT = 200_000
 
-export const failureReasons = {
-  edition: {
-    ExceedsEditionAvailableSupply: 'Edition is sold out',
-  },
-  minters: {
-    ExceedsAvailableSupply: 'Mint is sold out',
-    ExceedsMaxPerAccount: 'Edition is sold out',
-  },
+export const CUSTOM_ERRORS = {
+  ExceedsEditionAvailableSupply: 'ExceedsEditionAvailableSupply',
+  ExceedsAvailableSupply: 'ExceedsAvailableSupply',
+  ExceedsMaxPerAccount: 'ExceedsMaxPerAccount',
 } as const

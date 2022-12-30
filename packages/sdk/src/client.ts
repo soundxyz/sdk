@@ -83,7 +83,7 @@ export function SoundClient({
     editionMinterMintIds,
     editionScheduleIds,
     editionMintSchedules,
-    getFailureReason,
+    getContractError,
   }
 
   const IdempotentCache: Record<string, unknown> = {}
@@ -651,7 +651,7 @@ export function SoundClient({
     return mintSchedules.flat().sort((a, b) => a.startTime - b.startTime)
   }
 
-  async function getFailureReason(txHash: string) {
+  async function getContractError(txHash: string) {
     if (
       txHash === NULL_BYTES32 ||
       txHash.slice(0, 2) !== '0x' ||
@@ -663,7 +663,6 @@ export function SoundClient({
 
     const provider = await _requireProvider()
     const tx = await provider.getTransaction(txHash)
-    const errorMessages = getErrorMessages(tx.data)
 
     try {
       // Simulate the original transaction
@@ -682,11 +681,13 @@ export function SoundClient({
         },
         tx.blockNumber,
       )
-      const firstFourBytes = response.slice(0, 10)
 
-      return errorMessages[firstFourBytes] || 'Unknown error'
-    } catch (error) {
-      console.log(error)
+      const firstFourBytes = response.slice(0, 10)
+      const errorMessages = getErrorMessages(tx.data)
+
+      return errorMessages[firstFourBytes] ?? 'Unknown error'
+    } catch (err) {
+      console.error(err)
     }
     return
   }
