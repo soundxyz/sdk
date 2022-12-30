@@ -47,6 +47,7 @@ import {
   getGenericMerkleMintConfig,
   didntThrowExpectedError,
   mineBlock,
+  setAutoMine,
 } from './helpers'
 
 import type { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
@@ -1786,14 +1787,14 @@ describe.only('getFailureReason', () => {
         },
       },
     })
+  })
 
-    // Slow down mining so failed transaction can be mined
-    await ethers.provider.send('evm_setAutomine', [false])
+  afterEach(async () => {
+    await setAutoMine(true)
   })
 
   it('returns expected tx failure reason for a range mint attempt on a sold-out schedule', async () => {
     const startTime = now()
-    const MINT_ID = 0
     const MAX_QUANTITY = 10
     const minter = RangeEditionMinter__factory.connect(rangeEditionMinter.address, artistWallet)
     const minterCalls = [
@@ -1815,15 +1816,15 @@ describe.only('getFailureReason', () => {
 
     await setupTest({ minterCalls })
 
+    const mintSchedules = await client.mintSchedules({ editionAddress: precomputedEditionAddress })
+
+    await setAutoMine(false)
+
     // Mint full quantity
-    minter
-      .connect(buyerWallet)
-      .mint(precomputedEditionAddress, MINT_ID, MAX_QUANTITY, NULL_ADDRESS, { value: PRICE * MAX_QUANTITY })
+    client.mint({ mintSchedule: mintSchedules[0], quantity: MAX_QUANTITY })
 
     // Attempt to mint again
-    const tx = await minter
-      .connect(buyerWallet)
-      .mint(precomputedEditionAddress, MINT_ID, 1, NULL_ADDRESS, { value: PRICE })
+    const tx = await client.mint({ mintSchedule: mintSchedules[0], quantity: 1 })
 
     await mineBlock()
 
@@ -1832,7 +1833,7 @@ describe.only('getFailureReason', () => {
     expect(failureReason).to.equal(failureReasons.minters.ExceedsAvailableSupply)
   })
 
-  it.only('returns expected tx failure reason for a merkle mint attempt on a sold-out edition', async () => {
+  it('returns expected tx failure reason for a merkle mint attempt on a sold-out schedule', async () => {
     const startTime = now()
     const MAX_QUANTITY = 10
     const merkleRoot = merkleTestHelper.getMerkleRoot(merkleTree)
@@ -1854,20 +1855,20 @@ describe.only('getFailureReason', () => {
 
     await setupTest({ minterCalls })
 
-    console.log({ precomputedEditionAddress })
-
     const mintSchedules = await client.mintSchedules({ editionAddress: precomputedEditionAddress })
 
-    // // Mint full quantity
-    // client.mint({ mintSchedule: mintSchedules[0], quantity: MAX_QUANTITY })
+    await setAutoMine(false)
 
-    // // Attempt to mint again
-    // const tx = await client.mint({ mintSchedule: mintSchedules[0], quantity: 1 })
+    // Mint full quantity
+    client.mint({ mintSchedule: mintSchedules[0], quantity: MAX_QUANTITY })
 
-    // await mineBlock()
+    // Attempt to mint again
+    const tx = await client.mint({ mintSchedule: mintSchedules[0], quantity: 1 })
 
-    // const failureReason = await client.getFailureReason(tx.hash)
+    await mineBlock()
 
-    // expect(failureReason).to.equal(failureReasons.minters.ExceedsAvailableSupply)
+    const failureReason = await client.getFailureReason(tx.hash)
+
+    expect(failureReason).to.equal(failureReasons.minters.ExceedsAvailableSupply)
   })
 })

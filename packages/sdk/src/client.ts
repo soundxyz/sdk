@@ -666,7 +666,7 @@ export function SoundClient({
     const errorMessages = getErrorMessages(tx.data)
 
     try {
-      // Simulate the original call at the block it was mined
+      // Simulate the original transaction
       const response = await provider.call(
         {
           to: tx.to,

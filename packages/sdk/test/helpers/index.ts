@@ -67,4 +67,8 @@ export const mineBlock = async () => {
   await ethers.provider.send('evm_mine', [])
 }
 
+export const setAutoMine = async (turnOn: boolean) => {
+  await ethers.provider.send('evm_setAutomine', [turnOn])
+}
+
 export { MerkleTestHelper }
