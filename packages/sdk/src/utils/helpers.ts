@@ -40,7 +40,12 @@ export function scaleAmount({ amount, multiplier }: { amount: BigNumber; multipl
   return amount.mul(multiplier * 100).div(100)
 }
 
-export function getErrorMessages(data: string) {
+/**
+ * Accepts data string from a transaction response,
+ * parses the contract function that was called,
+ * and returns a map of the potential errors for the given function.
+ */
+export function getErrorSelectors(data: string) {
   const functionSelector = data.slice(0, 10)
 
   const editionInterface = SoundEditionV1_1__factory.createInterface()

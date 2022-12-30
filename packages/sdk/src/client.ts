@@ -34,7 +34,7 @@ import {
   MINT_GAS_LIMIT_MULTIPLIER,
   MINT_FALLBACK_GAS_LIMIT,
 } from './utils/constants'
-import { getLazyOption, getSaltAsBytes32, validateAddress, scaleAmount, getErrorMessages } from './utils/helpers'
+import { getLazyOption, getSaltAsBytes32, validateAddress, scaleAmount, getErrorSelectors } from './utils/helpers'
 import { LazyPromise } from './utils/promise'
 
 import type {
@@ -682,10 +682,11 @@ export function SoundClient({
         tx.blockNumber,
       )
 
+      // If this is a failed transaction, the first 4 bytes of the response will be the custom error selector (hash of its signature)
       const firstFourBytes = response.slice(0, 10)
-      const errorMessages = getErrorMessages(tx.data)
+      const errorSelectors = getErrorSelectors(tx.data)
 
-      return errorMessages[firstFourBytes] ?? 'Unknown error'
+      return errorSelectors[firstFourBytes] ?? 'Unable to parse error'
     } catch (err) {
       console.error(err)
     }
