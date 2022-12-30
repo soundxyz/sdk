@@ -240,9 +240,13 @@ export function SoundClient({
     // Get the edition's remaining token quantity.
     const { signerOrProvider } = await _requireSignerOrProvider()
     const editionContract = SoundEditionV1_1__factory.connect(mintSchedule.editionAddress, signerOrProvider)
-    const editionTotalMinted = (await editionContract.totalMinted()).toNumber()
-    const editionMaxMintable = await editionContract.editionMaxMintable()
-    const editionRemainingQty = editionMaxMintable - editionTotalMinted
+
+    const [editionTotalMinted, editionMaxMintable] = await Promise.all([
+      editionContract.totalMinted(),
+      editionContract.editionMaxMintable(),
+    ])
+
+    const editionRemainingQty = editionMaxMintable - editionTotalMinted.toNumber()
 
     if (!editionRemainingQty) {
       return 0
