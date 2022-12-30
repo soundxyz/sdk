@@ -1,5 +1,13 @@
 import { interfaceIds } from '@soundxyz/sound-protocol'
-import { RangeEditionMinter__factory, MerkleDropMinter__factory } from '@soundxyz/sound-protocol/typechain/index'
+import {
+  RangeEditionMinter__factory,
+  MerkleDropMinter__factory,
+  SoundEditionV1_1__factory,
+} from '@soundxyz/sound-protocol/typechain/index'
+
+const editionInterface = SoundEditionV1_1__factory.createInterface()
+const rangeMinterInterface = RangeEditionMinter__factory.createInterface()
+const merkleMinterInteface = MerkleDropMinter__factory.createInterface()
 
 export const minterFactoryMap = {
   [interfaceIds.IRangeEditionMinter]: RangeEditionMinter__factory,
@@ -31,4 +39,22 @@ export const CUSTOM_ERRORS = {
   ExceedsEditionAvailableSupply: 'ExceedsEditionAvailableSupply',
   ExceedsAvailableSupply: 'ExceedsAvailableSupply',
   ExceedsMaxPerAccount: 'ExceedsMaxPerAccount',
+}
+
+export const errorSigHashToName = {
+  [editionInterface.getSighash(CUSTOM_ERRORS.ExceedsEditionAvailableSupply)]: editionInterface.getError(
+    CUSTOM_ERRORS.ExceedsEditionAvailableSupply,
+  ).name,
+  [rangeMinterInterface.getSighash(CUSTOM_ERRORS.ExceedsAvailableSupply)]: rangeMinterInterface.getError(
+    CUSTOM_ERRORS.ExceedsAvailableSupply,
+  ).name,
+  [rangeMinterInterface.getSighash(CUSTOM_ERRORS.ExceedsMaxPerAccount)]: rangeMinterInterface.getError(
+    CUSTOM_ERRORS.ExceedsMaxPerAccount,
+  ).name,
+  [merkleMinterInteface.getSighash(CUSTOM_ERRORS.ExceedsAvailableSupply)]: merkleMinterInteface.getError(
+    CUSTOM_ERRORS.ExceedsAvailableSupply,
+  ).name,
+  [merkleMinterInteface.getSighash(CUSTOM_ERRORS.ExceedsMaxPerAccount)]: merkleMinterInteface.getError(
+    CUSTOM_ERRORS.ExceedsMaxPerAccount,
+  ).name,
 } as const
