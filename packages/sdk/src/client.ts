@@ -264,7 +264,7 @@ export function SoundClient({
 
     // Return the minimum of the two. The number of tokens minted within the mint schedule
     // can never exceed the number of tokens available for the edition.
-    return Math.min(scheduleEligibleQty, editionRemainingQty)
+    return Math.max(0, Math.min(scheduleEligibleQty, editionRemainingQty))
   }
 
   function getMerkleProof({ merkleRoot, userAddress }: MerkleProofParameters) {
