@@ -26,3 +26,13 @@ export const NULL_BYTES32 = '0x0000000000000000000000000000000000000000000000000
 export const MINT_GAS_LIMIT_MULTIPLIER = 1.2
 
 export const MINT_FALLBACK_GAS_LIMIT = 200_000
+
+export const failureReasons = {
+  edition: {
+    ExceedsEditionAvailableSupply: 'Edition is sold out',
+  },
+  minters: {
+    ExceedsAvailableSupply: 'Mint is sold out',
+    ExceedsMaxPerAccount: 'Edition is sold out',
+  },
+} as const

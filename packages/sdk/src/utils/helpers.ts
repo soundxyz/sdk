@@ -3,7 +3,12 @@ import { InvalidAddressError } from '../errors'
 import keccak256 from 'keccak256'
 import type { BigNumber } from '@ethersproject/bignumber'
 import type { AddressInputType } from '../types'
-import { NULL_ADDRESS } from './constants'
+import { failureReasons, NULL_ADDRESS } from './constants'
+import {
+  MerkleDropMinter__factory,
+  RangeEditionMinter__factory,
+  SoundEditionV1_1__factory,
+} from '@soundxyz/sound-protocol/typechain'
 
 export function validateAddress({
   type,
@@ -33,4 +38,41 @@ export function getLazyOption<T extends object>(option: T | (() => T | Promise<T
 
 export function scaleAmount({ amount, multiplier }: { amount: BigNumber; multiplier: number }) {
   return amount.mul(multiplier * 100).div(100)
+}
+
+export function getErrorMessages(data: string) {
+  const firstFourBytes = data.slice(0, 10)
+
+  const editionInterface = SoundEditionV1_1__factory.createInterface()
+  const rangeMinterInterface = RangeEditionMinter__factory.createInterface()
+  const merkleMinterInteface = MerkleDropMinter__factory.createInterface()
+
+  const editionMintSignature = editionInterface.getSighash('mint')
+  const rangeMintSignature = rangeMinterInterface.getSighash('mint')
+  const merkleMintSignature = merkleMinterInteface.getSighash('mint')
+
+  switch (firstFourBytes) {
+    case editionMintSignature: {
+      return {
+        [editionInterface.getSighash('ExceedsEditionAvailableSupply')]:
+          failureReasons.edition.ExceedsEditionAvailableSupply,
+      }
+    }
+    case rangeMintSignature: {
+      return {
+        [rangeMinterInterface.getSighash('ExceedsAvailableSupply')]: failureReasons.minters.ExceedsAvailableSupply,
+        [rangeMinterInterface.getSighash('ExceedsMaxPerAccount')]: failureReasons.minters.ExceedsMaxPerAccount,
+      }
+    }
+    case merkleMintSignature: {
+      return {
+        [merkleMinterInteface.getSighash('ExceedsAvailableSupply')]: failureReasons.minters.ExceedsAvailableSupply,
+        [merkleMinterInteface.getSighash('ExceedsMaxPerAccount')]: failureReasons.minters.ExceedsMaxPerAccount,
+      }
+    }
+    default: {
+      console.error('Unknown function selector:', firstFourBytes)
+      return {}
+    }
+  }
 }

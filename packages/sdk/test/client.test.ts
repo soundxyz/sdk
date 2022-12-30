@@ -36,6 +36,7 @@ import {
   UINT32_MAX,
   NULL_BYTES32,
   MINT_GAS_LIMIT_MULTIPLIER,
+  failureReasons,
 } from '../src/utils/constants'
 import { getSaltAsBytes32, scaleAmount } from '../src/utils/helpers'
 import {
@@ -45,6 +46,7 @@ import {
   getGenericRangeMintConfig,
   getGenericMerkleMintConfig,
   didntThrowExpectedError,
+  mineBlock,
 } from './helpers'
 
 import type { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
@@ -1767,38 +1769,105 @@ describe('mintSchedules', () => {
 
     expect(dataNoScheduleIds[0].mintId).to.equal(first.mintId)
   })
+})
 
-  describe('getFailureReason', () => {
-    it('returns expected tx failure reason for a mint attempt on a sold-out edition (ExceedsEditionAvailableSupply)', async () => {
-      const maxMintableUpper = 8
-      const startTime = now()
-      const MINT_ID = 0
+describe.only('getFailureReason', () => {
+  let client: SoundClient
+  const merkleTestHelper = MerkleTestHelper()
+  const merkleTree = merkleTestHelper.getMerkleTree()
 
-      const minter = RangeEditionMinter__factory.connect(rangeEditionMinter.address, artistWallet)
-      const minterCalls = [
-        {
-          contractAddress: rangeEditionMinter.address,
-          calldata: minter.interface.encodeFunctionData('createEditionMint', [
-            precomputedEditionAddress,
-            PRICE,
-            startTime,
-            startTime + ONE_HOUR, // cutoffTime,
-            startTime + ONE_HOUR * 2, // endTime,
-            0, // affiliateFeeBPS
-            4, // maxMintableLower
-            maxMintableUpper, // maxMintableUpper
-            1, // maxMintablePerAccount,
-          ]),
+  beforeEach(async () => {
+    client = SoundClient({
+      provider: ethers.provider,
+      signer: buyerWallet,
+      merkleProvider: {
+        merkleProof({ userAddress }) {
+          return merkleTestHelper.getProof({ merkleTree, address: userAddress })
         },
-      ]
-
-      await setupTest({ minterCalls })
-
-      // Mint upper range limit
-      for (let i = 0; i < maxMintableUpper; i++) {
-        const minter = RangeEditionMinter__factory.connect(rangeEditionMinter.address, signers[i])
-        await minter.mint(precomputedEditionAddress, MINT_ID, 1, NULL_ADDRESS, { value: PRICE })
-      }
+      },
     })
+
+    // Slow down mining so failed transaction can be mined
+    await ethers.provider.send('evm_setAutomine', [false])
+  })
+
+  it('returns expected tx failure reason for a range mint attempt on a sold-out schedule', async () => {
+    const startTime = now()
+    const MINT_ID = 0
+    const MAX_QUANTITY = 10
+    const minter = RangeEditionMinter__factory.connect(rangeEditionMinter.address, artistWallet)
+    const minterCalls = [
+      {
+        contractAddress: rangeEditionMinter.address,
+        calldata: minter.interface.encodeFunctionData('createEditionMint', [
+          precomputedEditionAddress,
+          PRICE,
+          startTime,
+          startTime + ONE_HOUR, // cutoffTime,
+          startTime + ONE_HOUR * 2, // endTime,
+          0, // affiliateFeeBPS
+          MAX_QUANTITY - 1, // maxMintableLower
+          MAX_QUANTITY, // maxMintableUpper
+          MAX_QUANTITY, // maxMintablePerAccount,
+        ]),
+      },
+    ]
+
+    await setupTest({ minterCalls })
+
+    // Mint full quantity
+    minter
+      .connect(buyerWallet)
+      .mint(precomputedEditionAddress, MINT_ID, MAX_QUANTITY, NULL_ADDRESS, { value: PRICE * MAX_QUANTITY })
+
+    // Attempt to mint again
+    const tx = await minter
+      .connect(buyerWallet)
+      .mint(precomputedEditionAddress, MINT_ID, 1, NULL_ADDRESS, { value: PRICE })
+
+    await mineBlock()
+
+    const failureReason = await client.getFailureReason(tx.hash)
+
+    expect(failureReason).to.equal(failureReasons.minters.ExceedsAvailableSupply)
+  })
+
+  it.only('returns expected tx failure reason for a merkle mint attempt on a sold-out edition', async () => {
+    const startTime = now()
+    const MAX_QUANTITY = 10
+    const merkleRoot = merkleTestHelper.getMerkleRoot(merkleTree)
+    const minterCalls = [
+      {
+        contractAddress: merkleDropMinter.address,
+        calldata: merkleDropMinter.interface.encodeFunctionData('createEditionMint', [
+          precomputedEditionAddress,
+          merkleRoot,
+          PRICE,
+          startTime,
+          startTime + ONE_HOUR,
+          0, // affiliateFeeBPS
+          MAX_QUANTITY, // maxMintable,
+          MAX_QUANTITY, // maxMintablePerAccount
+        ]),
+      },
+    ]
+
+    await setupTest({ minterCalls })
+
+    console.log({ precomputedEditionAddress })
+
+    const mintSchedules = await client.mintSchedules({ editionAddress: precomputedEditionAddress })
+
+    // // Mint full quantity
+    // client.mint({ mintSchedule: mintSchedules[0], quantity: MAX_QUANTITY })
+
+    // // Attempt to mint again
+    // const tx = await client.mint({ mintSchedule: mintSchedules[0], quantity: 1 })
+
+    // await mineBlock()
+
+    // const failureReason = await client.getFailureReason(tx.hash)
+
+    // expect(failureReason).to.equal(failureReasons.minters.ExceedsAvailableSupply)
   })
 })
