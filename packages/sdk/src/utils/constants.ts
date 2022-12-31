@@ -3,9 +3,11 @@ import {
   RangeEditionMinter__factory,
   MerkleDropMinter__factory,
   SoundEditionV1_1__factory,
+  IMinterModule__factory,
 } from '@soundxyz/sound-protocol/typechain/index'
 
 const editionInterface = SoundEditionV1_1__factory.createInterface()
+const iMinterModuleInterface = IMinterModule__factory.createInterface()
 const rangeMinterInterface = RangeEditionMinter__factory.createInterface()
 const merkleMinterInteface = MerkleDropMinter__factory.createInterface()
 
@@ -36,17 +38,97 @@ export const MINT_GAS_LIMIT_MULTIPLIER = 1.2
 export const MINT_FALLBACK_GAS_LIMIT = 200_000
 
 export const CUSTOM_ERRORS = {
+  // SoundEdition
+  MetadataIsFrozen: 'MetadataIsFrozen',
+  InvalidRoyaltyBPS: 'InvalidRoyaltyBPS',
+  InvalidRandomnessLock: 'InvalidRandomnessLock',
   ExceedsEditionAvailableSupply: 'ExceedsEditionAvailableSupply',
+  InvalidAmount: 'InvalidAmount',
+  InvalidFundingRecipient: 'InvalidFundingRecipient',
+  InvalidEditionMaxMintableRange: 'InvalidEditionMaxMintableRange',
+  MaximumHasAlreadyBeenReached: 'MaximumHasAlreadyBeenReached',
+  ExceedsAddressBatchMintLimit: 'ExceedsAddressBatchMintLimit',
+  MintRandomnessAlreadyRevealed: 'MintRandomnessAlreadyRevealed',
+  NoAddressesToAirdrop: 'NoAddressesToAirdrop',
+  MintHasConcluded: 'MintHasConcluded',
+  MintsAlreadyExist: 'MintsAlreadyExist',
+  // IMinterModule
+  Underpaid: 'Underpaid',
   ExceedsAvailableSupply: 'ExceedsAvailableSupply',
+  MintNotOpen: 'MintNotOpen',
+  MintPaused: 'MintPaused',
+  InvalidTimeRange: 'InvalidTimeRange',
+  Unauthorized: 'Unauthorized',
+  InvalidAffiliateFeeBPS: 'InvalidAffiliateFeeBPS',
+  FeeRegistryIsZeroAddress: 'FeeRegistryIsZeroAddress',
+  // Child minters
+  InvalidMaxMintableRange: 'InvalidMaxMintableRange',
   ExceedsMaxPerAccount: 'ExceedsMaxPerAccount',
+  MaxMintablePerAccountIsZero: 'MaxMintablePerAccountIsZero',
+  InvalidMerkleProof: 'InvalidMerkleProof',
+  MerkleRootHashIsEmpty: 'MerkleRootHashIsEmpty',
 } as const
 
-const { ExceedsEditionAvailableSupply, ExceedsAvailableSupply, ExceedsMaxPerAccount } = CUSTOM_ERRORS
+const {
+  MetadataIsFrozen,
+  InvalidRoyaltyBPS,
+  InvalidRandomnessLock,
+  ExceedsEditionAvailableSupply,
+  InvalidAmount,
+  InvalidFundingRecipient,
+  InvalidEditionMaxMintableRange,
+  MaximumHasAlreadyBeenReached,
+  ExceedsAddressBatchMintLimit,
+  MintRandomnessAlreadyRevealed,
+  NoAddressesToAirdrop,
+  MintHasConcluded,
+  MintsAlreadyExist,
+  Underpaid,
+  ExceedsAvailableSupply,
+  MintNotOpen,
+  MintPaused,
+  InvalidTimeRange,
+  Unauthorized,
+  InvalidAffiliateFeeBPS,
+  FeeRegistryIsZeroAddress,
+  InvalidMaxMintableRange,
+  ExceedsMaxPerAccount,
+  MaxMintablePerAccountIsZero,
+  InvalidMerkleProof,
+  MerkleRootHashIsEmpty,
+} = CUSTOM_ERRORS
 
 export const errorSigHashToName = {
+  // SoundEdition
+  [editionInterface.getSighash(MetadataIsFrozen)]: MetadataIsFrozen,
+  [editionInterface.getSighash(InvalidRoyaltyBPS)]: InvalidRoyaltyBPS,
+  [editionInterface.getSighash(InvalidRandomnessLock)]: InvalidRandomnessLock,
   [editionInterface.getSighash(ExceedsEditionAvailableSupply)]: ExceedsEditionAvailableSupply,
-  [rangeMinterInterface.getSighash(ExceedsAvailableSupply)]: ExceedsAvailableSupply,
+  [editionInterface.getSighash(InvalidAmount)]: InvalidAmount,
+  [editionInterface.getSighash(InvalidFundingRecipient)]: InvalidFundingRecipient,
+  [editionInterface.getSighash(InvalidEditionMaxMintableRange)]: InvalidEditionMaxMintableRange,
+  [editionInterface.getSighash(MaximumHasAlreadyBeenReached)]: MaximumHasAlreadyBeenReached,
+  [editionInterface.getSighash(ExceedsAddressBatchMintLimit)]: ExceedsAddressBatchMintLimit,
+  [editionInterface.getSighash(MintRandomnessAlreadyRevealed)]: MintRandomnessAlreadyRevealed,
+  [editionInterface.getSighash(NoAddressesToAirdrop)]: NoAddressesToAirdrop,
+  [editionInterface.getSighash(MintHasConcluded)]: MintHasConcluded,
+  [editionInterface.getSighash(MintsAlreadyExist)]: MintsAlreadyExist,
+  // IMinterModule
+  [iMinterModuleInterface.getSighash(Underpaid)]: Underpaid,
+  [iMinterModuleInterface.getSighash(ExceedsAvailableSupply)]: ExceedsAvailableSupply,
+  [iMinterModuleInterface.getSighash(MintNotOpen)]: MintNotOpen,
+  [iMinterModuleInterface.getSighash(MintPaused)]: MintPaused,
+  [iMinterModuleInterface.getSighash(InvalidTimeRange)]: InvalidTimeRange,
+  [iMinterModuleInterface.getSighash(Unauthorized)]: Unauthorized,
+  [iMinterModuleInterface.getSighash(InvalidAffiliateFeeBPS)]: InvalidAffiliateFeeBPS,
+  [iMinterModuleInterface.getSighash(FeeRegistryIsZeroAddress)]: FeeRegistryIsZeroAddress,
+  // RangeEditionMinter
+  [rangeMinterInterface.getSighash(InvalidMaxMintableRange)]: InvalidMaxMintableRange,
   [rangeMinterInterface.getSighash(ExceedsMaxPerAccount)]: ExceedsMaxPerAccount,
-  [merkleMinterInteface.getSighash(ExceedsAvailableSupply)]: ExceedsAvailableSupply,
+  [rangeMinterInterface.getSighash(MaxMintablePerAccountIsZero)]: MaxMintablePerAccountIsZero,
+  // MerkleDropMinter
+  [merkleMinterInteface.getSighash(InvalidMerkleProof)]: InvalidMerkleProof,
   [merkleMinterInteface.getSighash(ExceedsMaxPerAccount)]: ExceedsMaxPerAccount,
+  [merkleMinterInteface.getSighash(MerkleRootHashIsEmpty)]: MerkleRootHashIsEmpty,
+  [merkleMinterInteface.getSighash(MaxMintablePerAccountIsZero)]: MaxMintablePerAccountIsZero,
 } as const

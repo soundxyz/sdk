@@ -28,7 +28,7 @@ import {
   InvalidMaxMintablePerAccountError,
   InvalidMaxMintableError,
 } from '../src/errors'
-import { DEFAULT_SALT, SOUND_FEE, ONE_HOUR, PRICE, BAD_ADDRESS } from './test-constants'
+import { DEFAULT_SALT, SOUND_FEE, ONE_HOUR, PRICE, BAD_ADDRESS, EDITION_MAX } from './test-constants'
 import {
   MINTER_ROLE,
   NULL_ADDRESS,
