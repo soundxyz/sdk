@@ -686,12 +686,18 @@ export function SoundClient({
       // If this is a failed transaction, the first 4 bytes of the response
       // will be the custom error selector (hash of its signature)
       const firstFourBytes = response.slice(0, 10)
+      const contractError = errorSigHashToName[firstFourBytes]
 
-      return errorSigHashToName[firstFourBytes] ?? 'Unable to parse error'
+      if (!contractError) {
+        console.warn('No contract error found')
+        return null
+      }
+
+      return contractError
     } catch (err) {
-      console.error(err)
+      console.error('Experienced problem while attempting to parse error', err)
+      return null
     }
-    return
   }
 
   /*********************************************************
