@@ -36,7 +36,7 @@ import {
   UINT32_MAX,
   NULL_BYTES32,
   MINT_GAS_LIMIT_MULTIPLIER,
-  CUSTOM_ERRORS,
+  TransactionErrors,
 } from '../src/utils/constants'
 import { getSaltAsBytes32, scaleAmount } from '../src/utils/helpers'
 import {
@@ -1830,7 +1830,7 @@ describe('getContractError returns expected error', () => {
 
     const customError = await client.getContractError(tx.hash)
 
-    expect(customError).to.equal(CUSTOM_ERRORS.ExceedsEditionAvailableSupply)
+    expect(customError).to.equal(TransactionErrors.ExceedsEditionAvailableSupply)
   })
 
   context('RangeMinter', () => {
@@ -1869,7 +1869,7 @@ describe('getContractError returns expected error', () => {
 
       const customError = await client.getContractError(tx.hash)
 
-      expect(customError).to.equal(CUSTOM_ERRORS.ExceedsAvailableSupply)
+      expect(customError).to.equal(TransactionErrors.ExceedsAvailableSupply)
     })
 
     it('mint attempt when user has already hit their max', async () => {
@@ -1907,7 +1907,7 @@ describe('getContractError returns expected error', () => {
 
       const customError = await client.getContractError(tx.hash)
 
-      expect(customError).to.equal(CUSTOM_ERRORS.ExceedsMaxPerAccount)
+      expect(customError).to.equal(TransactionErrors.ExceedsMaxPerAccount)
     })
   })
 
@@ -1946,7 +1946,7 @@ describe('getContractError returns expected error', () => {
 
       const customError = await client.getContractError(tx.hash)
 
-      expect(customError).to.equal(CUSTOM_ERRORS.ExceedsAvailableSupply)
+      expect(customError).to.equal(TransactionErrors.ExceedsAvailableSupply)
     })
 
     it('mint attempt when user has already hit their max', async () => {
@@ -1983,7 +1983,7 @@ describe('getContractError returns expected error', () => {
 
       const customError = await client.getContractError(tx.hash)
 
-      expect(customError).to.equal(CUSTOM_ERRORS.ExceedsMaxPerAccount)
+      expect(customError).to.equal(TransactionErrors.ExceedsMaxPerAccount)
     })
   })
 })

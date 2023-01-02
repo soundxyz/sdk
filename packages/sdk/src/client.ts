@@ -33,7 +33,8 @@ import {
   NULL_BYTES32,
   MINT_GAS_LIMIT_MULTIPLIER,
   MINT_FALLBACK_GAS_LIMIT,
-  errorSigHashToName,
+  TransactionErrorSigNames,
+  TransactionError,
 } from './utils/constants'
 import { getLazyOption, getSaltAsBytes32, validateAddress, scaleAmount } from './utils/helpers'
 import { LazyPromise } from './utils/promise'
@@ -652,7 +653,7 @@ export function SoundClient({
     return mintSchedules.flat().sort((a, b) => a.startTime - b.startTime)
   }
 
-  async function getContractError(txHash: string) {
+  async function getContractError(txHash: string): Promise<TransactionError | null> {
     if (
       txHash === NULL_BYTES32 ||
       txHash.slice(0, 2) !== '0x' ||
@@ -686,16 +687,13 @@ export function SoundClient({
       // If this is a failed transaction, the first 4 bytes of the response
       // will be the custom error selector (hash of its signature)
       const firstFourBytes = response.slice(0, 10)
-      const contractError = errorSigHashToName[firstFourBytes]
+      const contractError = TransactionErrorSigNames[firstFourBytes]
 
-      if (!contractError) {
-        console.warn('No contract error found')
-        return null
-      }
+      if (!contractError) return null
 
       return contractError
     } catch (err) {
-      console.error('Experienced problem while attempting to parse error', err)
+      onError(err)
       return null
     }
   }
