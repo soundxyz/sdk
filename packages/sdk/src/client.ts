@@ -11,6 +11,7 @@ import {
   InvalidQuantityError,
   MissingMerkleProvider,
   MissingSignerError,
+  MissingProviderError,
   MissingSignerOrProviderError,
   MissingSoundAPI,
   NotEligibleMint,
@@ -22,6 +23,7 @@ import {
   InvalidEditionMaxMintableError,
   InvalidMaxMintablePerAccountError,
   InvalidMerkleRootError,
+  InvalidTxHashError,
 } from './errors'
 import {
   NULL_ADDRESS,
@@ -31,6 +33,8 @@ import {
   NULL_BYTES32,
   MINT_GAS_LIMIT_MULTIPLIER,
   MINT_FALLBACK_GAS_LIMIT,
+  ContractErrorSigHashToName,
+  ContractErrorName,
 } from './utils/constants'
 import { getLazyOption, getSaltAsBytes32, validateAddress, scaleAmount } from './utils/helpers'
 import { LazyPromise } from './utils/promise'
@@ -42,6 +46,7 @@ import type {
   MinterInterfaceId,
   MintOptions,
   SignerOrProvider,
+  Provider,
   SoundClientConfig,
 } from './types'
 import type { Signer } from '@ethersproject/abstract-signer'
@@ -80,6 +85,7 @@ export function SoundClient({
     editionMinterMintIds,
     editionScheduleIds,
     editionMintSchedules,
+    getContractError,
   }
 
   const IdempotentCache: Record<string, unknown> = {}
@@ -647,6 +653,51 @@ export function SoundClient({
     return mintSchedules.flat().sort((a, b) => a.startTime - b.startTime)
   }
 
+  async function getContractError(txHash: string): Promise<ContractErrorName | null> {
+    if (
+      txHash === NULL_BYTES32 ||
+      txHash.slice(0, 2) !== '0x' ||
+      // Tx hash is 32 bytes, which is 64 hex characters + '0x'
+      txHash.length !== 66
+    ) {
+      throw new InvalidTxHashError({ txHash })
+    }
+
+    const provider = await _requireProvider()
+    const tx = await provider.getTransaction(txHash)
+
+    try {
+      // Simulate the original transaction
+      const response = await provider.call(
+        {
+          to: tx.to,
+          from: tx.from,
+          nonce: tx.nonce,
+          gasLimit: tx.gasLimit,
+          gasPrice: tx.gasPrice,
+          data: tx.data,
+          value: tx.value,
+          chainId: tx.chainId,
+          type: tx.type ?? undefined,
+          accessList: tx.accessList,
+        },
+        tx.blockNumber,
+      )
+
+      // If this is a failed transaction, the first 4 bytes of the response
+      // will be the custom error selector (hash of its signature)
+      const firstFourBytes = response.slice(0, 10)
+      const contractError = ContractErrorSigHashToName[firstFourBytes]
+
+      if (!contractError) return null
+
+      return contractError
+    } catch (err) {
+      onError(err)
+      return null
+    }
+  }
+
   /*********************************************************
                   INTERNAL FUNCTIONS
  ********************************************************/
@@ -728,6 +779,15 @@ export function SoundClient({
     }
 
     throw new MissingSignerError()
+  }
+
+  async function _requireProvider(): Promise<Provider> {
+    if (client.provider) {
+      const provider = await getLazyOption(client.provider)
+      return provider
+    }
+
+    throw new MissingProviderError()
   }
 
   async function _requireSignerOrProvider(): Promise<{ signerOrProvider: SignerOrProvider }> {

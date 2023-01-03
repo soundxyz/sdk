@@ -8,6 +8,14 @@ export class MissingSignerError extends Error {
   }
 }
 
+export class MissingProviderError extends Error {
+  readonly name = 'MissingProviderError'
+
+  constructor() {
+    super('Must provide provider')
+  }
+}
+
 export class MissingSignerOrProviderError extends Error {
   readonly name = 'MissingSignerOrProviderError'
 
@@ -300,5 +308,17 @@ export class InvalidTimeValuesError extends Error {
     this.startTime = startTime
     this.cutoffTime = cutoffTime
     this.endTime = endTime
+  }
+}
+
+export class InvalidTxHashError extends Error {
+  readonly name = 'InvalidTxHashError'
+
+  readonly txHash: string
+
+  constructor({ txHash }: { txHash: string }) {
+    super('Must be a valid bytes32 transaction hash')
+
+    this.txHash = txHash
   }
 }

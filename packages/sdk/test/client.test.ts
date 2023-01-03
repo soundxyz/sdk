@@ -28,7 +28,7 @@ import {
   InvalidMaxMintablePerAccountError,
   InvalidMaxMintableError,
 } from '../src/errors'
-import { DEFAULT_SALT, SOUND_FEE, ONE_HOUR, PRICE, BAD_ADDRESS } from './test-constants'
+import { DEFAULT_SALT, SOUND_FEE, ONE_HOUR, PRICE, BAD_ADDRESS, EDITION_MAX } from './test-constants'
 import {
   MINTER_ROLE,
   NULL_ADDRESS,
@@ -36,6 +36,7 @@ import {
   UINT32_MAX,
   NULL_BYTES32,
   MINT_GAS_LIMIT_MULTIPLIER,
+  ContractErrorName,
 } from '../src/utils/constants'
 import { getSaltAsBytes32, scaleAmount } from '../src/utils/helpers'
 import {
@@ -45,6 +46,8 @@ import {
   getGenericRangeMintConfig,
   getGenericMerkleMintConfig,
   didntThrowExpectedError,
+  mineBlock,
+  setAutoMine,
 } from './helpers'
 
 import type { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
@@ -1766,5 +1769,221 @@ describe('mintSchedules', () => {
     expect(dataWithScheduleIds[0].mintId).equal(dataNoScheduleIds[0].mintId)
 
     expect(dataNoScheduleIds[0].mintId).to.equal(first.mintId)
+  })
+})
+
+describe('getContractError returns expected error', () => {
+  let client: SoundClient
+  const START_TIME = now()
+  const MAX_QUANTITY = 10
+  const merkleTestHelper = MerkleTestHelper()
+  const merkleTree = merkleTestHelper.getMerkleTree()
+
+  beforeEach(async () => {
+    client = SoundClient({
+      provider: ethers.provider,
+      signer: buyerWallet,
+      merkleProvider: {
+        merkleProof({ userAddress }) {
+          return merkleTestHelper.getProof({ merkleTree, address: userAddress })
+        },
+      },
+    })
+  })
+
+  afterEach(async () => {
+    await setAutoMine(true)
+  })
+
+  it('mint attempt on a sold-out edition', async () => {
+    const minter = RangeEditionMinter__factory.connect(rangeEditionMinter.address, artistWallet)
+    const minterCalls = [
+      {
+        contractAddress: rangeEditionMinter.address,
+        calldata: minter.interface.encodeFunctionData('createEditionMint', [
+          precomputedEditionAddress,
+          PRICE,
+          START_TIME,
+          START_TIME + ONE_HOUR, // cutoffTime,
+          START_TIME + ONE_HOUR * 2, // endTime,
+          0, // affiliateFeeBPS
+          EDITION_MAX * 2 - 1, // maxMintableLower
+          EDITION_MAX * 2, // maxMintableUpper
+          EDITION_MAX * 2, // maxMintablePerAccount,
+        ]),
+      },
+    ]
+
+    await setupTest({ minterCalls })
+
+    const mintSchedules = await client.mintSchedules({ editionAddress: precomputedEditionAddress })
+
+    await setAutoMine(false)
+
+    // Mint full quantity
+    client.mint({ mintSchedule: mintSchedules[0], quantity: EDITION_MAX })
+
+    // Attempt to mint again
+    const tx = await client.mint({ mintSchedule: mintSchedules[0], quantity: 1 })
+
+    await mineBlock()
+
+    const customError = await client.getContractError(tx.hash)
+
+    expect(customError).to.equal(ContractErrorName.ExceedsEditionAvailableSupply)
+  })
+
+  context('RangeMinter', () => {
+    it('mint attempt on a sold-out schedule', async () => {
+      const minter = RangeEditionMinter__factory.connect(rangeEditionMinter.address, artistWallet)
+      const minterCalls = [
+        {
+          contractAddress: rangeEditionMinter.address,
+          calldata: minter.interface.encodeFunctionData('createEditionMint', [
+            precomputedEditionAddress,
+            PRICE,
+            START_TIME,
+            START_TIME + ONE_HOUR, // cutoffTime,
+            START_TIME + ONE_HOUR * 2, // endTime,
+            0, // affiliateFeeBPS
+            MAX_QUANTITY - 1, // maxMintableLower
+            MAX_QUANTITY, // maxMintableUpper
+            MAX_QUANTITY, // maxMintablePerAccount,
+          ]),
+        },
+      ]
+
+      await setupTest({ minterCalls })
+
+      const mintSchedules = await client.mintSchedules({ editionAddress: precomputedEditionAddress })
+
+      await setAutoMine(false)
+
+      // Mint full quantity
+      client.mint({ mintSchedule: mintSchedules[0], quantity: MAX_QUANTITY })
+
+      // Attempt to mint again
+      const tx = await client.mint({ mintSchedule: mintSchedules[0], quantity: 1 })
+
+      await mineBlock()
+
+      const customError = await client.getContractError(tx.hash)
+
+      expect(customError).to.equal(ContractErrorName.ExceedsAvailableSupply)
+    })
+
+    it('mint attempt when user has already hit their max', async () => {
+      const MAX_MINTABLE_PER_ACCOUNT = 1
+      const minter = RangeEditionMinter__factory.connect(rangeEditionMinter.address, artistWallet)
+      const minterCalls = [
+        {
+          contractAddress: rangeEditionMinter.address,
+          calldata: minter.interface.encodeFunctionData('createEditionMint', [
+            precomputedEditionAddress,
+            PRICE,
+            START_TIME,
+            START_TIME + ONE_HOUR, // cutoffTime,
+            START_TIME + ONE_HOUR * 2, // endTime,
+            0, // affiliateFeeBPS
+            MAX_QUANTITY - 1, // maxMintableLower
+            MAX_QUANTITY, // maxMintableUpper
+            MAX_MINTABLE_PER_ACCOUNT, // maxMintablePerAccount,
+          ]),
+        },
+      ]
+
+      await setupTest({ minterCalls })
+
+      const mintSchedules = await client.mintSchedules({ editionAddress: precomputedEditionAddress })
+
+      await setAutoMine(false)
+
+      client.mint({ mintSchedule: mintSchedules[0], quantity: MAX_MINTABLE_PER_ACCOUNT })
+
+      // Attempt to mint again
+      const tx = await client.mint({ mintSchedule: mintSchedules[0], quantity: 1 })
+
+      await mineBlock()
+
+      const customError = await client.getContractError(tx.hash)
+
+      expect(customError).to.equal(ContractErrorName.ExceedsMaxPerAccount)
+    })
+  })
+
+  context('MerkleDropMinter', () => {
+    it('mint attempt on a sold-out schedule', async () => {
+      const merkleRoot = merkleTestHelper.getMerkleRoot(merkleTree)
+      const minterCalls = [
+        {
+          contractAddress: merkleDropMinter.address,
+          calldata: merkleDropMinter.interface.encodeFunctionData('createEditionMint', [
+            precomputedEditionAddress,
+            merkleRoot,
+            PRICE,
+            START_TIME,
+            START_TIME + ONE_HOUR,
+            0, // affiliateFeeBPS
+            MAX_QUANTITY, // maxMintable,
+            MAX_QUANTITY, // maxMintablePerAccount
+          ]),
+        },
+      ]
+
+      await setupTest({ minterCalls })
+
+      const mintSchedules = await client.mintSchedules({ editionAddress: precomputedEditionAddress })
+
+      await setAutoMine(false)
+
+      // Mint full quantity
+      client.mint({ mintSchedule: mintSchedules[0], quantity: MAX_QUANTITY })
+
+      // Attempt to mint again
+      const tx = await client.mint({ mintSchedule: mintSchedules[0], quantity: 1 })
+
+      await mineBlock()
+
+      const customError = await client.getContractError(tx.hash)
+
+      expect(customError).to.equal(ContractErrorName.ExceedsAvailableSupply)
+    })
+
+    it('mint attempt when user has already hit their max', async () => {
+      const MAX_MINTABLE_PER_ACCOUNT = 1
+      const merkleRoot = merkleTestHelper.getMerkleRoot(merkleTree)
+      const minterCalls = [
+        {
+          contractAddress: merkleDropMinter.address,
+          calldata: merkleDropMinter.interface.encodeFunctionData('createEditionMint', [
+            precomputedEditionAddress,
+            merkleRoot,
+            PRICE,
+            START_TIME,
+            START_TIME + ONE_HOUR,
+            0, // affiliateFeeBPS
+            EDITION_MAX, // maxMintable,
+            MAX_MINTABLE_PER_ACCOUNT, // maxMintablePerAccount
+          ]),
+        },
+      ]
+
+      await setupTest({ minterCalls })
+
+      const mintSchedules = await client.mintSchedules({ editionAddress: precomputedEditionAddress })
+
+      await setAutoMine(false)
+
+      client.mint({ mintSchedule: mintSchedules[0], quantity: MAX_MINTABLE_PER_ACCOUNT })
+
+      // Attempt to mint again
+      const tx = await client.mint({ mintSchedule: mintSchedules[0], quantity: 1 })
+
+      await mineBlock()
+
+      const customError = await client.getContractError(tx.hash)
+
+      expect(customError).to.equal(ContractErrorName.ExceedsMaxPerAccount)
+    })
   })
 })
