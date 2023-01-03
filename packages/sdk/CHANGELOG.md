@@ -1,5 +1,19 @@
 # @soundxyz/sdk
 
+## 0.13.0
+
+### Minor Changes
+
+- [#175](https://github.com/soundxyz/sdk/pull/175) [`4d34ade`](https://github.com/soundxyz/sdk/commit/4d34ade567773c8e34af7d2a97ab962d0eb0f565) Thanks [@gigamesh](https://github.com/gigamesh)! - getContractError helper for parsing failed transactions
+
+### Patch Changes
+
+- [#165](https://github.com/soundxyz/sdk/pull/165) [`4061789`](https://github.com/soundxyz/sdk/commit/4061789e2a378b3f7940a2a0325c9d7b6c379cbc) Thanks [@gigamesh](https://github.com/gigamesh)! - Improves address validation
+
+- [#173](https://github.com/soundxyz/sdk/pull/173) [`8d72b04`](https://github.com/soundxyz/sdk/commit/8d72b04333d429155fc45e7c246264c5db11f93d) Thanks [@vigneshka](https://github.com/vigneshka)! - Bump sound-protocol to 1.3.0
+
+- [#164](https://github.com/soundxyz/sdk/pull/164) [`f133dea`](https://github.com/soundxyz/sdk/commit/f133dea9859a348e8d8bc60cced837bd7312f30b) Thanks [@gigamesh](https://github.com/gigamesh)! - Adds fallback gas limit for mint calls
+
 ## 0.12.1
 
 ### Patch Changes
