@@ -33,7 +33,7 @@ import {
   NULL_BYTES32,
   MINT_GAS_LIMIT_MULTIPLIER,
   MINT_FALLBACK_GAS_LIMIT,
-  ContractErrorSigNames,
+  ContractErrorSigHashToName,
   ContractErrorName,
 } from './utils/constants'
 import { getLazyOption, getSaltAsBytes32, validateAddress, scaleAmount } from './utils/helpers'
@@ -687,7 +687,7 @@ export function SoundClient({
       // If this is a failed transaction, the first 4 bytes of the response
       // will be the custom error selector (hash of its signature)
       const firstFourBytes = response.slice(0, 10)
-      const contractError = ContractErrorSigNames[firstFourBytes]
+      const contractError = ContractErrorSigHashToName[firstFourBytes]
 
       if (!contractError) return null
 

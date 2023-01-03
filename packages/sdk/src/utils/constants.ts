@@ -37,7 +37,7 @@ export const MINT_GAS_LIMIT_MULTIPLIER = 1.2
 
 export const MINT_FALLBACK_GAS_LIMIT = 200_000
 
-export const ContractErrorNames = {
+export const ContractErrorName = {
   // SoundEdition
   MetadataIsFrozen: 'MetadataIsFrozen',
   InvalidRoyaltyBPS: 'InvalidRoyaltyBPS',
@@ -96,10 +96,10 @@ const {
   MaxMintablePerAccountIsZero,
   InvalidMerkleProof,
   MerkleRootHashIsEmpty,
-} = ContractErrorNames
+} = ContractErrorName
 
 // Maps contract error signature hashes to error names
-export const ContractErrorSigNames = {
+export const ContractErrorSigHashToName = {
   // SoundEdition
   [editionInterface.getSighash(MetadataIsFrozen)]: MetadataIsFrozen,
   [editionInterface.getSighash(InvalidRoyaltyBPS)]: InvalidRoyaltyBPS,
@@ -134,4 +134,4 @@ export const ContractErrorSigNames = {
   [merkleMinterInteface.getSighash(MaxMintablePerAccountIsZero)]: MaxMintablePerAccountIsZero,
 } as const
 
-export type ContractErrorName = typeof ContractErrorSigNames[keyof typeof ContractErrorSigNames]
+export type ContractErrorName = typeof ContractErrorSigHashToName[keyof typeof ContractErrorSigHashToName]
