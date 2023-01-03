@@ -236,4 +236,4 @@ export * from './merkle/types'
 
 export type AddressInputType = 'DEPLOYER' | 'SOUND_EDITION' | 'MINTER' | 'FUNDING_RECIPIENT' | 'METADATA_MODULE'
 
-export type { ContractErrorName } from './utils/constants'
+export type { ContractErrorName, ContractErrorSigHashToName } from './utils/constants'

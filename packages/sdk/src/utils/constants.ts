@@ -69,6 +69,8 @@ export const ContractErrorName = {
   MerkleRootHashIsEmpty: 'MerkleRootHashIsEmpty',
 } as const
 
+export type ContractErrorName = typeof ContractErrorName[keyof typeof ContractErrorName]
+
 const {
   MetadataIsFrozen,
   InvalidRoyaltyBPS,
@@ -134,4 +136,4 @@ export const ContractErrorSigHashToName = {
   [merkleMinterInteface.getSighash(MaxMintablePerAccountIsZero)]: MaxMintablePerAccountIsZero,
 } as const
 
-export type ContractErrorName = typeof ContractErrorSigHashToName[keyof typeof ContractErrorSigHashToName]
+export type ContractErrorSigHashToName = typeof ContractErrorSigHashToName[keyof typeof ContractErrorSigHashToName]
