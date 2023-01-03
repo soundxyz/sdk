@@ -34,7 +34,7 @@ import {
   MINT_GAS_LIMIT_MULTIPLIER,
   MINT_FALLBACK_GAS_LIMIT,
   TransactionErrorSigNames,
-  TransactionError,
+  TransactionErrorName,
 } from './utils/constants'
 import { getLazyOption, getSaltAsBytes32, validateAddress, scaleAmount } from './utils/helpers'
 import { LazyPromise } from './utils/promise'
@@ -653,7 +653,7 @@ export function SoundClient({
     return mintSchedules.flat().sort((a, b) => a.startTime - b.startTime)
   }
 
-  async function getContractError(txHash: string): Promise<TransactionError | null> {
+  async function getContractError(txHash: string): Promise<TransactionErrorName | null> {
     if (
       txHash === NULL_BYTES32 ||
       txHash.slice(0, 2) !== '0x' ||

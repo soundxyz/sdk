@@ -36,7 +36,7 @@ import {
   UINT32_MAX,
   NULL_BYTES32,
   MINT_GAS_LIMIT_MULTIPLIER,
-  TransactionErrors,
+  TransactionErrorNames,
 } from '../src/utils/constants'
 import { getSaltAsBytes32, scaleAmount } from '../src/utils/helpers'
 import {
@@ -1830,7 +1830,7 @@ describe('getContractError returns expected error', () => {
 
     const customError = await client.getContractError(tx.hash)
 
-    expect(customError).to.equal(TransactionErrors.ExceedsEditionAvailableSupply)
+    expect(customError).to.equal(TransactionErrorNames.ExceedsEditionAvailableSupply)
   })
 
   context('RangeMinter', () => {
@@ -1869,7 +1869,7 @@ describe('getContractError returns expected error', () => {
 
       const customError = await client.getContractError(tx.hash)
 
-      expect(customError).to.equal(TransactionErrors.ExceedsAvailableSupply)
+      expect(customError).to.equal(TransactionErrorNames.ExceedsAvailableSupply)
     })
 
     it('mint attempt when user has already hit their max', async () => {
@@ -1907,7 +1907,7 @@ describe('getContractError returns expected error', () => {
 
       const customError = await client.getContractError(tx.hash)
 
-      expect(customError).to.equal(TransactionErrors.ExceedsMaxPerAccount)
+      expect(customError).to.equal(TransactionErrorNames.ExceedsMaxPerAccount)
     })
   })
 
@@ -1946,7 +1946,7 @@ describe('getContractError returns expected error', () => {
 
       const customError = await client.getContractError(tx.hash)
 
-      expect(customError).to.equal(TransactionErrors.ExceedsAvailableSupply)
+      expect(customError).to.equal(TransactionErrorNames.ExceedsAvailableSupply)
     })
 
     it('mint attempt when user has already hit their max', async () => {
@@ -1983,7 +1983,7 @@ describe('getContractError returns expected error', () => {
 
       const customError = await client.getContractError(tx.hash)
 
-      expect(customError).to.equal(TransactionErrors.ExceedsMaxPerAccount)
+      expect(customError).to.equal(TransactionErrorNames.ExceedsMaxPerAccount)
     })
   })
 })
