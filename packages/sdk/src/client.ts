@@ -243,13 +243,34 @@ export function SoundClient({
       }
     }
 
-    const remaining =
+    // Get the edition's remaining token quantity.
+    const { signerOrProvider } = await _requireSignerOrProvider()
+    const editionContract = SoundEditionV1_1__factory.connect(mintSchedule.editionAddress, signerOrProvider)
+
+    const [editionTotalMinted, editionMaxMintable] = await Promise.all([
+      editionContract.totalMinted(),
+      editionContract.editionMaxMintable(),
+    ])
+
+    const editionRemainingQty = editionMaxMintable - editionTotalMinted.toNumber()
+
+    if (!editionRemainingQty) {
+      return 0
+    }
+
+    // Get eligible quantity for the user on this mint schedule.
+    const remainingForSchedule =
       (typeof mintSchedule.maxMintable === 'function'
         ? mintSchedule.maxMintable(timestamp)
         : mintSchedule.maxMintable) - mintSchedule.totalMinted
 
-    const alreadyMinted = await numberMinted({ editionAddress: mintSchedule.editionAddress, userAddress })
-    return Math.max(Math.min(remaining, mintSchedule.maxMintablePerAccount - alreadyMinted), 0)
+    const mintedByUserFromSchedule = await numberMinted({ editionAddress: mintSchedule.editionAddress, userAddress })
+    const eligibleForUserOnSchedule = mintSchedule.maxMintablePerAccount - mintedByUserFromSchedule
+    const scheduleEligibleQty = Math.min(remainingForSchedule, eligibleForUserOnSchedule)
+
+    // Return the minimum of the two. The number of tokens minted within the mint schedule
+    // can never exceed the number of tokens available for the edition.
+    return Math.max(0, Math.min(scheduleEligibleQty, editionRemainingQty))
   }
 
   function getMerkleProof({ merkleRoot, userAddress }: MerkleProofParameters) {
