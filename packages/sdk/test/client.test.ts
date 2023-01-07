@@ -690,7 +690,7 @@ describe('eligibleQuantity: multiple sale schedules', () => {
         ]),
       },
       {
-        contractAddress: editionMaxMinter.address,
+        contractAddress: rangeEditionMinter.address,
         calldata: rangeMinter.interface.encodeFunctionData('createEditionMint', [
           precomputedEditionAddress,
           PRICE,
@@ -1125,7 +1125,7 @@ describe('BaseMinter functionality', () => {
           startTime,
           startTime + ONE_HOUR,
           0, // affiliateFeeBPS
-          2, // maxMintablePerAccount,
+          EDITION_MAX, // maxMintablePerAccount,
         ]),
       },
     ]
@@ -1179,7 +1179,7 @@ describe('BaseMinter functionality', () => {
   })
 
   it(`Should throw error if more than eligibleQuantity requested`, async () => {
-    const quantity = 5
+    const quantity = EDITION_MAX + 1
     const eligibleQuantity = await client.eligibleQuantity({
       mintSchedule: mintSchedules[0],
       userAddress: buyerWallet.address,
@@ -1187,11 +1187,9 @@ describe('BaseMinter functionality', () => {
     await client
       .mint({ mintSchedule: mintSchedules[0], quantity })
       .then(didntThrowExpectedError)
-      .catch((error) => {
+      .catch(async (error) => {
         expect(error).instanceOf(NotEligibleMint)
-
         assert(error instanceof NotEligibleMint)
-
         expect(error.eligibleMintQuantity).equal(eligibleQuantity)
       })
   })
@@ -1834,6 +1832,7 @@ describe('editionScheduleIds', () => {
     expect(scheduleIds).deep.eq([
       { minterAddress: merkleDropMinter.address, mintIds: [0] },
       { minterAddress: rangeEditionMinter.address, mintIds: [0] },
+      { minterAddress: editionMaxMinter.address, mintIds: [] },
     ])
   })
 })
