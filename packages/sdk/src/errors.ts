@@ -299,11 +299,13 @@ export class InvalidTimeValuesError extends Error {
   readonly name = 'InvalidTimeValuesError'
 
   readonly startTime: number
-  readonly cutoffTime: number
+  readonly cutoffTime?: number
   readonly endTime: number
 
-  constructor({ startTime, cutoffTime, endTime }: { startTime: number; cutoffTime: number; endTime: number }) {
-    super('startTime must be earlier than cutoffTime and cutoffTime must be earlier than endTime')
+  constructor({ startTime, cutoffTime, endTime }: { startTime: number; cutoffTime?: number; endTime: number }) {
+    super(
+      `startTime must be earlier than ${cutoffTime ? 'cutoffTime and cutoffTime must be earlier than ' : ''}endTime`,
+    )
 
     this.startTime = startTime
     this.cutoffTime = cutoffTime
