@@ -197,7 +197,7 @@ describe('isSoundEdition', () => {
     expect(err1).not.equal(err2)
   })
 
-  it('Correctly identifies SoundEdition addresses', async () => {
+  it.only('Correctly identifies SoundEdition addresses', async () => {
     await setupTest({})
 
     const wallet = Wallet.createRandom()

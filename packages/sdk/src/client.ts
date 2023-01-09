@@ -114,20 +114,15 @@ export function SoundClient({
 
       try {
         return await editionContract.supportsInterface(interfaceIds.ISoundEditionV1)
-      } catch (err) {
+      } catch (err: any) {
         onError(err)
-        let chainId: number | null = null
-        try {
-          chainId = await _getNetworkChainId()
-        } catch (err) {
-          onError(err)
+
+        // CALL_EXCEPTION gets thrown unless supportsInterface() is true
+        if (err.code === 'CALL_EXCEPTION') {
+          return false
         }
-        onError(
-          Error(
-            `Error checking if ${editionAddress} is a SoundEdition contract (interfaceId: ${interfaceIds.ISoundEditionV1}). Network chain ID: ${chainId}`,
-          ),
-        )
-        return false
+
+        throw err
       }
     })
   }
