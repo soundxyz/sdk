@@ -1,5 +1,13 @@
 # @soundxyz/sdk
 
+## 0.13.1
+
+### Patch Changes
+
+- [#180](https://github.com/soundxyz/sdk/pull/180) [`ecde08d`](https://github.com/soundxyz/sdk/commit/ecde08dac7e1c1271e7176ea0de3a8bb1746b600) Thanks [@gigamesh](https://github.com/gigamesh)! - Check for CALL_EXCEPTION in isSoundEdition catch, otherwise throw error higher
+
+- [#168](https://github.com/soundxyz/sdk/pull/168) [`fa78c09`](https://github.com/soundxyz/sdk/commit/fa78c0939baec7ab3a825491fe29a2e1d2705e58) Thanks [@gigamesh](https://github.com/gigamesh)! - Makes eligibleQuantity respect edition quantity over mint schedule quantity
+
 ## 0.13.0
 
 ### Minor Changes
