@@ -115,9 +115,7 @@ export function SoundClient({
       try {
         return await editionContract.supportsInterface(interfaceIds.ISoundEditionV1)
       } catch (err: any) {
-        onError(err)
-
-        // CALL_EXCEPTION gets thrown unless supportsInterface() is true
+        // CALL_EXCEPTION gets thrown if the contract doesn't exist or supportsInterface isn't implemented
         if (err.code === 'CALL_EXCEPTION') {
           return false
         }
