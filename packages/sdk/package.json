@@ -76,7 +76,7 @@
     "ethers": "^5.7.0",
     "graphql": "^16.6.0",
     "hardhat": "^2.10.2",
-    "merkletreejs": "^0.2.32",
+    "merkletreejs": "^0.3.0",
     "prettier": "^2.7.1",
     "require-env-variable": "^4.0.1",
     "ts-node": "^10.9.1",
