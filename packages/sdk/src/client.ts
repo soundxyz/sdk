@@ -737,7 +737,6 @@ export function SoundClient({
           case interfaceIds.IRangeEditionMinter: {
             const minterContract = minterFactoryMap[interfaceId].connect(minterAddress, signerOrProvider)
             const mintSchedule = await minterContract.mintInfo(editionAddress, mintId)
-
             return {
               mintType: 'RangeEdition',
               interfaceId,
