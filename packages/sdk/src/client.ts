@@ -756,6 +756,7 @@ export function SoundClient({
                   : mintSchedule.maxMintableLower,
               maxMintablePerAccount: mintSchedule.maxMintablePerAccount,
               totalMinted: mintSchedule.totalMinted,
+              affiliateFeeBPS: mintSchedule.affiliateFeeBPS,
             }
           }
           case interfaceIds.IMerkleDropMinter: {
@@ -774,6 +775,7 @@ export function SoundClient({
               maxMintable: mintSchedule.maxMintable,
               maxMintablePerAccount: mintSchedule.maxMintablePerAccount,
               totalMinted: mintSchedule.totalMinted,
+              affiliateFeeBPS: mintSchedule.affiliateFeeBPS,
             }
           }
           default: {
