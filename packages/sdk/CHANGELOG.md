@@ -1,5 +1,11 @@
 # @soundxyz/sdk
 
+## 0.13.2
+
+### Patch Changes
+
+- [#185](https://github.com/soundxyz/sdk/pull/185) [`ecbf4af`](https://github.com/soundxyz/sdk/commit/ecbf4afdc62902cd32dee1cd76163052d9b70ddb) Thanks [@PabloSzx](https://github.com/PabloSzx)! - MintSchedule includes affiliateFeeBPS
+
 ## 0.13.1
 
 ### Patch Changes
