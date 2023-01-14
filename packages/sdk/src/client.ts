@@ -737,6 +737,7 @@ export function SoundClient({
           case interfaceIds.IRangeEditionMinter: {
             const minterContract = minterFactoryMap[interfaceId].connect(minterAddress, signerOrProvider)
             const mintSchedule = await minterContract.mintInfo(editionAddress, mintId)
+
             return {
               mintType: 'RangeEdition',
               interfaceId,
@@ -756,6 +757,7 @@ export function SoundClient({
                   : mintSchedule.maxMintableLower,
               maxMintablePerAccount: mintSchedule.maxMintablePerAccount,
               totalMinted: mintSchedule.totalMinted,
+              affiliateFeeBPS: mintSchedule.affiliateFeeBPS,
             }
           }
           case interfaceIds.IMerkleDropMinter: {
@@ -774,6 +776,7 @@ export function SoundClient({
               maxMintable: mintSchedule.maxMintable,
               maxMintablePerAccount: mintSchedule.maxMintablePerAccount,
               totalMinted: mintSchedule.totalMinted,
+              affiliateFeeBPS: mintSchedule.affiliateFeeBPS,
             }
           }
           default: {

@@ -92,6 +92,7 @@ export type MintScheduleBase = {
   price: BigNumber
   maxMintablePerAccount: number
   totalMinted: number
+  affiliateFeeBPS: number
 }
 
 export type MinterInterfaceId = typeof interfaceIds.IMerkleDropMinter | typeof interfaceIds.IRangeEditionMinter
