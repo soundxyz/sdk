@@ -52,7 +52,7 @@ import type {
 import type { Signer } from '@ethersproject/abstract-signer'
 import type { BigNumberish } from '@ethersproject/bignumber'
 import type { ContractTransaction, Overrides, PayableOverrides } from '@ethersproject/contracts'
-import type { ReleaseInfoQueryVariables } from './api/graphql/gql'
+import type { ReleaseInfoQueryVariables, ReleaseShareInfoQueryVariables } from './api/graphql/gql'
 import type { ContractCall, EditionConfig, MintConfig, MintSchedule } from './types'
 import type { EditionInfoStructOutput } from '@soundxyz/sound-protocol/typechain/ISoundEditionV1_1'
 
@@ -537,9 +537,34 @@ export function SoundClient({
       }
     })
 
+    async function apiShare(
+      variables: Omit<ReleaseShareInfoQueryVariables, 'contractAddress' | 'editionId'> = {
+        // TODO: Remove https://linear.app/sound/issue/ENG-2933/set-default-value-on-html-parameters-of-embed-api-fields
+        releaseEmbedUriInput: { html: { height: '100%', style: 'border-radius: 5px', width: '100%' } },
+      },
+    ) {
+      const soundAPI = client.soundAPI
+      if (!soundAPI) throw new MissingSoundAPI()
+
+      const { data, errors } = await soundAPI.releaseShareInfo({ ...soundParams, ...variables })
+
+      const release = data?.release
+      if (!release) throw new SoundNotFoundError({ ...soundParams, graphqlErrors: errors })
+
+      return {
+        ...release,
+        mintStartDate: new Date(release.mintStartTimestamp),
+        track: {
+          ...release.track,
+          revealTimeDate: new Date(Math.max(0, Math.floor(release.mintStartTime - release.track.duration)) * 1000),
+        },
+      }
+    }
+
     return {
       contract,
       api,
+      apiShare,
     }
   }
 

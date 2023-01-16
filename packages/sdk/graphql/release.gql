@@ -106,3 +106,40 @@ query AudioFromTrack($trackId: UUID!) {
     revealTime
   }
 }
+
+query ReleaseShareInfo(
+  $contractAddress: Address!
+  $editionId: String
+  $releaseWebappUriInput: ReleaseWebappUriInput
+  $releaseEmbedUriInput: ReleaseWebEmbedInput!
+) {
+  release: releaseFromContract(contractAddress: $contractAddress, editionId: $editionId) {
+    id
+
+    contractAddress
+    editionId
+
+    type
+
+    mintStartTime
+    mintStartTimestamp
+
+    webappUri(input: $releaseWebappUriInput)
+    webEmbed(input: $releaseEmbedUriInput)
+
+    coverImage {
+      id
+      url
+    }
+
+    track {
+      id
+      duration
+      normalizedPeaks
+      revealedAudio {
+        id
+        url
+      }
+    }
+  }
+}
