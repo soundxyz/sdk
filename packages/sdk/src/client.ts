@@ -537,12 +537,7 @@ export function SoundClient({
       }
     })
 
-    async function apiShare(
-      variables: Omit<ReleaseShareInfoQueryVariables, 'contractAddress' | 'editionId'> = {
-        // TODO: Remove https://linear.app/sound/issue/ENG-2933/set-default-value-on-html-parameters-of-embed-api-fields
-        releaseEmbedUriInput: { html: { height: '100%', style: 'border-radius: 5px', width: '100%' } },
-      },
-    ) {
+    async function apiShare(variables: Omit<ReleaseShareInfoQueryVariables, 'contractAddress' | 'editionId'>) {
       const soundAPI = client.soundAPI
       if (!soundAPI) throw new MissingSoundAPI()
 
