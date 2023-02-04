@@ -18,6 +18,11 @@ export function MockAPI(api?: Partial<SoundAPI>): SoundAPI {
         data: null,
       }
     },
+    async releaseShareInfo() {
+      return {
+        data: null,
+      }
+    },
     ...api,
   }
 }

@@ -11,6 +11,9 @@ import {
   ReleaseInfo,
   ReleaseInfoQuery,
   ReleaseInfoQueryVariables,
+  ReleaseShareInfo,
+  ReleaseShareInfoQuery,
+  ReleaseShareInfoQueryVariables,
   Test,
   TestQuery,
 } from './api/graphql/gql'
@@ -97,6 +100,22 @@ export function SoundAPI({ apiEndpoint = 'https://api.sound.xyz/graphql', apiKey
         variables: {
           contractAddress,
           editionId,
+        },
+      })
+    },
+    releaseShareInfo({
+      contractAddress,
+      editionId = null,
+      releaseEmbedUriInput,
+      releaseWebappUriInput,
+    }: ReleaseShareInfoQueryVariables) {
+      return graphqlRequest<ReleaseShareInfoQuery, ReleaseShareInfoQueryVariables>({
+        query: ReleaseShareInfo,
+        variables: {
+          contractAddress,
+          editionId,
+          releaseEmbedUriInput: releaseEmbedUriInput ?? undefined,
+          releaseWebappUriInput: releaseWebappUriInput ?? undefined,
         },
       })
     },
