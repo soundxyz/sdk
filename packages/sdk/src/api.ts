@@ -114,8 +114,8 @@ export function SoundAPI({ apiEndpoint = 'https://api.sound.xyz/graphql', apiKey
         variables: {
           contractAddress,
           editionId,
-          releaseEmbedUriInput,
-          releaseWebappUriInput,
+          releaseEmbedUriInput: releaseEmbedUriInput ?? undefined,
+          releaseWebappUriInput: releaseWebappUriInput ?? undefined,
         },
       })
     },

@@ -111,7 +111,7 @@ query ReleaseShareInfo(
   $contractAddress: Address!
   $editionId: String
   $releaseWebappUriInput: ReleaseWebappUriInput
-  $releaseEmbedUriInput: ReleaseWebEmbedInput!
+  $releaseEmbedUriInput: ReleaseWebEmbedInput
 ) {
   release: releaseFromContract(contractAddress: $contractAddress, editionId: $editionId) {
     id
