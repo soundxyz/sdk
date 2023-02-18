@@ -7,9 +7,9 @@ import {
   RangeEditionMinter__factory,
   SoundCreatorV1,
   SoundCreatorV1__factory,
-  SoundEditionV1_1__factory,
+  SoundEditionV1_2__factory,
   SoundFeeRegistry__factory,
-} from '@soundxyz/sound-protocol/typechain/index'
+} from '@soundxyz/sound-protocol-private/typechain/index'
 import assert from 'assert'
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
@@ -82,7 +82,7 @@ async function deployProtocol() {
   // the addresses are deterministically generated based on the order of deployment
 
   // Deploy edition implmementation
-  const SoundEditionV1 = new SoundEditionV1_1__factory()
+  const SoundEditionV1 = new SoundEditionV1_2__factory()
   const soundEditionImp = await SoundEditionV1.connect(soundWallet).deploy()
 
   // Deploy & initialize creator
@@ -125,7 +125,7 @@ beforeEach(async () => {
  * Sets up an edition and mint schedules.
  */
 export async function setupTest({ minterCalls = [] }: { minterCalls?: ContractCall[] }) {
-  const editionInterface = new ethers.utils.Interface(SoundEditionV1_1__factory.abi)
+  const editionInterface = new ethers.utils.Interface(SoundEditionV1_2__factory.abi)
   const editionInitData = editionInterface.encodeFunctionData('initialize', [
     'Song Name',
     'SYMBOL',
@@ -758,7 +758,7 @@ describe('numberOfTokensOwned', () => {
     })
 
     // Burn token
-    const songContract = SoundEditionV1_1__factory.connect(precomputedEditionAddress, buyerWallet)
+    const songContract = SoundEditionV1_2__factory.connect(precomputedEditionAddress, buyerWallet)
     const numberOfTokensOwnedBeforeBurn = await client.numberOfTokensOwned({
       editionAddress: precomputedEditionAddress,
       userAddress: buyerWallet.address,
@@ -858,7 +858,7 @@ describe('numberOfTokensOwned', () => {
     expect(numberOfTokensOwnedBeforeBuyer2).to.equal(0)
 
     // Transfer out the song
-    const songContract = SoundEditionV1_1__factory.connect(precomputedEditionAddress, buyerWallet)
+    const songContract = SoundEditionV1_2__factory.connect(precomputedEditionAddress, buyerWallet)
     await songContract.transferFrom(buyerWallet.address, buyer2Wallet.address, 1)
 
     const numberOfTokensOwnedAfterBuyer1 = await client.numberOfTokensOwned({
@@ -942,14 +942,14 @@ describe('mint', () => {
 
     it(`Successfully mints via RangeEditionMinter`, async () => {
       const quantity = 2
-      const initialBalance = await SoundEditionV1_1__factory.connect(
+      const initialBalance = await SoundEditionV1_2__factory.connect(
         precomputedEditionAddress,
         ethers.provider,
       ).balanceOf(buyerWallet.address)
 
       await client.mint({ mintSchedule: mintSchedules[0], quantity })
 
-      const finalBalance = await SoundEditionV1_1__factory.connect(
+      const finalBalance = await SoundEditionV1_2__factory.connect(
         precomputedEditionAddress,
         ethers.provider,
       ).balanceOf(buyerWallet.address)
@@ -1054,7 +1054,7 @@ describe('mint', () => {
 
     it(`Successfully mints via MerkleDropMinter`, async () => {
       const quantity = 1
-      const initialBalance = await SoundEditionV1_1__factory.connect(
+      const initialBalance = await SoundEditionV1_2__factory.connect(
         precomputedEditionAddress,
         ethers.provider,
       ).balanceOf(buyerWallet.address)
@@ -1064,7 +1064,7 @@ describe('mint', () => {
         quantity,
       })
 
-      const finalBalance = await SoundEditionV1_1__factory.connect(
+      const finalBalance = await SoundEditionV1_2__factory.connect(
         precomputedEditionAddress,
         ethers.provider,
       ).balanceOf(buyerWallet.address)
@@ -1160,7 +1160,7 @@ describe('createEdition', () => {
       salt: SALT,
     })
 
-    const editionContract = SoundEditionV1_1__factory.connect(precomputedEditionAddress, ethers.provider)
+    const editionContract = SoundEditionV1_2__factory.connect(precomputedEditionAddress, ethers.provider)
 
     const [
       editionBaseURI,
@@ -1608,7 +1608,7 @@ describe('editionRegisteredMinters', () => {
 
     // Deploy a new minter and grant it minter role
     const newMinter = await RangeEditionMinter.connect(soundWallet).deploy('0x0000000000000000000000000000000000000001')
-    const soundEdition = SoundEditionV1_1__factory.connect(precomputedEditionAddress, artistWallet)
+    const soundEdition = SoundEditionV1_2__factory.connect(precomputedEditionAddress, artistWallet)
 
     await soundEdition.grantRoles(newMinter.address, MINTER_ROLE)
 

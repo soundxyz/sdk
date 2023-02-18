@@ -1,12 +1,12 @@
-import { interfaceIds } from '@soundxyz/sound-protocol'
+import { interfaceIds } from '@soundxyz/sound-protocol-private'
 import {
   RangeEditionMinter__factory,
   MerkleDropMinter__factory,
-  SoundEditionV1_1__factory,
+  SoundEditionV1_2__factory,
   IMinterModule__factory,
-} from '@soundxyz/sound-protocol/typechain/index'
+} from '@soundxyz/sound-protocol-private/typechain/index'
 
-const editionInterface = SoundEditionV1_1__factory.createInterface()
+const editionInterface = SoundEditionV1_2__factory.createInterface()
 const iMinterModuleInterface = IMinterModule__factory.createInterface()
 const rangeMinterInterface = RangeEditionMinter__factory.createInterface()
 const merkleMinterInteface = MerkleDropMinter__factory.createInterface()

@@ -1,11 +1,11 @@
-import { interfaceIds } from '@soundxyz/sound-protocol'
+import { interfaceIds } from '@soundxyz/sound-protocol-private'
 import {
   IMinterModule__factory,
   MerkleDropMinter__factory,
   RangeEditionMinter__factory,
   SoundCreatorV1__factory,
-  SoundEditionV1_1__factory,
-} from '@soundxyz/sound-protocol/typechain/index'
+  SoundEditionV1_2__factory,
+} from '@soundxyz/sound-protocol-private/typechain/index'
 import {
   CreatorAddressMissing,
   InvalidQuantityError,
@@ -54,7 +54,7 @@ import type { BigNumberish } from '@ethersproject/bignumber'
 import type { ContractTransaction, Overrides, PayableOverrides } from '@ethersproject/contracts'
 import type { ReleaseInfoQueryVariables, ReleaseShareInfoQueryVariables } from './api/graphql/gql'
 import type { ContractCall, EditionConfig, MintConfig, MintSchedule } from './types'
-import type { EditionInfoStructOutput } from '@soundxyz/sound-protocol/typechain/ISoundEditionV1_1'
+import type { EditionInfoStructOutput } from '@soundxyz/sound-protocol-private/typechain/ISoundEditionV1_1'
 
 export function SoundClient({
   signer,
@@ -110,7 +110,7 @@ export function SoundClient({
       validateAddress({ type: 'SOUND_EDITION', address: editionAddress })
       const { signerOrProvider } = await _requireSignerOrProvider()
 
-      const editionContract = SoundEditionV1_1__factory.connect(editionAddress, signerOrProvider)
+      const editionContract = SoundEditionV1_2__factory.connect(editionAddress, signerOrProvider)
 
       try {
         return await editionContract.supportsInterface(interfaceIds.ISoundEditionV1)
@@ -181,7 +181,7 @@ export function SoundClient({
 
     const { signerOrProvider } = await _requireSignerOrProvider()
 
-    const editionContract = SoundEditionV1_1__factory.connect(editionAddress, signerOrProvider)
+    const editionContract = SoundEditionV1_2__factory.connect(editionAddress, signerOrProvider)
 
     return (await editionContract.balanceOf(userAddress)).toNumber()
   }
@@ -191,7 +191,7 @@ export function SoundClient({
 
     const { signerOrProvider } = await _requireSignerOrProvider()
 
-    const editionContract = SoundEditionV1_1__factory.connect(editionAddress, signerOrProvider)
+    const editionContract = SoundEditionV1_2__factory.connect(editionAddress, signerOrProvider)
 
     return (await editionContract.numberMinted(userAddress)).toNumber()
   }
@@ -238,7 +238,7 @@ export function SoundClient({
 
     // Get the edition's remaining token quantity.
     const { signerOrProvider } = await _requireSignerOrProvider()
-    const editionContract = SoundEditionV1_1__factory.connect(mintSchedule.editionAddress, signerOrProvider)
+    const editionContract = SoundEditionV1_2__factory.connect(mintSchedule.editionAddress, signerOrProvider)
 
     const [editionTotalMinted, editionMaxMintable] = await Promise.all([
       editionContract.totalMinted(),
@@ -407,7 +407,7 @@ export function SoundClient({
       formattedSalt,
     )
 
-    const editionInterface = SoundEditionV1_1__factory.createInterface()
+    const editionInterface = SoundEditionV1_2__factory.createInterface()
 
     /**
      * Encode all the bundled contract calls.
@@ -505,7 +505,7 @@ export function SoundClient({
     const contract = LazyPromise(async () => {
       await _requireValidSoundEdition({ editionAddress: soundParams.contractAddress })
 
-      const editionContract = SoundEditionV1_1__factory.connect(
+      const editionContract = SoundEditionV1_2__factory.connect(
         soundParams.contractAddress,
         (await _requireSignerOrProvider()).signerOrProvider,
       )
@@ -595,7 +595,7 @@ export function SoundClient({
   }): Promise<string[]> {
     const { signerOrProvider } = await _requireSignerOrProvider()
 
-    const editionContract = SoundEditionV1_1__factory.connect(editionAddress, signerOrProvider)
+    const editionContract = SoundEditionV1_2__factory.connect(editionAddress, signerOrProvider)
     // Get the addresses with MINTER_ROLE
     const minterRole = await editionContract.MINTER_ROLE()
     const filter = editionContract.filters.RolesUpdated(undefined, minterRole)
