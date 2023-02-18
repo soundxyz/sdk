@@ -1,5 +1,11 @@
 # @soundxyz/sdk
 
+## 0.14.0
+
+### Minor Changes
+
+- [#187](https://github.com/soundxyz/sdk/pull/187) [`e7bf9d6`](https://github.com/soundxyz/sdk/commit/e7bf9d68535e2462382ec0b72f12ba6af689670e) Thanks [@PabloSzx](https://github.com/PabloSzx)! - New editionInfo.apiShare function, including new customizables webapp link and web embed
+
 ## 0.13.2
 
 ### Patch Changes
