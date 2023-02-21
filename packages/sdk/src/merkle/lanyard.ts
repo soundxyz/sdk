@@ -6,12 +6,14 @@ import { UnexpectedLanyardResponse } from '../errors'
 const lanyardProofResponseSchema = z.union([
   z.object({
     proof: z.array(z.string()),
-    unhashedLeaf: z.string().nullable(),
+    unhashedLeaf: z.string().nullable().optional(),
   }),
-  z.object({
-    error: z.boolean(),
-    message: z.string().nullable(),
-  }),
+  z
+    .object({
+      error: z.boolean(),
+      message: z.string().nullable(),
+    })
+    .partial(),
 ])
 
 export const LanyardMerkleProofProvider: MerkleProofProvider & { lanyardAPIEndpoint: URL; headers: HeadersInit } = {
