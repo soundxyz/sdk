@@ -1,11 +1,20 @@
 import type { MerkleProofProvider } from './types'
 import { z } from 'zod'
+
 import { UnexpectedLanyardResponse } from '../errors'
 
-const lanyardProofResponseSchema = z.object({
-  proof: z.array(z.string()),
-  unhashedLeaf: z.string().nullable(),
-})
+const lanyardProofResponseSchema = z.union([
+  z.object({
+    proof: z.array(z.string()),
+    unhashedLeaf: z.string().nullable().optional(),
+  }),
+  z
+    .object({
+      error: z.boolean(),
+      message: z.string().nullable(),
+    })
+    .partial(),
+])
 
 export const LanyardMerkleProofProvider: MerkleProofProvider & { lanyardAPIEndpoint: URL; headers: HeadersInit } = {
   lanyardAPIEndpoint: new URL('https://lanyard.org/api/v1/proof'),
@@ -21,14 +30,33 @@ export const LanyardMerkleProofProvider: MerkleProofProvider & { lanyardAPIEndpo
       method: 'GET',
       headers: this.headers,
       mode: 'cors',
+    }).catch((err) => {
+      throw new UnexpectedLanyardResponse({
+        response: null,
+        cause: err,
+      })
     })
 
-    if (response.status !== 200) throw new UnexpectedLanyardResponse({ response })
+    let json: unknown
 
-    const json = await response.json()
+    try {
+      json = await response.json()
+    } catch (err) {
+      throw new UnexpectedLanyardResponse({ response, cause: err })
+    }
 
-    const { proof } = lanyardProofResponseSchema.parse(json)
+    const parsedJson = lanyardProofResponseSchema.safeParse(json)
 
-    return proof
+    if (!parsedJson.success) {
+      throw new UnexpectedLanyardResponse({ response, zodError: parsedJson.error, cause: parsedJson.error })
+    }
+
+    const jsonData = parsedJson.data
+
+    if ('proof' in jsonData) {
+      return jsonData.proof
+    }
+
+    return null
   },
 }

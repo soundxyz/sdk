@@ -1,3 +1,4 @@
+import type { ZodError } from 'zod'
 import type { GraphQLExecutionErrors, MintScheduleBase, AddressInputType } from './types'
 
 export class MissingSignerError extends Error {
@@ -228,12 +229,21 @@ export class MissingMerkleProvider extends Error {
 export class UnexpectedLanyardResponse extends Error {
   readonly name = 'UnexpectedLanyardResponseError'
 
-  readonly response: Response
+  readonly response: Response | null
 
-  constructor({ response }: { response: Response }) {
-    super(`Unexpected lanyard API response, status code ${response.status}`)
+  readonly zodError: ZodError | null
+
+  constructor({ response, zodError, cause }: { response: Response | null; zodError?: ZodError; cause?: unknown }) {
+    super(
+      response ? `Unexpected lanyard API response, status code ${response.status}` : 'Unexpected lanyard API response',
+      {
+        cause,
+      },
+    )
 
     this.response = response
+
+    this.zodError = zodError || null
   }
 }
 
