@@ -1,5 +1,11 @@
 # @soundxyz/sdk
 
+## 0.14.1
+
+### Patch Changes
+
+- [#199](https://github.com/soundxyz/sdk/pull/199) [`c25c21c`](https://github.com/soundxyz/sdk/commit/c25c21cbf5e2d3f0370d1618b7f63c581313821b) Thanks [@PabloSzx](https://github.com/PabloSzx)! - Lanyard API provider more flexible response handler
+
 ## 0.14.0
 
 ### Minor Changes
