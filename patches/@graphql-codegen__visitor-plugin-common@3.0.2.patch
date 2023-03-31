@@ -1,9 +1,9 @@
 diff --git a/cjs/client-side-base-visitor.js b/cjs/client-side-base-visitor.js
-index 9bd92e58298fd01a509e84273e34923d536d121f..eeb63ff3443fdc6ce749ad9eec0db03a1ca6e3cc 100644
+index a25a3f606da2110faba0dbc411b1e2079ff7050d..dd593f52e0988632a209b13c118f43dc3ed55354 100644
 --- a/cjs/client-side-base-visitor.js
 +++ b/cjs/client-side-base-visitor.js
-@@ -137,7 +137,7 @@ class ClientSideBaseVisitor extends base_visitor_js_1.BaseVisitor {
-             return JSON.stringify(gqlObj);
+@@ -164,7 +164,7 @@ class ClientSideBaseVisitor extends base_visitor_js_1.BaseVisitor {
+             return `{${metaString}"kind":"${graphql_1.Kind.DOCUMENT}","definitions":${jsonStringify(definitions)}}`;
          }
          if (this.config.documentMode === DocumentMode.string) {
 -            return '`' + doc + '`';

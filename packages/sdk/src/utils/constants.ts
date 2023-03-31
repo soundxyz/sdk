@@ -2,11 +2,11 @@ import { interfaceIds } from '@soundxyz/sound-protocol'
 import {
   RangeEditionMinter__factory,
   MerkleDropMinter__factory,
-  SoundEditionV1_1__factory,
+  SoundEditionV1_2__factory,
   IMinterModule__factory,
 } from '@soundxyz/sound-protocol/typechain/index'
 
-const editionInterface = SoundEditionV1_1__factory.createInterface()
+const editionInterface = SoundEditionV1_2__factory.createInterface()
 const iMinterModuleInterface = IMinterModule__factory.createInterface()
 const rangeMinterInterface = RangeEditionMinter__factory.createInterface()
 const merkleMinterInteface = MerkleDropMinter__factory.createInterface()
@@ -69,7 +69,7 @@ export const ContractErrorName = {
   MerkleRootHashIsEmpty: 'MerkleRootHashIsEmpty',
 } as const
 
-export type ContractErrorName = typeof ContractErrorName[keyof typeof ContractErrorName]
+export type ContractErrorName = (typeof ContractErrorName)[keyof typeof ContractErrorName]
 
 const {
   MetadataIsFrozen,
@@ -136,4 +136,4 @@ export const ContractErrorSigHashToName = {
   [merkleMinterInteface.getSighash(MaxMintablePerAccountIsZero)]: MaxMintablePerAccountIsZero,
 } as const
 
-export type ContractErrorSigHashToName = typeof ContractErrorSigHashToName[keyof typeof ContractErrorSigHashToName]
+export type ContractErrorSigHashToName = (typeof ContractErrorSigHashToName)[keyof typeof ContractErrorSigHashToName]

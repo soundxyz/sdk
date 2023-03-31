@@ -5,11 +5,6 @@ export function MockAPI(api?: Partial<SoundAPI>): SoundAPI {
     async check() {
       return null
     },
-    async audioFromTrack() {
-      return {
-        data: null,
-      }
-    },
     async merkleProof() {
       return null
     },
@@ -19,6 +14,11 @@ export function MockAPI(api?: Partial<SoundAPI>): SoundAPI {
       }
     },
     async releaseShareInfo() {
+      return {
+        data: null,
+      }
+    },
+    async editionOwnedTokenIds() {
       return {
         data: null,
       }

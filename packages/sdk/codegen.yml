@@ -12,6 +12,11 @@ generates:
       enumsAsConst: true
       skipTypename: true
       namingConvention: 'keep'
+      preResolveTypes: true
+      onlyOperationTypes: true
+      avoidOptionals:
+        field: true
+        object: false
       scalars:
         DateTime: 'string'
         NonNegativeInt: 'number'

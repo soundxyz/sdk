@@ -2,9 +2,10 @@ import { z } from 'zod'
 
 import { MissingApiKey, SoundAPIGraphQLError, UnexpectedApiResponse } from './errors'
 import {
-  AudioFromTrack,
-  AudioFromTrackQuery,
-  AudioFromTrackQueryVariables,
+  EditionOwnedTokenIds,
+  EditionOwnedTokenIdsInput,
+  EditionOwnedTokenIdsQuery,
+  EditionOwnedTokenIdsQueryVariables,
   MerkleProof,
   MerkleProofQuery,
   MerkleProofQueryVariables,
@@ -119,14 +120,6 @@ export function SoundAPI({ apiEndpoint = 'https://api.sound.xyz/graphql', apiKey
         },
       })
     },
-    audioFromTrack({ trackId }: { trackId: string }) {
-      return graphqlRequest<AudioFromTrackQuery, AudioFromTrackQueryVariables>({
-        query: AudioFromTrack,
-        variables: {
-          trackId,
-        },
-      })
-    },
     async merkleProof({ merkleRoot, userAddress }: MerkleProofParameters) {
       const { data, errors } = await graphqlRequest<MerkleProofQuery, MerkleProofQueryVariables>({
         query: MerkleProof,
@@ -141,6 +134,14 @@ export function SoundAPI({ apiEndpoint = 'https://api.sound.xyz/graphql', apiKey
       if (!data?.merkleTreeProof) return null
 
       return data.merkleTreeProof.proof
+    },
+    editionOwnedTokenIds(input: EditionOwnedTokenIdsInput) {
+      return graphqlRequest<EditionOwnedTokenIdsQuery, EditionOwnedTokenIdsQueryVariables>({
+        query: EditionOwnedTokenIds,
+        variables: {
+          input,
+        },
+      })
     },
   }
 }
