@@ -1,28 +1,32 @@
 import { ethers } from 'hardhat'
-import type { MerkleDropConfig, RangeEditionConfig } from '../../src/types'
+
 import { NON_NULL_ADDRESS, NULL_ADDRESS } from '../../src/utils/constants'
 import { ONE_HOUR, PRICE } from '../test-constants'
 import { MerkleTestHelper } from './merkle'
 
+import type { EditionConfig, MerkleDropConfig, RangeEditionConfig } from '../../src/types'
 export function now() {
   return Math.floor(Date.now() / 1000)
 }
 
-export const getGenericEditionConfig = () => ({
-  name: 'Test',
-  symbol: 'TEST',
-  metadataModule: NULL_ADDRESS,
-  baseURI: 'https://test.com',
-  contractURI: 'https://test.com',
-  fundingRecipient: NON_NULL_ADDRESS,
-  royaltyBPS: 0,
-  editionMaxMintableLower: 10,
-  editionMaxMintableUpper: 10,
-  editionCutoffTime: 999999,
-  shouldEnableMintRandomness: true,
-  shouldFreezeMetadata: false,
-  enableOperatorFiltering: true,
-})
+export const getGenericEditionConfig = () =>
+  ({
+    name: 'Test',
+    symbol: 'TEST',
+    metadataModule: NULL_ADDRESS,
+    baseURI: 'https://test.com',
+    contractURI: 'https://test.com',
+    fundingRecipient: NON_NULL_ADDRESS,
+    royaltyBPS: 0,
+    editionMaxMintableLower: 10,
+    editionMaxMintableUpper: 10,
+    editionCutoffTime: 999999,
+    shouldEnableMintRandomness: true,
+    shouldFreezeMetadata: false,
+    enableOperatorFiltering: true,
+
+    setSAM: null,
+  } satisfies EditionConfig)
 
 const startTime = now()
 const cutoffTime = startTime + ONE_HOUR / 2

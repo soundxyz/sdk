@@ -20,7 +20,20 @@ type ActivityFeed {
     Pagination parameters
     """
     pagination: CursorConnectionArgs! = { first: 10, sort: DESC }
-  ): ActivityFeedGroupConnection!
+  ): ActivityFeedGroupConnection! @deprecated(reason: "Prefer using ActivityFeed.groups")
+  """
+  Paginated activity feed groups of activity feed.
+  """
+  groups(
+    """
+    Only get activity feed groups of certain filter values
+    """
+    filter: ActivityFeedGroupFilterArgs! = { types: [ALL] }
+    """
+    Pagination parameters
+    """
+    pagination: CursorConnectionArgs! = { first: 10, sort: DESC }
+  ): ActivityFeedGroups!
   """
   Activity feed UUID
   """
@@ -169,6 +182,20 @@ union ActivityFeedGroupInfo =
   | UserLikedSongsAggregate
 
 """
+Paginated activity feed group connection
+"""
+type ActivityFeedGroups implements Connection {
+  """
+  Edges of current page
+  """
+  edges: [ActivityFeedGroupConnectionEdge]!
+  """
+  Pagination helpers information
+  """
+  pageInfo: PageInfo!
+}
+
+"""
 Social proof of release in activity feed based on user authentication
 """
 type ActivityFeedReleaseSocialProof {
@@ -200,9 +227,17 @@ type Airdrop implements CollectorAction & Node & ReleaseAction {
   """
   date: DateTime!
   """
+  Starting token ID of NFT for bonding curve sale purchase
+  """
+  fromTokenId: Int!
+  """
   Action id
   """
   id: ID!
+  """
+  Number of sequential tokens purchased
+  """
+  quantity: Int!
   """
   Release corresponding to collector airdrop action entity
   """
@@ -211,6 +246,10 @@ type Airdrop implements CollectorAction & Node & ReleaseAction {
   Serial number of nft airdrop
   """
   serialNumber: Int!
+  """
+  Ending token ID of NFT for bonding curve sale purchase
+  """
+  toTokenId: Int!
   """
   User corresponding to collector action entity
   """
@@ -924,7 +963,106 @@ Types of release sales
 enum AuctionType {
   FIXED_QUANTITY
   OPEN_EDITION
+  OPEN_EDITION_WITH_SAM
   RANGE_BOUND
+}
+
+"""
+Audio Media (including all encodings)
+"""
+type AudioMedia {
+  """
+  Track audio, AAC 128k if available
+  """
+  audio128k: Media
+  """
+  Track audio, AAC 192k if available
+  """
+  audio192k: Media
+  """
+  Track audio, AAC 256k if available
+  """
+  audio256k: Media
+  """
+  Track audio, original non-transcoded version
+  """
+  audioOriginal: Media!
+}
+
+"""
+Bonding curve sale collector action entity
+"""
+type BondingCurveSale implements ArtistAction & CollectorAction & Node & ReleaseAction {
+  """
+  Amount paid in Wei for bonding curve sale
+  """
+  amountPaidInWei: String!
+  """
+  Date of action
+  """
+  date: DateTime!
+  """
+  Starting token ID of NFT for bonding curve sale purchase
+  """
+  fromTokenId: Int!
+  """
+  Action id
+  """
+  id: ID!
+  """
+  Number of sequential tokens purchased
+  """
+  quantity: Int!
+  """
+  Release corresponding to collector bonding curve sale action entity
+  """
+  release: Release!
+  """
+  Starting serial number of nft bonding curve sale purchase
+  """
+  serialNumber: Int!
+  """
+  Ending token ID of NFT for bonding curve sale purchase
+  """
+  toTokenId: Int!
+  """
+  User corresponding to collector action entity
+  """
+  user: User!
+}
+
+"""
+Token sold to bonding curve collector action entity
+"""
+type BondingCurveSold implements ArtistAction & CollectorAction & Node & ReleaseAction {
+  """
+  Date of action
+  """
+  date: DateTime!
+  """
+  First token ID in the unordered batch of sold tokens
+  """
+  firstTokenId: Int!
+  """
+  Action id
+  """
+  id: ID!
+  """
+  Payment received in Wei
+  """
+  paymentInWei: String!
+  """
+  Number of tokens sold
+  """
+  quantity: Int!
+  """
+  Release corresponding to collector bonding curve sold action entity
+  """
+  release: Release!
+  """
+  User corresponding to collector action entity
+  """
+  user: User!
 }
 
 """
@@ -986,6 +1124,7 @@ Name of the collection market
 """
 enum CollectionMarketType {
   AIRDROP
+  BONDING_CURVE_SALE
   PRIMARY_SALE
   SECONDARY_SALE
 }
@@ -1085,7 +1224,7 @@ interface Connection {
   """
   Edges of current page
   """
-  edges: [Edge!]!
+  edges: [Edge]!
   """
   Pagination helpers information
   """
@@ -1310,6 +1449,10 @@ type Draft implements Node {
   Type of Release
   """
   type: ReleaseType!
+  """
+  Draft updated date
+  """
+  updatedAt: DateTime!
 }
 
 """
@@ -1350,7 +1493,7 @@ type DraftAllowList implements Node {
 """
 Draft allowlist info
 """
-type DraftAllowListInfo {
+type DraftAllowListInfo implements EditableDraftField {
   """
   Collectors of artists allowlist configuration
   """
@@ -1359,6 +1502,10 @@ type DraftAllowListInfo {
   Collectors of releases allowlist configuration
   """
   collectorsOfReleases: DraftCollectorsOfReleasesInfo
+  """
+  Flag for artist access to edit field
+  """
+  isEditable: Boolean!
   """
   Info for manually added draft allow list
   """
@@ -1440,7 +1587,7 @@ type DraftAuctionConfigurationsInfo {
   """
   Toggle to enable SAM for auction
   """
-  enableSAM: Boolean!
+  enabledSAM: Boolean
   """
   Free mint auction configurations
   """
@@ -1522,9 +1669,13 @@ type DraftInfo {
   """
   allowListInfo: DraftAllowListsInfo
   """
-  Draft release info
+  Draft auction configurations info
   """
   auctionConfigurations: DraftAuctionConfigurationsInfo
+  """
+  Editable draft auction configurations info
+  """
+  editableAuctionConfigurations: EditableDraftAuctionConfigurationsInfo
   """
   Number of draft upload steps already complete
   """
@@ -1534,11 +1685,11 @@ type DraftInfo {
   """
   releaseInfo: DraftReleaseInfo
   """
-  Draft release info
+  Draft rewards info
   """
   rewardsInfo: RewardsUploadStepInfo
   """
-  Draft release info
+  Draft splits info
   """
   splitsInfo: SplitsUploadStepInfo
 }
@@ -1561,10 +1712,6 @@ type DraftPublicSaleAuctionConfigurationInfo {
   Number of days auction should run for
   """
   endTimeDays: Int
-  """
-  Draft release info
-  """
-  listeningPartyStart: Timestamp
   """
   Max mints per wallet for auction
   """
@@ -1661,6 +1808,228 @@ interface Edge {
 }
 
 """
+Draft auction configuration step info
+"""
+type EditableDraftAuctionConfigurationInfo {
+  """
+  Editable max mints per wallet for auction
+  """
+  maxMintsPerWallet: EditableDraftMaxMintsPerWalletInfo!
+  """
+  Editable start time
+  """
+  price: EditableDraftPriceInfo!
+  """
+  Editable auction quantity
+  """
+  quantity: EditableDraftQuantityInfo!
+  """
+  Editable start time
+  """
+  startTime: EditableDraftStartTimeInfo!
+}
+
+"""
+Editable release info upload step info
+"""
+type EditableDraftAuctionConfigurationsInfo {
+  """
+  Editable auction type
+  """
+  auctionType: EditableDraftAuctionTypeInfo!
+  """
+  Editable enabled SAM flag
+  """
+  enabledSAM: EditableDraftEnabledSAMInfo!
+  """
+  Free mint auction configurations
+  """
+  freeMint: EditableDraftAuctionConfigurationInfo
+  """
+  Editable max mintable
+  """
+  maxMintable: EditableDraftMaxMintableInfo!
+  """
+  Editable minimum quantity
+  """
+  minQuantity: EditableDraftMinQuantityInfo!
+  """
+  Presale mint auction configurations
+  """
+  presaleMint: EditableDraftAuctionConfigurationInfo
+  """
+  Public mint auction configurations
+  """
+  publicMint: EditableDraftPublicSaleAuctionConfigurationInfo!
+  """
+  Editable quantity breakdown
+  """
+  quantityBreakdown: EditableDraftMaxMintableInfo!
+}
+
+"""
+Editable draft auction type info
+"""
+type EditableDraftAuctionTypeInfo implements EditableDraftField {
+  """
+  Type of auction
+  """
+  auctionType: AuctionType!
+  """
+  Flag for artist access to edit field
+  """
+  isEditable: Boolean!
+}
+
+"""
+Editable draft enabled SAM flag
+"""
+type EditableDraftEnabledSAMInfo implements EditableDraftField {
+  """
+  Toggle to enable SAM for auction
+  """
+  enabledSAM: Boolean
+  """
+  Flag for artist access to edit field
+  """
+  isEditable: Boolean!
+}
+
+"""
+Editable draft auction end time in days info
+"""
+type EditableDraftEndTimeDaysInfo implements EditableDraftField {
+  """
+  Number of days auction should run for
+  """
+  endTimeDays: Int
+  """
+  Flag for artist access to edit field
+  """
+  isEditable: Boolean!
+}
+
+"""
+Editable draft field entity
+"""
+interface EditableDraftField {
+  """
+  Flag for artist access to edit field
+  """
+  isEditable: Boolean!
+}
+
+"""
+Editable draft max mintable info
+"""
+type EditableDraftMaxMintableInfo implements EditableDraftField {
+  """
+  Flag for artist access to edit field
+  """
+  isEditable: Boolean!
+  """
+  Max mint supply of auction
+  """
+  maxMintable: Int!
+}
+
+"""
+Editable draft auction max mints per wallet info
+"""
+type EditableDraftMaxMintsPerWalletInfo implements EditableDraftField {
+  """
+  Flag for artist access to edit field
+  """
+  isEditable: Boolean!
+  """
+  Max mints per wallet for auction
+  """
+  maxMintsPerWallet: Int
+}
+
+"""
+Editable draft min quantity info
+"""
+type EditableDraftMinQuantityInfo implements EditableDraftField {
+  """
+  Flag for artist access to edit field
+  """
+  isEditable: Boolean!
+  """
+  Minimum supply of auction
+  """
+  minQuantity: Int!
+}
+
+"""
+Editable draft auction price info
+"""
+type EditableDraftPriceInfo implements EditableDraftField {
+  """
+  Flag for artist access to edit field
+  """
+  isEditable: Boolean!
+  """
+  Price per mint
+  """
+  price: Float!
+}
+
+"""
+Editable draft public sale auction configuration step info
+"""
+type EditableDraftPublicSaleAuctionConfigurationInfo {
+  """
+  Editable end time in days
+  """
+  endTimeDays: EditableDraftEndTimeDaysInfo!
+  """
+  Editable max mints per wallet for auction
+  """
+  maxMintsPerWallet: EditableDraftMaxMintsPerWalletInfo!
+  """
+  Editable start time
+  """
+  price: EditableDraftPriceInfo!
+  """
+  Editable auction quantity
+  """
+  quantity: EditableDraftQuantityInfo!
+  """
+  Editable start time
+  """
+  startTime: EditableDraftStartTimeInfo!
+}
+
+"""
+Editable draft auction quantity info
+"""
+type EditableDraftQuantityInfo implements EditableDraftField {
+  """
+  Flag for artist access to edit field
+  """
+  isEditable: Boolean!
+  """
+  Max supply for auction
+  """
+  quantity: Int!
+}
+
+"""
+Editable draft auction start time info
+"""
+type EditableDraftStartTimeInfo implements EditableDraftField {
+  """
+  Flag for artist access to edit field
+  """
+  isEditable: Boolean!
+  """
+  Start time of auction
+  """
+  startTime: Int!
+}
+
+"""
 Edition contract earnings
 """
 type EditionContractEarning {
@@ -1676,6 +2045,42 @@ type EditionContractEarning {
   Total eth on the contract
   """
   totalBalance: String!
+}
+
+"""
+Filter the edition owned tokenIds result
+"""
+input EditionOwnedTokenIdsFilter {
+  """
+  Should it include golden egg
+  """
+  includeGoldenEgg: Boolean! = true
+}
+
+"""
+Input for editionOwnedTokenIds query
+"""
+input EditionOwnedTokenIdsInput {
+  """
+  Edition contract address
+  """
+  editionContractAddress: Address!
+  """
+  Filter the tokenIds
+  """
+  filter: EditionOwnedTokenIdsFilter! = { includeGoldenEgg: true }
+  """
+  Limit the amount of token ids to be returned. By default there is no limit
+  """
+  limit: PositiveInt
+  """
+  Public address of owner
+  """
+  ownerPublicAddress: Address!
+  """
+  Customize sort behavior
+  """
+  sort: NftCursorConnectionSort! = { serialNumber: ASC }
 }
 
 """
@@ -1715,6 +2120,7 @@ enum EventType {
   AIRDROP
   EDITION_PURCHASED
   ORDERS_MATCHED
+  OTHER_MINTED
   TRANSFER
   UNKNOWN
 }
@@ -1846,6 +2252,11 @@ input IframeHtmlParameters {
   """
   width: String!
 }
+
+"""
+A field whose value is a JSON Web Token (JWT): https://jwt.io/introduction.
+"""
+scalar JWT
 
 """
 Client key management entity
@@ -2081,7 +2492,9 @@ enum MediaType {
   ARTIST_FREE_SALE_ALLOWLIST
   ARTIST_PRESALE_ALLOWLIST
   AUDIO
-  AUDIO_TRANSCODED
+  AUDIO_128K
+  AUDIO_192K
+  AUDIO_256K
   AVATAR_IMAGE
   DRAFT_ALLOWLISTED_ADDRESSES_CSV
   RELEASE_BANNER_IMAGE
@@ -2298,6 +2711,15 @@ type Mutation {
     """
     signedMessage: String!
   ): String!
+  """
+  [PUBLIC] Verify JWT from Dynamic
+  """
+  verifyDynamicJWT(
+    """
+    JWT to verify
+    """
+    jwt: JWT!
+  ): String!
 }
 
 """
@@ -2308,6 +2730,11 @@ type Nft implements Node {
   Amount paid in Wei for NFT
   """
   amountPaidInWei: String!
+    @deprecated(reason: "Inaccurate after initial purchase, use activity feed for last purchase value")
+  """
+  Release collector entity associated with NFT ownership
+  """
+  collectorRelease: ReleaseCollector
   """
   Comment set for NFT
   """
@@ -2333,6 +2760,10 @@ type Nft implements Node {
   """
   id: ID!
   """
+  Was the NFT burned. Shortcut for owner.publicAddress === 0x000....
+  """
+  isBurned: Boolean!
+  """
   Is the NFT a golden egg
   """
   isGoldenEgg: Boolean!
@@ -2351,7 +2782,7 @@ type Nft implements Node {
   """
   Release collector entity associated with NFT ownership
   """
-  releaseCollector: ReleaseCollector!
+  releaseCollector: ReleaseCollector! @deprecated(reason: "Use collectorRelease instead")
   """
   Acumulative serial number
   """
@@ -2841,9 +3272,17 @@ type PrimarySale implements ArtistAction & CollectorAction & Node & ReleaseActio
   """
   date: DateTime!
   """
+  Starting token ID of NFT for bonding curve sale purchase
+  """
+  fromTokenId: Int!
+  """
   Action id
   """
   id: ID!
+  """
+  Number of sequential tokens purchased
+  """
+  quantity: Int!
   """
   Release corresponding to collector primary sale action entity
   """
@@ -2852,6 +3291,10 @@ type PrimarySale implements ArtistAction & CollectorAction & Node & ReleaseActio
   Serial number of nft primary sale purchase
   """
   serialNumber: Int!
+  """
+  Ending token ID of NFT for bonding curve sale purchase
+  """
+  toTokenId: Int!
   """
   User corresponding to collector action entity
   """
@@ -2964,7 +3407,7 @@ type Query {
     Track identifier
     """
     trackId: UUID!
-  ): TrackAudio!
+  ): TrackAudio! @deprecated(reason: "Use Track.audio instead")
   """
   [PUBLIC] Get authenticated user information, if any
   """
@@ -3000,6 +3443,10 @@ type Query {
   """
   currencies: Currencies!
   """
+  Get current release chart
+  """
+  currentReleaseChart: ReleaseChart!
+  """
   [PUBLIC] Get DraftAllowList from release and mintType
   """
   draftAllowlistFromRelease(
@@ -3008,6 +3455,15 @@ type Query {
     """
     input: DraftAllowlistFromReleaseInput!
   ): DraftAllowList
+  """
+  Return list of tokenIds owned by user public address
+  """
+  editionOwnedTokenIds(
+    """
+    Parameters of editionOwnedTokenIds query
+    """
+    input: EditionOwnedTokenIdsInput!
+  ): [String!]!
   """
   [PUBLIC] Get EggGame of specified release
   """
@@ -3128,15 +3584,6 @@ type Query {
   """
   now: Int!
   """
-  [PUBLIC] Test query to get the date of calculation of resolver based using response cache
-  """
-  nowCached(
-    """
-    Amount of seconds for the response to be cached
-    """
-    ttlSeconds: Int! = 3
-  ): Timestamp!
-  """
   [PUBLIC] Get playlist based on given type and associationId
   """
   playlist(
@@ -3233,6 +3680,46 @@ type Query {
     releaseId: UUID!
   ): String
   """
+  Get release chart based on input
+  """
+  releaseChart(
+    """
+    Input parameters for releaseChart query
+    """
+    input: ReleaseChartInput!
+  ): ReleaseChart!
+  """
+  Get release chart based on date input
+  """
+  releaseChartByDate(
+    """
+    Input parameters for releaseChart query
+    """
+    input: ReleaseChartByLastDayInput!
+  ): ReleaseChart
+  """
+  Latest supported ranges for ReleaseCharts
+  """
+  releaseChartPeriods: ReleaseChartsPeriodRange!
+  """
+  Get release chart rank based on input
+  """
+  releaseChartRank(
+    """
+    Input parameters for releaseChartRank query
+    """
+    input: ReleaseChartRankInput!
+  ): ReleaseChartRank!
+  """
+  Get release charts based on input
+  """
+  releaseCharts(
+    """
+    Input parameters for releaseCharts query
+    """
+    input: ReleaseChartsInput!
+  ): ReleaseChartConnection!
+  """
   [PUBLIC] Get all users that collected the same release in one activity feed group.
   """
   releaseCollectedByManyUsers(
@@ -3316,9 +3803,78 @@ type Query {
     id: UUID!
   ): Shelf!
   """
+  [PUBLIC] Get trending artists information
+  """
+  topArtists(
+    """
+    Sort logic used
+    """
+    sort: TrendingArtistsSortEnum!
+    """
+    For what time period the data should come from
+    """
+    timePeriod: TimePeriodAggEnum!
+  ): [TrendingArtistInfo!]!
+  """
+  [PUBLIC] Get top collectors information
+  """
+  topCollectors(
+    """
+    Sort logic used
+    """
+    sort: TrendingCollectorsSortEnum!
+    """
+    For what time period the data should come from
+    """
+    timePeriod: TimePeriodAggEnum!
+  ): [TrendingCollectorInfo!]!
+  """
+  [PUBLIC] Get top collectors information based on currently owned NFTs
+  """
+  topCollectorsV2(
+    """
+    Sort logic used
+    """
+    sort: TrendingCollectorsSortEnum!
+    """
+    For what time period the data should come from
+    """
+    timePeriod: TopChartTimePeriodEnum!
+  ): [TrendingCollectorInfo!]!
+  """
+  [PUBLIC] Get trending playlists
+  """
+  topPlaylists(
+    """
+    Sort logic used
+    """
+    sort: TrendingPlaylistsSortEnum!
+    """
+    For what time period the data should come from
+    """
+    timePeriod: TimePeriodAggEnum!
+  ): [TrendingPlaylistInfo!]!
+  """
+  [PUBLIC] Get trending releases
+  """
+  topReleases(
+    """
+    Sort logic used
+    """
+    sort: TrendingReleasesSortEnum!
+    """
+    For what time period the data should come from
+    """
+    timePeriod: TimePeriodAggEnum!
+  ): [TrendingReleaseInfo!]!
+  """
   [PUBLIC] Get total raised of the whole platform
   """
-  totalRaised: TotalRaised!
+  totalRaised: TotalRaised! @deprecated(reason: "Please use totalRaisedPlatform")
+  """
+  [PUBLIC] Get total raised of the whole platform
+  """
+  totalRaisedPlatform: TotalRaisedPlatform!
   """
   [PUBLIC] Total count of minted releases
   """
@@ -3349,7 +3905,7 @@ type Query {
     For what time period the data should come from
     """
     timePeriod: TimePeriodAggEnum!
-  ): [TrendingArtistInfo!]!
+  ): [TrendingArtistInfo!]! @deprecated(reason: "Please use Query.topArtists")
   """
   [PUBLIC] Get trending collectors information
   """
@@ -3362,7 +3918,7 @@ type Query {
     For what time period the data should come from
     """
     timePeriod: TimePeriodAggEnum!
-  ): [TrendingCollectorInfo!]!
+  ): [TrendingCollectorInfo!]! @deprecated(reason: "Please use Query.topCollectors")
   """
   [PUBLIC] Get trending playlists
   """
@@ -3388,7 +3944,7 @@ type Query {
     For what time period the data should come from
     """
     timePeriod: TimePeriodAggEnum!
-  ): [TrendingReleaseInfo!]!
+  ): [TrendingReleaseInfo!]! @deprecated(reason: "Please use Query.topReleases")
   """
   [PUBLIC] Get specified user by id
   """
@@ -3481,6 +4037,15 @@ Release entity
 """
 type Release implements Node {
   """
+  Release activity feed
+  """
+  activityFeed(
+    """
+    Input parameters
+    """
+    input: ReleaseActivityFeedInput!
+  ): ReleaseActionConnection!
+  """
   Number of nfts airdropped
   """
   airdropCount: Int!
@@ -3554,6 +4119,10 @@ type Release implements Node {
   """
   currentMaxQuantity: Int! @deprecated(reason: "Please use finalQuantity")
   """
+  Draft id associated to release
+  """
+  draftId: String
+  """
   Edition ID
   """
   editionId: String
@@ -3561,6 +4130,10 @@ type Release implements Node {
   EggGame of Release
   """
   eggGame: EggGame
+  """
+  Flag for SAM enabled or not for release
+  """
+  enabledSAM: Boolean! @deprecated(reason: "Use samAddress != null")
   """
   Associated external url
   """
@@ -3600,7 +4173,11 @@ type Release implements Node {
   """
   Is release sold out relative to the final quantity
   """
-  isFinalSoldOut: Boolean!
+  isFinalSoldOut: Boolean! @deprecated(reason: "Use 'isFirstPhaseCompleted' instead")
+  """
+  Is release sold out relative to the final quantity on first phase
+  """
+  isFirstPhaseCompleted: Boolean!
   """
   Associated laylo.com url
   """
@@ -3666,7 +4243,7 @@ type Release implements Node {
   """
   Public listening party start time as number of milliseconds since the ECMAScript epoch.
   """
-  publicListeningParty: Timestamp!
+  publicListeningParty: Timestamp! @deprecated(reason: "Use mintStartTimeStamp instead")
   """
   Public minting start time
   """
@@ -3692,6 +4269,10 @@ type Release implements Node {
   """
   royaltyBps: Int!
   """
+  Sale details for release
+  """
+  saleDetails: SaleDetails!
+  """
   Minting periods
   """
   saleSchedules: [SaleSchedule!]!
@@ -3699,6 +4280,22 @@ type Release implements Node {
   Unique list of affiliate fees percent ordered by start time of sale schedule
   """
   salesAffiliateFeesPercent: [String!]!
+  """
+  Sound Automated Market (SAM) address associated with the release
+  """
+  samAddress: String
+  """
+  Override for the SAM buy buffer in basis points (bps) for this release
+  """
+  samBuyBufferBpsOverride: Int
+  """
+  SAM configuration if enabled for edition
+  """
+  samConfig: SamConfig
+  """
+  Override for the SAM sell buffer in basis points (bps) for this release
+  """
+  samSellBufferBpsOverride: Int
   """
   Edition schedule identifiers, used to optimize chain calls
   """
@@ -3737,17 +4334,25 @@ type Release implements Node {
   """
   topNftsWithComment: [NftWithComment!]!
   """
+  Total minted NFTs
+  """
+  totalMinted: Int!
+  """
   Total raised in Wei
   """
-  totalRaised: String!
+  totalRaised: String! @deprecated(reason: "Use Release.saleDetails.primaryRaisedInWei instead.")
   """
   Total amount raised from primary sales converted from eth to usd
   """
   totalRaisedPrimaryUsd: Float!
   """
-  Total amount raised from primary sales converted from eth to usd
+  Total amount raised from secondary sales converted from eth to usd
   """
   totalRaisedSecondaryUsd: Float!
+  """
+  Total supply of NFTs
+  """
+  totalSupply: Int!
   """
   Track of release
   """
@@ -3756,14 +4361,6 @@ type Release implements Node {
   Type of Release
   """
   type: ReleaseType!
-  """
-  Total number of upload steps
-  """
-  uploadSteps: Int! @deprecated(reason: "No longer concept of upload steps with new draft model")
-  """
-  Total number of upload steps with new draft model
-  """
-  uploadStepsComplete: Int! @deprecated(reason: "No longer concept of upload steps with new draft model")
   """
   Web HTML iframe embed
   """
@@ -3838,6 +4435,20 @@ input ReleaseActivityFeedFilterArgs {
   Only get activity of given type
   """
   types: [ReleaseActivityFeedTypeFilterOption!]! = [ALL]
+}
+
+"""
+Release activity feed input parameters
+"""
+input ReleaseActivityFeedInput {
+  """
+  Only get activities of given types
+  """
+  filter: ReleaseActivityFeedFilterArgs! = { types: [ALL] }
+  """
+  Pagination parameters
+  """
+  pagination: CursorConnectionArgs! = { first: 10, sort: DESC }
 }
 
 """
@@ -3920,6 +4531,253 @@ enum ReleaseAlbumRevealFilterOption {
   ALL
   ONLY_NOT_REVEALED_ALBUMS
   ONLY_REVEALED_ALBUMS
+}
+
+"""
+Release chart entity
+"""
+type ReleaseChart implements Node {
+  """
+  Chart ranks of release chart
+  """
+  chartRanks(
+    """
+    Pagination parameters
+    """
+    pagination: ReleaseChartRankCursorConnectionArgs! = { after: null, first: 10, sort: { currentRank: ASC } }
+  ): ReleaseChartRankConnection!
+  """
+  UUID of Release chart entity
+  """
+  id: ID!
+  """
+  Last full day of the chart period (inclusive)
+  """
+  lastDayOfChartInclusive: DateTime!
+  """
+  Release chart period end exclusive
+  """
+  periodEndExclusive: DateTime!
+  """
+  Release chart period start inclusive
+  """
+  periodStartInclusive: DateTime!
+}
+
+"""
+Input for releaseChart query
+"""
+input ReleaseChartByLastDayInput {
+  """
+  Locate chart using the last date of the period (inclusive)
+  """
+  lastDayOfChartInclusive: DateTime!
+}
+
+"""
+Paginated connection of Release Charts
+"""
+type ReleaseChartConnection implements Connection {
+  """
+  Edges of current page
+  """
+  edges: [ReleaseChartConnectionEdge!]!
+  """
+  Pagination helpers information
+  """
+  pageInfo: PageInfo!
+}
+
+"""
+Edge of Release Chart Connection
+"""
+type ReleaseChartConnectionEdge implements Edge {
+  """
+  Cursor to be used for pagination
+  """
+  cursor: String!
+  """
+  Release Chart node
+  """
+  node: ReleaseChart!
+}
+
+"""
+Pagination paramaters for release charts
+"""
+input ReleaseChartCursorConnectionArgs {
+  """
+  Start forwards pagination since "after" cursor
+  """
+  after: String
+  """
+  Start backwards pagination since "before" cursor
+  """
+  before: String
+  """
+  Limit the amount of nodes to be fetched, to be used with "after", with a maximum of 51 nodes.
+  """
+  first: NonNegativeInt
+  """
+  Limit the amount of nodes to be fetched, to be used with "before", with a maximum of 51 nodes.
+  """
+  last: NonNegativeInt
+  """
+  Customize sort behavior
+  """
+  sort: ReleaseChartCursorConnectionSort! = {}
+}
+
+"""
+Customize sort of release charts
+"""
+input ReleaseChartCursorConnectionSort {
+  """
+  Sort by release chart period end exclusive
+  """
+  periodEndExclusive: SortOrder
+}
+
+"""
+Input for releaseChart query
+"""
+input ReleaseChartInput {
+  """
+  Filter on periodEnd date
+  """
+  periodEndExclusive: DateTime!
+}
+
+"""
+Release chart rank entity
+"""
+type ReleaseChartRank implements Node {
+  """
+  Current ranking of release
+  """
+  currentRank: Int!
+  """
+  UUID of Release chart entity
+  """
+  id: ID!
+  """
+  Last ranking of release
+  """
+  rankLast: Int
+  """
+  Peak ranking of release
+  """
+  rankPeak: Int
+  """
+  Chart rank release
+  """
+  release: Release!
+  """
+  Trending indicator of release
+  """
+  trendingIndicator: TrendingIndicator!
+  """
+  Trending streak of release
+  """
+  trendingStreak: Int!
+}
+
+"""
+Paginated connection of Release Chart Ranks
+"""
+type ReleaseChartRankConnection implements Connection {
+  """
+  Edges of current page
+  """
+  edges: [ReleaseChartRankConnectionEdge!]!
+  """
+  Pagination helpers information
+  """
+  pageInfo: PageInfo!
+}
+
+"""
+Edge of Release Chart Rank Connection
+"""
+type ReleaseChartRankConnectionEdge implements Edge {
+  """
+  Cursor to be used for pagination
+  """
+  cursor: String!
+  """
+  Release Chart Rank node
+  """
+  node: ReleaseChartRank!
+}
+
+"""
+Pagination paramaters for release chart ranks
+"""
+input ReleaseChartRankCursorConnectionArgs {
+  """
+  Start forwards pagination since "after" cursor
+  """
+  after: String
+  """
+  Start backwards pagination since "before" cursor
+  """
+  before: String
+  """
+  Limit the amount of nodes to be fetched, to be used with "after", with a maximum of 51 nodes.
+  """
+  first: NonNegativeInt
+  """
+  Limit the amount of nodes to be fetched, to be used with "before", with a maximum of 51 nodes.
+  """
+  last: NonNegativeInt
+  """
+  Customize sort behavior
+  """
+  sort: ReleaseChartRankCursorConnectionSort! = { currentRank: ASC }
+}
+
+"""
+Customize sort of collectors
+"""
+input ReleaseChartRankCursorConnectionSort {
+  """
+  Sort by release chart current rank
+  """
+  currentRank: SortOrder
+}
+
+"""
+Input for releaseChartRank query
+"""
+input ReleaseChartRankInput {
+  """
+  Release Chart Rank entity id
+  """
+  id: UUID!
+}
+
+"""
+Input for releaseChart query
+"""
+input ReleaseChartsInput {
+  """
+  Cursor connection parameters
+  """
+  pagination: ReleaseChartCursorConnectionArgs! = { after: null, first: 10, sort: { periodEndExclusive: DESC } }
+}
+
+"""
+Latest supported ranges for ReleaseCharts
+"""
+type ReleaseChartsPeriodRange {
+  """
+  Earliest date covered by ReleaseCharts (inclusive in UTC)
+  """
+  earliestPeriodStartInclusive: DateTime!
+  """
+  Latest date covered by ReleaseCharts (exclusive in UTC)
+  """
+  latestPeriodEndExclusive: DateTime!
 }
 
 """
@@ -4116,9 +4974,13 @@ type ReleaseDropped implements ArtistAction & Node & ReleaseAction {
   """
   id: ID!
   """
-  New releases added to playlist in action
+  Release entity dropped by artist
   """
-  releasesAdded: Release!
+  release: Release!
+  """
+  Release entity dropped by artist
+  """
+  releasesAdded: Release! @deprecated(reason: "Misnamed field and marked for removal. Use `release` field instead")
   """
   User corresponding to action entity
   """
@@ -4761,6 +5623,32 @@ type RewardsUploadStepInfo {
 }
 
 """
+Release sale details
+"""
+type SaleDetails {
+  """
+  Number of nfts collected during primary sale
+  """
+  primaryCollected: Int!
+  """
+  Aggregate raised during primary sale
+  """
+  primaryRaisedInWei: String!
+  """
+  Number of nfts collected during sound swap sale
+  """
+  soundSwapCollected: Int!
+  """
+  Aggregate raised during sound swap sale
+  """
+  soundSwapRaisedInWei: String!
+  """
+  Aggregate raised during sound swap sale
+  """
+  totalVolume: String!
+}
+
+"""
 Single sale schedule information of Release Presale Configuration
 """
 type SaleSchedule {
@@ -4804,6 +5692,52 @@ type SaleSchedule {
   Start Time of Sale Schedule
   """
   startTime: DateTime!
+}
+
+"""
+Sam configuration within edition
+"""
+type SamConfig {
+  """
+  Fee BPS applied for share affiliate
+  """
+  affiliateFeeBPS: Int!
+  """
+  Artist fee BPS
+  """
+  artistFeeBPS: Int!
+  """
+  Base price
+  """
+  basePrice: String!
+  """
+  When is the SAM to be frozen and not allow purchases
+  """
+  buyFreezeTime: Timestamp!
+  """
+  Fee BPS applied for golden egg holders
+  """
+  goldenEggFeeBPS: Int!
+  """
+  SAM edition configuration identifier
+  """
+  id: ID!
+  """
+  Inflection point
+  """
+  inflectionPoint: Int!
+  """
+  Inflection price
+  """
+  inflectionPrice: String!
+  """
+  Max supply of tokens that SAM can provide
+  """
+  maxSupply: Int!
+  """
+  SAM Contract address
+  """
+  samAddress: String!
 }
 
 """
@@ -4933,6 +5867,10 @@ type SecondarySale implements ArtistAction & CollectorAction & Node & ReleaseAct
   """
   date: DateTime!
   """
+  Starting token ID of NFT for bonding curve sale purchase
+  """
+  fromTokenId: Int!
+  """
   Action id
   """
   id: ID!
@@ -4941,6 +5879,10 @@ type SecondarySale implements ArtistAction & CollectorAction & Node & ReleaseAct
   """
   purchasedFromUser: User!
   """
+  Number of sequential tokens purchased
+  """
+  quantity: Int!
+  """
   Release corresponding to collector secondary sale action entity
   """
   release: Release!
@@ -4948,6 +5890,10 @@ type SecondarySale implements ArtistAction & CollectorAction & Node & ReleaseAct
   Serial number of nft secondary sale purchase
   """
   serialNumber: Int!
+  """
+  Ending token ID of NFT for bonding curve sale purchase
+  """
+  toTokenId: Int!
   """
   User corresponding to collector action entity
   """
@@ -5008,6 +5954,15 @@ type Shelf implements Node {
   """
   name: String!
   """
+  Paginated releases of shelf ordered depending on shelfType
+  """
+  orderedReleases(
+    """
+    Pagination parameters
+    """
+    pagination: ShelfOrderedReleaseCursorConnectionArgs! = { first: 10 }
+  ): ShelfReleaseConnection!
+  """
   Total play time of all releases in a shelf in seconds
   """
   playTimeInSeconds: Int!
@@ -5020,7 +5975,7 @@ type Shelf implements Node {
   """
   releaseCount: Int!
   """
-  List of release identifiers in the shelf, ordered ascendingly by index within shelf
+  List of release identifiers in the shelf ordered depending on shelfType
   """
   releaseIds(
     """
@@ -5036,9 +5991,9 @@ type Shelf implements Node {
     Pagination parameters
     """
     pagination: ShelfReleaseCursorConnectionArgs! = { after: null, first: 5, sort: { index: ASC } }
-  ): ShelfReleaseConnection!
+  ): ShelfReleaseConnection! @deprecated(reason: "Please use Shelf.orderedReleases")
   """
-  List of track identifiers in the shelf, ordered ascendingly by index within shelf
+  List of track identifiers in the shelf ordered depending on shelfType
   """
   trackIds(
     """
@@ -5151,6 +6106,28 @@ input ShelfCursorConnectionSort {
   Sort by shelf index value
   """
   index: SortOrder
+}
+
+"""
+Cursor connection parameters for shelf ordered releases
+"""
+input ShelfOrderedReleaseCursorConnectionArgs {
+  """
+  Start forwards pagination since "after" cursor
+  """
+  after: String
+  """
+  Start backwards pagination since "before" cursor
+  """
+  before: String
+  """
+  Limit the amount of nodes to be fetched, to be used with "after", with a maximum of 51 nodes.
+  """
+  first: NonNegativeInt
+  """
+  Limit the amount of nodes to be fetched, to be used with "before", with a maximum of 51 nodes.
+  """
+  last: NonNegativeInt
 }
 
 """
@@ -5501,10 +6478,39 @@ The javascript `Date` as integer. Type represents date and time as number of mil
 scalar Timestamp
 
 """
+Time period to aggregate top chart queries
+"""
+enum TopChartTimePeriodEnum {
+  ALL_TIME
+  SEVEN_DAY
+  THIRTY_DAY
+}
+
+"""
 Total raised on Ethereum and USD
 """
 type TotalRaised {
+  """
+  Total Ethereum raised on platform
+  """
   eth: Float!
+  """
+  Total USD raised on platform
+  """
+  usd: Float!
+}
+
+"""
+Total raised on Ethereum and USD
+"""
+type TotalRaisedPlatform {
+  """
+  Total Ethereum in wei raised on platform
+  """
+  ethInWei: String!
+  """
+  Total USD raised on platform
+  """
   usd: Float!
 }
 
@@ -5512,6 +6518,10 @@ type TotalRaised {
 Track entity
 """
 type Track {
+  """
+  Audio of Track
+  """
+  audio: AudioMedia!
   """
   Duration in seconds
   """
@@ -5535,11 +6545,15 @@ type Track {
   """
   Track audio post-reveal of release
   """
-  revealedAudio: Media
+  revealedAudio: Media @deprecated(reason: "Use 'audio' instead")
+  """
+  Track audio post-reveal for all encodings
+  """
+  revealedAudioMedia: AudioMedia @deprecated(reason: "Use 'audio' instead")
   """
   Track original audio (non-transcoded) post-reveal of release
   """
-  revealedAudioOriginal: Media
+  revealedAudioOriginal: Media @deprecated(reason: "Use 'audio' instead")
   """
   Track title
   """
@@ -5557,11 +6571,15 @@ type TrackAudio {
   """
   Track audio, transcoded version if available
   """
-  audio: Media
+  audio: Media!
+  """
+  Track audio media, including encodings if available
+  """
+  audioMedia: AudioMedia!
   """
   Track audio, original non-transcoded version
   """
-  audioOriginal: Media
+  audioOriginal: Media!
   """
   Track duration in seconds
   """
@@ -5581,7 +6599,7 @@ type TrackAudio {
   """
   Reveal time in UNIX timestamp of track based on authenticated user (if authenticated)
   """
-  revealTime: Int!
+  revealTime: Int! @deprecated(reason: "Audio is always revealed")
 }
 
 """
@@ -5704,6 +6722,16 @@ enum TrendingCollectorsSortEnum {
   CREATORS_SUPPORTED
   NFTS_BOUGHT
   TOTAL_SPENT
+}
+
+"""
+Trending indicator type
+"""
+enum TrendingIndicator {
+  DOWN
+  NEW
+  SAME
+  UP
 }
 
 """

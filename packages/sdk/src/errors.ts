@@ -1,5 +1,5 @@
+import type { GraphQLExecutionErrors, AddressInputType, MintSchedule } from './types'
 import type { ZodError } from 'zod'
-import type { GraphQLExecutionErrors, MintScheduleBase, AddressInputType } from './types'
 
 export class MissingSignerError extends Error {
   readonly name = 'MissingSignerError'
@@ -76,6 +76,18 @@ export class NotSoundEditionError extends Error {
 
   constructor({ contractAddress }: { contractAddress: string }) {
     super('Address must be a sound edition contract')
+
+    this.contractAddress = contractAddress
+  }
+}
+
+export class SamNotFoundError extends Error {
+  readonly name = 'SamNotFoundError'
+
+  readonly contractAddress: string
+
+  constructor({ contractAddress }: { contractAddress: string }) {
+    super('SAM could not be found for edition')
 
     this.contractAddress = contractAddress
   }
@@ -178,10 +190,46 @@ export class InvalidQuantityError extends Error {
   }
 }
 
+export class InvalidOffsetError extends Error {
+  readonly name = 'InvalidOffsetError'
+
+  readonly offset: number
+
+  constructor({ offset }: { offset: number }) {
+    super('Must provide valid non-negative integer offset')
+
+    this.offset = offset
+  }
+}
+
+export class InvalidTokenIdError extends Error {
+  readonly name = 'InvalidTokenIdError'
+
+  readonly tokenId: string
+
+  constructor({ tokenId }: { tokenId: string }) {
+    super('Must provide valid token id')
+
+    this.tokenId = tokenId
+  }
+}
+
+export class InvalidAttributonIdError extends Error {
+  readonly name = 'InvalidAttributonIdError'
+
+  readonly attributonId: string
+
+  constructor({ attributonId }: { attributonId: string }) {
+    super('Must provide valid BigNumber-like attributon id')
+
+    this.attributonId = attributonId
+  }
+}
+
 export class NotEligibleMint extends Error {
   readonly name = 'NotEligibleMintError'
 
-  readonly mintSchedule: MintScheduleBase
+  readonly mintSchedule: MintSchedule
   readonly userAddress: string
   readonly eligibleMintQuantity: number
 
@@ -190,7 +238,7 @@ export class NotEligibleMint extends Error {
     userAddress,
     eligibleMintQuantity,
   }: {
-    mintSchedule: MintScheduleBase
+    mintSchedule: MintSchedule
     userAddress: string
     eligibleMintQuantity: number
   }) {

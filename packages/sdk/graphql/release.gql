@@ -1,5 +1,5 @@
 query ReleaseInfo($contractAddress: Address!, $editionId: String) {
-  release: releaseContract(contractAddress: $contractAddress, editionId: $editionId) {
+  release: releaseFromContract(contractAddress: $contractAddress, editionId: $editionId) {
     id
     contractAddress
     editionId
@@ -7,20 +7,16 @@ query ReleaseInfo($contractAddress: Address!, $editionId: String) {
     type
 
     mintStartTime
+    mintStartTimestamp
+    webappUri
 
     externalUrl
-    openseaUrl
-    layloUrl
     marketPlaceUrl
 
     title
     behindTheMusic
 
     season
-
-    totalRaised
-    totalRaisedPrimaryUsd
-    totalRaisedSecondaryUsd
 
     genre {
       id
@@ -30,20 +26,32 @@ query ReleaseInfo($contractAddress: Address!, $editionId: String) {
     track {
       id
       duration
-      normalizedPeaks
-      revealedAudio {
-        id
-        url
+      audio {
+        audio128k {
+          id
+          url
+        }
+        audio192k {
+          id
+          url
+        }
+        audio256k {
+          id
+          url
+        }
+        audioOriginal {
+          id
+          url
+        }
       }
     }
 
     artist {
       id
 
-      gemCollectionUrl
+      webappUri
       season
       soundHandle
-      spotifyUrl
 
       bannerImage {
         id
@@ -56,15 +64,9 @@ query ReleaseInfo($contractAddress: Address!, $editionId: String) {
 
         description
         displayName
-        email
         twitterHandle
 
         avatar {
-          id
-          url
-        }
-
-        bannerImage {
           id
           url
         }
@@ -74,8 +76,6 @@ query ReleaseInfo($contractAddress: Address!, $editionId: String) {
     rewards {
       id
       description
-      numOfBackers
-      price
       title
     }
 
@@ -84,26 +84,15 @@ query ReleaseInfo($contractAddress: Address!, $editionId: String) {
       url
     }
 
-    eggGame {
-      id
-      winningSerialNum
-      goldenEggImage {
-        id
-        url
-      }
-    }
-  }
-}
-
-query AudioFromTrack($trackId: UUID!) {
-  audioFromTrack(trackId: $trackId) {
-    id
-    duration
-    audio {
+    goldenEggImage {
       id
       url
     }
-    revealTime
+
+    eggGame {
+      id
+      winningSerialNum
+    }
   }
 }
 
@@ -135,10 +124,23 @@ query ReleaseShareInfo(
     track {
       id
       duration
-      normalizedPeaks
-      revealedAudio {
-        id
-        url
+      audio {
+        audio128k {
+          id
+          url
+        }
+        audio192k {
+          id
+          url
+        }
+        audio256k {
+          id
+          url
+        }
+        audioOriginal {
+          id
+          url
+        }
       }
     }
   }

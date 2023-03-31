@@ -49,7 +49,11 @@ export interface MintOptions {
 export type MerkleProvider = MerkleProofProvider
 
 export interface BaseSoundClientConfig {
+  /**
+   * Creator Address to be used as contract creator reference
+   */
   soundCreatorAddress?: string
+
   /**
    * @default console.error
    */
@@ -70,7 +74,7 @@ type LazyOption<T extends object> = T | (() => T | Promise<T>)
 
 export type { Signer, Provider }
 
-export type SoundClientConfig = (
+export type SoundClientContractProvider =
   | {
       provider: LazyOption<Provider>
       signer?: LazyOption<Signer>
@@ -79,10 +83,29 @@ export type SoundClientConfig = (
       provider?: LazyOption<Provider>
       signer: LazyOption<Signer>
     }
-) &
-  BaseSoundClientConfig
 
-export type MintScheduleBase = {
+export type SoundClientConfig = SoundClientContractProvider & BaseSoundClientConfig
+
+export interface SAM {
+  basePrice: BigNumber
+  inflectionPrice: BigNumber
+  inflectionPoint: number
+
+  balance: BigNumber
+
+  supply: number
+  maxSupply: number
+
+  buyFreezeTime: number
+
+  goldenEggFeesAccrued: BigNumber
+
+  artistFeeBPS: number
+  affiliateFeeBPS: number
+  goldenEggFeeBPS: number
+}
+
+export interface MintScheduleBase {
   editionAddress: string
   minterAddress: string
   mintId: number
@@ -97,7 +120,7 @@ export type MintScheduleBase = {
 
 export type MinterInterfaceId = typeof interfaceIds.IMerkleDropMinter | typeof interfaceIds.IRangeEditionMinter
 
-export type RangeEditionSchedule = MintScheduleBase & {
+export interface RangeEditionSchedule extends MintScheduleBase {
   mintType: 'RangeEdition'
   maxMintableLower: number
   maxMintableUpper: number
@@ -105,7 +128,7 @@ export type RangeEditionSchedule = MintScheduleBase & {
   maxMintable: (unixTimestamp?: number) => number
 }
 
-export type MerkleDropSchedule = MintScheduleBase & {
+export interface MerkleDropSchedule extends MintScheduleBase {
   mintType: 'MerkleDrop'
   maxMintable: number
   merkleRoot: string
@@ -138,6 +161,21 @@ export type EditionConfig = {
   shouldFreezeMetadata: boolean
   shouldEnableMintRandomness: boolean
   enableOperatorFiltering: boolean
+
+  setSAM: SamConfig | null
+}
+
+export interface SamConfig {
+  contractAddress: string
+
+  basePrice: BigNumberish
+  linearPriceSlope: BigNumberish
+  inflectionPrice: BigNumberish
+  inflectionPoint: BigNumberish
+
+  artistFeeBPS: BigNumberish
+  goldenEggFeeBPS: BigNumberish
+  affiliateFeeBPS: BigNumberish
 }
 
 /**
@@ -235,6 +273,31 @@ export type Expand<T> = T extends infer O ? { [K in keyof O]: O[K] } : never
 
 export * from './merkle/types'
 
-export type AddressInputType = 'DEPLOYER' | 'SOUND_EDITION' | 'MINTER' | 'FUNDING_RECIPIENT' | 'METADATA_MODULE'
+export type AddressInputType =
+  | 'DEPLOYER'
+  | 'SOUND_EDITION'
+  | 'MINTER'
+  | 'FUNDING_RECIPIENT'
+  | 'METADATA_MODULE'
+  | 'SAM'
+  | 'AFFILIATE'
+  | 'WALLET'
+  | 'CREATOR_ADDRESS'
 
 export { ContractErrorName, ContractErrorSigHashToName } from './utils/constants'
+
+export type ExpandTypeChainStructOutput<T> = Expand<Omit<T, keyof [] | number | `${number}`>>
+
+export type Bytes = ArrayLike<number>
+
+export type BytesLike = Bytes | string
+
+export declare type PromiseOrValue<T> = T | Promise<T>
+
+type TupleSplit<T, N extends number, O extends readonly any[] = readonly []> = O['length'] extends N
+  ? [O, T]
+  : T extends readonly [infer F, ...infer R]
+  ? TupleSplit<readonly [...R], N, readonly [...O, F]>
+  : [O, T]
+
+export type TakeFirst<T extends readonly any[], N extends number> = TupleSplit<T, N>[0]
