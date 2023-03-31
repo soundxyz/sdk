@@ -2,4 +2,4 @@
 '@soundxyz/sdk': minor
 ---
 
-SAM
+SAM + Sound v1.2 support
