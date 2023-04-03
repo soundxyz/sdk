@@ -28,7 +28,7 @@
   "types": "./dist/index.d.ts",
   "scripts": {
     "prepack": "node build.mjs",
-    "prepare": "graphql-codegen",
+    "prepare": "node build.mjs",
     "postpublish": "gh-release",
     "pull-env": "dotenv-vault pull",
     "test": "hardhat test",
@@ -74,7 +74,7 @@
     "chai": "^4.3.7",
     "changesets-github-release": "^0.1.0",
     "dotenv": "^16.0.3",
-    "esbuild": "^0.17.14",
+    "esbuild": "^0.17.15",
     "ethereum-waffle": "^4.0.10",
     "ethers": "^5.7.2",
     "graphql": "^16.6.0",
@@ -91,6 +91,7 @@
   },
   "publishConfig": {
     "access": "public",
-    "directory": "dist"
+    "directory": "dist",
+    "linkDirectory": true
   }
 }

@@ -1,0 +1,26 @@
+{
+  "name": "@soundxyz/sdk-example",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "prepare": "node pull-env.mjs",
+    "snoop-xyz": "bob-tsm src/snoop-xyz.ts",
+    "mint": "bob-tsm src/mint.ts"
+  },
+  "dependencies": {
+    "@soundxyz/sdk": "workspace:^",
+    "@soundxyz/sound-protocol": "^1.4.0",
+    "alchemy-sdk": "^2.6.2",
+    "date-fns": "^2.29.3",
+    "ethers": "^5.7.2",
+    "require-env-variable": "^4.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "18.15.11",
+    "bob-tsm": "^1.1.2",
+    "dotenv": "^16.0.3",
+    "esbuild": "^0.17.15",
+    "typescript": "5.0.3",
+    "undici": "^5.21.0"
+  }
+}
