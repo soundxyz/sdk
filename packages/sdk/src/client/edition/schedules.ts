@@ -87,7 +87,7 @@ export async function editionRegisteredMinters(
     fromBlockOrBlockHash,
   }: {
     editionAddress: string
-    fromBlockOrBlockHash: BlockOrBlockHash | undefined
+    fromBlockOrBlockHash?: BlockOrBlockHash
   },
 ): Promise<string[]> {
   const {
@@ -137,7 +137,7 @@ export async function editionMinterMintIds(
   }: {
     editionAddress: string
     minterAddress: string
-    fromBlockOrBlockHash: BlockOrBlockHash | undefined
+    fromBlockOrBlockHash?: BlockOrBlockHash
   },
 ) {
   const { signerOrProvider } = await this.expectSignerOrProvider()
