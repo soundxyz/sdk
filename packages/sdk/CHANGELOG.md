@@ -1,5 +1,15 @@
 # @soundxyz/sdk
 
+## 1.0.0
+
+### Major Changes
+
+- [#206](https://github.com/soundxyz/sdk/pull/206) [`5a3b035`](https://github.com/soundxyz/sdk/commit/5a3b0355f8a1996308ea0ecbd4972cfec2bb47dc) Thanks [@PabloSzx](https://github.com/PabloSzx)! - Major v1 rework stable release
+
+### Minor Changes
+
+- [#206](https://github.com/soundxyz/sdk/pull/206) [`5a3b035`](https://github.com/soundxyz/sdk/commit/5a3b0355f8a1996308ea0ecbd4972cfec2bb47dc) Thanks [@PabloSzx](https://github.com/PabloSzx)! - SAM + Sound v1.2 support
+
 ## 0.14.1
 
 ### Patch Changes
