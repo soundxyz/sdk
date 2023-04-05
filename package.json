@@ -54,6 +54,9 @@
     "pnpm": ">=7.9.1"
   },
   "pnpm": {
+    "overrides": {
+      "@graphql-codegen/visitor-plugin-common": "3.0.2"
+    },
     "patchedDependencies": {
       "@graphql-codegen/visitor-plugin-common@3.0.2": "patches/@graphql-codegen__visitor-plugin-common@3.0.2.patch"
     },
