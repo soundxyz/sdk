@@ -4,6 +4,7 @@ import { IMinterModule__factory, SoundEditionV1_2__factory } from '@soundxyz/sou
 import { UnsupportedMinterError } from '../../errors'
 import { BlockOrBlockHash, MinterInterfaceId, MintSchedule } from '../../types'
 import { minterFactoryMap } from '../../utils/constants'
+import { LazyPromise } from '../../utils/promise'
 import { SoundClientInstance } from '../instance'
 
 export async function mintSchedules(
@@ -164,16 +165,24 @@ async function mintInfosFromMinter(
     mintIds: number[]
   },
 ): Promise<MintSchedule[]> {
-  const { signerOrProvider } = await this.expectSignerOrProvider()
+  const {
+    expectSignerOrProvider,
+    instance: { idempotentCachedCall },
+  } = this
+
+  const signerOrProvider = LazyPromise(() => expectSignerOrProvider().then((v) => v.signerOrProvider))
+
+  const interfaceId = await idempotentCachedCall(`minter-interface-id-${minterAddress}`, async () => {
+    const minterModule = IMinterModule__factory.connect(minterAddress, await signerOrProvider)
+
+    return (await minterModule.moduleInterfaceId()) as MinterInterfaceId
+  })
 
   return Promise.all(
     mintIds.map(async (mintId) => {
-      const minterModule = IMinterModule__factory.connect(minterAddress, signerOrProvider)
-      const interfaceId = (await minterModule.moduleInterfaceId()) as MinterInterfaceId
-
       switch (interfaceId) {
         case interfaceIds.IRangeEditionMinter: {
-          const minterContract = minterFactoryMap[interfaceId].connect(minterAddress, signerOrProvider)
+          const minterContract = minterFactoryMap[interfaceId].connect(minterAddress, await signerOrProvider)
           const mintSchedule = await minterContract.mintInfo(editionAddress, mintId)
           return {
             mintType: 'RangeEdition',
@@ -198,7 +207,7 @@ async function mintInfosFromMinter(
           }
         }
         case interfaceIds.IMerkleDropMinter: {
-          const minterContract = minterFactoryMap[interfaceId].connect(minterAddress, signerOrProvider)
+          const minterContract = minterFactoryMap[interfaceId].connect(minterAddress, await signerOrProvider)
           const mintSchedule = await minterContract.mintInfo(editionAddress, mintId)
           return {
             mintType: 'MerkleDrop',
