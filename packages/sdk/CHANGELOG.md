@@ -1,5 +1,13 @@
 # @soundxyz/sdk
 
+## 1.0.1
+
+### Patch Changes
+
+- [#213](https://github.com/soundxyz/sdk/pull/213) [`a9a1cea`](https://github.com/soundxyz/sdk/commit/a9a1cea678f806885d379499a2b89ad679672791) Thanks [@PabloSzx](https://github.com/PabloSzx)! - Add Tie-breaker logic on schedules start time sort with Merkle first
+
+- [#210](https://github.com/soundxyz/sdk/pull/210) [`351ccd0`](https://github.com/soundxyz/sdk/commit/351ccd0f5991988974d2dd58253ee382baecfde7) Thanks [@PabloSzx](https://github.com/PabloSzx)! - Optimize minter interface id contract calls
+
 ## 1.0.0
 
 ### Major Changes
