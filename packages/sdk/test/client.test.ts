@@ -1,67 +1,68 @@
+import assert from 'assert'
+import { expect } from 'chai'
+import { randomUUID } from 'crypto'
+import { ethers } from 'hardhat'
+
+import { BigNumber } from '@ethersproject/bignumber'
 import { Wallet } from '@ethersproject/wallet'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
+import { SoundEditionV1__factory } from '@soundxyz/sound-protocol-v1-0/typechain/index'
+import { SoundEditionV1_1__factory } from '@soundxyz/sound-protocol-v1-1/typechain/index'
 import {
   MerkleDropMinter,
   MerkleDropMinter__factory,
   RangeEditionMinter,
   RangeEditionMinter__factory,
+  SAM,
+  SAM__factory,
   SoundCreatorV1,
   SoundCreatorV1__factory,
   SoundEditionV1_2__factory,
   SoundFeeRegistry__factory,
-  SAM__factory,
-  SAM,
 } from '@soundxyz/sound-protocol/typechain/index'
-import { SoundEditionV1_1__factory } from '@soundxyz/sound-protocol-v1-1/typechain/index'
-import { SoundEditionV1__factory } from '@soundxyz/sound-protocol-v1-0/typechain/index'
-import assert from 'assert'
-import { expect } from 'chai'
-import { ethers } from 'hardhat'
 
+import { mintInfosFromMinter } from '../src/client/edition/schedules'
+import { SoundClient } from '../src/client/main'
 import {
   InvalidAddressError,
   InvalidEditionMaxMintableError,
+  InvalidMaxMintableError,
+  InvalidMaxMintablePerAccountError,
+  InvalidMerkleRootError,
   InvalidQuantityError,
   InvalidTimeValuesError,
   MissingMerkleProvider,
-  InvalidMerkleRootError,
   MissingSoundAPI,
   NotEligibleMint,
   SoundNotFoundError,
-  InvalidMaxMintablePerAccountError,
-  InvalidMaxMintableError,
 } from '../src/errors'
-import { DEFAULT_SALT, SOUND_FEE, ONE_HOUR, PRICE, BAD_ADDRESS, EDITION_MAX } from './test-constants'
 import {
-  MINTER_ROLE,
-  NULL_ADDRESS,
-  NON_NULL_ADDRESS,
-  UINT32_MAX,
-  NULL_BYTES32,
-  MINT_GAS_LIMIT_MULTIPLIER,
   ContractErrorName,
+  MINT_GAS_LIMIT_MULTIPLIER,
+  MINTER_ROLE,
+  NON_NULL_ADDRESS,
+  NULL_ADDRESS,
+  NULL_BYTES32,
+  UINT32_MAX,
 } from '../src/utils/constants'
 import { getSaltAsBytes32, scaleAmount } from '../src/utils/helpers'
 import {
-  MerkleTestHelper,
-  now,
-  getGenericEditionConfig,
-  getGenericRangeMintConfig,
-  getGenericMerkleMintConfig,
   didntThrowExpectedError,
+  getGenericEditionConfig,
+  getGenericMerkleMintConfig,
+  getGenericRangeMintConfig,
+  MerkleTestHelper,
   mineBlock,
+  now,
   setAutoMine,
 } from './helpers'
+import { MockAPI } from './helpers/api'
+import { BAD_ADDRESS, DEFAULT_SALT, EDITION_MAX, ONE_HOUR, PRICE, SOUND_FEE } from './test-constants'
 
 import type { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import type MerkleTree from 'merkletreejs'
 
 import type { ContractCall, MintConfig, MintSchedule } from '../src/types'
-import { MockAPI } from './helpers/api'
-import { randomUUID } from 'crypto'
-import { SoundClient } from '../src/client/main'
-import { BigNumber } from '@ethersproject/bignumber'
-
 const SoundCreatorV1 = new SoundCreatorV1__factory()
 const SoundFeeRegistry = new SoundFeeRegistry__factory()
 const RangeEditionMinter = new RangeEditionMinter__factory()
@@ -1256,6 +1257,160 @@ describe('createEdition', () => {
         }
       }
     }
+  })
+
+  it('mint schedules tie-breaker on merkle first, contract merkle first', async () => {
+    const editionConfig = getGenericEditionConfig()
+
+    const mintStartTime = now()
+    const mint1CutoffTime = mintStartTime + ONE_HOUR / 2
+    const mint1MaxMintablePerAccount = 2
+    const mint3MaxMintablePerAccount = 3
+    const merkleTestHelper = MerkleTestHelper()
+    const merkleRoot = merkleTestHelper.getMerkleRoot(merkleTestHelper.getMerkleTree())
+
+    const mintConfigs: MintConfig[] = [
+      {
+        mintType: 'MerkleDrop' as const,
+        minterAddress: merkleDropMinter.address,
+        price: PRICE,
+        merkleRoot,
+        startTime: mintStartTime,
+        endTime: mintStartTime + ONE_HOUR,
+        maxMintable: 9,
+        maxMintablePerAccount: mint3MaxMintablePerAccount,
+        affiliateFeeBPS: 0,
+      },
+      {
+        mintType: 'RangeEdition' as const,
+        minterAddress: rangeEditionMinter.address,
+        price: PRICE,
+        startTime: mintStartTime,
+        cutoffTime: mint1CutoffTime,
+        endTime: mintStartTime + ONE_HOUR,
+        maxMintableLower: 5,
+        maxMintableUpper: 10,
+        maxMintablePerAccount: mint1MaxMintablePerAccount,
+        affiliateFeeBPS: 0,
+      },
+    ]
+
+    const [precomputedEditionAddress, _] = await SoundCreatorV1__factory.connect(
+      soundCreator.address,
+      ethers.provider,
+    ).soundEditionAddress(artistWallet.address, getSaltAsBytes32(SALT))
+
+    /**
+     * Create sound edition and mint schedules.
+     */
+    await client.creation({ creatorAddress: soundCreator.address }).createEdition({
+      editionConfig,
+      mintConfigs,
+      salt: SALT,
+    })
+
+    const { schedules } = await client.edition.mintSchedules({
+      editionAddress: precomputedEditionAddress,
+    })
+
+    expect(new Set(schedules.map((v) => v.startTime))).deep.equal(new Set([mintStartTime]))
+
+    expect(schedules.map((v) => v.mintType)).deep.equal([
+      'MerkleDrop',
+      'RangeEdition',
+    ] satisfies MintConfig['mintType'][])
+
+    const scheduleIds = await client.edition.scheduleIds({
+      editionAddress: precomputedEditionAddress,
+    })
+
+    const mintSchedulesLists = await Promise.all(
+      scheduleIds.map(({ minterAddress, mintIds }) =>
+        mintInfosFromMinter.call(client.client, { editionAddress: precomputedEditionAddress, minterAddress, mintIds }),
+      ),
+    )
+
+    expect(mintSchedulesLists.flat().map((v) => v.mintType)).deep.equal([
+      'MerkleDrop',
+      'RangeEdition',
+    ] satisfies MintConfig['mintType'][])
+  })
+
+  it('mint schedules tie-breaker on merkle first, contract range first', async () => {
+    const editionConfig = getGenericEditionConfig()
+
+    const mintStartTime = now()
+    const mint1CutoffTime = mintStartTime + ONE_HOUR / 2
+    const mint1MaxMintablePerAccount = 2
+    const mint3MaxMintablePerAccount = 3
+    const merkleTestHelper = MerkleTestHelper()
+    const merkleRoot = merkleTestHelper.getMerkleRoot(merkleTestHelper.getMerkleTree())
+
+    const mintConfigs: MintConfig[] = [
+      {
+        mintType: 'RangeEdition' as const,
+        minterAddress: rangeEditionMinter.address,
+        price: PRICE,
+        startTime: mintStartTime,
+        cutoffTime: mint1CutoffTime,
+        endTime: mintStartTime + ONE_HOUR,
+        maxMintableLower: 5,
+        maxMintableUpper: 10,
+        maxMintablePerAccount: mint1MaxMintablePerAccount,
+        affiliateFeeBPS: 0,
+      },
+      {
+        mintType: 'MerkleDrop' as const,
+        minterAddress: merkleDropMinter.address,
+        price: PRICE,
+        merkleRoot,
+        startTime: mintStartTime,
+        endTime: mintStartTime + ONE_HOUR,
+        maxMintable: 9,
+        maxMintablePerAccount: mint3MaxMintablePerAccount,
+        affiliateFeeBPS: 0,
+      },
+    ]
+
+    const [precomputedEditionAddress, _] = await SoundCreatorV1__factory.connect(
+      soundCreator.address,
+      ethers.provider,
+    ).soundEditionAddress(artistWallet.address, getSaltAsBytes32(SALT))
+
+    /**
+     * Create sound edition and mint schedules.
+     */
+    await client.creation({ creatorAddress: soundCreator.address }).createEdition({
+      editionConfig,
+      mintConfigs,
+      salt: SALT,
+    })
+
+    const { schedules } = await client.edition.mintSchedules({
+      editionAddress: precomputedEditionAddress,
+    })
+
+    expect(new Set(schedules.map((v) => v.startTime))).deep.equal(new Set([mintStartTime]))
+
+    expect(schedules.map((v) => v.mintType)).deep.equal([
+      'MerkleDrop',
+      'RangeEdition',
+    ] satisfies MintConfig['mintType'][])
+
+    const scheduleIds = await client.edition.scheduleIds({
+      editionAddress: precomputedEditionAddress,
+    })
+
+    const mintSchedulesLists = await Promise.all(
+      scheduleIds.map(({ minterAddress, mintIds }) =>
+        mintInfosFromMinter.call(client.client, { editionAddress: precomputedEditionAddress, minterAddress, mintIds }),
+      ),
+    )
+
+    expect(mintSchedulesLists.flat().map((v) => v.mintType)).deep.equal([
+      'RangeEdition',
+      'MerkleDrop',
+    ] satisfies MintConfig['mintType'][])
   })
 
   it('throws if fundingRecipient is a null address', async () => {

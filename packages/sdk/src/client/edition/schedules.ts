@@ -36,7 +36,21 @@ export async function mintSchedules(
     ),
   )
 
-  const schedules = mintSchedulesLists.flat().sort((a, b) => a.startTime - b.startTime)
+  const schedules = mintSchedulesLists.flat().sort((a, b) => {
+    const startTimeDiff = a.startTime - b.startTime
+
+    if (startTimeDiff !== 0) return startTimeDiff
+
+    if (a.mintType === 'MerkleDrop' && b.mintType !== 'MerkleDrop') {
+      return -1
+    }
+
+    if (b.mintType === 'MerkleDrop' && a.mintType !== 'MerkleDrop') {
+      return 1
+    }
+
+    return 0
+  })
 
   const activeSchedules = schedules.filter((mintSchedule) => {
     return mintSchedule.startTime <= timestamp && mintSchedule.endTime > timestamp && !isSchedulePaused(mintSchedule)
@@ -153,7 +167,7 @@ export async function editionMinterMintIds(
 /**
  * @private
  */
-async function mintInfosFromMinter(
+export async function mintInfosFromMinter(
   this: SoundClientInstance,
   {
     editionAddress,
