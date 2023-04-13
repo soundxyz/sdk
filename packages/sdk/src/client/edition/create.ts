@@ -1,8 +1,8 @@
 import { BigNumberish } from '@ethersproject/bignumber'
 import { Overrides } from '@ethersproject/contracts'
 import {
-  MerkleDropMinter__factory,
-  RangeEditionMinter__factory,
+  MerkleDropMinterV2__factory,
+  RangeEditionMinterV2__factory,
   SAM__factory,
   SoundCreatorV1__factory,
   SoundEditionV1_2__factory,
@@ -96,7 +96,7 @@ export async function createEdition(
      */
     switch (mintConfig.mintType) {
       case 'RangeEdition': {
-        const minterInterface = RangeEditionMinter__factory.createInterface()
+        const minterInterface = RangeEditionMinterV2__factory.createInterface()
         contractCalls.push({
           contractAddress: mintConfig.minterAddress,
 
@@ -115,7 +115,7 @@ export async function createEdition(
         break
       }
       case 'MerkleDrop': {
-        const minterInterface = MerkleDropMinter__factory.createInterface()
+        const minterInterface = MerkleDropMinterV2__factory.createInterface()
         contractCalls.push({
           contractAddress: mintConfig.minterAddress,
           calldata: minterInterface.encodeFunctionData('createEditionMint', [

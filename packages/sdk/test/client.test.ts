@@ -10,8 +10,12 @@ import { SoundEditionV1__factory } from '@soundxyz/sound-protocol-v1-0/typechain
 import { SoundEditionV1_1__factory } from '@soundxyz/sound-protocol-v1-1/typechain/index'
 import {
   MerkleDropMinter,
+  MerkleDropMinterV2,
+  MerkleDropMinterV2__factory,
   MerkleDropMinter__factory,
   RangeEditionMinter,
+  RangeEditionMinterV2,
+  RangeEditionMinterV2__factory,
   RangeEditionMinter__factory,
   SAM,
   SAM__factory,
@@ -66,14 +70,18 @@ import type { ContractCall, MintConfig, MintSchedule } from '../src/types'
 const SoundCreatorV1 = new SoundCreatorV1__factory()
 const SoundFeeRegistry = new SoundFeeRegistry__factory()
 const RangeEditionMinter = new RangeEditionMinter__factory()
+const RangeEditionMinterV2 = new RangeEditionMinterV2__factory()
 const MerkleDropMinter = new MerkleDropMinter__factory()
+const MerkleDropMinterV2 = new MerkleDropMinterV2__factory()
 const SamMinter = new SAM__factory()
 
 let client: SoundClient
 let soundCreator: SoundCreatorV1
 let precomputedEditionAddress: string
 let merkleDropMinter: MerkleDropMinter
+let merkleDropMinterV2: MerkleDropMinterV2
 let rangeEditionMinter: RangeEditionMinter
+let rangeEditionMinterV2: RangeEditionMinterV2
 let samMinter: SAM
 let signers: SignerWithAddress[]
 let soundWallet: SignerWithAddress
@@ -108,7 +116,10 @@ async function deployProtocol() {
 
   // Deploy minters
   const merkleDropMinter = await MerkleDropMinter.connect(soundWallet).deploy(feeRegistry.address)
+  const merkleDropMinterV2 = await MerkleDropMinterV2.connect(soundWallet).deploy()
+
   const rangeEditionMinter = await RangeEditionMinter.connect(soundWallet).deploy(feeRegistry.address)
+  const rangeEditionMinterV2 = await RangeEditionMinterV2.connect(soundWallet).deploy()
 
   // SAM minter
   const samMinter = await SamMinter.connect(soundWallet).deploy()
@@ -124,7 +135,9 @@ async function deployProtocol() {
     soundCreator,
     precomputedEditionAddress,
     merkleDropMinter,
+    merkleDropMinterV2,
     rangeEditionMinter,
+    rangeEditionMinterV2,
     samMinter,
     SoundEditionV1_2,
     soundEditionV1_2Imp,
@@ -149,7 +162,9 @@ beforeEach(async () => {
   soundCreator = fixture.soundCreator
   precomputedEditionAddress = fixture.precomputedEditionAddress
   merkleDropMinter = fixture.merkleDropMinter
+  merkleDropMinterV2 = fixture.merkleDropMinterV2
   rangeEditionMinter = fixture.rangeEditionMinter
+  rangeEditionMinterV2 = fixture.rangeEditionMinterV2
   samMinter = fixture.samMinter
 
   client = SoundClient({
@@ -1165,7 +1180,7 @@ describe('createEdition', () => {
     const mintConfigs: MintConfig[] = [
       {
         mintType: 'RangeEdition' as const,
-        minterAddress: rangeEditionMinter.address,
+        minterAddress: rangeEditionMinterV2.address,
         price: PRICE,
         startTime: mint1StartTime,
         cutoffTime: mint1CutoffTime,
@@ -1177,7 +1192,7 @@ describe('createEdition', () => {
       },
       {
         mintType: 'MerkleDrop' as const,
-        minterAddress: merkleDropMinter.address,
+        minterAddress: merkleDropMinterV2.address,
         price: PRICE,
         merkleRoot,
         startTime: mint3StartTime,
@@ -1236,7 +1251,7 @@ describe('createEdition', () => {
     for (const mintConfig of mintConfigs) {
       switch (mintConfig.mintType) {
         case 'RangeEdition': {
-          const minter = RangeEditionMinter__factory.connect(mintConfig.minterAddress, ethers.provider)
+          const minter = RangeEditionMinterV2__factory.connect(mintConfig.minterAddress, ethers.provider)
           const mintSchedule = await minter.mintInfo(precomputedEditionAddress, MINT_ID)
           expect(mintSchedule.startTime).to.equal(mint1StartTime)
           expect(mintSchedule.cutoffTime).to.equal(mint1CutoffTime)
@@ -1247,7 +1262,7 @@ describe('createEdition', () => {
           break
         }
         case 'MerkleDrop': {
-          const minter = MerkleDropMinter__factory.connect(mintConfig.minterAddress, ethers.provider)
+          const minter = MerkleDropMinterV2__factory.connect(mintConfig.minterAddress, ethers.provider)
           const mintSchedule = await minter.mintInfo(precomputedEditionAddress, MINT_ID)
           expect(mintSchedule.startTime).to.equal(mint3StartTime)
           expect(mintSchedule.endTime).to.equal(mint3StartTime + ONE_HOUR)
