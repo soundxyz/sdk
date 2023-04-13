@@ -194,9 +194,9 @@ importers:
       '@nomiclabs/hardhat-waffle':
         specifier: ^2.0.5
         version: 2.0.5(@nomiclabs/hardhat-ethers@2.2.2)(ethereum-waffle@4.0.10)(ethers@5.7.2)(hardhat@2.13.0)
-      '@soundxyz/sound-protocol':
-        specifier: ^1.4.0
-        version: 1.4.0
+      '@soundxyz/sound-protocol-private':
+        specifier: 1.5.0-alpha-1be6075.1
+        version: 1.5.0-alpha-1be6075.1
       '@soundxyz/sound-protocol-v1-0':
         specifier: npm:@soundxyz/sound-protocol@1.1.0
         version: /@soundxyz/sound-protocol@1.1.0
@@ -3760,6 +3760,17 @@ packages:
       tslib: 1.14.1
     dev: true
 
+  /@soundxyz/sound-protocol-private@1.5.0-alpha-1be6075.1:
+    resolution: {integrity: sha512-dvvuEYjFheMCOI7a1wGo4Tp4W/FphLQp71vkHG41NHXRWJh9xXiu699cg2se4tSBXEjSC1Z7Ic08m76hxBVWwg==}
+    dependencies:
+      '@ethersproject/abi': 5.7.0
+      '@ethersproject/providers': 5.7.2
+      ethers: 5.7.2
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
+    dev: true
+
   /@soundxyz/sound-protocol@1.1.0:
     resolution: {integrity: sha512-Njsg+ZTm8m3neTMVjRERlGctLvZx8296YET5AVRdsXUxZjXKJkNAbhziDc6kPxmaUwtJFTIUvcwp8BTzQFzoSQ==}
     dependencies:
@@ -3791,6 +3802,7 @@ packages:
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
+    dev: false
 
   /@tootallnate/once@2.0.0:
     resolution: {integrity: sha512-XCuKFP5PS55gnMVu3dty8KPatLqUoy/ZYzDzAGCQ8JNFCkLXzmI7vNHCR+XpbZaMWQK/vQubr7PkYq8g470J/A==}
@@ -4002,6 +4014,10 @@ packages:
     resolution: {integrity: sha512-Da66lEIFeIz9ltsdMZcpQvmrmmoqrfju8pm1BH8WbYjZSwUgCwXLb9C+9XYogwBITnbsSaMdVPb2ekf7TV+03w==}
     dependencies:
       '@types/node': 18.15.13
+
+  /@types/seedrandom@3.0.1:
+    resolution: {integrity: sha512-giB9gzDeiCeloIXDgzFBCgjj1k4WxcDrZtGl6h1IqmUPlxF+Nx8Ve+96QCyDZ/HseB/uvDsKbpib9hU5cU53pw==}
+    dev: true
 
   /@types/seedrandom@3.0.1:
     resolution: {integrity: sha512-giB9gzDeiCeloIXDgzFBCgjj1k4WxcDrZtGl6h1IqmUPlxF+Nx8Ve+96QCyDZ/HseB/uvDsKbpib9hU5cU53pw==}

@@ -4,7 +4,7 @@ import {
   MerkleDropMinter__factory,
   RangeEditionMinter__factory,
   SoundEditionV1_2__factory,
-} from '@soundxyz/sound-protocol/typechain'
+} from '@soundxyz/sound-protocol-private/typechain'
 
 import { InvalidQuantityError, NotEligibleMint } from '../../errors'
 import { MintOptions, MintSchedule } from '../../types'

@@ -1,5 +1,5 @@
-import { interfaceIds } from '@soundxyz/sound-protocol'
-import { IMinterModule__factory, SoundEditionV1_2__factory } from '@soundxyz/sound-protocol/typechain'
+import { interfaceIds } from '@soundxyz/sound-protocol-private'
+import { IMinterModule__factory, SoundEditionV1_2__factory } from '@soundxyz/sound-protocol-private/typechain'
 
 import { UnsupportedMinterError } from '../../errors'
 import { BlockOrBlockHash, MinterInterfaceId, MintSchedule } from '../../types'

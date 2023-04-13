@@ -6,7 +6,7 @@ import {
   SAM__factory,
   SoundCreatorV1__factory,
   SoundEditionV1_2__factory,
-} from '@soundxyz/sound-protocol/typechain'
+} from '@soundxyz/sound-protocol-private/typechain'
 
 import {
   InvalidEditionMaxMintableError,

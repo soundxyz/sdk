@@ -19,7 +19,7 @@ import {
   SoundCreatorV1__factory,
   SoundEditionV1_2__factory,
   SoundFeeRegistry__factory,
-} from '@soundxyz/sound-protocol/typechain/index'
+} from '@soundxyz/sound-protocol-private/typechain/index'
 
 import { mintInfosFromMinter } from '../src/client/edition/schedules'
 import { SoundClient } from '../src/client/main'
