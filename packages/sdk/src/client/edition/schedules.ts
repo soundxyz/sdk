@@ -1,11 +1,12 @@
 import { interfaceIds } from '@soundxyz/sound-protocol-private'
-import { IMinterModule__factory, SoundEditionV1_2__factory } from '@soundxyz/sound-protocol-private/typechain'
+import { IMinterModuleV2__factory, SoundEditionV1_2__factory } from '@soundxyz/sound-protocol-private/typechain'
 
 import { UnsupportedMinterError } from '../../errors'
-import { BlockOrBlockHash, MinterInterfaceId, MintSchedule } from '../../types'
+import { BlockOrBlockHash, HANDLED_MINTER_INTERFACE_IDS, MinterInterfaceId, MintSchedule } from '../../types'
 import { minterFactoryMap } from '../../utils/constants'
 import { LazyPromise } from '../../utils/promise'
 import { SoundClientInstance } from '../instance'
+import { exhaustiveGuard } from '../../utils/helpers'
 
 export async function mintSchedules(
   this: SoundClientInstance,
@@ -122,7 +123,7 @@ export async function editionRegisteredMinters(
   // Check supportsInterface() to verify each address is a minter
   const minters = await Promise.all(
     candidateMinters.map(async (minterAddress) => {
-      const minterContract = IMinterModule__factory.connect(minterAddress, signerOrProvider)
+      const minterContract = IMinterModuleV2__factory.connect(minterAddress, signerOrProvider)
 
       try {
         const isMinter = await minterContract.supportsInterface(interfaceIds.IMinterModule)
@@ -158,7 +159,7 @@ export async function editionMinterMintIds(
   const { signerOrProvider } = await this.expectSignerOrProvider()
 
   // Query MintConfigCreated event
-  const minterContract = IMinterModule__factory.connect(minterAddress, signerOrProvider)
+  const minterContract = IMinterModuleV2__factory.connect(minterAddress, signerOrProvider)
   const filter = minterContract.filters.MintConfigCreated(editionAddress)
   const mintScheduleConfigEvents = await minterContract.queryFilter(filter, fromBlockOrBlockHash)
   return mintScheduleConfigEvents.map((event) => event.args.mintId.toNumber())
@@ -187,15 +188,20 @@ export async function mintInfosFromMinter(
   const signerOrProvider = LazyPromise(() => expectSignerOrProvider().then((v) => v.signerOrProvider))
 
   const interfaceId = await idempotentCachedCall(`minter-interface-id-${minterAddress}`, async () => {
-    const minterModule = IMinterModule__factory.connect(minterAddress, await signerOrProvider)
+    const minterModule = IMinterModuleV2__factory.connect(minterAddress, await signerOrProvider)
 
     return (await minterModule.moduleInterfaceId()) as MinterInterfaceId
   })
 
   return Promise.all(
     mintIds.map(async (mintId) => {
+      if (HANDLED_MINTER_INTERFACE_IDS.indexOf(interfaceId) === -1) {
+        throw new UnsupportedMinterError({ interfaceId })
+      }
+
       switch (interfaceId) {
-        case interfaceIds.IRangeEditionMinter: {
+        case interfaceIds.IRangeEditionMinter:
+        case interfaceIds.IRangeEditionMinterV2: {
           const minterContract = minterFactoryMap[interfaceId].connect(minterAddress, await signerOrProvider)
           const mintSchedule = await minterContract.mintInfo(editionAddress, mintId)
           return {
@@ -220,11 +226,14 @@ export async function mintInfosFromMinter(
             affiliateFeeBPS: mintSchedule.affiliateFeeBPS,
           }
         }
-        case interfaceIds.IMerkleDropMinter: {
+
+        case interfaceIds.IMerkleDropMinter:
+        case interfaceIds.IMerkleDropMinterV2: {
           const minterContract = minterFactoryMap[interfaceId].connect(minterAddress, await signerOrProvider)
           const mintSchedule = await minterContract.mintInfo(editionAddress, mintId)
           return {
             mintType: 'MerkleDrop',
+            interfaceId,
             mintId,
             merkleRoot: mintSchedule.merkleRootHash,
             editionAddress,
@@ -240,7 +249,7 @@ export async function mintInfosFromMinter(
           }
         }
         default: {
-          throw new UnsupportedMinterError({ interfaceId })
+          exhaustiveGuard(interfaceId)
         }
       }
     }),

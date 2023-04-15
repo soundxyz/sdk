@@ -1,19 +1,22 @@
 import { BigNumber } from '@ethersproject/bignumber'
 import { ContractTransaction, PayableOverrides } from '@ethersproject/contracts'
-import {
-  MerkleDropMinter__factory,
-  RangeEditionMinter__factory,
-  SoundEditionV1_2__factory,
-} from '@soundxyz/sound-protocol-private/typechain'
+import { SoundEditionV1_2__factory } from '@soundxyz/sound-protocol-private/typechain'
 
-import { InvalidQuantityError, NotEligibleMint } from '../../errors'
-import { MintOptions, MintSchedule } from '../../types'
-import { MINT_FALLBACK_GAS_LIMIT, MINT_GAS_LIMIT_MULTIPLIER, NULL_ADDRESS } from '../../utils/constants'
-import { scaleAmount } from '../../utils/helpers'
+import { InvalidAttributonIdError, InvalidQuantityError, NotEligibleMint } from '../../errors'
+import { MintOptions, MintSchedule, MintToOptions } from '../../types'
+import {
+  MINT_FALLBACK_GAS_LIMIT,
+  MINT_GAS_LIMIT_MULTIPLIER,
+  NULL_ADDRESS,
+  minterFactoryMap,
+} from '../../utils/constants'
+import { exhaustiveGuard, scaleAmount } from '../../utils/helpers'
 import { SoundClientInstance } from '../instance'
 import { validateSoundEdition } from '../validation'
 import { getMerkleProof } from './merkle'
 import { isSchedulePaused } from './schedules'
+import { interfaceIds } from '@soundxyz/sound-protocol-private/interfaceIds'
+import { isBigNumberish } from '@ethersproject/bignumber/lib/bignumber'
 
 export async function numberOfTokensOwned(
   this: SoundClientInstance,
@@ -69,9 +72,13 @@ export async function mint(
     maxPriorityFeePerGas,
   }
 
-  switch (mintSchedule.mintType) {
-    case 'RangeEdition': {
-      const rangeMinter = RangeEditionMinter__factory.connect(mintSchedule.minterAddress, signer)
+  const interfaceId = mintSchedule.interfaceId
+
+  switch (interfaceId) {
+    case interfaceIds.IRangeEditionMinter:
+    case interfaceIds.IRangeEditionMinterV2: {
+      const rangeMinter = minterFactoryMap[interfaceId].connect(mintSchedule.minterAddress, signer)
+
       const mintArgs = [mintSchedule.editionAddress, mintSchedule.mintId, quantity, affiliate] as const
 
       if (txnOverrides.gasLimit) {
@@ -91,8 +98,9 @@ export async function mint(
       return rangeMinter.mint(...mintArgs, txnOverrides)
     }
 
-    case 'MerkleDrop': {
-      const merkleDropMinter = MerkleDropMinter__factory.connect(mintSchedule.minterAddress, signer)
+    case interfaceIds.IMerkleDropMinter:
+    case interfaceIds.IMerkleDropMinterV2: {
+      const merkleDropMinter = minterFactoryMap[interfaceId].connect(mintSchedule.minterAddress, signer)
 
       const { merkleRootHash: merkleRoot } = await merkleDropMinter.mintInfo(
         mintSchedule.editionAddress,
@@ -131,8 +139,145 @@ export async function mint(
       return merkleDropMinter.mint(...mintArgs, txnOverrides)
     }
 
-    default:
-      throw new Error('Unimplemented')
+    default: {
+      exhaustiveGuard(interfaceId)
+    }
+  }
+}
+
+export async function mintTo(
+  this: SoundClientInstance,
+  {
+    affiliate = NULL_ADDRESS,
+    affiliateProof = [],
+    attributonId = 0,
+    gasLimit,
+    maxFeePerGas,
+    maxPriorityFeePerGas,
+    mintSchedule,
+    mintToAddress,
+    quantity,
+  }: MintToOptions,
+): Promise<ContractTransaction> {
+  if (!isBigNumberish(attributonId)) {
+    throw new InvalidAttributonIdError({
+      attributonId,
+    })
+  }
+
+  await validateSoundEdition.call(this, { editionAddress: mintSchedule.editionAddress })
+  if (quantity <= 0 || Math.floor(quantity) !== quantity) throw new InvalidQuantityError({ quantity })
+
+  const { signer, userAddress } = await this.expectSigner()
+
+  const toAddress = mintToAddress ?? userAddress
+
+  const eligibleMintQuantity = await eligibleQuantity.call(this, {
+    mintSchedule,
+    userAddress,
+  })
+  if (eligibleMintQuantity < quantity) {
+    throw new NotEligibleMint({
+      eligibleMintQuantity,
+      mintSchedule,
+      userAddress,
+    })
+  }
+
+  const txnOverrides: PayableOverrides = {
+    value: 'price' in mintSchedule ? mintSchedule.price.mul(quantity) : BigNumber.from('0'),
+    gasLimit,
+    maxFeePerGas,
+    maxPriorityFeePerGas,
+  }
+
+  const interfaceId = mintSchedule.interfaceId
+
+  switch (interfaceId) {
+    case interfaceIds.IRangeEditionMinterV2: {
+      const rangeMinter = minterFactoryMap[interfaceId].connect(mintSchedule.minterAddress, signer)
+
+      const mintArgs = [
+        mintSchedule.editionAddress,
+        mintSchedule.mintId,
+        toAddress,
+        quantity,
+        affiliate,
+        affiliateProof,
+        attributonId,
+      ] as const
+
+      if (txnOverrides.gasLimit) {
+        return rangeMinter.mintTo(...mintArgs, txnOverrides)
+      }
+
+      try {
+        // Add a buffer to the gas estimate to account for node provider estimate variance.
+        const gasEstimate = await rangeMinter.estimateGas.mintTo(...mintArgs, txnOverrides)
+
+        txnOverrides.gasLimit = scaleAmount({ amount: gasEstimate, multiplier: MINT_GAS_LIMIT_MULTIPLIER })
+      } catch (err) {
+        // If estimation fails, provide a hardcoded gas limit that is guaranteed to succeed.
+        txnOverrides.gasLimit = MINT_FALLBACK_GAS_LIMIT
+      }
+
+      return rangeMinter.mintTo(...mintArgs, txnOverrides)
+    }
+
+    case interfaceIds.IMerkleDropMinterV2: {
+      const merkleDropMinter = minterFactoryMap[interfaceId].connect(mintSchedule.minterAddress, signer)
+
+      const { merkleRootHash: merkleRoot } = await merkleDropMinter.mintInfo(
+        mintSchedule.editionAddress,
+        mintSchedule.mintId,
+      )
+
+      const proof = await getMerkleProof.call(this, {
+        merkleRoot,
+        userAddress,
+      })
+
+      if (!proof?.length) {
+        throw new NotEligibleMint({
+          mintSchedule,
+          userAddress,
+          eligibleMintQuantity,
+        })
+      }
+
+      const mintArgs = [
+        mintSchedule.editionAddress,
+        mintSchedule.mintId,
+        toAddress,
+        quantity,
+        // TODO, allow overriding allowlisted for delegatecash
+        toAddress,
+        proof,
+        affiliate,
+        affiliateProof,
+        attributonId,
+      ] as const
+
+      if (txnOverrides.gasLimit) {
+        return merkleDropMinter.mintTo(...mintArgs, txnOverrides)
+      }
+
+      try {
+        // Add a buffer to the gas estimate to account for node provider estimate variance.
+        const gasEstimate = await merkleDropMinter.estimateGas.mintTo(...mintArgs, txnOverrides)
+
+        txnOverrides.gasLimit = scaleAmount({ amount: gasEstimate, multiplier: MINT_GAS_LIMIT_MULTIPLIER })
+      } catch (err) {
+        // If estimation fails, provide a hardcoded gas limit that is guaranteed to succeed.
+        txnOverrides.gasLimit = MINT_FALLBACK_GAS_LIMIT
+      }
+
+      return merkleDropMinter.mintTo(...mintArgs, txnOverrides)
+    }
+
+    default: {
+      exhaustiveGuard(interfaceId)
+    }
   }
 }
 

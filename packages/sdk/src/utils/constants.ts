@@ -1,7 +1,9 @@
 import { interfaceIds } from '@soundxyz/sound-protocol-private'
 import {
   RangeEditionMinter__factory,
+  RangeEditionMinterV2__factory,
   MerkleDropMinter__factory,
+  MerkleDropMinterV2__factory,
   SoundEditionV1_2__factory,
   IMinterModule__factory,
 } from '@soundxyz/sound-protocol-private/typechain/index'
@@ -13,7 +15,9 @@ const merkleMinterInteface = MerkleDropMinter__factory.createInterface()
 
 export const minterFactoryMap = {
   [interfaceIds.IRangeEditionMinter]: RangeEditionMinter__factory,
+  [interfaceIds.IRangeEditionMinterV2]: RangeEditionMinterV2__factory,
   [interfaceIds.IMerkleDropMinter]: MerkleDropMinter__factory,
+  [interfaceIds.IMerkleDropMinterV2]: MerkleDropMinterV2__factory,
 } as const
 
 // This is hardcoded on the contract so we always know its 2
