@@ -330,8 +330,8 @@ describe('numberMinted', () => {
     })
     expect(numberMintedAfterOne).to.equal(1)
 
-    // mint second
-    await RangeEditionMinterV2__factory.connect(rangeEditionMinterV2.address, buyerWallet).mint(
+    // mint second, and also one for another buyer
+    await RangeEditionMinter__factory.connect(rangeEditionMinter.address, buyerWallet).mint(
       precomputedEditionAddress,
       MINT_ID,
       1,
@@ -340,13 +340,32 @@ describe('numberMinted', () => {
         value: PRICE,
       },
     )
+    await RangeEditionMinterV2__factory.connect(rangeEditionMinterV2.address, buyerWallet).mintTo(
+      precomputedEditionAddress,
+      MINT_ID,
+      buyer2Wallet.address,
+      1,
+      NULL_ADDRESS,
+      [],
+      0,
+      {
+        value: PRICE,
+      },
+    )
 
-    // numberMintedAfter shows 2
-    const numberMintedAfterTwo = await client.edition.numberMinted({
-      editionAddress: precomputedEditionAddress,
-      userAddress: buyerWallet.address,
-    })
-    expect(numberMintedAfterTwo).to.equal(2)
+    // numberMintedAfter shows 2 for buyer 1, and 1 for buyer 2
+    const [buyer1Minted, buyer2Minted] = await Promise.all([
+      client.edition.numberMinted({
+        editionAddress: precomputedEditionAddress,
+        userAddress: buyerWallet.address,
+      }),
+      client.edition.numberMinted({
+        editionAddress: precomputedEditionAddress,
+        userAddress: buyer2Wallet.address,
+      }),
+    ])
+    expect(buyer1Minted).to.equal(2)
+    expect(buyer2Minted).to.equal(1)
   })
 })
 
@@ -508,6 +527,27 @@ describe('eligibleQuantity: single RangeEditionMinter instance', () => {
     })
     expect(newEligibleQuantity).to.equal(1)
 
+    // minting to another person does not affect the minters limit
+    await RangeEditionMinterV2__factory.connect(rangeEditionMinterV2.address, buyerWallet).mintTo(
+      precomputedEditionAddress,
+      MINT_ID,
+      buyer2Wallet.address,
+      1,
+      NULL_ADDRESS,
+      [],
+      0,
+      {
+        value: PRICE,
+      },
+    )
+
+    // still eligible for 1 now
+    const eligibleAfterMintToSeparate = await client.edition.eligibleQuantity({
+      mintSchedule: mints[0],
+      userAddress: buyerWallet.address,
+    })
+    expect(eligibleAfterMintToSeparate).to.equal(1)
+
     // mint on v2 range minter
     await RangeEditionMinterV2__factory.connect(rangeEditionMinter.address, buyerWallet).mint(
       precomputedEditionAddress,
@@ -528,7 +568,7 @@ describe('eligibleQuantity: single RangeEditionMinter instance', () => {
 
     const editionInfo = await client.edition.info({ contractAddress: precomputedEditionAddress }).contract.info
 
-    expect(editionInfo.totalMinted).to.equal(2)
+    expect(editionInfo.totalMinted).to.equal(3)
 
     expect(editionInfo.editionMaxMintable).to.equal(EDITION_MAX)
   })

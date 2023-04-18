@@ -52,7 +52,7 @@ export interface MintToOptions extends SharedMintOptions {
   /**
    * Mint Schedule to mint from
    */
-  mintSchedule: MintToCompatibleSchedule
+  mintSchedule: V2MintSchedule
 
   /**
    * Recipient address that should receive the NFT(s)
@@ -172,7 +172,7 @@ export interface MerkleDropV2Schedule extends MerkleDropSchedule {
 
 export type MintSchedule = RangeEditionV1Schedule | RangeEditionV2Schedule | MerkleDropV1Schedule | MerkleDropV2Schedule
 
-export type MintToCompatibleSchedule = RangeEditionV2Schedule | MerkleDropV2Schedule
+export type V2MintSchedule = RangeEditionV2Schedule | MerkleDropV2Schedule
 
 /**
  * The arguments required by SoundEdition.initialize
