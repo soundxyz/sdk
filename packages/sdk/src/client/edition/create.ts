@@ -47,7 +47,7 @@ export async function createEdition(
     notNull: true,
   })
 
-  await validateEditionConfig(editionConfig)
+  validateEditionConfig(editionConfig)
 
   validateMintConfigs(mintConfigs)
 
@@ -60,12 +60,6 @@ export async function createEdition(
   }
 
   const formattedSalt = getSaltAsBytes32(customSalt || Math.random() * 1_000_000_000_000_000)
-
-  validateAddress({
-    address: creatorAddress,
-    type: 'CREATOR_ADDRESS',
-    notNull: true,
-  })
 
   // Precompute the edition address.
   const [editionAddress, _] = await SoundCreatorV1__factory.connect(creatorAddress, signer).soundEditionAddress(
@@ -194,7 +188,7 @@ export async function createEdition(
   )
 }
 
-export async function validateEditionConfig(config: EditionConfig) {
+export function validateEditionConfig(config: EditionConfig) {
   const { editionMaxMintableLower, editionMaxMintableUpper, fundingRecipient, metadataModule, setSAM } = config
 
   validateAddress({

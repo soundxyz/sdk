@@ -126,9 +126,11 @@ export async function editionRegisteredMinters(
       const minterContract = IMinterModuleV2__factory.connect(minterAddress, signerOrProvider)
 
       try {
-        const isMinter = await minterContract.supportsInterface(interfaceIds.IMinterModule)
+        const moduleInterfaceId = await minterContract.moduleInterfaceId()
 
-        return isMinter ? minterAddress : null
+        return HANDLED_MINTER_INTERFACE_IDS.indexOf(moduleInterfaceId as MinterInterfaceId) !== -1
+          ? minterAddress
+          : null
       } catch (err) {
         onUnhandledError(err)
         return null
