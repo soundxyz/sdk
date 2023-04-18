@@ -43,14 +43,14 @@ interface SharedMintOptions {
 
 export interface MintOptions extends SharedMintOptions {
   /**
-   * Mint Schedule to mint froms
+   * Mint Schedule to mint from
    */
   mintSchedule: MintSchedule
 }
 
 export interface MintToOptions extends SharedMintOptions {
   /**
-   * Mint Schedule to mint froms
+   * Mint Schedule to mint from
    */
   mintSchedule: MintToCompatibleSchedule
 
@@ -143,14 +143,6 @@ export const HANDLED_MINTER_INTERFACE_IDS = [
   interfaceIds.IRangeEditionMinterV2,
 ] as const
 export type MinterInterfaceId = (typeof HANDLED_MINTER_INTERFACE_IDS)[number]
-
-export const MINTTO_COMPATIBLE_INTERFACE_IDS = [
-  interfaceIds.IMerkleDropMinter,
-  interfaceIds.IMerkleDropMinterV2,
-  interfaceIds.IRangeEditionMinter,
-  interfaceIds.IRangeEditionMinterV2,
-] as const
-export type MintToCompatibleInterfaceId = (typeof MINTTO_COMPATIBLE_INTERFACE_IDS)[number]
 
 export interface RangeEditionSchedule extends MintScheduleBase {
   mintType: 'RangeEdition'
