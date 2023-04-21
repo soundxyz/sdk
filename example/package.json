@@ -16,7 +16,7 @@
     "require-env-variable": "^4.0.1"
   },
   "devDependencies": {
-    "@types/node": "18.15.11",
+    "@types/node": "18.15.13",
     "bob-tsm": "^1.1.2",
     "dotenv": "^16.0.3",
     "esbuild": "^0.17.15",
