@@ -16,7 +16,7 @@ import { validateSoundEdition } from '../validation'
 import { getMerkleProof } from './merkle'
 import { isSchedulePaused } from './schedules'
 import { interfaceIds } from '@soundxyz/sound-protocol-private/interfaceIds'
-import { isBigNumberish } from '@ethersproject/bignumber/lib/bignumber'
+import { isBigNumberish } from '@ethersproject/bignumber/lib/bignumber.js'
 
 export async function numberOfTokensOwned(
   this: SoundClientInstance,
