@@ -170,9 +170,9 @@ export interface MerkleDropV2Schedule extends MerkleDropSchedule {
   interfaceId: typeof interfaceIds.IMerkleDropMinterV2
 }
 
-export type MintSchedule = RangeEditionV1Schedule | RangeEditionV2Schedule | MerkleDropV1Schedule | MerkleDropV2Schedule
-
 export type V2MintSchedule = RangeEditionV2Schedule | MerkleDropV2Schedule
+
+export type MintSchedule = RangeEditionV1Schedule | MerkleDropV1Schedule | V2MintSchedule
 
 /**
  * The arguments required by SoundEdition.initialize
