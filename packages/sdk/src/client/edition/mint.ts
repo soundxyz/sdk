@@ -1,22 +1,22 @@
 import { BigNumber } from '@ethersproject/bignumber'
 import { ContractTransaction, PayableOverrides } from '@ethersproject/contracts'
-import { SoundEditionV1_2__factory } from '@soundxyz/sound-protocol-private/typechain'
+import { SoundEditionV1_2__factory } from '@soundxyz/sound-protocol/typechain'
 
 import { InvalidAttributonIdError, InvalidQuantityError, NotEligibleMint } from '../../errors'
 import { MintOptions, MintSchedule, MintToOptions } from '../../types'
 import {
   MINT_FALLBACK_GAS_LIMIT,
   MINT_GAS_LIMIT_MULTIPLIER,
-  NULL_ADDRESS,
   minterFactoryMap,
+  NULL_ADDRESS,
 } from '../../utils/constants'
 import { exhaustiveGuard, scaleAmount } from '../../utils/helpers'
 import { SoundClientInstance } from '../instance'
 import { validateSoundEdition } from '../validation'
 import { getMerkleProof } from './merkle'
 import { isSchedulePaused } from './schedules'
-import { interfaceIds } from '@soundxyz/sound-protocol-private/interfaceIds'
-import { isBigNumberish } from '@ethersproject/bignumber/lib/bignumber.js'
+import { interfaceIds } from '@soundxyz/sound-protocol/interfaceIds'
+import { isBigNumberish } from '@ethersproject/bignumber/lib/bignumber'
 
 export async function numberOfTokensOwned(
   this: SoundClientInstance,

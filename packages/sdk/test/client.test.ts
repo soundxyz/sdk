@@ -10,21 +10,20 @@ import { SoundEditionV1__factory } from '@soundxyz/sound-protocol-v1-0/typechain
 import { SoundEditionV1_1__factory } from '@soundxyz/sound-protocol-v1-1/typechain/index'
 import {
   MerkleDropMinter,
+  MerkleDropMinter__factory,
   MerkleDropMinterV2,
   MerkleDropMinterV2__factory,
-  MerkleDropMinter__factory,
   RangeEditionMinter,
+  RangeEditionMinter__factory,
   RangeEditionMinterV2,
   RangeEditionMinterV2__factory,
-  RangeEditionMinter__factory,
   SAM,
   SAM__factory,
   SoundCreatorV1,
   SoundCreatorV1__factory,
   SoundEditionV1_2__factory,
   SoundFeeRegistry__factory,
-} from '@soundxyz/sound-protocol-private/typechain/index'
-
+} from '@soundxyz/sound-protocol/typechain/index'
 import { mintInfosFromMinter } from '../src/client/edition/schedules'
 import { SoundClient } from '../src/client/main'
 import {
@@ -1072,7 +1071,7 @@ describe('numberOfTokensOwned', () => {
   })
 
   it('should have no tokens owned', async () => {
-    let minter = RangeEditionMinterV2__factory.connect(rangeEditionMinter.address, artistWallet)
+    const minter = RangeEditionMinterV2__factory.connect(rangeEditionMinter.address, artistWallet)
     const startTime = now()
     const minterCalls = [
       {
@@ -2024,7 +2023,7 @@ describe('editionMinterMintIds', () => {
         )
     }
 
-    let mintIds = await client.edition.minterMintIds({
+    const mintIds = await client.edition.minterMintIds({
       editionAddress: precomputedEditionAddress,
       minterAddress: rangeEditionMinter.address,
       fromBlockOrBlockHash: 0,
@@ -2156,7 +2155,7 @@ describe('editionMintSchedules', () => {
     const rangeMintIds = [0, 3, 5, 7, 9]
     const merkleMintIds = [0, 2, 4, 6, 8]
 
-    let schedules = (
+    const schedules = (
       await client.edition.mintSchedules({
         editionAddress: precomputedEditionAddress,
         scheduleIds: [

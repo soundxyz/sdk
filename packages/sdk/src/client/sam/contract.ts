@@ -1,7 +1,7 @@
 import { BigNumber, isBigNumberish } from '@ethersproject/bignumber/lib/bignumber.js'
 import { PayableOverrides } from '@ethersproject/contracts'
-import { SAM__factory, SoundEditionV1_2__factory } from '@soundxyz/sound-protocol-private/typechain'
-import { SAMInfoStructOutput } from '@soundxyz/sound-protocol-private/typechain/ISAM'
+import { SAM__factory, SoundEditionV1_2__factory } from '@soundxyz/sound-protocol/typechain'
+import { SAMInfoStructOutput } from '@soundxyz/sound-protocol/typechain/ISAM'
 
 import {
   InvalidAttributonIdError,

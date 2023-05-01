@@ -1,5 +1,5 @@
-import { interfaceIds } from '@soundxyz/sound-protocol-private'
-import { SoundEditionV1_2__factory } from '@soundxyz/sound-protocol-private/typechain'
+import { interfaceIds } from '@soundxyz/sound-protocol'
+import { SoundEditionV1_2__factory } from '@soundxyz/sound-protocol/typechain'
 import { SoundClientInstance } from '../instance'
 import { validateSoundEdition } from '../validation'
 

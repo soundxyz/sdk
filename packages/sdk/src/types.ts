@@ -1,7 +1,7 @@
 import type { BigNumber, BigNumberish } from '@ethersproject/bignumber'
 import type { Signer } from '@ethersproject/abstract-signer'
 import type { Provider } from '@ethersproject/abstract-provider'
-import { interfaceIds } from '@soundxyz/sound-protocol-private'
+import { interfaceIds } from '@soundxyz/sound-protocol'
 import type { SoundAPI } from './api'
 import type { MerkleProofProvider } from './merkle/types'
 

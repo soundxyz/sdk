@@ -1,5 +1,5 @@
-import { SoundEditionV1_2__factory } from '@soundxyz/sound-protocol-private/typechain'
-import { EditionInfoStructOutput } from '@soundxyz/sound-protocol-private/typechain/ISoundEditionV1'
+import { SoundEditionV1_2__factory } from '@soundxyz/sound-protocol/typechain'
+import { EditionInfoStructOutput } from '@soundxyz/sound-protocol/typechain/ISoundEditionV1'
 import { ReleaseInfoQueryVariables, ReleaseShareInfoQueryVariables } from '../../api/graphql/gql'
 import { SoundNotFoundError } from '../../errors'
 import { ExpandTypeChainStructOutput } from '../../types'

@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@soundxyz/sdk": "workspace:^",
-    "@soundxyz/sound-protocol": "^1.4.0",
+    "@soundxyz/sound-protocol": "^1.5.0",
     "alchemy-sdk": "^2.6.2",
     "date-fns": "^2.29.3",
     "ethers": "^5.7.2",
