@@ -1,5 +1,12 @@
 # @soundxyz/sdk
 
+## 1.1.0
+
+### Minor Changes
+
+- [#215](https://github.com/soundxyz/sdk/pull/215) [`41bd540`](https://github.com/soundxyz/sdk/commit/41bd5404a7e53e3a132737ce14448eeb362f824a) Thanks [@vigneshka](https://github.com/vigneshka)! - - Adds support for RangeEditionMinterV2 and MerkleDropMinterV2 contract interfaces
+  - Adds mintTo function which is compatible with v2 contracts
+
 ## 1.0.1
 
 ### Patch Changes
