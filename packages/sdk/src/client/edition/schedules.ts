@@ -160,7 +160,7 @@ export async function editionMinterMintIds(
 ) {
   const { signerOrProvider } = await this.expectSignerOrProvider()
 
-  // Query MintConfigCreated event
+  // Query MintConfigCreated event, for v1 and v2, this signature is the same
   const minterContract = IMinterModuleV2__factory.connect(minterAddress, signerOrProvider)
   const filter = minterContract.filters.MintConfigCreated(editionAddress)
   const mintScheduleConfigEvents = await minterContract.queryFilter(filter, fromBlockOrBlockHash)

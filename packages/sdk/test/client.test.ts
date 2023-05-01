@@ -2000,7 +2000,7 @@ describe('editionRegisteredMinters', () => {
 })
 
 describe('editionMinterMintIds', () => {
-  it('returns mint ids', async () => {
+  it('returns v1 mint ids', async () => {
     await setupTest({})
     const MINT_SCHEDULE_COUNT = 10
 
@@ -2026,6 +2026,37 @@ describe('editionMinterMintIds', () => {
     const mintIds = await client.edition.minterMintIds({
       editionAddress: precomputedEditionAddress,
       minterAddress: rangeEditionMinter.address,
+      fromBlockOrBlockHash: 0,
+    })
+
+    expect(mintIds).deep.eq(Array.from({ length: MINT_SCHEDULE_COUNT }, (_, i) => i))
+  })
+  it('returns v2 mint ids', async () => {
+    await setupTest({})
+    const MINT_SCHEDULE_COUNT = 10
+
+    const mintConfig = getGenericRangeMintConfig({ minterAddress: rangeEditionMinterV2.address })
+
+    // Make  mint schedules
+    for (let i = 0; i < MINT_SCHEDULE_COUNT; i++) {
+      await rangeEditionMinterV2
+        .connect(artistWallet)
+        .createEditionMint(
+          precomputedEditionAddress,
+          mintConfig.price,
+          mintConfig.startTime,
+          mintConfig.cutoffTime,
+          mintConfig.endTime,
+          mintConfig.affiliateFeeBPS,
+          mintConfig.maxMintableLower,
+          mintConfig.maxMintableUpper,
+          mintConfig.maxMintablePerAccount,
+        )
+    }
+
+    const mintIds = await client.edition.minterMintIds({
+      editionAddress: precomputedEditionAddress,
+      minterAddress: rangeEditionMinterV2.address,
       fromBlockOrBlockHash: 0,
     })
 
