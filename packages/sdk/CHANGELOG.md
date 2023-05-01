@@ -1,5 +1,11 @@
 # @soundxyz/sdk
 
+## 1.1.1
+
+### Patch Changes
+
+- [#222](https://github.com/soundxyz/sdk/pull/222) [`5f77547`](https://github.com/soundxyz/sdk/commit/5f7754762d9e62c0413e4384a651f0df429a5219) Thanks [@vigneshka](https://github.com/vigneshka)! - Fix bignumber import
+
 ## 1.1.0
 
 ### Minor Changes
