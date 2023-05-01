@@ -1,8 +1,8 @@
 import { BigNumberish } from '@ethersproject/bignumber'
 import { Overrides } from '@ethersproject/contracts'
 import {
-  MerkleDropMinter__factory,
-  RangeEditionMinter__factory,
+  MerkleDropMinterV2__factory,
+  RangeEditionMinterV2__factory,
   SAM__factory,
   SoundCreatorV1__factory,
   SoundEditionV1_2__factory,
@@ -47,7 +47,7 @@ export async function createEdition(
     notNull: true,
   })
 
-  await validateEditionConfig(editionConfig)
+  validateEditionConfig(editionConfig)
 
   validateMintConfigs(mintConfigs)
 
@@ -60,12 +60,6 @@ export async function createEdition(
   }
 
   const formattedSalt = getSaltAsBytes32(customSalt || Math.random() * 1_000_000_000_000_000)
-
-  validateAddress({
-    address: creatorAddress,
-    type: 'CREATOR_ADDRESS',
-    notNull: true,
-  })
 
   // Precompute the edition address.
   const [editionAddress, _] = await SoundCreatorV1__factory.connect(creatorAddress, signer).soundEditionAddress(
@@ -96,7 +90,7 @@ export async function createEdition(
      */
     switch (mintConfig.mintType) {
       case 'RangeEdition': {
-        const minterInterface = RangeEditionMinter__factory.createInterface()
+        const minterInterface = RangeEditionMinterV2__factory.createInterface()
         contractCalls.push({
           contractAddress: mintConfig.minterAddress,
 
@@ -115,7 +109,7 @@ export async function createEdition(
         break
       }
       case 'MerkleDrop': {
-        const minterInterface = MerkleDropMinter__factory.createInterface()
+        const minterInterface = MerkleDropMinterV2__factory.createInterface()
         contractCalls.push({
           contractAddress: mintConfig.minterAddress,
           calldata: minterInterface.encodeFunctionData('createEditionMint', [
@@ -194,7 +188,7 @@ export async function createEdition(
   )
 }
 
-export async function validateEditionConfig(config: EditionConfig) {
+export function validateEditionConfig(config: EditionConfig) {
   const { editionMaxMintableLower, editionMaxMintableUpper, fundingRecipient, metadataModule, setSAM } = config
 
   validateAddress({

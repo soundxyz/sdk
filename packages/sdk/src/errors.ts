@@ -1,4 +1,4 @@
-import type { GraphQLExecutionErrors, AddressInputType, MintSchedule } from './types'
+import type { AddressInputType, GraphQLExecutionErrors, MintSchedule } from './types'
 import type { ZodError } from 'zod'
 
 export class MissingSignerError extends Error {

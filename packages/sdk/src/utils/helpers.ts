@@ -59,3 +59,7 @@ export function curry<T extends (...args: any[]) => any>(fn: T): Curry<T> {
   }
   return curried as Curry<T>
 }
+
+export function exhaustiveGuard(_value: never): never {
+  throw new Error(`Exhaustive guard reached with value ${_value}`)
+}

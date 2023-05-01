@@ -1,7 +1,7 @@
 import type { BigNumber, BigNumberish } from '@ethersproject/bignumber'
 import type { Signer } from '@ethersproject/abstract-signer'
 import type { Provider } from '@ethersproject/abstract-provider'
-import type { interfaceIds } from '@soundxyz/sound-protocol'
+import { interfaceIds } from '@soundxyz/sound-protocol'
 import type { SoundAPI } from './api'
 import type { MerkleProofProvider } from './merkle/types'
 
@@ -13,12 +13,7 @@ export type SignerOrProvider = Signer | Provider
 
 export type BlockOrBlockHash = string | number
 
-export interface MintOptions {
-  /**
-   * Mint Schedule to mint froms
-   */
-  mintSchedule: MintSchedule
-
+interface SharedMintOptions {
   /**
    * Amount of NFTs to be minted
    */
@@ -44,6 +39,29 @@ export interface MintOptions {
    */
 
   maxPriorityFeePerGas?: BigNumberish
+}
+
+export interface MintOptions extends SharedMintOptions {
+  /**
+   * Mint Schedule to mint from
+   */
+  mintSchedule: MintSchedule
+}
+
+export interface MintToOptions extends SharedMintOptions {
+  /**
+   * Mint Schedule to mint from
+   */
+  mintSchedule: V2MintSchedule
+
+  /**
+   * Recipient address that should receive the NFT(s)
+   */
+  mintToAddress?: string
+
+  attributonId?: BigNumberish
+
+  affiliateProof?: BytesLike[]
 }
 
 export type MerkleProvider = MerkleProofProvider
@@ -118,23 +136,45 @@ export interface MintScheduleBase {
   affiliateFeeBPS: number
 }
 
-export type MinterInterfaceId = typeof interfaceIds.IMerkleDropMinter | typeof interfaceIds.IRangeEditionMinter
+export const HANDLED_MINTER_INTERFACE_IDS = [
+  interfaceIds.IMerkleDropMinter,
+  interfaceIds.IMerkleDropMinterV2,
+  interfaceIds.IRangeEditionMinter,
+  interfaceIds.IRangeEditionMinterV2,
+] as const
+export type MinterInterfaceId = (typeof HANDLED_MINTER_INTERFACE_IDS)[number]
 
 export interface RangeEditionSchedule extends MintScheduleBase {
   mintType: 'RangeEdition'
+  interfaceId: typeof interfaceIds.IRangeEditionMinter | typeof interfaceIds.IRangeEditionMinterV2
   maxMintableLower: number
   maxMintableUpper: number
   cutoffTime: number
   maxMintable: (unixTimestamp?: number) => number
 }
+export interface RangeEditionV1Schedule extends RangeEditionSchedule {
+  interfaceId: typeof interfaceIds.IRangeEditionMinter
+}
+export interface RangeEditionV2Schedule extends RangeEditionSchedule {
+  interfaceId: typeof interfaceIds.IRangeEditionMinterV2
+}
 
 export interface MerkleDropSchedule extends MintScheduleBase {
   mintType: 'MerkleDrop'
+  interfaceId: typeof interfaceIds.IMerkleDropMinter | typeof interfaceIds.IMerkleDropMinterV2
   maxMintable: number
   merkleRoot: string
 }
+export interface MerkleDropV1Schedule extends MerkleDropSchedule {
+  interfaceId: typeof interfaceIds.IMerkleDropMinter
+}
+export interface MerkleDropV2Schedule extends MerkleDropSchedule {
+  interfaceId: typeof interfaceIds.IMerkleDropMinterV2
+}
 
-export type MintSchedule = RangeEditionSchedule | MerkleDropSchedule
+export type V2MintSchedule = RangeEditionV2Schedule | MerkleDropV2Schedule
+
+export type MintSchedule = RangeEditionV1Schedule | MerkleDropV1Schedule | V2MintSchedule
 
 export function isRangeEditionSchedule(schedule: MintSchedule): schedule is RangeEditionSchedule {
   return schedule.mintType === 'RangeEdition'
