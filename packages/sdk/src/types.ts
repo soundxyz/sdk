@@ -146,6 +146,7 @@ export type MinterInterfaceId = (typeof HANDLED_MINTER_INTERFACE_IDS)[number]
 
 export interface RangeEditionSchedule extends MintScheduleBase {
   mintType: 'RangeEdition'
+  interfaceId: typeof interfaceIds.IRangeEditionMinter | typeof interfaceIds.IRangeEditionMinterV2
   maxMintableLower: number
   maxMintableUpper: number
   cutoffTime: number
@@ -160,6 +161,7 @@ export interface RangeEditionV2Schedule extends RangeEditionSchedule {
 
 export interface MerkleDropSchedule extends MintScheduleBase {
   mintType: 'MerkleDrop'
+  interfaceId: typeof interfaceIds.IMerkleDropMinter | typeof interfaceIds.IMerkleDropMinterV2
   maxMintable: number
   merkleRoot: string
 }
@@ -173,6 +175,14 @@ export interface MerkleDropV2Schedule extends MerkleDropSchedule {
 export type V2MintSchedule = RangeEditionV2Schedule | MerkleDropV2Schedule
 
 export type MintSchedule = RangeEditionV1Schedule | MerkleDropV1Schedule | V2MintSchedule
+
+export function isRangeEditionSchedule(schedule: MintSchedule): schedule is RangeEditionSchedule {
+  return schedule.mintType === 'RangeEdition'
+}
+
+export function isMerkleDropSchedule(schedule: MintSchedule): schedule is MerkleDropSchedule {
+  return schedule.mintType === 'MerkleDrop'
+}
 
 /**
  * The arguments required by SoundEdition.initialize

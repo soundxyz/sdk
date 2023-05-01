@@ -87,7 +87,7 @@
     "typescript": "5.0.3"
   },
   "peerDependencies": {
-    "@soundxyz/sound-protocol": "^1.5.0"
+    "@soundxyz/sound-protocol": "~1.5.0"
   },
   "publishConfig": {
     "access": "public",
