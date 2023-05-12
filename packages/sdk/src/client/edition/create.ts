@@ -51,7 +51,10 @@ export async function createEdition(
 
   validateMintConfigs(mintConfigs)
 
-  const { signer, userAddress } = await this.expectSigner()
+  const [{ signer, userAddress }, { providerOrSigner }] = await Promise.all([
+    this.expectSigner(),
+    this.expectProviderOrSigner(),
+  ])
 
   const txnOverrides: Overrides = {
     gasLimit,
@@ -62,10 +65,10 @@ export async function createEdition(
   const formattedSalt = getSaltAsBytes32(customSalt || Math.random() * 1_000_000_000_000_000)
 
   // Precompute the edition address.
-  const [editionAddress, _] = await SoundCreatorV1__factory.connect(creatorAddress, signer).soundEditionAddress(
-    userAddress,
-    formattedSalt,
-  )
+  const [editionAddress, _] = await SoundCreatorV1__factory.connect(
+    creatorAddress,
+    providerOrSigner,
+  ).soundEditionAddress(userAddress, formattedSalt)
 
   const editionInterface = SoundEditionV1_2__factory.createInterface()
 
