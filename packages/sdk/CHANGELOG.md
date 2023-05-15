@@ -1,5 +1,11 @@
 # @soundxyz/sdk
 
+## 1.1.2
+
+### Patch Changes
+
+- [#224](https://github.com/soundxyz/sdk/pull/224) [`cb6fec8`](https://github.com/soundxyz/sdk/commit/cb6fec825a2d967c0da8dfac4796d8f22180507c) Thanks [@PabloSzx](https://github.com/PabloSzx)! - Use provider for expected edition address
+
 ## 1.1.1
 
 ### Patch Changes
