@@ -69,7 +69,7 @@ export async function createEdition(
     () =>
       SoundCreatorV1__factory.connect(creatorAddress, providerOrSigner).soundEditionAddress(userAddress, formattedSalt),
     {
-      attempts: 10,
+      attempts: 5,
       delay: 500,
     },
   )
