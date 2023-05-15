@@ -63,3 +63,28 @@ export function curry<T extends (...args: any[]) => any>(fn: T): Curry<T> {
 export function exhaustiveGuard(_value: never): never {
   throw new Error(`Exhaustive guard reached with value ${_value}`)
 }
+
+export async function retry<T>(
+  fn: () => Promise<T>,
+  {
+    attempts,
+    delay,
+  }: {
+    attempts: number
+    delay: number
+  },
+): Promise<T> {
+  for (let i = 0; i < attempts; i++) {
+    try {
+      return await fn()
+    } catch (error) {
+      if (i < attempts - 1) {
+        await new Promise<void>((resolve) => setTimeout(resolve, delay))
+      } else {
+        throw error
+      }
+    }
+  }
+
+  return fn()
+}
