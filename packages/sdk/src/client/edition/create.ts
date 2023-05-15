@@ -17,7 +17,7 @@ import {
 } from '../../errors'
 import { ContractCall, EditionConfig, MintConfig } from '../../types'
 import { editionInitFlags, MINTER_ROLE, NULL_ADDRESS, NULL_BYTES32, UINT32_MAX } from '../../utils/constants'
-import { getSaltAsBytes32, validateAddress } from '../../utils/helpers'
+import { getSaltAsBytes32, retry, validateAddress } from '../../utils/helpers'
 import { SoundClientInstance } from '../instance'
 
 export async function createEdition(
@@ -51,7 +51,10 @@ export async function createEdition(
 
   validateMintConfigs(mintConfigs)
 
-  const { signer, userAddress } = await this.expectSigner()
+  const [{ signer, userAddress }, { providerOrSigner }] = await Promise.all([
+    this.expectSigner(),
+    this.expectProviderOrSigner(),
+  ])
 
   const txnOverrides: Overrides = {
     gasLimit,
@@ -62,9 +65,13 @@ export async function createEdition(
   const formattedSalt = getSaltAsBytes32(customSalt || Math.random() * 1_000_000_000_000_000)
 
   // Precompute the edition address.
-  const [editionAddress, _] = await SoundCreatorV1__factory.connect(creatorAddress, signer).soundEditionAddress(
-    userAddress,
-    formattedSalt,
+  const [editionAddress, _] = await retry(
+    () =>
+      SoundCreatorV1__factory.connect(creatorAddress, providerOrSigner).soundEditionAddress(userAddress, formattedSalt),
+    {
+      attempts: 5,
+      delay: 500,
+    },
   )
 
   const editionInterface = SoundEditionV1_2__factory.createInterface()
@@ -267,11 +274,11 @@ export async function expectedEditionAddress(
     type: 'CREATOR_ADDRESS',
     address: creatorAddress,
   })
-  const { signerOrProvider } = await this.expectSignerOrProvider()
+  const { providerOrSigner } = await this.expectProviderOrSigner()
 
   const { addr: editionAddress, exists } = await SoundCreatorV1__factory.connect(
     creatorAddress,
-    signerOrProvider,
+    providerOrSigner,
   ).soundEditionAddress(deployer, getSaltAsBytes32(salt))
 
   return {
