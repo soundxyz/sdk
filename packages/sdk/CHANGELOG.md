@@ -1,5 +1,11 @@
 # @soundxyz/sdk
 
+## 1.1.3
+
+### Patch Changes
+
+- [#227](https://github.com/soundxyz/sdk/pull/227) [`90100fb`](https://github.com/soundxyz/sdk/commit/90100fb9379aeef4feebd1eae1549d4a6af6fa5f) Thanks [@PabloSzx](https://github.com/PabloSzx)! - eligibleQuantity uses mintCount for merkle drop minter v2
+
 ## 1.1.2
 
 ### Patch Changes
