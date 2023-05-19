@@ -1,6 +1,6 @@
 import { BigNumber } from '@ethersproject/bignumber'
 import { ContractTransaction, PayableOverrides } from '@ethersproject/contracts'
-import { SoundEditionV1_2__factory } from '@soundxyz/sound-protocol/typechain'
+import { MerkleDropMinterV2__factory, SoundEditionV1_2__factory } from '@soundxyz/sound-protocol/typechain'
 
 import { InvalidAttributonIdError, InvalidQuantityError, NotEligibleMint } from '../../errors'
 import { MintOptions, MintSchedule, MintToOptions } from '../../types'
@@ -324,8 +324,8 @@ export async function eligibleQuantity(
   }
 
   // Get the edition's remaining token quantity.
-  const { signerOrProvider } = await this.expectSignerOrProvider()
-  const editionContract = SoundEditionV1_2__factory.connect(mintSchedule.editionAddress, signerOrProvider)
+  const { providerOrSigner } = await this.expectProviderOrSigner()
+  const editionContract = SoundEditionV1_2__factory.connect(mintSchedule.editionAddress, providerOrSigner)
 
   const [editionTotalMinted, editionMaxMintable] = await Promise.all([
     editionContract.totalMinted(),
@@ -343,10 +343,14 @@ export async function eligibleQuantity(
     (typeof mintSchedule.maxMintable === 'function' ? mintSchedule.maxMintable(timestamp) : mintSchedule.maxMintable) -
     mintSchedule.totalMinted
 
-  const mintedByUserFromSchedule = await numberMinted.call(this, {
-    editionAddress: mintSchedule.editionAddress,
-    userAddress,
-  })
+  const mintedByUserFromSchedule = await (mintSchedule.interfaceId === interfaceIds.IMerkleDropMinterV2
+    ? MerkleDropMinterV2__factory.connect(mintSchedule.minterAddress, providerOrSigner)
+        .mintCount(mintSchedule.editionAddress, mintSchedule.mintId, userAddress)
+        .then((v) => v.toNumber())
+    : numberMinted.call(this, {
+        editionAddress: mintSchedule.editionAddress,
+        userAddress,
+      }))
   const eligibleForUserOnSchedule = mintSchedule.maxMintablePerAccount - mintedByUserFromSchedule
   const scheduleEligibleQty = Math.min(remainingForSchedule, eligibleForUserOnSchedule)
 
