@@ -18,6 +18,11 @@ query ReleaseInfo($contractAddress: Address!, $editionId: String) {
 
     season
 
+    scheduleIds {
+      mintIds
+      minterAddress
+    }
+
     genre {
       id
       name
