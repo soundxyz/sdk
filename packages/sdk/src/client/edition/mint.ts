@@ -3,7 +3,7 @@ import { ContractTransaction, PayableOverrides } from '@ethersproject/contracts'
 import { MerkleDropMinterV2__factory, SoundEditionV1_2__factory } from '@soundxyz/sound-protocol/typechain'
 
 import { InvalidAttributonIdError, InvalidQuantityError, NotEligibleMint } from '../../errors'
-import { MintOptions, MintSchedule, MintToOptions } from '../../types'
+import { EstimatableTransaction, MintOptions, MintSchedule, MintToOptions } from '../../types'
 import {
   MINT_FALLBACK_GAS_LIMIT,
   MINT_GAS_LIMIT_MULTIPLIER,
@@ -44,10 +44,10 @@ export async function numberMinted(
   return (await editionContract.numberMinted(userAddress)).toNumber()
 }
 
-export async function mint(
+async function mintHelper(
   this: SoundClientInstance,
   { mintSchedule, quantity, affiliate = NULL_ADDRESS, gasLimit, maxFeePerGas, maxPriorityFeePerGas }: MintOptions,
-): Promise<ContractTransaction> {
+): Promise<EstimatableTransaction> {
   await validateSoundEdition.call(this, { editionAddress: mintSchedule.editionAddress })
   if (quantity <= 0 || Math.floor(quantity) !== quantity) throw new InvalidQuantityError({ quantity })
 
@@ -82,7 +82,10 @@ export async function mint(
       const mintArgs = [mintSchedule.editionAddress, mintSchedule.mintId, quantity, affiliate] as const
 
       if (txnOverrides.gasLimit) {
-        return rangeMinter.mint(...mintArgs, txnOverrides)
+        return {
+          gasEstimate: BigNumber.from(await txnOverrides.gasLimit),
+          startTransaction: () => rangeMinter.mint(...mintArgs, txnOverrides),
+        }
       }
 
       try {
@@ -95,7 +98,10 @@ export async function mint(
         txnOverrides.gasLimit = MINT_FALLBACK_GAS_LIMIT
       }
 
-      return rangeMinter.mint(...mintArgs, txnOverrides)
+      return {
+        gasEstimate: BigNumber.from(txnOverrides.gasLimit),
+        startTransaction: () => rangeMinter.mint(...mintArgs, txnOverrides),
+      }
     }
 
     case interfaceIds.IMerkleDropMinter:
@@ -123,7 +129,10 @@ export async function mint(
       const mintArgs = [mintSchedule.editionAddress, mintSchedule.mintId, quantity, proof, affiliate] as const
 
       if (txnOverrides.gasLimit) {
-        return merkleDropMinter.mint(...mintArgs, txnOverrides)
+        return {
+          gasEstimate: BigNumber.from(await txnOverrides.gasLimit),
+          startTransaction: () => merkleDropMinter.mint(...mintArgs, txnOverrides),
+        }
       }
 
       try {
@@ -136,7 +145,10 @@ export async function mint(
         txnOverrides.gasLimit = MINT_FALLBACK_GAS_LIMIT
       }
 
-      return merkleDropMinter.mint(...mintArgs, txnOverrides)
+      return {
+        gasEstimate: BigNumber.from(txnOverrides.gasLimit),
+        startTransaction: () => merkleDropMinter.mint(...mintArgs, txnOverrides),
+      }
     }
 
     default: {
@@ -145,7 +157,15 @@ export async function mint(
   }
 }
 
-export async function mintTo(
+export async function estimateMint(this: SoundClientInstance, mintOptions: MintOptions): Promise<BigNumber> {
+  return mintHelper.call(this, mintOptions).then(({ gasEstimate }) => gasEstimate)
+}
+
+export async function mint(this: SoundClientInstance, mintOptions: MintOptions): Promise<ContractTransaction> {
+  return mintHelper.call(this, mintOptions).then(({ startTransaction }) => startTransaction())
+}
+
+async function mintToHelper(
   this: SoundClientInstance,
   {
     affiliate = NULL_ADDRESS,
@@ -158,7 +178,7 @@ export async function mintTo(
     mintToAddress,
     quantity,
   }: MintToOptions,
-): Promise<ContractTransaction> {
+): Promise<EstimatableTransaction> {
   if (!isBigNumberish(attributonId)) {
     throw new InvalidAttributonIdError({
       attributonId,
@@ -208,7 +228,10 @@ export async function mintTo(
       ] as const
 
       if (txnOverrides.gasLimit) {
-        return rangeMinter.mintTo(...mintArgs, txnOverrides)
+        return {
+          gasEstimate: BigNumber.from(await txnOverrides.gasLimit),
+          startTransaction: () => rangeMinter.mintTo(...mintArgs, txnOverrides),
+        }
       }
 
       try {
@@ -221,7 +244,10 @@ export async function mintTo(
         txnOverrides.gasLimit = MINT_FALLBACK_GAS_LIMIT
       }
 
-      return rangeMinter.mintTo(...mintArgs, txnOverrides)
+      return {
+        gasEstimate: BigNumber.from(txnOverrides.gasLimit),
+        startTransaction: () => rangeMinter.mintTo(...mintArgs, txnOverrides),
+      }
     }
 
     case interfaceIds.IMerkleDropMinterV2: {
@@ -259,7 +285,10 @@ export async function mintTo(
       ] as const
 
       if (txnOverrides.gasLimit) {
-        return merkleDropMinter.mintTo(...mintArgs, txnOverrides)
+        return {
+          gasEstimate: BigNumber.from(txnOverrides.gasLimit),
+          startTransaction: () => merkleDropMinter.mintTo(...mintArgs, txnOverrides),
+        }
       }
 
       try {
@@ -272,13 +301,23 @@ export async function mintTo(
         txnOverrides.gasLimit = MINT_FALLBACK_GAS_LIMIT
       }
 
-      return merkleDropMinter.mintTo(...mintArgs, txnOverrides)
+      return {
+        gasEstimate: BigNumber.from(txnOverrides.gasLimit),
+        startTransaction: () => merkleDropMinter.mintTo(...mintArgs, txnOverrides),
+      }
     }
 
     default: {
       exhaustiveGuard(interfaceId)
     }
   }
+}
+
+export async function estimateMintTo(this: SoundClientInstance, mintOptions: MintToOptions): Promise<BigNumber> {
+  return mintToHelper.call(this, mintOptions).then(({ gasEstimate }) => gasEstimate)
+}
+export async function mintTo(this: SoundClientInstance, mintOptions: MintToOptions): Promise<ContractTransaction> {
+  return mintToHelper.call(this, mintOptions).then(({ startTransaction }) => startTransaction())
 }
 
 export async function eligibleQuantity(
