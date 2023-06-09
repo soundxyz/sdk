@@ -20,7 +20,7 @@ import { editionInitFlags, MINTER_ROLE, NULL_ADDRESS, NULL_BYTES32, UINT32_MAX }
 import { getSaltAsBytes32, retry, validateAddress } from '../../utils/helpers'
 import { SoundClientInstance } from '../instance'
 
-export async function createEdition(
+async function createEditionHelper(
   this: SoundClientInstance,
   { creatorAddress }: { creatorAddress: string },
   {
@@ -186,13 +186,82 @@ export async function createEdition(
 
   const soundCreatorContract = SoundCreatorV1__factory.connect(creatorAddress, signer)
 
-  return soundCreatorContract.createSoundAndMints(
+  return {
+    soundCreatorContract,
     formattedSalt,
     editionInitData,
-    contractCalls.map((d) => d.contractAddress),
-    contractCalls.map((d) => d.calldata),
+    addresses: contractCalls.map((d) => d.contractAddress),
+    calldata: contractCalls.map((d) => d.calldata),
+    txnOverrides,
+  }
+}
+
+export async function estimateCreateEdition(
+  this: SoundClientInstance,
+  { creatorAddress }: { creatorAddress: string },
+  {
+    editionConfig,
+    mintConfigs,
+    salt: customSalt,
+
+    gasLimit,
+    maxFeePerGas,
+    maxPriorityFeePerGas,
+  }: {
+    editionConfig: EditionConfig
+    mintConfigs: MintConfig[]
+
+    salt?: string | number
+    gasLimit?: BigNumberish
+    maxFeePerGas?: BigNumberish
+    maxPriorityFeePerGas?: BigNumberish
+  },
+) {
+  const { soundCreatorContract, formattedSalt, editionInitData, addresses, calldata, txnOverrides } =
+    await createEditionHelper.call(
+      this,
+      { creatorAddress },
+      { editionConfig, mintConfigs, salt: customSalt, gasLimit, maxFeePerGas, maxPriorityFeePerGas },
+    )
+
+  return soundCreatorContract.estimateGas.createSoundAndMints(
+    formattedSalt,
+    editionInitData,
+    addresses,
+    calldata,
     txnOverrides,
   )
+}
+
+export async function createEdition(
+  this: SoundClientInstance,
+  { creatorAddress }: { creatorAddress: string },
+  {
+    editionConfig,
+    mintConfigs,
+    salt: customSalt,
+
+    gasLimit,
+    maxFeePerGas,
+    maxPriorityFeePerGas,
+  }: {
+    editionConfig: EditionConfig
+    mintConfigs: MintConfig[]
+
+    salt?: string | number
+    gasLimit?: BigNumberish
+    maxFeePerGas?: BigNumberish
+    maxPriorityFeePerGas?: BigNumberish
+  },
+) {
+  const { soundCreatorContract, formattedSalt, editionInitData, addresses, calldata, txnOverrides } =
+    await createEditionHelper.call(
+      this,
+      { creatorAddress },
+      { editionConfig, mintConfigs, salt: customSalt, gasLimit, maxFeePerGas, maxPriorityFeePerGas },
+    )
+
+  return soundCreatorContract.createSoundAndMints(formattedSalt, editionInitData, addresses, calldata, txnOverrides)
 }
 
 export function validateEditionConfig(config: EditionConfig) {

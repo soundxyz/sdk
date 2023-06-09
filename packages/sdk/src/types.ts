@@ -4,6 +4,7 @@ import type { Provider } from '@ethersproject/abstract-provider'
 import { interfaceIds } from '@soundxyz/sound-protocol'
 import type { SoundAPI } from './api'
 import type { MerkleProofProvider } from './merkle/types'
+import type { ContractTransaction } from '@ethersproject/contracts'
 
 /*********************************************************
                 PROTOCOL TYPES
@@ -341,3 +342,5 @@ type TupleSplit<T, N extends number, O extends readonly any[] = readonly []> = O
   : [O, T]
 
 export type TakeFirst<T extends readonly any[], N extends number> = TupleSplit<T, N>[0]
+
+export type EstimatableTransaction = { gasEstimate: BigNumber; startTransaction: () => Promise<ContractTransaction> }
