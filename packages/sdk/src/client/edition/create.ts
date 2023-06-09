@@ -20,7 +20,6 @@ import { editionInitFlags, MINTER_ROLE, NULL_ADDRESS, NULL_BYTES32, UINT32_MAX }
 import { getSaltAsBytes32, retry, validateAddress } from '../../utils/helpers'
 import { SoundClientInstance } from '../instance'
 
-// this function is the same as createEdition except it calls estimateGas instead of sending the transaction
 async function createEditionHelper(
   this: SoundClientInstance,
   { creatorAddress }: { creatorAddress: string },
