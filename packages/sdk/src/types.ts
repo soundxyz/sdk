@@ -4,7 +4,7 @@ import type { Provider } from '@ethersproject/abstract-provider'
 import { interfaceIds } from '@soundxyz/sound-protocol'
 import type { SoundAPI } from './api'
 import type { MerkleProofProvider } from './merkle/types'
-import { ContractTransaction } from '@ethersproject/contracts'
+import type { ContractTransaction } from '@ethersproject/contracts'
 
 /*********************************************************
                 PROTOCOL TYPES
