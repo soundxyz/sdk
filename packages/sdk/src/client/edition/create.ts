@@ -21,7 +21,7 @@ import { getSaltAsBytes32, retry, validateAddress } from '../../utils/helpers'
 import { SoundClientInstance } from '../instance'
 
 // this function is the same as createEdition except it calls estimateGas instead of sending the transaction
-export async function estimateCreateEdition(
+async function createEditionHelper(
   this: SoundClientInstance,
   { creatorAddress }: { creatorAddress: string },
   {
@@ -187,11 +187,49 @@ export async function estimateCreateEdition(
 
   const soundCreatorContract = SoundCreatorV1__factory.connect(creatorAddress, signer)
 
+  return {
+    soundCreatorContract,
+    formattedSalt,
+    editionInitData,
+    addresses: contractCalls.map((d) => d.contractAddress),
+    calldata: contractCalls.map((d) => d.calldata),
+    txnOverrides,
+  }
+}
+
+export async function estimateCreateEdition(
+  this: SoundClientInstance,
+  { creatorAddress }: { creatorAddress: string },
+  {
+    editionConfig,
+    mintConfigs,
+    salt: customSalt,
+
+    gasLimit,
+    maxFeePerGas,
+    maxPriorityFeePerGas,
+  }: {
+    editionConfig: EditionConfig
+    mintConfigs: MintConfig[]
+
+    salt?: string | number
+    gasLimit?: BigNumberish
+    maxFeePerGas?: BigNumberish
+    maxPriorityFeePerGas?: BigNumberish
+  },
+) {
+  const { soundCreatorContract, formattedSalt, editionInitData, addresses, calldata, txnOverrides } =
+    await createEditionHelper.call(
+      this,
+      { creatorAddress },
+      { editionConfig, mintConfigs, salt: customSalt, gasLimit, maxFeePerGas, maxPriorityFeePerGas },
+    )
+
   return soundCreatorContract.estimateGas.createSoundAndMints(
     formattedSalt,
     editionInitData,
-    contractCalls.map((d) => d.contractAddress),
-    contractCalls.map((d) => d.calldata),
+    addresses,
+    calldata,
     txnOverrides,
   )
 }
@@ -217,158 +255,14 @@ export async function createEdition(
     maxPriorityFeePerGas?: BigNumberish
   },
 ) {
-  validateAddress({
-    address: creatorAddress,
-    type: 'CREATOR_ADDRESS',
-    notNull: true,
-  })
+  const { soundCreatorContract, formattedSalt, editionInitData, addresses, calldata, txnOverrides } =
+    await createEditionHelper.call(
+      this,
+      { creatorAddress },
+      { editionConfig, mintConfigs, salt: customSalt, gasLimit, maxFeePerGas, maxPriorityFeePerGas },
+    )
 
-  validateEditionConfig(editionConfig)
-
-  validateMintConfigs(mintConfigs)
-
-  const [{ signer, userAddress }, { providerOrSigner }] = await Promise.all([
-    this.expectSigner(),
-    this.expectProviderOrSigner(),
-  ])
-
-  const txnOverrides: Overrides = {
-    gasLimit,
-    maxFeePerGas,
-    maxPriorityFeePerGas,
-  }
-
-  const formattedSalt = getSaltAsBytes32(customSalt || Math.random() * 1_000_000_000_000_000)
-
-  // Precompute the edition address.
-  const [editionAddress, _] = await retry(
-    () =>
-      SoundCreatorV1__factory.connect(creatorAddress, providerOrSigner).soundEditionAddress(userAddress, formattedSalt),
-    {
-      attempts: 5,
-      delay: 500,
-    },
-  )
-
-  const editionInterface = SoundEditionV1_2__factory.createInterface()
-
-  /**
-   * Encode all the bundled contract calls.
-   */
-  const contractCalls: ContractCall[] = []
-
-  // Grant MINTER_ROLE for each minter.
-  const mintersToGrantRole = Array.from(new Set(mintConfigs.map((m) => m.minterAddress)))
-  for (const minterAddress of mintersToGrantRole) {
-    contractCalls.push({
-      contractAddress: editionAddress,
-      calldata: editionInterface.encodeFunctionData('grantRoles', [minterAddress, MINTER_ROLE]),
-    })
-  }
-
-  // Add the createEditionMint calls.
-  for (const mintConfig of mintConfigs) {
-    /**
-     * Set up the createEditionMint call for each mint config.
-     */
-    switch (mintConfig.mintType) {
-      case 'RangeEdition': {
-        const minterInterface = RangeEditionMinterV2__factory.createInterface()
-        contractCalls.push({
-          contractAddress: mintConfig.minterAddress,
-
-          calldata: minterInterface.encodeFunctionData('createEditionMint', [
-            editionAddress,
-            mintConfig.price,
-            Math.floor(mintConfig.startTime),
-            Math.floor(mintConfig.cutoffTime),
-            Math.floor(mintConfig.endTime),
-            mintConfig.affiliateFeeBPS,
-            Math.floor(mintConfig.maxMintableLower),
-            Math.floor(mintConfig.maxMintableUpper),
-            Math.floor(mintConfig.maxMintablePerAccount),
-          ]),
-        })
-        break
-      }
-      case 'MerkleDrop': {
-        const minterInterface = MerkleDropMinterV2__factory.createInterface()
-        contractCalls.push({
-          contractAddress: mintConfig.minterAddress,
-          calldata: minterInterface.encodeFunctionData('createEditionMint', [
-            editionAddress,
-            mintConfig.merkleRoot,
-            mintConfig.price,
-            Math.floor(mintConfig.startTime),
-            Math.floor(mintConfig.endTime),
-            mintConfig.affiliateFeeBPS,
-            Math.floor(mintConfig.maxMintable),
-            Math.floor(mintConfig.maxMintablePerAccount),
-          ]),
-        })
-        break
-      }
-    }
-  }
-
-  if (editionConfig.setSAM && editionConfig.setSAM.contractAddress !== NULL_ADDRESS) {
-    contractCalls.push({
-      contractAddress: editionAddress,
-      calldata: editionInterface.encodeFunctionData('setSAM', [editionConfig.setSAM.contractAddress]),
-    })
-
-    const samInterface = SAM__factory.createInterface()
-
-    contractCalls.push({
-      contractAddress: editionConfig.setSAM.contractAddress,
-      calldata: samInterface.encodeFunctionData('create', [
-        editionAddress,
-        editionConfig.setSAM.basePrice,
-        editionConfig.setSAM.linearPriceSlope,
-        editionConfig.setSAM.inflectionPrice,
-        editionConfig.setSAM.inflectionPoint,
-        UINT32_MAX,
-        UINT32_MAX,
-        editionConfig.setSAM.artistFeeBPS,
-        editionConfig.setSAM.goldenEggFeeBPS,
-        editionConfig.setSAM.affiliateFeeBPS,
-        userAddress,
-        formattedSalt,
-      ]),
-    })
-  }
-
-  let flags = 0
-  if (editionConfig.shouldFreezeMetadata) flags |= editionInitFlags.METADATA_IS_FROZEN
-  if (editionConfig.shouldEnableMintRandomness) flags |= editionInitFlags.MINT_RANDOMNESS_ENABLED
-  if (editionConfig.enableOperatorFiltering) flags |= editionInitFlags.OPERATOR_FILTERING_ENABLED
-
-  /**
-   * Encode the SoundEdition.initialize call.
-   */
-  const editionInitData = editionInterface.encodeFunctionData('initialize', [
-    editionConfig.name,
-    editionConfig.symbol,
-    editionConfig.metadataModule,
-    editionConfig.baseURI,
-    editionConfig.contractURI,
-    editionConfig.fundingRecipient,
-    editionConfig.royaltyBPS,
-    Math.floor(editionConfig.editionMaxMintableLower),
-    Math.floor(editionConfig.editionMaxMintableUpper),
-    Math.floor(editionConfig.editionCutoffTime),
-    flags,
-  ])
-
-  const soundCreatorContract = SoundCreatorV1__factory.connect(creatorAddress, signer)
-
-  return soundCreatorContract.createSoundAndMints(
-    formattedSalt,
-    editionInitData,
-    contractCalls.map((d) => d.contractAddress),
-    contractCalls.map((d) => d.calldata),
-    txnOverrides,
-  )
+  return soundCreatorContract.createSoundAndMints(formattedSalt, editionInitData, addresses, calldata, txnOverrides)
 }
 
 export function validateEditionConfig(config: EditionConfig) {
