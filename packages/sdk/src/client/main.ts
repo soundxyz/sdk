@@ -1,8 +1,8 @@
 import { curry, validateAddress } from '../utils/helpers'
 import { LazyPromise } from '../utils/promise'
-import { createEdition, expectedEditionAddress } from './edition/create'
+import { createEdition, estimateCreateEdition, expectedEditionAddress } from './edition/create'
 import { editionInfo } from './edition/info'
-import { eligibleQuantity, mint, numberMinted, numberOfTokensOwned } from './edition/mint'
+import { eligibleQuantity, estimateMint, mint, numberMinted, numberOfTokensOwned } from './edition/mint'
 import { editionMinterMintIds, editionRegisteredMinters, editionScheduleIds, mintSchedules } from './edition/schedules'
 import { getContractError } from './errors'
 import { SoundClientInstance, SoundClientInstanceConfig } from './instance'
@@ -33,6 +33,7 @@ export function SoundClient(config: SoundClientInstanceConfig) {
       mintSchedules: mintSchedules.bind(client),
 
       mint: mint.bind(client),
+      estimateMint: estimateMint.bind(client),
 
       sam({ editionAddress }: SamEditionAddress) {
         return {
@@ -76,6 +77,7 @@ export function SoundClient(config: SoundClientInstanceConfig) {
 
       return {
         createEdition: curry(createEdition.bind(client))({ creatorAddress }),
+        estimateEdition: curry(estimateCreateEdition.bind(client))({ creatorAddress }),
         expectedEditionAddress: curry(expectedEditionAddress.bind(client))({ creatorAddress }),
       } as const
     },
