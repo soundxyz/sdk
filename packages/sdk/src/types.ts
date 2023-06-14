@@ -64,7 +64,7 @@ interface SharedMintOptions extends SoundContractValidation {
    *
    * If null or empty array is provided, not eligible safe-check will be thrown
    */
-  merkleProof?: string[] | null
+  merkleProof?: string[] | null | undefined
 }
 
 export interface MintOptions extends SharedMintOptions {
