@@ -1,5 +1,11 @@
 # @soundxyz/sdk
 
+## 1.2.1
+
+### Patch Changes
+
+- [#239](https://github.com/soundxyz/sdk/pull/239) [`3e6af5d`](https://github.com/soundxyz/sdk/commit/3e6af5d1e64d2063d4df4d65dd5aa803d75f561d) Thanks [@PabloSzx](https://github.com/PabloSzx)! - Add assumeValidSoundContract option for SAM operations
+
 ## 1.2.0
 
 ### Minor Changes
