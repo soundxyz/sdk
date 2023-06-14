@@ -51,9 +51,11 @@ export async function SamSell(
     gasLimit,
     maxFeePerGas,
     maxPriorityFeePerGas,
+
+    assumeValidSoundContract = false,
   }: SamSellOptions,
 ) {
-  const samAddress = await SamContractAddress.call(this, { editionAddress })
+  const samAddress = await SamContractAddress.call(this, { editionAddress, assumeValidSoundContract })
 
   if (!samAddress) throw new SamNotFoundError({ contractAddress: editionAddress })
 
@@ -121,12 +123,14 @@ export async function SamBuy(
     gasLimit,
     maxFeePerGas,
     maxPriorityFeePerGas,
+
+    assumeValidSoundContract = false,
   }: SamBuyOptions,
 ) {
   if (typeof quantity !== 'number' || !Number.isInteger(quantity) || quantity <= 0)
     throw new InvalidQuantityError({ quantity })
 
-  const samAddress = await SamContractAddress.call(this, { editionAddress })
+  const samAddress = await SamContractAddress.call(this, { editionAddress, assumeValidSoundContract })
 
   if (!samAddress) throw new SamNotFoundError({ contractAddress: editionAddress })
 
@@ -180,10 +184,10 @@ export async function SamBuy(
 
 export async function SamTotalSellPrice(
   this: SoundClientInstance,
-  { editionAddress }: SamEditionAddress,
+  { editionAddress, assumeValidSoundContract = false }: SamEditionAddress,
   { offset, quantity }: { offset: number; quantity: number },
 ) {
-  const samAddress = await SamContractAddress.call(this, { editionAddress })
+  const samAddress = await SamContractAddress.call(this, { editionAddress, assumeValidSoundContract })
 
   if (!samAddress) return null
 
@@ -201,10 +205,10 @@ export async function SamTotalSellPrice(
 
 export async function SamTotalBuyPrice(
   this: SoundClientInstance,
-  { editionAddress }: SamEditionAddress,
+  { editionAddress, assumeValidSoundContract = false }: SamEditionAddress,
   { offset, quantity }: { offset: number; quantity: number },
 ) {
-  const samAddress = await SamContractAddress.call(this, { editionAddress })
+  const samAddress = await SamContractAddress.call(this, { editionAddress, assumeValidSoundContract })
 
   if (!samAddress) return null
 
@@ -223,8 +227,11 @@ export async function SamTotalBuyPrice(
   return { ...info }
 }
 
-export async function SamEditionInfo(this: SoundClientInstance, { editionAddress }: SamEditionAddress) {
-  const samAddress = await SamContractAddress.call(this, { editionAddress })
+export async function SamEditionInfo(
+  this: SoundClientInstance,
+  { editionAddress, assumeValidSoundContract = false }: SamEditionAddress,
+) {
+  const samAddress = await SamContractAddress.call(this, { editionAddress, assumeValidSoundContract })
 
   if (!samAddress) return null
 
