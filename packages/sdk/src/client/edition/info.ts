@@ -2,14 +2,17 @@ import { SoundEditionV1_2__factory } from '@soundxyz/sound-protocol/typechain'
 import { EditionInfoStructOutput } from '@soundxyz/sound-protocol/typechain/ISoundEditionV1'
 import { ReleaseInfoQueryVariables, ReleaseShareInfoQueryVariables } from '../../api/graphql/gql'
 import { SoundNotFoundError } from '../../errors'
-import { ExpandTypeChainStructOutput } from '../../types'
+import { ExpandTypeChainStructOutput, SoundContractValidation } from '../../types'
 import { LazyPromise } from '../../utils/promise'
 import { SoundClientInstance } from '../instance'
 import { validateSoundEdition } from '../validation'
 import { isSoundV1_2_OrGreater } from './interface'
 
-export function editionInfo(this: SoundClientInstance, soundParams: ReleaseInfoQueryVariables) {
-  const { contractAddress } = soundParams
+export function editionInfo(
+  this: SoundClientInstance,
+  soundParams: ReleaseInfoQueryVariables & SoundContractValidation,
+) {
+  const { contractAddress, assumeValidSoundContract = false } = soundParams
 
   const { expectSignerOrProvider, expectSoundAPI } = this
 
@@ -22,6 +25,7 @@ export function editionInfo(this: SoundClientInstance, soundParams: ReleaseInfoQ
   const info = LazyPromise(async () => {
     await validateSoundEdition.call(this, {
       editionAddress: contractAddress,
+      assumeValidSoundContract,
     })
     const { signerOrProvider } = await expectSignerOrProvider()
 
