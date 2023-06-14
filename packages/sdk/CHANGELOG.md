@@ -1,5 +1,21 @@
 # @soundxyz/sdk
 
+## 1.2.0
+
+### Minor Changes
+
+- [#237](https://github.com/soundxyz/sdk/pull/237) [`8d24534`](https://github.com/soundxyz/sdk/commit/8d2453468b5cbf2a23e03ffc84237c9fbf221160) Thanks [@saihaj](https://github.com/saihaj)! - expose estimate mint functions
+
+- [#238](https://github.com/soundxyz/sdk/pull/238) [`f01ab63`](https://github.com/soundxyz/sdk/commit/f01ab63e347014fb4d32f3c6b84bad638f482c88) Thanks [@PabloSzx](https://github.com/PabloSzx)! - New "skipEligibilityChecks" and "merkleProof" mint options
+
+- [#238](https://github.com/soundxyz/sdk/pull/238) [`f01ab63`](https://github.com/soundxyz/sdk/commit/f01ab63e347014fb4d32f3c6b84bad638f482c88) Thanks [@PabloSzx](https://github.com/PabloSzx)! - New "assumeValidSoundContract" options
+
+- [#230](https://github.com/soundxyz/sdk/pull/230) [`0698c36`](https://github.com/soundxyz/sdk/commit/0698c364caf08164634064f02934f66ae47ffb5c) Thanks [@PabloSzx](https://github.com/PabloSzx)! - Expose scheduleIds on api call to optimize chain calls
+
+### Patch Changes
+
+- [#235](https://github.com/soundxyz/sdk/pull/235) [`dea5ecf`](https://github.com/soundxyz/sdk/commit/dea5ecf02307821570bf737f7941bf57e3b749b3) Thanks [@vigneshka](https://github.com/vigneshka)! - Add estimateMint, estimateMintTo, and estimateCreateEdition functions
+
 ## 1.1.3
 
 ### Patch Changes
