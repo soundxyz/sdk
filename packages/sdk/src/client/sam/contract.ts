@@ -10,7 +10,7 @@ import {
   InvalidTokenIdError,
   SamNotFoundError,
 } from '../../errors'
-import { ExpandTypeChainStructOutput, TakeFirst } from '../../types'
+import { ExpandTypeChainStructOutput, SoundContractValidation, TakeFirst } from '../../types'
 import { MINT_FALLBACK_GAS_LIMIT, MINT_GAS_LIMIT_MULTIPLIER, NULL_ADDRESS } from '../../utils/constants'
 import { scaleAmount, validateAddress } from '../../utils/helpers'
 import { isSoundV1_2_OrGreater } from '../edition/interface'
@@ -18,10 +18,14 @@ import { SoundClientInstance } from '../instance'
 import { validateSoundEdition } from '../validation'
 import { SamBuyOptions, SamEditionAddress, SamSellOptions } from './types'
 
-export async function SamContractAddress(this: SoundClientInstance, { editionAddress }: SamEditionAddress) {
+export async function SamContractAddress(
+  this: SoundClientInstance,
+  { editionAddress, assumeValidSoundContract = false }: SamEditionAddress & SoundContractValidation,
+) {
   return this.instance.idempotentCachedCall(`sam-contract-address-${editionAddress}`, async () => {
     await validateSoundEdition.call(this, {
       editionAddress,
+      assumeValidSoundContract,
     })
 
     if (!(await isSoundV1_2_OrGreater.call(this, { editionAddress }))) return null

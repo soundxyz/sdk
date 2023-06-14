@@ -4,6 +4,7 @@ import { SoundEditionV1_2__factory } from '@soundxyz/sound-protocol/typechain'
 import { NotSoundEditionError } from '../errors'
 import { validateAddress } from '../utils/helpers'
 import { SoundClientInstance } from './instance'
+import { SoundContractValidation } from '../types'
 
 export async function isSoundEdition(
   this: SoundClientInstance,
@@ -30,11 +31,15 @@ export async function isSoundEdition(
   })
 }
 
-export async function validateSoundEdition(this: SoundClientInstance, { editionAddress }: { editionAddress: string }) {
-  const isEdition = await isSoundEdition.call(this, { editionAddress })
-  if (!isEdition) {
-    throw new NotSoundEditionError({ contractAddress: editionAddress })
-  }
+export function validateSoundEdition(
+  this: SoundClientInstance,
+  { editionAddress, assumeValidSoundContract }: { editionAddress: string } & Required<SoundContractValidation>,
+) {
+  if (assumeValidSoundContract) return
+
+  return isSoundEdition.call(this, { editionAddress }).then((isEdition) => {
+    if (!isEdition) throw new NotSoundEditionError({ contractAddress: editionAddress })
+  })
 }
 
 async function getNetworkChainId(this: SoundClientInstance) {

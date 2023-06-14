@@ -231,7 +231,7 @@ export class NotEligibleMint extends Error {
 
   readonly mintSchedule: MintSchedule
   readonly userAddress: string
-  readonly eligibleMintQuantity: number
+  readonly eligibleMintQuantity?: number
 
   constructor({
     mintSchedule,
@@ -240,7 +240,7 @@ export class NotEligibleMint extends Error {
   }: {
     mintSchedule: MintSchedule
     userAddress: string
-    eligibleMintQuantity: number
+    eligibleMintQuantity?: number
   }) {
     super('Not eligible to mint')
 

@@ -14,7 +14,16 @@ export type SignerOrProvider = Signer | Provider
 
 export type BlockOrBlockHash = string | number
 
-interface SharedMintOptions {
+export interface SoundContractValidation {
+  /**
+   * Assume valid Sound.xyz contract, skipping safety checks
+   *
+   * @default false
+   */
+  assumeValidSoundContract?: boolean
+}
+
+interface SharedMintOptions extends SoundContractValidation {
   /**
    * Amount of NFTs to be minted
    */
@@ -40,6 +49,22 @@ interface SharedMintOptions {
    */
 
   maxPriorityFeePerGas?: BigNumberish
+
+  /**
+   * Skip quantity eligibility pre-mint checks
+   *
+   * @default false
+   */
+  skipQuantityChecks?: boolean
+
+  /**
+   * Pre-provide merkle proof to be used for merkle drops
+   *
+   * By default if it's not specified, it will use the pre-specified Merkle Provider on Sound Client instance
+   *
+   * If null or empty array is provided, not eligible safe-check will be thrown
+   */
+  merkleProof?: string[] | null
 }
 
 export interface MintOptions extends SharedMintOptions {

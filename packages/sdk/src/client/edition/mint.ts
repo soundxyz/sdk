@@ -3,7 +3,7 @@ import { ContractTransaction, PayableOverrides } from '@ethersproject/contracts'
 import { MerkleDropMinterV2__factory, SoundEditionV1_2__factory } from '@soundxyz/sound-protocol/typechain'
 
 import { InvalidAttributonIdError, InvalidQuantityError, NotEligibleMint } from '../../errors'
-import { EstimatableTransaction, MintOptions, MintSchedule, MintToOptions } from '../../types'
+import { EstimatableTransaction, MintOptions, MintSchedule, MintToOptions, SoundContractValidation } from '../../types'
 import {
   MINT_FALLBACK_GAS_LIMIT,
   MINT_GAS_LIMIT_MULTIPLIER,
@@ -20,9 +20,13 @@ import { isBigNumberish } from '@ethersproject/bignumber/lib/bignumber.js'
 
 export async function numberOfTokensOwned(
   this: SoundClientInstance,
-  { editionAddress, userAddress }: { editionAddress: string; userAddress: string },
+  {
+    editionAddress,
+    userAddress,
+    assumeValidSoundContract = false,
+  }: { editionAddress: string; userAddress: string } & SoundContractValidation,
 ) {
-  await validateSoundEdition.call(this, { editionAddress })
+  await validateSoundEdition.call(this, { editionAddress, assumeValidSoundContract })
 
   const { signerOrProvider } = await this.expectSignerOrProvider()
 
@@ -33,9 +37,13 @@ export async function numberOfTokensOwned(
 
 export async function numberMinted(
   this: SoundClientInstance,
-  { editionAddress, userAddress }: { editionAddress: string; userAddress: string },
+  {
+    editionAddress,
+    userAddress,
+    assumeValidSoundContract = false,
+  }: { editionAddress: string; userAddress: string } & SoundContractValidation,
 ) {
-  await validateSoundEdition.call(this, { editionAddress })
+  await validateSoundEdition.call(this, { editionAddress, assumeValidSoundContract })
 
   const { signerOrProvider } = await this.expectSignerOrProvider()
 
@@ -46,23 +54,38 @@ export async function numberMinted(
 
 async function mintHelper(
   this: SoundClientInstance,
-  { mintSchedule, quantity, affiliate = NULL_ADDRESS, gasLimit, maxFeePerGas, maxPriorityFeePerGas }: MintOptions,
+  {
+    mintSchedule,
+    quantity,
+    affiliate = NULL_ADDRESS,
+    gasLimit,
+    maxFeePerGas,
+    maxPriorityFeePerGas,
+    skipQuantityChecks = false,
+    merkleProof,
+    assumeValidSoundContract = false,
+  }: MintOptions,
 ): Promise<EstimatableTransaction> {
-  await validateSoundEdition.call(this, { editionAddress: mintSchedule.editionAddress })
+  await validateSoundEdition.call(this, { editionAddress: mintSchedule.editionAddress, assumeValidSoundContract })
+
   if (quantity <= 0 || Math.floor(quantity) !== quantity) throw new InvalidQuantityError({ quantity })
 
   const { signer, userAddress } = await this.expectSigner()
 
-  const eligibleMintQuantity = await eligibleQuantity.call(this, {
-    mintSchedule,
-    userAddress,
-  })
-  if (eligibleMintQuantity < quantity) {
-    throw new NotEligibleMint({
-      eligibleMintQuantity,
+  let eligibleMintQuantity: number | undefined
+
+  if (!skipQuantityChecks) {
+    eligibleMintQuantity = await eligibleQuantity.call(this, {
       mintSchedule,
       userAddress,
     })
+    if (eligibleMintQuantity < quantity) {
+      throw new NotEligibleMint({
+        eligibleMintQuantity,
+        mintSchedule,
+        userAddress,
+      })
+    }
   }
 
   const txnOverrides: PayableOverrides = {
@@ -108,15 +131,21 @@ async function mintHelper(
     case interfaceIds.IMerkleDropMinterV2: {
       const merkleDropMinter = minterFactoryMap[interfaceId].connect(mintSchedule.minterAddress, signer)
 
-      const { merkleRootHash: merkleRoot } = await merkleDropMinter.mintInfo(
-        mintSchedule.editionAddress,
-        mintSchedule.mintId,
-      )
+      let proof: string[] | null
 
-      const proof = await getMerkleProof.call(this, {
-        merkleRoot,
-        userAddress,
-      })
+      if (merkleProof === undefined) {
+        const { merkleRootHash: merkleRoot } = await merkleDropMinter.mintInfo(
+          mintSchedule.editionAddress,
+          mintSchedule.mintId,
+        )
+
+        proof = await getMerkleProof.call(this, {
+          merkleRoot,
+          userAddress,
+        })
+      } else {
+        proof = merkleProof
+      }
 
       if (!proof?.length) {
         throw new NotEligibleMint({
@@ -177,6 +206,10 @@ async function mintToHelper(
     mintSchedule,
     mintToAddress,
     quantity,
+
+    skipQuantityChecks = false,
+    merkleProof,
+    assumeValidSoundContract = false,
   }: MintToOptions,
 ): Promise<EstimatableTransaction> {
   if (!isBigNumberish(attributonId)) {
@@ -185,23 +218,28 @@ async function mintToHelper(
     })
   }
 
-  await validateSoundEdition.call(this, { editionAddress: mintSchedule.editionAddress })
+  await validateSoundEdition.call(this, { editionAddress: mintSchedule.editionAddress, assumeValidSoundContract })
+
   if (quantity <= 0 || Math.floor(quantity) !== quantity) throw new InvalidQuantityError({ quantity })
 
   const { signer, userAddress } = await this.expectSigner()
 
   const toAddress = mintToAddress ?? userAddress
 
-  const eligibleMintQuantity = await eligibleQuantity.call(this, {
-    mintSchedule,
-    userAddress,
-  })
-  if (eligibleMintQuantity < quantity) {
-    throw new NotEligibleMint({
-      eligibleMintQuantity,
+  let eligibleMintQuantity: number | undefined
+
+  if (!skipQuantityChecks) {
+    eligibleMintQuantity = await eligibleQuantity.call(this, {
       mintSchedule,
       userAddress,
     })
+    if (eligibleMintQuantity < quantity) {
+      throw new NotEligibleMint({
+        eligibleMintQuantity,
+        mintSchedule,
+        userAddress,
+      })
+    }
   }
 
   const txnOverrides: PayableOverrides = {
@@ -253,15 +291,21 @@ async function mintToHelper(
     case interfaceIds.IMerkleDropMinterV2: {
       const merkleDropMinter = minterFactoryMap[interfaceId].connect(mintSchedule.minterAddress, signer)
 
-      const { merkleRootHash: merkleRoot } = await merkleDropMinter.mintInfo(
-        mintSchedule.editionAddress,
-        mintSchedule.mintId,
-      )
+      let proof: string[] | null
 
-      const proof = await getMerkleProof.call(this, {
-        merkleRoot,
-        userAddress,
-      })
+      if (merkleProof === undefined) {
+        const { merkleRootHash: merkleRoot } = await merkleDropMinter.mintInfo(
+          mintSchedule.editionAddress,
+          mintSchedule.mintId,
+        )
+
+        proof = await getMerkleProof.call(this, {
+          merkleRoot,
+          userAddress,
+        })
+      } else {
+        proof = merkleProof
+      }
 
       if (!proof?.length) {
         throw new NotEligibleMint({
