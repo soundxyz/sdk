@@ -35,23 +35,24 @@ export function SoundClient(config: SoundClientInstanceConfig) {
       mint: mint.bind(client),
       estimateMint: estimateMint.bind(client),
 
-      sam({ editionAddress }: SamEditionAddress) {
+      sam({ editionAddress, assumeValidSoundContract = false }: SamEditionAddress) {
         return {
           contract: {
             address: LazyPromise(() => {
               return SamContractAddress.call(client, {
                 editionAddress,
+                assumeValidSoundContract,
               })
             }),
             info: LazyPromise(() => {
-              return SamEditionInfo.call(client, { editionAddress })
+              return SamEditionInfo.call(client, { editionAddress, assumeValidSoundContract })
             }),
 
-            totalBuyPrice: curry(SamTotalBuyPrice.bind(client))({ editionAddress }),
-            totalSellPrice: curry(SamTotalSellPrice.bind(client))({ editionAddress }),
+            totalBuyPrice: curry(SamTotalBuyPrice.bind(client))({ editionAddress, assumeValidSoundContract }),
+            totalSellPrice: curry(SamTotalSellPrice.bind(client))({ editionAddress, assumeValidSoundContract }),
 
-            buy: curry(SamBuy.bind(client))({ editionAddress }),
-            sell: curry(SamSell.bind(client))({ editionAddress }),
+            buy: curry(SamBuy.bind(client))({ editionAddress, assumeValidSoundContract }),
+            sell: curry(SamSell.bind(client))({ editionAddress, assumeValidSoundContract }),
           },
           api: {
             availableTokensToSell: curry(SamAvailableTokensToSell.bind(client))({ editionAddress }),

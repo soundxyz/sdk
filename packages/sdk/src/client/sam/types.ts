@@ -1,11 +1,11 @@
 import { BigNumberish } from '@ethersproject/bignumber'
-import { BytesLike } from '../../types'
+import { BytesLike, SoundContractValidation } from '../../types'
 
-export interface SamEditionAddress {
+export interface SamEditionAddress extends SoundContractValidation {
   editionAddress: string
 }
 
-export interface SamBuyOptions {
+export interface SamBuyOptions extends SoundContractValidation {
   quantity: number
 
   price: BigNumberish
@@ -32,7 +32,7 @@ export interface SamBuyOptions {
   maxPriorityFeePerGas?: BigNumberish
 }
 
-export interface SamSellOptions {
+export interface SamSellOptions extends SoundContractValidation {
   tokenIds: BigNumberish[]
 
   minimumPayout: BigNumberish
