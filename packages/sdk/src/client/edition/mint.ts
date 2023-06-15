@@ -70,7 +70,7 @@ async function mintHelper(
 
   if (quantity <= 0 || Math.floor(quantity) !== quantity) throw new InvalidQuantityError({ quantity })
 
-  const { signer, userAddress } = await this.expectSigner()
+  const { signer, userAddress, provider } = await this.expectSignerAndOptionalProvider()
 
   let eligibleMintQuantity: number | undefined
 
@@ -112,8 +112,16 @@ async function mintHelper(
       }
 
       try {
+        const rangeMinterProvider = minterFactoryMap[interfaceId].connect(
+          mintSchedule.minterAddress,
+          provider || signer,
+        )
+
         // Add a buffer to the gas estimate to account for node provider estimate variance.
-        const gasEstimate = await rangeMinter.estimateGas.mint(...mintArgs, txnOverrides)
+        const gasEstimate = await rangeMinterProvider.estimateGas.mint(...mintArgs, {
+          ...txnOverrides,
+          from: userAddress,
+        })
 
         txnOverrides.gasLimit = scaleAmount({ amount: gasEstimate, multiplier: MINT_GAS_LIMIT_MULTIPLIER })
       } catch (err) {
@@ -165,8 +173,16 @@ async function mintHelper(
       }
 
       try {
+        const merkleDropMinterProvider = minterFactoryMap[interfaceId].connect(
+          mintSchedule.minterAddress,
+          provider || signer,
+        )
+
         // Add a buffer to the gas estimate to account for node provider estimate variance.
-        const gasEstimate = await merkleDropMinter.estimateGas.mint(...mintArgs, txnOverrides)
+        const gasEstimate = await merkleDropMinterProvider.estimateGas.mint(...mintArgs, {
+          ...txnOverrides,
+          from: userAddress,
+        })
 
         txnOverrides.gasLimit = scaleAmount({ amount: gasEstimate, multiplier: MINT_GAS_LIMIT_MULTIPLIER })
       } catch (err) {
@@ -222,7 +238,7 @@ async function mintToHelper(
 
   if (quantity <= 0 || Math.floor(quantity) !== quantity) throw new InvalidQuantityError({ quantity })
 
-  const { signer, userAddress } = await this.expectSigner()
+  const { signer, userAddress, provider } = await this.expectSignerAndOptionalProvider()
 
   const toAddress = mintToAddress ?? userAddress
 
@@ -273,8 +289,16 @@ async function mintToHelper(
       }
 
       try {
+        const rangeMinterProvider = minterFactoryMap[interfaceId].connect(
+          mintSchedule.minterAddress,
+          provider || signer,
+        )
+
         // Add a buffer to the gas estimate to account for node provider estimate variance.
-        const gasEstimate = await rangeMinter.estimateGas.mintTo(...mintArgs, txnOverrides)
+        const gasEstimate = await rangeMinterProvider.estimateGas.mintTo(...mintArgs, {
+          ...txnOverrides,
+          from: userAddress,
+        })
 
         txnOverrides.gasLimit = scaleAmount({ amount: gasEstimate, multiplier: MINT_GAS_LIMIT_MULTIPLIER })
       } catch (err) {
@@ -336,8 +360,16 @@ async function mintToHelper(
       }
 
       try {
+        const merkleDropMinterProvider = minterFactoryMap[interfaceId].connect(
+          mintSchedule.minterAddress,
+          provider || signer,
+        )
+
         // Add a buffer to the gas estimate to account for node provider estimate variance.
-        const gasEstimate = await merkleDropMinter.estimateGas.mintTo(...mintArgs, txnOverrides)
+        const gasEstimate = await merkleDropMinterProvider.estimateGas.mintTo(...mintArgs, {
+          ...txnOverrides,
+          from: userAddress,
+        })
 
         txnOverrides.gasLimit = scaleAmount({ amount: gasEstimate, multiplier: MINT_GAS_LIMIT_MULTIPLIER })
       } catch (err) {

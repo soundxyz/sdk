@@ -129,6 +129,18 @@ export function SoundClientInstance({
     throw new MissingSignerOrProviderError()
   }
 
+  async function expectSignerAndOptionalProvider() {
+    const [signer, provider] = await Promise.all([
+      expectSigner(),
+      instance.provider ? getLazyOption(instance.provider) : null,
+    ])
+
+    return {
+      ...signer,
+      provider,
+    }
+  }
+
   function expectSoundAPI() {
     const soundAPI = instance.soundAPI
     if (!soundAPI) throw new MissingSoundAPI()
@@ -145,6 +157,7 @@ export function SoundClientInstance({
     expectProviderOrSigner,
     expectSoundAPI,
     getNetworkChainId,
+    expectSignerAndOptionalProvider,
   }
 }
 
