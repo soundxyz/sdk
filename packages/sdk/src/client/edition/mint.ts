@@ -28,9 +28,9 @@ export async function numberOfTokensOwned(
 ) {
   await validateSoundEdition.call(this, { editionAddress, assumeValidSoundContract })
 
-  const { signerOrProvider } = await this.expectSignerOrProvider()
+  const { providerOrSigner } = await this.expectProviderOrSigner()
 
-  const editionContract = SoundEditionV1_2__factory.connect(editionAddress, signerOrProvider)
+  const editionContract = SoundEditionV1_2__factory.connect(editionAddress, providerOrSigner)
 
   return (await editionContract.balanceOf(userAddress)).toNumber()
 }
@@ -45,9 +45,9 @@ export async function numberMinted(
 ) {
   await validateSoundEdition.call(this, { editionAddress, assumeValidSoundContract })
 
-  const { signerOrProvider } = await this.expectSignerOrProvider()
+  const { providerOrSigner } = await this.expectProviderOrSigner()
 
-  const editionContract = SoundEditionV1_2__factory.connect(editionAddress, signerOrProvider)
+  const editionContract = SoundEditionV1_2__factory.connect(editionAddress, providerOrSigner)
 
   return (await editionContract.numberMinted(userAddress)).toNumber()
 }

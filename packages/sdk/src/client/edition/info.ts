@@ -14,7 +14,7 @@ export function editionInfo(
 ) {
   const { contractAddress, assumeValidSoundContract = false } = soundParams
 
-  const { expectSignerOrProvider, expectSoundAPI } = this
+  const { expectProviderOrSigner, expectSoundAPI } = this
 
   const isVersionAtLeastV1_2 = LazyPromise(() => {
     return isSoundV1_2_OrGreater.call(this, {
@@ -27,9 +27,9 @@ export function editionInfo(
       editionAddress: contractAddress,
       assumeValidSoundContract,
     })
-    const { signerOrProvider } = await expectSignerOrProvider()
+    const { providerOrSigner } = await expectProviderOrSigner()
 
-    const editionContract = SoundEditionV1_2__factory.connect(contractAddress, signerOrProvider)
+    const editionContract = SoundEditionV1_2__factory.connect(contractAddress, providerOrSigner)
 
     const info: ExpandTypeChainStructOutput<EditionInfoStructOutput> = await editionContract.editionInfo()
 

@@ -14,9 +14,9 @@ export async function isSoundV1_2_OrGreater(
       assumeValidSoundContract,
     })
 
-    const { signerOrProvider } = await this.expectSignerOrProvider()
+    const { providerOrSigner } = await this.expectProviderOrSigner()
 
-    const edition = SoundEditionV1_2__factory.connect(editionAddress, signerOrProvider)
+    const edition = SoundEditionV1_2__factory.connect(editionAddress, providerOrSigner)
 
     return edition.supportsInterface(interfaceIds.ISoundEditionV1_2)
   })

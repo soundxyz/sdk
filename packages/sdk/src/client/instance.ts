@@ -97,6 +97,9 @@ export function SoundClientInstance({
     throw new MissingProviderError()
   }
 
+  /**
+   * @deprecated Prefer using expectProviderOrSigner
+   */
   async function expectSignerOrProvider(): Promise<{ signerOrProvider: SignerOrProvider }> {
     if (instance.signer) {
       const signer = await getLazyOption(instance.signer)
