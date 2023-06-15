@@ -1,5 +1,11 @@
 # @soundxyz/sdk
 
+## 1.2.2
+
+### Patch Changes
+
+- [#244](https://github.com/soundxyz/sdk/pull/244) [`e8a1726`](https://github.com/soundxyz/sdk/commit/e8a17265bd6094723d4987c55ca2aa75d31af6db) Thanks [@PabloSzx](https://github.com/PabloSzx)! - Always prioritize provider over signer for contract information requests
+
 ## 1.2.1
 
 ### Patch Changes
