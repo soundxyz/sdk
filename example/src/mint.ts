@@ -13,8 +13,6 @@ const editionContract = clientSigner.edition.info({
 
 const editionInfo = await editionContract.info
 
-editionInfo.symbol
-
 assert.strictEqual(editionInfo.name, 'SDK Example')
 
 console.log(editionInfo)
