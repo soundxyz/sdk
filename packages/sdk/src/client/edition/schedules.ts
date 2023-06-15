@@ -107,12 +107,12 @@ export async function editionRegisteredMinters(
   },
 ): Promise<string[]> {
   const {
-    expectSignerOrProvider,
+    expectProviderOrSigner,
     instance: { onUnhandledError },
   } = this
-  const { signerOrProvider } = await expectSignerOrProvider()
+  const { providerOrSigner } = await expectProviderOrSigner()
 
-  const editionContract = SoundEditionV1_2__factory.connect(editionAddress, signerOrProvider)
+  const editionContract = SoundEditionV1_2__factory.connect(editionAddress, providerOrSigner)
   // Get the addresses with MINTER_ROLE
   const minterRole = await editionContract.MINTER_ROLE()
   const filter = editionContract.filters.RolesUpdated(undefined, minterRole)
@@ -123,7 +123,7 @@ export async function editionRegisteredMinters(
   // Check supportsInterface() to verify each address is a minter
   const minters = await Promise.all(
     candidateMinters.map(async (minterAddress) => {
-      const minterContract = IMinterModuleV2__factory.connect(minterAddress, signerOrProvider)
+      const minterContract = IMinterModuleV2__factory.connect(minterAddress, providerOrSigner)
 
       try {
         const moduleInterfaceId = await minterContract.moduleInterfaceId()
@@ -158,10 +158,10 @@ export async function editionMinterMintIds(
     fromBlockOrBlockHash?: BlockOrBlockHash
   },
 ) {
-  const { signerOrProvider } = await this.expectSignerOrProvider()
+  const { providerOrSigner } = await this.expectProviderOrSigner()
 
   // Query MintConfigCreated event, for v1 and v2, this signature is the same
-  const minterContract = IMinterModuleV2__factory.connect(minterAddress, signerOrProvider)
+  const minterContract = IMinterModuleV2__factory.connect(minterAddress, providerOrSigner)
   const filter = minterContract.filters.MintConfigCreated(editionAddress)
   const mintScheduleConfigEvents = await minterContract.queryFilter(filter, fromBlockOrBlockHash)
   return mintScheduleConfigEvents.map((event) => event.args.mintId.toNumber())
@@ -183,11 +183,11 @@ export async function mintInfosFromMinter(
   },
 ): Promise<MintSchedule[]> {
   const {
-    expectSignerOrProvider,
+    expectProviderOrSigner,
     instance: { idempotentCachedCall },
   } = this
 
-  const signerOrProvider = LazyPromise(() => expectSignerOrProvider().then((v) => v.signerOrProvider))
+  const signerOrProvider = LazyPromise(() => expectProviderOrSigner().then((v) => v.providerOrSigner))
 
   const interfaceId = await idempotentCachedCall(`minter-interface-id-${minterAddress}`, async () => {
     const minterModule = IMinterModuleV2__factory.connect(minterAddress, await signerOrProvider)

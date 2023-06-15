@@ -10,13 +10,13 @@ export async function isSoundEdition(
   this: SoundClientInstance,
   { editionAddress }: { editionAddress: string },
 ): Promise<boolean> {
-  const { instance, expectSignerOrProvider } = this
+  const { instance, expectProviderOrSigner } = this
 
   return instance.idempotentCachedCall(`is-sound-edition-${editionAddress}`, async () => {
     validateAddress({ type: 'SOUND_EDITION', address: editionAddress })
-    const { signerOrProvider } = await expectSignerOrProvider()
+    const { providerOrSigner } = await expectProviderOrSigner()
 
-    const editionContract = SoundEditionV1_2__factory.connect(editionAddress, signerOrProvider)
+    const editionContract = SoundEditionV1_2__factory.connect(editionAddress, providerOrSigner)
 
     try {
       return await editionContract.supportsInterface(interfaceIds.ISoundEditionV1)

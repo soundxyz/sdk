@@ -30,9 +30,9 @@ export async function SamContractAddress(
 
     if (!(await isSoundV1_2_OrGreater.call(this, { editionAddress }))) return null
 
-    const { signerOrProvider } = await this.expectSignerOrProvider()
+    const { providerOrSigner } = await this.expectProviderOrSigner()
 
-    const edition = SoundEditionV1_2__factory.connect(editionAddress, signerOrProvider)
+    const edition = SoundEditionV1_2__factory.connect(editionAddress, providerOrSigner)
 
     return edition.sam().then((samAddress) => (samAddress.toLowerCase() === NULL_ADDRESS ? null : samAddress))
   })
@@ -191,9 +191,9 @@ export async function SamTotalSellPrice(
 
   if (!samAddress) return null
 
-  const { signerOrProvider } = await this.expectSignerOrProvider()
+  const { providerOrSigner } = await this.expectProviderOrSigner()
 
-  const samContract = SAM__factory.connect(samAddress, signerOrProvider)
+  const samContract = SAM__factory.connect(samAddress, providerOrSigner)
 
   if (typeof quantity !== 'number' || !Number.isInteger(quantity) || quantity <= 0)
     throw new InvalidQuantityError({ quantity })
@@ -212,9 +212,9 @@ export async function SamTotalBuyPrice(
 
   if (!samAddress) return null
 
-  const { signerOrProvider } = await this.expectSignerOrProvider()
+  const { providerOrSigner } = await this.expectProviderOrSigner()
 
-  const samContract = SAM__factory.connect(samAddress, signerOrProvider)
+  const samContract = SAM__factory.connect(samAddress, providerOrSigner)
 
   if (typeof quantity !== 'number' || !Number.isInteger(quantity) || quantity <= 0)
     throw new InvalidQuantityError({ quantity })
@@ -235,9 +235,9 @@ export async function SamEditionInfo(
 
   if (!samAddress) return null
 
-  const { signerOrProvider } = await this.expectSignerOrProvider()
+  const { providerOrSigner } = await this.expectProviderOrSigner()
 
-  const samContract = SAM__factory.connect(samAddress, signerOrProvider)
+  const samContract = SAM__factory.connect(samAddress, providerOrSigner)
 
   const info: ExpandTypeChainStructOutput<SAMInfoStructOutput> = await samContract.samInfo(editionAddress)
 
