@@ -89,7 +89,6 @@ async function mintHelper(
   }
 
   const txnOverrides: PayableOverrides = {
-    value: 'price' in mintSchedule ? mintSchedule.price.mul(quantity) : BigNumber.from('0'),
     gasLimit,
     maxFeePerGas,
     maxPriorityFeePerGas,
@@ -243,7 +242,6 @@ async function mintToHelper(
   }
 
   const txnOverrides: PayableOverrides = {
-    value: 'price' in mintSchedule ? mintSchedule.price.mul(quantity) : BigNumber.from('0'),
     gasLimit,
     maxFeePerGas,
     maxPriorityFeePerGas,
