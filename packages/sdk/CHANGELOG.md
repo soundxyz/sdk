@@ -1,5 +1,11 @@
 # @soundxyz/sdk
 
+## 1.2.3
+
+### Patch Changes
+
+- [#250](https://github.com/soundxyz/sdk/pull/250) [`a671b19`](https://github.com/soundxyz/sdk/commit/a671b19f44ecc25b9bd8f153bc553e42a530ffc1) Thanks [@vigneshka](https://github.com/vigneshka)! - Support minters with transaction fee
+
 ## 1.2.2
 
 ### Patch Changes
