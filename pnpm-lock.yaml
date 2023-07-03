@@ -1,4 +1,4 @@
-lockfileVersion: '6.1'
+lockfileVersion: '6.0'
 
 settings:
   autoInstallPeers: true
@@ -199,8 +199,8 @@ importers:
         specifier: ^2.0.5
         version: 2.0.5(@nomiclabs/hardhat-ethers@2.2.2)(ethereum-waffle@4.0.10)(ethers@5.7.2)(hardhat@2.13.0)
       '@soundxyz/sound-protocol':
-        specifier: ^1.5.0
-        version: 1.5.0
+        specifier: 1.5.1-alpha-71d1f1c.0
+        version: 1.5.1-alpha-71d1f1c.0
       '@soundxyz/sound-protocol-v1-0':
         specifier: npm:@soundxyz/sound-protocol@1.1.0
         version: /@soundxyz/sound-protocol@1.1.0
@@ -3825,6 +3825,18 @@ packages:
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
+    dev: false
+
+  /@soundxyz/sound-protocol@1.5.1-alpha-71d1f1c.0:
+    resolution: {integrity: sha512-mvxJmoH+Ixv5CvlT1gEfraAeQFe7j9u84N6LJDQq7nfVaDNaaogxwvJUHaTeIJIkJBGDtc2PP2kqAAv0PMDryw==}
+    dependencies:
+      '@ethersproject/abi': 5.7.0
+      '@ethersproject/providers': 5.7.2
+      ethers: 5.7.2
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
+    dev: true
 
   /@tootallnate/once@2.0.0:
     resolution: {integrity: sha512-XCuKFP5PS55gnMVu3dty8KPatLqUoy/ZYzDzAGCQ8JNFCkLXzmI7vNHCR+XpbZaMWQK/vQubr7PkYq8g470J/A==}

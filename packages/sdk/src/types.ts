@@ -78,7 +78,7 @@ export interface MintToOptions extends SharedMintOptions {
   /**
    * Mint Schedule to mint from
    */
-  mintSchedule: V2MintSchedule
+  mintSchedule: V2MintSchedule | V2_1MintSchedule
 
   /**
    * Recipient address that should receive the NFT(s)
@@ -160,19 +160,25 @@ export interface MintScheduleBase {
   maxMintablePerAccount: number
   totalMinted: number
   affiliateFeeBPS: number
+  platformTransactionFee: BigNumber
 }
 
 export const HANDLED_MINTER_INTERFACE_IDS = [
   interfaceIds.IMerkleDropMinter,
   interfaceIds.IMerkleDropMinterV2,
+  interfaceIds.IMerkleDropMinterV2_1,
   interfaceIds.IRangeEditionMinter,
   interfaceIds.IRangeEditionMinterV2,
+  interfaceIds.IRangeEditionMinterV2_1,
 ] as const
 export type MinterInterfaceId = (typeof HANDLED_MINTER_INTERFACE_IDS)[number]
 
 export interface RangeEditionSchedule extends MintScheduleBase {
   mintType: 'RangeEdition'
-  interfaceId: typeof interfaceIds.IRangeEditionMinter | typeof interfaceIds.IRangeEditionMinterV2
+  interfaceId:
+    | typeof interfaceIds.IRangeEditionMinter
+    | typeof interfaceIds.IRangeEditionMinterV2
+    | typeof interfaceIds.IRangeEditionMinterV2_1
   maxMintableLower: number
   maxMintableUpper: number
   cutoffTime: number
@@ -185,9 +191,16 @@ export interface RangeEditionV2Schedule extends RangeEditionSchedule {
   interfaceId: typeof interfaceIds.IRangeEditionMinterV2
 }
 
+export interface RangeEditionV2_1Schedule extends RangeEditionSchedule {
+  interfaceId: typeof interfaceIds.IRangeEditionMinterV2_1
+}
+
 export interface MerkleDropSchedule extends MintScheduleBase {
   mintType: 'MerkleDrop'
-  interfaceId: typeof interfaceIds.IMerkleDropMinter | typeof interfaceIds.IMerkleDropMinterV2
+  interfaceId:
+    | typeof interfaceIds.IMerkleDropMinter
+    | typeof interfaceIds.IMerkleDropMinterV2
+    | typeof interfaceIds.IMerkleDropMinterV2_1
   maxMintable: number
   merkleRoot: string
 }
@@ -198,9 +211,15 @@ export interface MerkleDropV2Schedule extends MerkleDropSchedule {
   interfaceId: typeof interfaceIds.IMerkleDropMinterV2
 }
 
-export type V2MintSchedule = RangeEditionV2Schedule | MerkleDropV2Schedule
+export interface MerkleDropV2_1Schedule extends MerkleDropSchedule {
+  interfaceId: typeof interfaceIds.IMerkleDropMinterV2_1
+}
 
-export type MintSchedule = RangeEditionV1Schedule | MerkleDropV1Schedule | V2MintSchedule
+export type V1MintSchedule = RangeEditionV1Schedule | MerkleDropV1Schedule
+export type V2MintSchedule = RangeEditionV2Schedule | MerkleDropV2Schedule
+export type V2_1MintSchedule = RangeEditionV2_1Schedule | MerkleDropV2_1Schedule
+
+export type MintSchedule = V1MintSchedule | V2MintSchedule | V2_1MintSchedule
 
 export function isRangeEditionSchedule(schedule: MintSchedule): schedule is RangeEditionSchedule {
   return schedule.mintType === 'RangeEdition'
