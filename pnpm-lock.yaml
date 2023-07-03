@@ -83,8 +83,8 @@ importers:
         specifier: workspace:^
         version: link:../packages/sdk/dist
       '@soundxyz/sound-protocol':
-        specifier: ^1.5.0
-        version: 1.5.0
+        specifier: ^1.6.0
+        version: 1.6.0
       alchemy-sdk:
         specifier: ^2.6.2
         version: 2.6.2
@@ -3816,17 +3816,6 @@ packages:
       - utf-8-validate
     dev: true
 
-  /@soundxyz/sound-protocol@1.5.0:
-    resolution: {integrity: sha512-cvRluoHTi2d7/8BXsAbPgmf+NT7mh7oPcPBSdYFAbrQ9Ytl6+F2VrUHkGyuvS8SK4ATMMjI4vaCIhQCUHzJCzQ==}
-    dependencies:
-      '@ethersproject/abi': 5.7.0
-      '@ethersproject/providers': 5.7.2
-      ethers: 5.7.2
-    transitivePeerDependencies:
-      - bufferutil
-      - utf-8-validate
-    dev: false
-
   /@soundxyz/sound-protocol@1.6.0:
     resolution: {integrity: sha512-vBvYr58hYghnQnTMS+TbJ08ooJAk4SteP8MErY9IxWhkThOU408onCxTMP7OX9Jev43f4D/1xHQPjden0LVmqg==}
     dependencies:
@@ -3836,7 +3825,6 @@ packages:
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
-    dev: true
 
   /@tootallnate/once@2.0.0:
     resolution: {integrity: sha512-XCuKFP5PS55gnMVu3dty8KPatLqUoy/ZYzDzAGCQ8JNFCkLXzmI7vNHCR+XpbZaMWQK/vQubr7PkYq8g470J/A==}
