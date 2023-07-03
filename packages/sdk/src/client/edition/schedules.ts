@@ -7,6 +7,7 @@ import { minterFactoryMap } from '../../utils/constants'
 import { LazyPromise } from '../../utils/promise'
 import { SoundClientInstance } from '../instance'
 import { exhaustiveGuard } from '../../utils/helpers'
+import { BigNumber } from '@ethersproject/bignumber'
 
 export async function mintSchedules(
   this: SoundClientInstance,
@@ -203,7 +204,8 @@ export async function mintInfosFromMinter(
 
       switch (interfaceId) {
         case interfaceIds.IRangeEditionMinter:
-        case interfaceIds.IRangeEditionMinterV2: {
+        case interfaceIds.IRangeEditionMinterV2:
+        case interfaceIds.IRangeEditionMinterV2_1: {
           const minterContract = minterFactoryMap[interfaceId].connect(minterAddress, await signerOrProvider)
           const mintSchedule = await minterContract.mintInfo(editionAddress, mintId)
           return {
@@ -226,11 +228,14 @@ export async function mintInfosFromMinter(
             maxMintablePerAccount: mintSchedule.maxMintablePerAccount,
             totalMinted: mintSchedule.totalMinted,
             affiliateFeeBPS: mintSchedule.affiliateFeeBPS,
+            platformTransactionFee:
+              'platformPerTxFlatFee' in mintSchedule ? mintSchedule.platformPerTxFlatFee : BigNumber.from(0),
           }
         }
 
         case interfaceIds.IMerkleDropMinter:
-        case interfaceIds.IMerkleDropMinterV2: {
+        case interfaceIds.IMerkleDropMinterV2:
+        case interfaceIds.IMerkleDropMinterV2_1: {
           const minterContract = minterFactoryMap[interfaceId].connect(minterAddress, await signerOrProvider)
           const mintSchedule = await minterContract.mintInfo(editionAddress, mintId)
           return {
@@ -248,8 +253,11 @@ export async function mintInfosFromMinter(
             maxMintablePerAccount: mintSchedule.maxMintablePerAccount,
             totalMinted: mintSchedule.totalMinted,
             affiliateFeeBPS: mintSchedule.affiliateFeeBPS,
+            platformTransactionFee:
+              'platformPerTxFlatFee' in mintSchedule ? mintSchedule.platformPerTxFlatFee : BigNumber.from(0),
           }
         }
+
         default: {
           exhaustiveGuard(interfaceId)
         }

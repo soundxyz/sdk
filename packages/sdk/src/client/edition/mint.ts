@@ -89,7 +89,7 @@ async function mintHelper(
   }
 
   const txnOverrides: PayableOverrides = {
-    value: 'price' in mintSchedule ? mintSchedule.price.mul(quantity) : BigNumber.from('0'),
+    value: mintSchedule.price.mul(quantity).add(mintSchedule.platformTransactionFee),
     gasLimit,
     maxFeePerGas,
     maxPriorityFeePerGas,
@@ -99,7 +99,8 @@ async function mintHelper(
 
   switch (interfaceId) {
     case interfaceIds.IRangeEditionMinter:
-    case interfaceIds.IRangeEditionMinterV2: {
+    case interfaceIds.IRangeEditionMinterV2:
+    case interfaceIds.IRangeEditionMinterV2_1: {
       const rangeMinter = minterFactoryMap[interfaceId].connect(mintSchedule.minterAddress, signer)
 
       const mintArgs = [mintSchedule.editionAddress, mintSchedule.mintId, quantity, affiliate] as const
@@ -128,7 +129,8 @@ async function mintHelper(
     }
 
     case interfaceIds.IMerkleDropMinter:
-    case interfaceIds.IMerkleDropMinterV2: {
+    case interfaceIds.IMerkleDropMinterV2:
+    case interfaceIds.IMerkleDropMinterV2_1: {
       const merkleDropMinter = minterFactoryMap[interfaceId].connect(mintSchedule.minterAddress, signer)
 
       let proof: string[] | null
@@ -243,7 +245,7 @@ async function mintToHelper(
   }
 
   const txnOverrides: PayableOverrides = {
-    value: 'price' in mintSchedule ? mintSchedule.price.mul(quantity) : BigNumber.from('0'),
+    value: mintSchedule.price.mul(quantity).add(mintSchedule.platformTransactionFee),
     gasLimit,
     maxFeePerGas,
     maxPriorityFeePerGas,
@@ -252,7 +254,8 @@ async function mintToHelper(
   const interfaceId = mintSchedule.interfaceId
 
   switch (interfaceId) {
-    case interfaceIds.IRangeEditionMinterV2: {
+    case interfaceIds.IRangeEditionMinterV2:
+    case interfaceIds.IRangeEditionMinterV2_1: {
       const rangeMinter = minterFactoryMap[interfaceId].connect(mintSchedule.minterAddress, signer)
 
       const mintArgs = [
@@ -288,7 +291,8 @@ async function mintToHelper(
       }
     }
 
-    case interfaceIds.IMerkleDropMinterV2: {
+    case interfaceIds.IMerkleDropMinterV2:
+    case interfaceIds.IMerkleDropMinterV2_1: {
       const merkleDropMinter = minterFactoryMap[interfaceId].connect(mintSchedule.minterAddress, signer)
 
       let proof: string[] | null
