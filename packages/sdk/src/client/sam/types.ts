@@ -8,7 +8,7 @@ export interface SamEditionAddress extends SoundContractValidation {
 export interface SamBuyOptions extends SoundContractValidation {
   quantity: number
 
-  price: BigNumberish
+  maxTotalValue: BigNumberish
 
   attributonId?: BigNumberish
 

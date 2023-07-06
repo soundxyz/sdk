@@ -2643,6 +2643,8 @@ describe('SAM', () => {
       linearPriceSlope,
       maxSupply,
       supply,
+      platformFeeBPS,
+      platformPerTxFlatFee,
     } = samInfo
 
     expect({
@@ -2659,6 +2661,8 @@ describe('SAM', () => {
       linearPriceSlope,
       maxSupply,
       supply,
+      platformFeeBPS,
+      platformPerTxFlatFee,
     }).to.deep.eq({
       affiliateFeeBPS: 0,
       affiliateMerkleRoot,
@@ -2673,6 +2677,8 @@ describe('SAM', () => {
       linearPriceSlope: BigNumber.from(0),
       maxSupply: UINT32_MAX,
       supply: 0,
+      platformFeeBPS: 0,
+      platformPerTxFlatFee: BigNumber.from(0),
     } satisfies typeof samInfo)
   })
 
@@ -2778,7 +2784,7 @@ describe('SAM', () => {
     assert(totalBuyPrice)
 
     await sam.contract.buy({
-      price: totalBuyPrice.total,
+      maxTotalValue: totalBuyPrice.total,
       quantity: 10,
     })
 
