@@ -1,5 +1,12 @@
 # @soundxyz/sdk
 
+## 2.0.0
+
+### Major Changes
+
+- [#253](https://github.com/soundxyz/sdk/pull/253) [`bf991c8`](https://github.com/soundxyz/sdk/commit/bf991c80623a952bc13613121e266793343a7721) Thanks [@vigneshka](https://github.com/vigneshka)! - patch change: sam info includes fees
+  breaking change: rename price to maxTotalValue in sambuy for clarity
+
 ## 1.2.3
 
 ### Patch Changes
