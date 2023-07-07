@@ -58,7 +58,7 @@
     "@graphql-codegen/typescript-operations": "^3.0.2",
     "@graphql-inspector/cli": "^3.4.9",
     "@graphql-inspector/config": "^3.4.3",
-    "@graphql-tools/utils": "^9.2.1",
+    "@graphql-tools/utils": "^10.0.0",
     "@nomicfoundation/hardhat-chai-matchers": "^1.0.6",
     "@nomicfoundation/hardhat-network-helpers": "^1.0.8",
     "@nomiclabs/hardhat-ethers": "^2.2.2",
