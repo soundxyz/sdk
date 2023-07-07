@@ -2,4 +2,5 @@
 '@soundxyz/sdk': major
 ---
 
-sam info includes fees, rename price to maxTotalValue in sambuy for clarity
+patch change: sam info includes fees
+breaking change: rename price to maxTotalValue in sambuy for clarity
