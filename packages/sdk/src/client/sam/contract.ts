@@ -1,7 +1,8 @@
 import { BigNumber, isBigNumberish } from '@ethersproject/bignumber/lib/bignumber.js'
 import { PayableOverrides } from '@ethersproject/contracts'
-import { SAM__factory, SoundEditionV1_2__factory } from '@soundxyz/sound-protocol/typechain'
+import { SAMV1_1__factory, SAM__factory, SoundEditionV1_2__factory } from '@soundxyz/sound-protocol/typechain'
 import { SAMInfoStructOutput } from '@soundxyz/sound-protocol/typechain/ISAM'
+import { SAMInfoStructOutput as V1_1SAMInfoStructOutput } from '@soundxyz/sound-protocol/typechain/ISAMV1_1'
 
 import {
   InvalidAttributonIdError,
@@ -10,13 +11,14 @@ import {
   InvalidTokenIdError,
   SamNotFoundError,
 } from '../../errors'
-import { ExpandTypeChainStructOutput, SoundContractValidation, TakeFirst } from '../../types'
+import { ExpandTypeChainStructOutput, SAMInterfaceId, SoundContractValidation, TakeFirst } from '../../types'
 import { MINT_FALLBACK_GAS_LIMIT, MINT_GAS_LIMIT_MULTIPLIER, NULL_ADDRESS } from '../../utils/constants'
-import { scaleAmount, validateAddress } from '../../utils/helpers'
+import { exhaustiveGuard, scaleAmount, validateAddress } from '../../utils/helpers'
 import { isSoundV1_2_OrGreater } from '../edition/interface'
 import { SoundClientInstance } from '../instance'
 import { validateSoundEdition } from '../validation'
 import { SamBuyOptions, SamEditionAddress, SamSellOptions } from './types'
+import { interfaceIds } from '@soundxyz/sound-protocol'
 
 export async function SamContractAddress(
   this: SoundClientInstance,
@@ -112,8 +114,7 @@ export async function SamBuy(
   { editionAddress }: SamEditionAddress,
   {
     quantity,
-
-    price,
+    maxTotalValue,
 
     affiliate = NULL_ADDRESS,
     affiliateProof = [],
@@ -159,7 +160,7 @@ export async function SamBuy(
   ] as const
 
   const txnOverrides: PayableOverrides = {
-    value: price,
+    value: maxTotalValue,
     gasLimit,
     maxFeePerGas,
     maxPriorityFeePerGas,
@@ -230,16 +231,41 @@ export async function SamTotalBuyPrice(
 export async function SamEditionInfo(
   this: SoundClientInstance,
   { editionAddress, assumeValidSoundContract = false }: SamEditionAddress,
-) {
+): Promise<ExpandTypeChainStructOutput<V1_1SAMInfoStructOutput> | null> {
   const samAddress = await SamContractAddress.call(this, { editionAddress, assumeValidSoundContract })
-
   if (!samAddress) return null
 
-  const { providerOrSigner } = await this.expectProviderOrSigner()
+  const {
+    expectProviderOrSigner,
+    instance: { idempotentCachedCall },
+  } = this
 
-  const samContract = SAM__factory.connect(samAddress, providerOrSigner)
+  const { providerOrSigner } = await expectProviderOrSigner()
 
-  const info: ExpandTypeChainStructOutput<SAMInfoStructOutput> = await samContract.samInfo(editionAddress)
+  const interfaceId = await idempotentCachedCall(`minter-interface-id-${samAddress}`, async () => {
+    const samModule = SAM__factory.connect(samAddress, providerOrSigner)
+    return (await samModule.moduleInterfaceId()) as SAMInterfaceId
+  })
 
-  return { ...info }
+  switch (interfaceId) {
+    case interfaceIds.ISAM: {
+      const samContract = SAM__factory.connect(samAddress, providerOrSigner)
+
+      const [info, platformFeeBPS] = await Promise.all([
+        samContract.samInfo(editionAddress),
+        samContract.platformFeeBPS(),
+      ])
+
+      const structuredInfo: ExpandTypeChainStructOutput<SAMInfoStructOutput> = info
+
+      return { ...structuredInfo, platformFeeBPS, platformPerTxFlatFee: BigNumber.from(0) }
+    }
+    case interfaceIds.ISAMV1_1: {
+      const samContract = SAMV1_1__factory.connect(samAddress, providerOrSigner)
+      const info: ExpandTypeChainStructOutput<V1_1SAMInfoStructOutput> = await samContract.samInfo(editionAddress)
+      return { ...info }
+    }
+    default:
+      exhaustiveGuard(interfaceId)
+  }
 }
