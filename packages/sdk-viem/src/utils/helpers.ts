@@ -5,6 +5,7 @@ import type { AddressInputType } from '../types'
 import { NULL_ADDRESS } from './constants'
 
 const addressCheckSet = new Set()
+
 export function assertAddress(
   address: string,
   {
