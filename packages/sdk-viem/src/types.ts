@@ -1,8 +1,6 @@
-import type { Client, Account } from 'viem'
+import type { PublicClient, WalletClient } from 'viem'
 import type { MerkleProofProvider } from './merkle/types'
 import type { SoundAPI } from './api'
-
-export type ClientOrAccount = Client | Account
 
 export type BlockOrBlockHash = string | number
 
@@ -17,17 +15,19 @@ export interface SoundContractValidation {
 
 type LazyOption<T extends object> = T | (() => T | Promise<T>)
 
-export type { Client, Account }
+export type { PublicClient, WalletClient }
 
 export type SoundClientContractProvider =
   | {
-      client: LazyOption<Client>
-      account?: LazyOption<Account>
+      client: LazyOption<PublicClient>
+      account?: LazyOption<WalletClient>
     }
   | {
-      client?: LazyOption<Client>
-      account: LazyOption<Account>
+      client?: LazyOption<PublicClient>
+      account: LazyOption<WalletClient>
     }
+
+export type MerkleProvider = MerkleProofProvider
 
 export interface BaseSoundClientConfig {
   /**
@@ -43,8 +43,10 @@ export interface BaseSoundClientConfig {
   /**
    * Merkle provider to be used
    */
-  merkleProvider?: MerkleProofProvider
+  merkleProvider?: MerkleProvider
 }
+
+export type SoundClientConfig = SoundClientContractProvider & BaseSoundClientConfig
 
 /*********************************************************
                     API TYPES
@@ -107,6 +109,7 @@ export type AddressInputType =
   | 'AFFILIATE'
   | 'WALLET'
   | 'CREATOR_ADDRESS'
+  | 'GENERIC'
 
 export type ExpandTypeChainStructOutput<T> = Expand<Omit<T, keyof [] | number | `${number}`>>
 

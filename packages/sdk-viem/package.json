@@ -39,16 +39,10 @@
     "linkDirectory": true
   },
   "dependencies": {
+    "keccak256": "^1.0.6",
     "zod": "^3.21.4"
   },
   "devDependencies": {
-    "@soundxyz/sound-protocol": "^1.7.0",
-    "@types/node": "20.4.5",
-    "bob-ts": "^4.1.1",
-    "bob-tsm": "^1.1.2",
-    "esbuild": "^0.18.17",
-    "typescript": "5.1.6",
-    "viem": "^1.4.2",
     "@graphql-codegen/cli": "^5.0.0",
     "@graphql-codegen/core": "^4.0.0",
     "@graphql-codegen/typescript": "^4.0.1",
@@ -56,6 +50,13 @@
     "@graphql-codegen/typescript-operations": "^4.0.1",
     "@graphql-inspector/cli": "^4.0.2",
     "@graphql-inspector/config": "^4.0.1",
-    "@graphql-tools/utils": "^10.0.4"
+    "@graphql-tools/utils": "^10.0.4",
+    "@soundxyz/sound-protocol": "^1.7.0",
+    "@types/node": "20.4.5",
+    "bob-ts": "^4.1.1",
+    "bob-tsm": "^1.1.2",
+    "esbuild": "^0.18.17",
+    "typescript": "5.1.6",
+    "viem": "^1.4.2"
   }
 }
