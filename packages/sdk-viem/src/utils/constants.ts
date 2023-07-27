@@ -1,27 +1,18 @@
 import { interfaceIds } from '@soundxyz/sound-protocol'
-import {
-  IMinterModule__factory,
-  MerkleDropMinter__factory,
-  MerkleDropMinterV2_1__factory,
-  MerkleDropMinterV2__factory,
-  RangeEditionMinter__factory,
-  RangeEditionMinterV2_1__factory,
-  RangeEditionMinterV2__factory,
-  SoundEditionV1_2__factory,
-} from '@soundxyz/sound-protocol/typechain/index'
-
-const editionInterface = SoundEditionV1_2__factory.createInterface()
-const iMinterModuleInterface = IMinterModule__factory.createInterface()
-const rangeMinterInterface = RangeEditionMinter__factory.createInterface()
-const merkleMinterInteface = MerkleDropMinter__factory.createInterface()
+import { rangeEditionMinterV1Abi } from '../abi/range-edition-minter-v1'
+import { rangeEditionMinterV2Abi } from '../abi/range-edition-minter-v2'
+import { rangeEditionMinterV2_1Abi } from '../abi/range-edition-minter-v2_1'
+import { merkleDropMinterV1Abi } from '../abi/merkle-drop-minter-v1'
+import { merkleDropMinterV2Abi } from '../abi/merkle-drop-minter-v2'
+import { merkleDropMinterV2_1Abi } from '../abi/merkle-drop-minter-v2_1'
 
 export const minterFactoryMap = {
-  [interfaceIds.IRangeEditionMinter]: RangeEditionMinter__factory,
-  [interfaceIds.IRangeEditionMinterV2]: RangeEditionMinterV2__factory,
-  [interfaceIds.IRangeEditionMinterV2_1]: RangeEditionMinterV2_1__factory,
-  [interfaceIds.IMerkleDropMinter]: MerkleDropMinter__factory,
-  [interfaceIds.IMerkleDropMinterV2]: MerkleDropMinterV2__factory,
-  [interfaceIds.IMerkleDropMinterV2_1]: MerkleDropMinterV2_1__factory,
+  [interfaceIds.IRangeEditionMinter]: rangeEditionMinterV1Abi,
+  [interfaceIds.IRangeEditionMinterV2]: rangeEditionMinterV2Abi,
+  [interfaceIds.IRangeEditionMinterV2_1]: rangeEditionMinterV2_1Abi,
+  [interfaceIds.IMerkleDropMinter]: merkleDropMinterV1Abi,
+  [interfaceIds.IMerkleDropMinterV2]: merkleDropMinterV2Abi,
+  [interfaceIds.IMerkleDropMinterV2_1]: merkleDropMinterV2_1Abi,
 } as const
 
 // This is hardcoded on the contract so we always know its 2
@@ -79,69 +70,69 @@ export const ContractErrorName = {
 
 export type ContractErrorName = (typeof ContractErrorName)[keyof typeof ContractErrorName]
 
-const {
-  MetadataIsFrozen,
-  InvalidRoyaltyBPS,
-  InvalidRandomnessLock,
-  ExceedsEditionAvailableSupply,
-  InvalidAmount,
-  InvalidFundingRecipient,
-  InvalidEditionMaxMintableRange,
-  MaximumHasAlreadyBeenReached,
-  ExceedsAddressBatchMintLimit,
-  MintRandomnessAlreadyRevealed,
-  NoAddressesToAirdrop,
-  MintHasConcluded,
-  MintsAlreadyExist,
-  Underpaid,
-  ExceedsAvailableSupply,
-  MintNotOpen,
-  MintPaused,
-  InvalidTimeRange,
-  Unauthorized,
-  InvalidAffiliateFeeBPS,
-  FeeRegistryIsZeroAddress,
-  InvalidMaxMintableRange,
-  ExceedsMaxPerAccount,
-  MaxMintablePerAccountIsZero,
-  InvalidMerkleProof,
-  MerkleRootHashIsEmpty,
-} = ContractErrorName
+// const {
+//   MetadataIsFrozen,
+//   InvalidRoyaltyBPS,
+//   InvalidRandomnessLock,
+//   ExceedsEditionAvailableSupply,
+//   InvalidAmount,
+//   InvalidFundingRecipient,
+//   InvalidEditionMaxMintableRange,
+//   MaximumHasAlreadyBeenReached,
+//   ExceedsAddressBatchMintLimit,
+//   MintRandomnessAlreadyRevealed,
+//   NoAddressesToAirdrop,
+//   MintHasConcluded,
+//   MintsAlreadyExist,
+//   Underpaid,
+//   ExceedsAvailableSupply,
+//   MintNotOpen,
+//   MintPaused,
+//   InvalidTimeRange,
+//   Unauthorized,
+//   InvalidAffiliateFeeBPS,
+//   FeeRegistryIsZeroAddress,
+//   InvalidMaxMintableRange,
+//   ExceedsMaxPerAccount,
+//   MaxMintablePerAccountIsZero,
+//   InvalidMerkleProof,
+//   MerkleRootHashIsEmpty,
+// } = ContractErrorName
 
-// Maps contract error signature hashes to error names
-export const ContractErrorSigHashToName = {
-  // SoundEdition
-  [editionInterface.getSighash(MetadataIsFrozen)]: MetadataIsFrozen,
-  [editionInterface.getSighash(InvalidRoyaltyBPS)]: InvalidRoyaltyBPS,
-  [editionInterface.getSighash(InvalidRandomnessLock)]: InvalidRandomnessLock,
-  [editionInterface.getSighash(ExceedsEditionAvailableSupply)]: ExceedsEditionAvailableSupply,
-  [editionInterface.getSighash(InvalidAmount)]: InvalidAmount,
-  [editionInterface.getSighash(InvalidFundingRecipient)]: InvalidFundingRecipient,
-  [editionInterface.getSighash(InvalidEditionMaxMintableRange)]: InvalidEditionMaxMintableRange,
-  [editionInterface.getSighash(MaximumHasAlreadyBeenReached)]: MaximumHasAlreadyBeenReached,
-  [editionInterface.getSighash(ExceedsAddressBatchMintLimit)]: ExceedsAddressBatchMintLimit,
-  [editionInterface.getSighash(MintRandomnessAlreadyRevealed)]: MintRandomnessAlreadyRevealed,
-  [editionInterface.getSighash(NoAddressesToAirdrop)]: NoAddressesToAirdrop,
-  [editionInterface.getSighash(MintHasConcluded)]: MintHasConcluded,
-  [editionInterface.getSighash(MintsAlreadyExist)]: MintsAlreadyExist,
-  // IMinterModule
-  [iMinterModuleInterface.getSighash(Underpaid)]: Underpaid,
-  [iMinterModuleInterface.getSighash(ExceedsAvailableSupply)]: ExceedsAvailableSupply,
-  [iMinterModuleInterface.getSighash(MintNotOpen)]: MintNotOpen,
-  [iMinterModuleInterface.getSighash(MintPaused)]: MintPaused,
-  [iMinterModuleInterface.getSighash(InvalidTimeRange)]: InvalidTimeRange,
-  [iMinterModuleInterface.getSighash(Unauthorized)]: Unauthorized,
-  [iMinterModuleInterface.getSighash(InvalidAffiliateFeeBPS)]: InvalidAffiliateFeeBPS,
-  [iMinterModuleInterface.getSighash(FeeRegistryIsZeroAddress)]: FeeRegistryIsZeroAddress,
-  // RangeEditionMinter
-  [rangeMinterInterface.getSighash(InvalidMaxMintableRange)]: InvalidMaxMintableRange,
-  [rangeMinterInterface.getSighash(ExceedsMaxPerAccount)]: ExceedsMaxPerAccount,
-  [rangeMinterInterface.getSighash(MaxMintablePerAccountIsZero)]: MaxMintablePerAccountIsZero,
-  // MerkleDropMinter
-  [merkleMinterInteface.getSighash(InvalidMerkleProof)]: InvalidMerkleProof,
-  [merkleMinterInteface.getSighash(ExceedsMaxPerAccount)]: ExceedsMaxPerAccount,
-  [merkleMinterInteface.getSighash(MerkleRootHashIsEmpty)]: MerkleRootHashIsEmpty,
-  [merkleMinterInteface.getSighash(MaxMintablePerAccountIsZero)]: MaxMintablePerAccountIsZero,
-} as const
+// // Maps contract error signature hashes to error names
+// export const ContractErrorSigHashToName = {
+//   // SoundEdition
+//   [editionInterface.getSighash(MetadataIsFrozen)]: MetadataIsFrozen,
+//   [editionInterface.getSighash(InvalidRoyaltyBPS)]: InvalidRoyaltyBPS,
+//   [editionInterface.getSighash(InvalidRandomnessLock)]: InvalidRandomnessLock,
+//   [editionInterface.getSighash(ExceedsEditionAvailableSupply)]: ExceedsEditionAvailableSupply,
+//   [editionInterface.getSighash(InvalidAmount)]: InvalidAmount,
+//   [editionInterface.getSighash(InvalidFundingRecipient)]: InvalidFundingRecipient,
+//   [editionInterface.getSighash(InvalidEditionMaxMintableRange)]: InvalidEditionMaxMintableRange,
+//   [editionInterface.getSighash(MaximumHasAlreadyBeenReached)]: MaximumHasAlreadyBeenReached,
+//   [editionInterface.getSighash(ExceedsAddressBatchMintLimit)]: ExceedsAddressBatchMintLimit,
+//   [editionInterface.getSighash(MintRandomnessAlreadyRevealed)]: MintRandomnessAlreadyRevealed,
+//   [editionInterface.getSighash(NoAddressesToAirdrop)]: NoAddressesToAirdrop,
+//   [editionInterface.getSighash(MintHasConcluded)]: MintHasConcluded,
+//   [editionInterface.getSighash(MintsAlreadyExist)]: MintsAlreadyExist,
+//   // IMinterModule
+//   [iMinterModuleInterface.getSighash(Underpaid)]: Underpaid,
+//   [iMinterModuleInterface.getSighash(ExceedsAvailableSupply)]: ExceedsAvailableSupply,
+//   [iMinterModuleInterface.getSighash(MintNotOpen)]: MintNotOpen,
+//   [iMinterModuleInterface.getSighash(MintPaused)]: MintPaused,
+//   [iMinterModuleInterface.getSighash(InvalidTimeRange)]: InvalidTimeRange,
+//   [iMinterModuleInterface.getSighash(Unauthorized)]: Unauthorized,
+//   [iMinterModuleInterface.getSighash(InvalidAffiliateFeeBPS)]: InvalidAffiliateFeeBPS,
+//   [iMinterModuleInterface.getSighash(FeeRegistryIsZeroAddress)]: FeeRegistryIsZeroAddress,
+//   // RangeEditionMinter
+//   [rangeMinterInterface.getSighash(InvalidMaxMintableRange)]: InvalidMaxMintableRange,
+//   [rangeMinterInterface.getSighash(ExceedsMaxPerAccount)]: ExceedsMaxPerAccount,
+//   [rangeMinterInterface.getSighash(MaxMintablePerAccountIsZero)]: MaxMintablePerAccountIsZero,
+//   // MerkleDropMinter
+//   [merkleMinterInteface.getSighash(InvalidMerkleProof)]: InvalidMerkleProof,
+//   [merkleMinterInteface.getSighash(ExceedsMaxPerAccount)]: ExceedsMaxPerAccount,
+//   [merkleMinterInteface.getSighash(MerkleRootHashIsEmpty)]: MerkleRootHashIsEmpty,
+//   [merkleMinterInteface.getSighash(MaxMintablePerAccountIsZero)]: MaxMintablePerAccountIsZero,
+// } as const
 
-export type ContractErrorSigHashToName = (typeof ContractErrorSigHashToName)[keyof typeof ContractErrorSigHashToName]
+// export type ContractErrorSigHashToName = (typeof ContractErrorSigHashToName)[keyof typeof ContractErrorSigHashToName]
