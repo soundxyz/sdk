@@ -6,7 +6,7 @@ import {
   MissingSignerOrProviderError,
   MissingSoundAPI,
 } from '../errors'
-import { MerkleProvider, Provider, Signer, SignerOrProvider, SoundClientContractProvider } from '../types'
+import type { MerkleProvider, Provider, Signer, SignerOrProvider, SoundClientContractProvider } from '../types'
 import { getLazyOption } from '../utils/helpers'
 
 export type SoundClientInstanceConfig = SoundClientContractProvider & {

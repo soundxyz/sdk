@@ -1,9 +1,15 @@
 import { BigNumber } from '@ethersproject/bignumber'
-import { ContractTransaction, PayableOverrides } from '@ethersproject/contracts'
+import type { ContractTransaction, PayableOverrides } from '@ethersproject/contracts'
 import { MerkleDropMinterV2__factory, SoundEditionV1_2__factory } from '@soundxyz/sound-protocol/typechain'
 
 import { InvalidAttributonIdError, InvalidQuantityError, NotEligibleMint } from '../../errors'
-import { EstimatableTransaction, MintOptions, MintSchedule, MintToOptions, SoundContractValidation } from '../../types'
+import type {
+  EstimatableTransaction,
+  MintOptions,
+  MintSchedule,
+  MintToOptions,
+  SoundContractValidation,
+} from '../../types'
 import {
   MINT_FALLBACK_GAS_LIMIT,
   MINT_GAS_LIMIT_MULTIPLIER,

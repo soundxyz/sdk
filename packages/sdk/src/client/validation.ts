@@ -4,7 +4,7 @@ import { SoundEditionV1_2__factory } from '@soundxyz/sound-protocol/typechain'
 import { NotSoundEditionError } from '../errors'
 import { validateAddress } from '../utils/helpers'
 import { SoundClientInstance } from './instance'
-import { SoundContractValidation } from '../types'
+import type { SoundContractValidation } from '../types'
 
 export async function isSoundEdition(
   this: SoundClientInstance,
