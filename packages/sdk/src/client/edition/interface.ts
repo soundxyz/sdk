@@ -2,7 +2,7 @@ import { interfaceIds } from '@soundxyz/sound-protocol'
 import { SoundEditionV1_2__factory } from '@soundxyz/sound-protocol/typechain'
 import { SoundClientInstance } from '../instance'
 import { validateSoundEdition } from '../validation'
-import { SoundContractValidation } from '../../types'
+import type { SoundContractValidation } from '../../types'
 
 export async function isSoundV1_2_OrGreater(
   this: SoundClientInstance,

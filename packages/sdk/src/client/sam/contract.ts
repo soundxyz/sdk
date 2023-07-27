@@ -1,8 +1,8 @@
 import { BigNumber, isBigNumberish } from '@ethersproject/bignumber/lib/bignumber.js'
-import { PayableOverrides } from '@ethersproject/contracts'
+import type { PayableOverrides } from '@ethersproject/contracts'
 import { SAMV1_1__factory, SAM__factory, SoundEditionV1_2__factory } from '@soundxyz/sound-protocol/typechain'
-import { SAMInfoStructOutput } from '@soundxyz/sound-protocol/typechain/ISAM'
-import { SAMInfoStructOutput as V1_1SAMInfoStructOutput } from '@soundxyz/sound-protocol/typechain/ISAMV1_1'
+import type { SAMInfoStructOutput } from '@soundxyz/sound-protocol/typechain/ISAM'
+import type { SAMInfoStructOutput as V1_1SAMInfoStructOutput } from '@soundxyz/sound-protocol/typechain/ISAMV1_1'
 
 import {
   InvalidAttributonIdError,
@@ -11,13 +11,13 @@ import {
   InvalidTokenIdError,
   SamNotFoundError,
 } from '../../errors'
-import { ExpandTypeChainStructOutput, SAMInterfaceId, SoundContractValidation, TakeFirst } from '../../types'
+import type { ExpandTypeChainStructOutput, SAMInterfaceId, SoundContractValidation, TakeFirst } from '../../types'
 import { MINT_FALLBACK_GAS_LIMIT, MINT_GAS_LIMIT_MULTIPLIER, NULL_ADDRESS } from '../../utils/constants'
 import { exhaustiveGuard, scaleAmount, validateAddress } from '../../utils/helpers'
 import { isSoundV1_2_OrGreater } from '../edition/interface'
 import { SoundClientInstance } from '../instance'
 import { validateSoundEdition } from '../validation'
-import { SamBuyOptions, SamEditionAddress, SamSellOptions } from './types'
+import type { SamBuyOptions, SamEditionAddress, SamSellOptions } from './types'
 import { interfaceIds } from '@soundxyz/sound-protocol'
 
 export async function SamContractAddress(

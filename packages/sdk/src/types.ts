@@ -94,11 +94,6 @@ export type MerkleProvider = MerkleProofProvider
 
 export interface BaseSoundClientConfig {
   /**
-   * Creator Address to be used as contract creator reference
-   */
-  soundCreatorAddress?: string
-
-  /**
    * @default console.error
    */
   onError?: (err: unknown) => void

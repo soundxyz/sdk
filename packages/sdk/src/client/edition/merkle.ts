@@ -1,4 +1,4 @@
-import { MerkleProofParameters } from '../../types'
+import type { MerkleProofParameters } from '../../types'
 import { SoundClientInstance } from '../instance'
 
 export async function getMerkleProof(this: SoundClientInstance, { merkleRoot, userAddress }: MerkleProofParameters) {
