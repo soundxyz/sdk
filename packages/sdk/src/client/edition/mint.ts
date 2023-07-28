@@ -436,7 +436,8 @@ export async function eligibleQuantity(
     (typeof mintSchedule.maxMintable === 'function' ? mintSchedule.maxMintable(timestamp) : mintSchedule.maxMintable) -
     mintSchedule.totalMinted
 
-  const mintedByUserFromSchedule = await (mintSchedule.interfaceId === interfaceIds.IMerkleDropMinterV2
+  const mintedByUserFromSchedule = await (mintSchedule.interfaceId === interfaceIds.IMerkleDropMinterV2 ||
+  mintSchedule.interfaceId === interfaceIds.IMerkleDropMinterV2_1
     ? MerkleDropMinterV2__factory.connect(mintSchedule.minterAddress, providerOrSigner)
         .mintCount(mintSchedule.editionAddress, mintSchedule.mintId, userAddress)
         .then((v) => v.toNumber())
