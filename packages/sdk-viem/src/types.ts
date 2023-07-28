@@ -1,4 +1,4 @@
-import type { PublicClient, WalletClient } from 'viem'
+import type { Address, FeeValuesEIP1559, PublicClient, TransactionRequestBase, WalletClient } from 'viem'
 import type { MerkleProofProvider } from './merkle/types'
 import type { SoundAPI } from './api'
 import { interfaceIds } from '@soundxyz/sound-protocol/interfaceIds'
@@ -146,7 +146,7 @@ export type SAMInterfaceId = (typeof HANDLED_SAM_INTERFACE_IDS)[number]
 export interface MintScheduleBase {
   editionAddress: string
   minterAddress: string
-  mintId: number
+  mintId: bigint
   startTime: number
   endTime: number
   mintPaused: boolean
@@ -211,4 +211,64 @@ export function isRangeEditionSchedule(schedule: MintSchedule): schedule is Rang
 
 export function isMerkleDropSchedule(schedule: MintSchedule): schedule is MerkleDropSchedule {
   return schedule.mintType === 'MerkleDrop'
+}
+
+export interface TransactionGasOptions
+  extends Partial<Pick<FeeValuesEIP1559, 'maxFeePerGas' | 'maxPriorityFeePerGas'>>,
+    Pick<TransactionRequestBase, 'gas'> {}
+
+interface SharedMintOptions extends SoundContractValidation, TransactionGasOptions {
+  /**
+   * Amount of NFTs to be minted
+   */
+  quantity: number
+
+  /**
+   * Optional affiliate address
+   */
+  affiliate?: string
+
+  /**
+   * Skip quantity eligibility pre-mint checks
+   *
+   * @default false
+   */
+  skipQuantityChecks?: boolean
+
+  /**
+   * Pre-provide merkle proof to be used for merkle drops
+   *
+   * By default if it's not specified, it will use the pre-specified Merkle Provider on Sound Client instance
+   *
+   * If null or empty array is provided, not eligible safe-check will be thrown
+   */
+  merkleProof?: string[] | null | undefined
+}
+
+export interface MintOptions extends SharedMintOptions {
+  /**
+   * Mint Schedule to mint from
+   */
+  mintSchedule: MintSchedule
+}
+
+export interface MintToOptions extends SharedMintOptions {
+  /**
+   * Mint Schedule to mint from
+   */
+  mintSchedule: V2MintSchedule | V2_1MintSchedule
+
+  /**
+   * Recipient address that should receive the NFT(s)
+   */
+  mintToAddress?: string
+
+  attributonId?: bigint
+
+  affiliateProof?: string[]
+}
+
+export type EstimatableTransaction = {
+  gasEstimate: bigint
+  startTransaction: () => Promise<{ transactionHash: Address }>
 }

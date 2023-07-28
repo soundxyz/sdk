@@ -1,4 +1,4 @@
-import type { AddressInputType, GraphQLExecutionErrors } from './types'
+import type { AddressInputType, GraphQLExecutionErrors, MintSchedule } from './types'
 import type { ZodError } from 'zod'
 
 export class MissingSignerError extends Error {
@@ -186,7 +186,7 @@ export class InvalidQuantityError extends Error {
   constructor({ quantity }: { quantity: number }) {
     super('Must provide valid quantity')
 
-    this.quantity = quantity
+    this.quantity = Number(quantity)
   }
 }
 
@@ -230,13 +230,23 @@ export class NotEligibleMint extends Error {
   readonly name = 'NotEligibleMintError'
 
   readonly userAddress: string
-  readonly eligibleMintQuantity?: number
+  readonly eligibleMintQuantity?: bigint
+  readonly mintSchedule: MintSchedule
 
-  constructor({ userAddress, eligibleMintQuantity }: { userAddress: string; eligibleMintQuantity?: number }) {
+  constructor({
+    userAddress,
+    eligibleMintQuantity,
+    mintSchedule,
+  }: {
+    userAddress: string
+    eligibleMintQuantity?: bigint
+    mintSchedule: MintSchedule
+  }) {
     super('Not eligible to mint')
 
     this.userAddress = userAddress
     this.eligibleMintQuantity = eligibleMintQuantity
+    this.mintSchedule = mintSchedule
   }
 }
 
@@ -368,5 +378,17 @@ export class InvalidTxHashError extends Error {
     super('Must be a valid bytes32 transaction hash')
 
     this.txHash = txHash
+  }
+}
+
+export class InvalidMerkleProofError extends Error {
+  readonly name = 'InvalidMerkleProofError'
+
+  readonly proof: readonly string[]
+
+  constructor({ proof }: { proof: readonly string[] }) {
+    super('Must be a valid merkle proof')
+
+    this.proof = proof
   }
 }

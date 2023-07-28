@@ -107,3 +107,28 @@ export async function retry<T>(
 
   return fn()
 }
+
+export function isMerkleProof(proof: readonly string[]): proof is Address[] {
+  return proof.every((value) => isAddress(value))
+}
+type NonEmptyArray<T> = [T, ...T[]]
+
+export function BigIntMin(...[firstValue, ...values]: NonEmptyArray<bigint>): bigint {
+  let value: bigint = firstValue
+
+  for (const currentValue of values) {
+    if (currentValue < value) value = currentValue
+  }
+
+  return value
+}
+
+export function BigIntMax(...[firstValue, ...values]: NonEmptyArray<bigint>): bigint {
+  let value: bigint = firstValue
+
+  for (const currentValue of values) {
+    if (currentValue > value) value = currentValue
+  }
+
+  return value
+}

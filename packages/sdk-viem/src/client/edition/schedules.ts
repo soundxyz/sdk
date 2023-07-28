@@ -323,7 +323,7 @@ export async function mintInfosFromMinter(
             maxMintablePerAccount: scheduleInfo.maxMintablePerAccount,
             maxMintableUpper: scheduleInfo.maxMintableUpper,
             minterAddress,
-            mintId: Number(mintId),
+            mintId: BigInt(mintId),
             mintPaused: scheduleInfo.mintPaused,
             price: scheduleInfo.price,
             startTime: scheduleInfo.startTime,
@@ -380,7 +380,7 @@ export async function mintInfosFromMinter(
 
             maxMintablePerAccount: scheduleInfo.maxMintablePerAccount,
             minterAddress,
-            mintId: Number(mintId),
+            mintId: BigInt(mintId),
             mintPaused: scheduleInfo.mintPaused,
             price: scheduleInfo.price,
             startTime: scheduleInfo.startTime,
