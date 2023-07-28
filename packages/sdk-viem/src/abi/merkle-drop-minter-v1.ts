@@ -984,4 +984,4 @@ export const merkleDropMinterV1Abi = [
     stateMutability: 'nonpayable',
     type: 'function',
   },
-]
+] as const
