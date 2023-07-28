@@ -1,7 +1,7 @@
 import { isAddress, type Address } from 'viem'
-import { InvalidAddressError } from '../errors'
+import { InvalidAddressError, InvalidHexaError } from '../errors'
 import keccak256 from 'keccak256'
-import type { AddressInputType } from '../types'
+import type { AddressInputType, HexaValue } from '../types'
 import { NULL_ADDRESS } from './constants'
 
 const addressCheckSet = new Set()
@@ -22,6 +22,14 @@ export function assertAddress(
   }
 
   throw new InvalidAddressError({ address, type })
+}
+
+export function isHexa(value: string): value is HexaValue {
+  return value.startsWith('0x')
+}
+
+export function assertIsHexa(value: string): asserts value is HexaValue {
+  if (!isHexa(value)) throw new InvalidHexaError({ value })
 }
 
 export function validateAddress(
@@ -47,7 +55,7 @@ export function validateAddress(
 }
 
 export function getSaltAsBytes32(salt: string | number) {
-  return '0x' + keccak256(salt.toString()).toString('hex')
+  return `0x${keccak256(salt.toString()).toString('hex')}` as const
 }
 
 export function getLazyOption<T extends object>(option: T | (() => T | Promise<T>)) {
@@ -108,8 +116,8 @@ export async function retry<T>(
   return fn()
 }
 
-export function isMerkleProof(proof: readonly string[]): proof is Address[] {
-  return proof.every((value) => isAddress(value))
+export function isMerkleProof(proof: readonly string[]): proof is HexaValue[] {
+  return proof.every((value) => isHexa(value))
 }
 type NonEmptyArray<T> = [T, ...T[]]
 

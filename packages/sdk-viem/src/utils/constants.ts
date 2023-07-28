@@ -16,7 +16,7 @@ export const minterFactoryMap = {
 } as const
 
 // This is hardcoded on the contract so we always know its 2
-export const MINTER_ROLE = 2
+export const MINTER_ROLE = 2n
 
 export const editionInitFlags = {
   METADATA_IS_FROZEN: 1, // 1 << 0

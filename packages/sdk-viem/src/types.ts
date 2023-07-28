@@ -5,6 +5,8 @@ import { interfaceIds } from '@soundxyz/sound-protocol/interfaceIds'
 
 export type BlockOrBlockHash = string | number
 
+export type HexaValue = `0x${string}`
+
 export interface SoundContractValidation {
   /**
    * Assume valid Sound.xyz contract, skipping safety checks
@@ -111,6 +113,7 @@ export type AddressInputType =
   | 'WALLET'
   | 'CREATOR_ADDRESS'
   | 'GENERIC'
+  | 'MERKLE_ROOT'
 
 export type Bytes = ArrayLike<number>
 
@@ -272,3 +275,73 @@ export type EstimatableTransaction = {
   gasEstimate: bigint
   startTransaction: () => Promise<{ transactionHash: Address }>
 }
+
+export type ContractCall = {
+  contractAddress: Address
+  calldata: Address
+}
+
+export interface SamConfig {
+  contractAddress: string
+
+  basePrice: bigint
+  linearPriceSlope: bigint
+  inflectionPrice: bigint
+  inflectionPoint: number
+
+  artistFeeBPS: number
+  goldenEggFeeBPS: number
+  affiliateFeeBPS: number
+}
+
+/**
+ * The arguments required by SoundEdition.initialize
+ */
+export type EditionConfig = {
+  name: string
+  symbol: string
+  metadataModule: string
+  baseURI: string
+  contractURI: string
+  fundingRecipient: string
+  royaltyBPS: number
+  editionMaxMintableLower: number
+  editionMaxMintableUpper: number
+  editionCutoffTime: number
+  shouldFreezeMetadata: boolean
+  shouldEnableMintRandomness: boolean
+  enableOperatorFiltering: boolean
+
+  setSAM: SamConfig | null
+}
+
+/**
+ * The arguments required for all minter calls.
+ */
+export type MintConfigBase = {
+  minterAddress: string
+  price: bigint
+  startTime: number
+  endTime: number
+  affiliateFeeBPS: number
+}
+
+/**
+ * The custom arguments required by each minter
+ */
+export type MerkleDropConfig = MintConfigBase & {
+  mintType: 'MerkleDrop'
+  merkleRoot: string
+  maxMintable: number
+  maxMintablePerAccount: number
+}
+
+export type RangeEditionConfig = MintConfigBase & {
+  mintType: 'RangeEdition'
+  cutoffTime: number
+  maxMintableLower: number
+  maxMintableUpper: number
+  maxMintablePerAccount: number
+}
+
+export type MintConfig = MerkleDropConfig | RangeEditionConfig

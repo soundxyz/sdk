@@ -392,3 +392,15 @@ export class InvalidMerkleProofError extends Error {
     this.proof = proof
   }
 }
+
+export class InvalidHexaError extends Error {
+  readonly name = 'InvalidHexaError'
+
+  readonly value: string
+
+  constructor({ value }: { value: string }) {
+    super('Must be a valid hex value that starts with 0x')
+
+    this.value = value
+  }
+}
