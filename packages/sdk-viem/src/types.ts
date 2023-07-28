@@ -136,6 +136,10 @@ export const HANDLED_MINTER_INTERFACE_IDS = [
 ] as const
 export type MinterInterfaceId = (typeof HANDLED_MINTER_INTERFACE_IDS)[number]
 
+export function isHandledMinterInterfaceId(interfaceId: string): interfaceId is MinterInterfaceId {
+  return HANDLED_MINTER_INTERFACE_IDS.findIndex((value) => value === interfaceId) !== -1
+}
+
 export const HANDLED_SAM_INTERFACE_IDS = [interfaceIds.ISAM, interfaceIds.ISAMV1_1] as const
 export type SAMInterfaceId = (typeof HANDLED_SAM_INTERFACE_IDS)[number]
 
