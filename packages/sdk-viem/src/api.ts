@@ -1,6 +1,7 @@
 import { z } from 'zod'
 
 import { MissingApiKey, SoundAPIGraphQLError, UnexpectedApiResponse } from './errors'
+import { isMerkleProof } from './utils/helpers'
 import {
   EditionOwnedTokenIds,
   type EditionOwnedTokenIdsInput,
@@ -131,7 +132,7 @@ export function SoundAPI({ apiEndpoint = 'https://api.sound.xyz/graphql', apiKey
 
       if (errors) throw new SoundAPIGraphQLError({ graphqlErrors: errors })
 
-      if (!data?.merkleTreeProof) return null
+      if (!data?.merkleTreeProof || !isMerkleProof(data.merkleTreeProof.proof)) return null
 
       return data.merkleTreeProof.proof
     },
