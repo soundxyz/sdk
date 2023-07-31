@@ -19,7 +19,7 @@ import { validateSoundEdition } from '../validation'
 import { getMerkleProof } from './merkle'
 import { isSchedulePaused } from './schedules'
 import { interfaceIds } from '@soundxyz/sound-protocol/interfaceIds'
-import { soundEditionV2Abi } from '../../abi/sound-edition-v2'
+import { soundEditionV1_2Abi } from '../../abi/sound-edition-v1_2'
 
 export async function numberOfTokensOwned(
   this: SoundClientInstance,
@@ -42,7 +42,7 @@ export async function numberOfTokensOwned(
   })
 
   return readContract({
-    abi: soundEditionV2Abi,
+    abi: soundEditionV1_2Abi,
     address: editionAddress,
     functionName: 'balanceOf',
     args: [userAddress],
@@ -70,7 +70,7 @@ export async function numberMinted(
   })
 
   return readContract({
-    abi: soundEditionV2Abi,
+    abi: soundEditionV1_2Abi,
     address: editionAddress,
     functionName: 'numberMinted',
     args: [userAddress],
@@ -743,13 +743,13 @@ export async function eligibleQuantity(
 
   const [editionTotalMinted, editionMaxMintable] = await Promise.all([
     readContract({
-      abi: soundEditionV2Abi,
+      abi: soundEditionV1_2Abi,
       address: mintSchedule.editionAddress,
       functionName: 'totalMinted',
     }),
 
     readContract({
-      abi: soundEditionV2Abi,
+      abi: soundEditionV1_2Abi,
       address: mintSchedule.editionAddress,
       functionName: 'editionMaxMintable',
     }),

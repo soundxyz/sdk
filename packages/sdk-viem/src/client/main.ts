@@ -85,3 +85,5 @@ export function SoundClient(config: SoundClientConfig) {
     },
   }
 }
+
+export type SoundClient = ReturnType<typeof SoundClient>

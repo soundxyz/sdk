@@ -13,7 +13,7 @@ import { SoundClientInstance } from '../instance'
 import { validateSoundEdition } from '../validation'
 import type { SamBuyOptions, SamEditionAddress, SamSellOptions } from './types'
 import { interfaceIds } from '@soundxyz/sound-protocol/interfaceIds'
-import { soundEditionV2Abi } from '../../abi/sound-edition-v2'
+import { soundEditionV1_2Abi } from '../../abi/sound-edition-v1_2'
 import { samv1Abi } from '../../abi/sam-v1'
 import { samV1_1Abi } from '../../abi/sam-v1_1'
 
@@ -36,7 +36,7 @@ export async function SamContractAddress(
     })
 
     return readContract({
-      abi: soundEditionV2Abi,
+      abi: soundEditionV1_2Abi,
       address: editionAddress,
       functionName: 'sam',
     }).then((value) => (value === NULL_ADDRESS ? null : value))

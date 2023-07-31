@@ -1,7 +1,7 @@
-import { isAddress, type Address } from 'viem'
+import { isAddress, type Address, isHex, type Hex } from 'viem'
 import { InvalidAddressError, InvalidHexaError } from '../errors'
 import keccak256 from 'keccak256'
-import type { AddressInputType, HexaValue } from '../types'
+import type { AddressInputType } from '../types'
 import { NULL_ADDRESS } from './constants'
 
 const addressCheckSet = new Set()
@@ -24,12 +24,8 @@ export function assertAddress(
   throw new InvalidAddressError({ address, type })
 }
 
-export function isHexa(value: string): value is HexaValue {
-  return value.startsWith('0x')
-}
-
-export function assertIsHexa(value: string): asserts value is HexaValue {
-  if (!isHexa(value)) throw new InvalidHexaError({ value })
+export function assertIsHex(value: string): asserts value is Hex {
+  if (!isHex(value, { strict: false })) throw new InvalidHexaError({ value })
 }
 
 export function validateAddress(
@@ -116,8 +112,8 @@ export async function retry<T>(
   return fn()
 }
 
-export function isMerkleProof(proof: readonly string[]): proof is HexaValue[] {
-  return proof.every((value) => isHexa(value))
+export function isMerkleProof(proof: readonly string[]): proof is Hex[] {
+  return proof.every((value) => isHex(value, { strict: false }))
 }
 type NonEmptyArray<T> = [T, ...T[]]
 

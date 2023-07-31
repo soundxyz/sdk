@@ -3,7 +3,7 @@ import { type Address, parseAbiItem } from 'viem'
 import { interfaceIds } from '@soundxyz/sound-protocol/interfaceIds'
 
 import { minterModuleV2_1Abi } from '../../abi/minter-module-v2_1'
-import { soundEditionV2Abi } from '../../abi/sound-edition-v2'
+import { soundEditionV1_2Abi } from '../../abi/sound-edition-v1_2'
 import { UnsupportedMinterError } from '../../errors'
 import { type BlockOrBlockHash, isHandledMinterInterfaceId, type MintSchedule } from '../../types'
 import { minterFactoryMap } from '../../utils/constants'
@@ -22,7 +22,7 @@ export async function mintSchedules(
     scheduleIds?:
       | {
           minterAddress: string
-          mintIds: number[]
+          mintIds: (number | bigint)[]
         }[]
       | null
     timestamp?: number
@@ -121,7 +121,7 @@ export async function editionRegisteredMinters(
 
   // Get the addresses with MINTER_ROLE
   const minterRole = await client.readContract({
-    abi: soundEditionV2Abi,
+    abi: soundEditionV1_2Abi,
     address: editionAddress,
     functionName: 'MINTER_ROLE',
   })

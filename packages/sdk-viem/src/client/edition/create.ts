@@ -11,7 +11,7 @@ import type { ContractCall, EditionConfig, MintConfig, TransactionGasOptions } f
 import { editionInitFlags, MINTER_ROLE, NULL_ADDRESS, NULL_BYTES32, UINT32_MAX } from '../../utils/constants'
 import { getSaltAsBytes32, retry, validateAddress } from '../../utils/helpers'
 import { SoundClientInstance } from '../instance'
-import { soundEditionV2Abi } from '../../abi/sound-edition-v2'
+import { soundEditionV1_2Abi } from '../../abi/sound-edition-v1_2'
 import { rangeEditionMinterV2_1Abi } from '../../abi/range-edition-minter-v2_1'
 import { merkleDropMinterV2_1Abi } from '../../abi/merkle-drop-minter-v2_1'
 import { samV1_1Abi } from '../../abi/sam-v1_1'
@@ -86,7 +86,7 @@ async function createEditionHelper(
     contractCalls.push({
       contractAddress: editionAddress,
       calldata: encodeFunctionData({
-        abi: soundEditionV2Abi,
+        abi: soundEditionV1_2Abi,
         functionName: 'grantRoles',
         args: [minterAddress, MINTER_ROLE],
       }),
@@ -159,7 +159,7 @@ async function createEditionHelper(
     contractCalls.push({
       contractAddress: editionAddress,
       calldata: encodeFunctionData({
-        abi: soundEditionV2Abi,
+        abi: soundEditionV1_2Abi,
         functionName: 'setSAM',
         args: [editionConfig.setSAM.contractAddress],
       }),
@@ -205,7 +205,7 @@ async function createEditionHelper(
    * Encode the SoundEdition.initialize call.
    */
   const editionInitData = encodeFunctionData({
-    abi: soundEditionV2Abi,
+    abi: soundEditionV1_2Abi,
     functionName: 'initialize',
     args: [
       editionConfig.name,

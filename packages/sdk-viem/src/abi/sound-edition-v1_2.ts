@@ -1,4 +1,4 @@
-export const soundEditionV2Abi = [
+export const soundEditionV1_2Abi = [
   { inputs: [], name: 'ApprovalCallerNotOwnerNorApproved', type: 'error' },
   { inputs: [], name: 'ApprovalQueryForNonexistentToken', type: 'error' },
   { inputs: [], name: 'BalanceQueryForZeroAddress', type: 'error' },
