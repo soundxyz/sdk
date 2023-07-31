@@ -66,7 +66,7 @@ export async function SamSell(
 
   const { wallet, userAddress } = await this.expectWallet()
 
-  const tokenIdsContract = tokenIds.sort((a, b) => (a > b ? 1 : -1))
+  const tokenIdsContract = tokenIds.map((v) => BigInt(v)).sort((a, b) => (a > b ? 1 : -1))
 
   const txnOverrides = {
     gas,

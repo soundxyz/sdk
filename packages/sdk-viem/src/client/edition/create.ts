@@ -173,8 +173,8 @@ async function createEditionHelper(
         args: [
           editionAddress,
           editionConfig.setSAM.basePrice,
-          editionConfig.setSAM.linearPriceSlope,
-          editionConfig.setSAM.inflectionPrice,
+          BigInt(editionConfig.setSAM.linearPriceSlope),
+          BigInt(editionConfig.setSAM.inflectionPrice),
           editionConfig.setSAM.inflectionPoint,
           UINT32_MAX,
           UINT32_MAX,
