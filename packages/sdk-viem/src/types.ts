@@ -154,7 +154,7 @@ export const HANDLED_SAM_INTERFACE_IDS = [interfaceIds.ISAM, interfaceIds.ISAMV1
 export type SAMInterfaceId = (typeof HANDLED_SAM_INTERFACE_IDS)[number]
 
 export interface MintScheduleBase {
-  editionAddress: string
+  editionAddress: Address
   minterAddress: Address
   mintId: bigint
   startTime: number
