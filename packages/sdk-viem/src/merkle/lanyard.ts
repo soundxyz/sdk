@@ -1,11 +1,12 @@
 import type { MerkleProofProvider } from './types'
 import { z } from 'zod'
+import { isHex } from 'viem'
 
 import { UnexpectedLanyardResponse } from '../errors'
 
 const lanyardProofResponseSchema = z.union([
   z.object({
-    proof: z.array(z.string()),
+    proof: z.array(z.string().refine(isHex)),
     unhashedLeaf: z.string().nullable().optional(),
   }),
   z
