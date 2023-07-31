@@ -5,7 +5,7 @@ import {
   SamNotFoundError,
   UnsupportedMinterError,
 } from '../../errors'
-import type { SoundContractValidation, TransactionGasOptions } from '../../types'
+import type { SAM, SoundContractValidation, TransactionGasOptions } from '../../types'
 import { MINT_FALLBACK_GAS_LIMIT, MINT_GAS_LIMIT_MULTIPLIER, NULL_ADDRESS } from '../../utils/constants'
 import { isMerkleProof, scaleAmount, validateAddress } from '../../utils/helpers'
 import { isSoundV1_2_OrGreater } from '../edition/interface'
@@ -268,7 +268,7 @@ export async function SamTotalBuyPrice(
 export async function SamEditionInfo(
   this: SoundClientInstance,
   { editionAddress, assumeValidSoundContract = false }: SamEditionAddress,
-) {
+): Promise<SAM | null> {
   const samAddress = await SamContractAddress.call(this, { editionAddress, assumeValidSoundContract })
   if (!samAddress) return null
 
