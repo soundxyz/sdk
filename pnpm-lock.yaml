@@ -275,6 +275,12 @@ importers:
         specifier: ^3.21.4
         version: 3.21.4
     devDependencies:
+      '@ethersproject/solidity':
+        specifier: ^5.7.0
+        version: 5.7.0
+      '@ethersproject/wallet':
+        specifier: ^5.7.0
+        version: 5.7.0
       '@graphql-codegen/cli':
         specifier: ^5.0.0
         version: 5.0.0(@types/node@20.4.5)(graphql@16.7.1)
@@ -299,9 +305,21 @@ importers:
       '@graphql-tools/utils':
         specifier: ^10.0.4
         version: 10.0.4(graphql@16.7.1)
+      '@nomicfoundation/hardhat-network-helpers':
+        specifier: ^1.0.8
+        version: 1.0.8(hardhat@2.17.0)
+      '@nomiclabs/hardhat-ethers':
+        specifier: ^2.2.3
+        version: 2.2.3(ethers@5.7.2)(hardhat@2.17.0)
       '@soundxyz/sound-protocol':
         specifier: ^1.7.0
         version: 1.7.0
+      '@soundxyz/sound-protocol-v1-0':
+        specifier: npm:@soundxyz/sound-protocol@1.1.0
+        version: /@soundxyz/sound-protocol@1.1.0
+      '@soundxyz/sound-protocol-v1-1':
+        specifier: npm:@soundxyz/sound-protocol@1.3.0
+        version: /@soundxyz/sound-protocol@1.3.0
       '@types/node':
         specifier: 20.4.5
         version: 20.4.5
@@ -311,9 +329,21 @@ importers:
       bob-tsm:
         specifier: ^1.1.2
         version: 1.1.2(esbuild@0.18.17)(typescript@5.1.6)
+      cross-undici-fetch:
+        specifier: ^0.4.14
+        version: 0.4.14
       esbuild:
         specifier: ^0.18.17
         version: 0.18.17
+      hardhat:
+        specifier: ^2.17.0
+        version: 2.17.0(ts-node@10.9.1)(typescript@5.1.6)
+      merkletreejs:
+        specifier: ^0.3.10
+        version: 0.3.10
+      require-env-variable:
+        specifier: ^4.0.1
+        version: 4.0.1
       typescript:
         specifier: 5.1.6
         version: 5.1.6
@@ -5835,6 +5865,20 @@ packages:
       shebang-command: 2.0.0
       which: 2.0.2
 
+  /cross-undici-fetch@0.4.14:
+    resolution: {integrity: sha512-CCep44A/baoO8kYJBIR1cRO/tRAk29xzb/tH3O85OtgwZGkL5I0tJZ47ccZdrnAJxrl5tlaYhAOx09fJXMcUqQ==}
+    dependencies:
+      abort-controller: 3.0.0
+      busboy: 1.6.0
+      form-data-encoder: 1.9.0
+      formdata-node: 4.4.1
+      node-fetch: 2.6.12
+      undici: 5.5.1
+      web-streams-polyfill: 3.2.1
+    transitivePeerDependencies:
+      - encoding
+    dev: true
+
   /crypto-js@3.3.0:
     resolution: {integrity: sha512-DIT51nX0dCfKltpRiXV+/TVZq+Qq2NgF4644+K7Ttnla7zEzqc+kjJyiB96BHNyUTBxyjzRcZYpUdZa+QAqi6Q==}
     dev: true
@@ -6996,6 +7040,10 @@ packages:
   /forever-agent@0.6.1:
     resolution: {integrity: sha512-j0KLYPhm6zeac4lz3oJ3o65qvgQCcPubiyotZrXqEaG4hNagNYO8qdlUrX5vwqv9ohqeT/Z3j6+yW067yWWdUw==}
 
+  /form-data-encoder@1.9.0:
+    resolution: {integrity: sha512-rahaRMkN8P8d/tgK/BLPX+WBVM27NbvdXBxqQujBtkDAIFspaRqN7Od7lfdGQA6KAD+f82fYCLBq1ipvcu8qLw==}
+    dev: true
+
   /form-data@2.3.3:
     resolution: {integrity: sha512-1lLKB2Mu3aGP1Q/2eCOx0fNbRMe7XdwktwOruhfqqd0rIJWwN4Dh+E3hrPSlDCXnSR7UtZ1N38rVXm+6+MEhJQ==}
     engines: {node: '>= 0.12'}
@@ -7029,6 +7077,14 @@ packages:
       asynckit: 0.4.0
       combined-stream: 1.0.8
       mime-types: 2.1.35
+    dev: true
+
+  /formdata-node@4.4.1:
+    resolution: {integrity: sha512-0iirZp3uVDjVGt9p49aTaqjk84TrglENEDuqfdlZQ1roC9CWlPk6Avf8EEnZNcAqPonwkG35x4n3ww/1THYAeQ==}
+    engines: {node: '>= 12.20'}
+    dependencies:
+      node-domexception: 1.0.0
+      web-streams-polyfill: 4.0.0-beta.3
     dev: true
 
   /formdata-polyfill@4.0.10:
@@ -9365,7 +9421,6 @@ packages:
   /node-domexception@1.0.0:
     resolution: {integrity: sha512-/jKZoMpw0F8GRwl4/eLROPA3cfcXtLApP0QzLmUT/HuPCZWyB7IY9ZrMeKw2O/nFIqPQB3PVM9aYm0F312AXDQ==}
     engines: {node: '>=10.5.0'}
-    dev: false
 
   /node-fetch@2.6.12:
     resolution: {integrity: sha512-C/fGU2E8ToujUivIO0H+tpQ6HWo4eEmchoPIoXtxCrVghxdKq+QOHqEZW7tuP3KlV3bC8FRMO5nMCC7Zm1VP6g==}
@@ -11409,6 +11464,11 @@ packages:
       busboy: 1.6.0
     dev: true
 
+  /undici@5.5.1:
+    resolution: {integrity: sha512-MEvryPLf18HvlCbLSzCW0U00IMftKGI5udnjrQbC5D4P0Hodwffhv+iGfWuJwg16Y/TK11ZFK8i+BPVW2z/eAw==}
+    engines: {node: '>=12.18'}
+    dev: true
+
   /universalify@0.1.2:
     resolution: {integrity: sha512-rBJeI5CXAlmy1pV+617WB9J63U6XcazHHF2f2dbJix4XzpUF0RS3Zbj0FGIOCAva5P/d/GBOYaACQ1w+0azUkg==}
     engines: {node: '>= 4.0.0'}
@@ -11578,6 +11638,11 @@ packages:
   /web-streams-polyfill@3.2.1:
     resolution: {integrity: sha512-e0MO3wdXWKrLbL0DgGnUV7WHVuw9OUvL4hjgnPkIeEvESk74gAITi5G606JtZPp39cd8HA9VQzCIvA49LpPN5Q==}
     engines: {node: '>= 8'}
+
+  /web-streams-polyfill@4.0.0-beta.3:
+    resolution: {integrity: sha512-QW95TCTaHmsYfHDybGMwO5IJIM93I/6vTRk+daHTWFPhwh+C8Cg7j7XyKrwrj8Ib6vYXe0ocYNrmzY4xAAN6ug==}
+    engines: {node: '>= 14'}
+    dev: true
 
   /web3-eth-abi@1.7.0:
     resolution: {integrity: sha512-heqR0bWxgCJwjWIhq2sGyNj9bwun5+Xox/LdZKe+WMyTSy0cXDXEAgv3XKNkXC4JqdDt/ZlbTEx4TWak4TRMSg==}

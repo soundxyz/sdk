@@ -1,11 +1,17 @@
-import type { Address, FeeValuesEIP1559, PublicClient, TransactionRequestBase, WalletClient } from 'viem'
+import type {
+  Address,
+  FeeValuesEIP1559,
+  PublicActions,
+  PublicClient,
+  TransactionRequestBase,
+  WalletActions,
+  WalletClient,
+} from 'viem'
 import type { MerkleProofProvider } from './merkle/types'
 import type { SoundAPI } from './api'
 import { interfaceIds } from '@soundxyz/sound-protocol/interfaceIds'
 
 export type BlockOrBlockHash = string | number
-
-export type HexaValue = `0x${string}`
 
 export interface SoundContractValidation {
   /**
@@ -18,15 +24,16 @@ export interface SoundContractValidation {
 
 type LazyOption<T extends object> = T | (() => T | Promise<T>)
 
-export type { PublicClient, WalletClient }
+export type ClientProvider = Pick<PublicClient, 'chain'> & PublicActions
+export type Wallet = Pick<WalletClient, 'account' | 'chain'> & WalletActions
 
 export type SoundClientContractProvider =
   | {
-      client: LazyOption<PublicClient>
+      client: LazyOption<ClientProvider>
       account?: LazyOption<WalletClient>
     }
   | {
-      client?: LazyOption<PublicClient>
+      client?: LazyOption<ClientProvider>
       account: LazyOption<WalletClient>
     }
 
@@ -285,8 +292,8 @@ export interface SamConfig {
   contractAddress: string
 
   basePrice: bigint
-  linearPriceSlope: bigint
-  inflectionPrice: bigint
+  linearPriceSlope: bigint | string | number
+  inflectionPrice: bigint | number | string
   inflectionPoint: number
 
   artistFeeBPS: number

@@ -5,7 +5,7 @@ import { LazyPromise } from '../../utils/promise'
 import { SoundClientInstance } from '../instance'
 import { validateSoundEdition } from '../validation'
 import { isSoundV1_2_OrGreater } from './interface'
-import { soundEditionV2Abi } from '../../abi/sound-edition-v2'
+import { soundEditionV1_2Abi } from '../../abi/sound-edition-v1_2'
 import { validateAddress } from '../../utils/helpers'
 
 export function editionInfo(
@@ -34,7 +34,7 @@ export function editionInfo(
     const { readContract } = await expectClient()
 
     return readContract({
-      abi: soundEditionV2Abi,
+      abi: soundEditionV1_2Abi,
       address: contractAddress,
       functionName: 'editionInfo',
     })

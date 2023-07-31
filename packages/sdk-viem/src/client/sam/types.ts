@@ -16,7 +16,7 @@ export interface SamBuyOptions extends SoundContractValidation, TransactionGasOp
 }
 
 export interface SamSellOptions extends SoundContractValidation, TransactionGasOptions {
-  tokenIds: bigint[]
+  tokenIds: (bigint | number | string)[]
 
   minimumPayout: bigint
 

@@ -1,7 +1,7 @@
 import type { Address } from 'viem'
 import { SoundAPI } from '../api'
 import { MissingMerkleProvider, MissingProviderError, MissingSignerError, MissingSoundAPI } from '../errors'
-import type { MerkleProvider, PublicClient, WalletClient, SoundClientContractProvider } from '../types'
+import type { MerkleProvider, SoundClientContractProvider, ClientProvider, Wallet } from '../types'
 import { getLazyOption } from '../utils/helpers'
 
 export type SoundClientInstanceConfig = SoundClientContractProvider & {
@@ -65,7 +65,7 @@ export function SoundClientInstance({
     return client.chain
   }
 
-  async function expectWallet(): Promise<{ wallet: WalletClient; userAddress: Address }> {
+  async function expectWallet(): Promise<{ wallet: Wallet; userAddress: Address }> {
     if (instance.wallet) {
       const wallet = await getLazyOption(instance.wallet)
 
@@ -80,7 +80,7 @@ export function SoundClientInstance({
     throw new MissingSignerError()
   }
 
-  async function expectClient(): Promise<PublicClient> {
+  async function expectClient(): Promise<ClientProvider> {
     if (instance.client) {
       return getLazyOption(instance.client)
     }

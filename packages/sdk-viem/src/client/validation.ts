@@ -1,6 +1,6 @@
 import type { SoundClientInstance } from './instance'
 import { validateAddress } from '../utils/helpers'
-import { soundEditionV2Abi } from '../abi/sound-edition-v2'
+import { soundEditionV1_2Abi } from '../abi/sound-edition-v1_2'
 import { interfaceIds } from '@soundxyz/sound-protocol'
 import type { SoundContractValidation } from '../types'
 import { NotSoundEditionError } from '../errors'
@@ -21,7 +21,7 @@ export async function isSoundEdition(
 
     try {
       return await client.readContract({
-        abi: soundEditionV2Abi,
+        abi: soundEditionV1_2Abi,
         address: editionAddress,
         functionName: 'supportsInterface',
         args: [interfaceIds.ISoundEditionV1],

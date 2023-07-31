@@ -2,7 +2,7 @@ import { interfaceIds } from '@soundxyz/sound-protocol/interfaceIds'
 import { SoundClientInstance } from '../instance'
 import { validateSoundEdition } from '../validation'
 import type { SoundContractValidation } from '../../types'
-import { soundEditionV2Abi } from '../../abi/sound-edition-v2'
+import { soundEditionV1_2Abi } from '../../abi/sound-edition-v1_2'
 import { validateAddress } from '../../utils/helpers'
 
 export async function isSoundV1_2_OrGreater(
@@ -20,7 +20,7 @@ export async function isSoundV1_2_OrGreater(
     const { readContract } = await this.expectClient()
 
     return readContract({
-      abi: soundEditionV2Abi,
+      abi: soundEditionV1_2Abi,
       address: editionAddress,
       functionName: 'supportsInterface',
       args: [interfaceIds.ISoundEditionV1_2],
