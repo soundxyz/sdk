@@ -155,7 +155,7 @@ export type SAMInterfaceId = (typeof HANDLED_SAM_INTERFACE_IDS)[number]
 
 export interface MintScheduleBase {
   editionAddress: string
-  minterAddress: string
+  minterAddress: Address
   mintId: bigint
   startTime: number
   endTime: number
@@ -221,6 +221,24 @@ export function isRangeEditionSchedule(schedule: MintSchedule): schedule is Rang
 
 export function isMerkleDropSchedule(schedule: MintSchedule): schedule is MerkleDropSchedule {
   return schedule.mintType === 'MerkleDrop'
+}
+
+export interface SAM {
+  platformFeeBPS: number
+  platformPerTxFlatFee: bigint
+  basePrice: bigint
+  linearPriceSlope: bigint
+  inflectionPrice: bigint
+  inflectionPoint: number
+  goldenEggFeesAccrued: bigint
+  balance: bigint
+  supply: number
+  maxSupply: number
+  buyFreezeTime: number
+  artistFeeBPS: number
+  affiliateFeeBPS: number
+  goldenEggFeeBPS: number
+  affiliateMerkleRoot: `0x${string}`
 }
 
 export interface TransactionGasOptions
