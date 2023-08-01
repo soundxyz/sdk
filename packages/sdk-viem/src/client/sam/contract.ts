@@ -158,8 +158,6 @@ export async function SamBuy(
     maxPriorityFeePerGas,
   } satisfies TransactionGasOptions
 
-  // const samContract = SAM__factory.connect(samAddress, signer)
-
   if (!isMerkleProof(affiliateProof)) {
     throw new InvalidMerkleProofError({
       proof: affiliateProof,
