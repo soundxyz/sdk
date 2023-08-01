@@ -195,10 +195,12 @@ export async function SamBuy(
     txnOverrides.gas = MINT_FALLBACK_GAS_LIMIT
   }
 
-  return wallet.writeContract({
-    ...contractParameters,
-    ...txnOverrides,
-  })
+  return wallet
+    .writeContract({
+      ...contractParameters,
+      ...txnOverrides,
+    })
+    .then((transactionHash) => ({ transactionHash }))
 }
 
 export async function SamTotalSellPrice(
