@@ -200,12 +200,25 @@ async function mintHelper(
       let proof: string[] | null
 
       if (merkleProof === undefined) {
-        const { merkleRootHash: merkleRoot } = await client.readContract({
-          abi: minterAbiMap[interfaceIds.IMerkleDropMinterV2_1],
+        const params = {
           address: mintSchedule.minterAddress,
           functionName: 'mintInfo',
           args: [mintSchedule.editionAddress, mintSchedule.mintId],
-        })
+        } as const
+        const { merkleRootHash: merkleRoot } = await (interfaceId === interfaceIds.IMerkleDropMinter
+          ? client.readContract({
+              ...params,
+              abi: minterAbiMap[interfaceId],
+            })
+          : interfaceId === interfaceIds.IMerkleDropMinterV2
+          ? client.readContract({
+              ...params,
+              abi: minterAbiMap[interfaceId],
+            })
+          : client.readContract({
+              ...params,
+              abi: minterAbiMap[interfaceId],
+            }))
 
         proof = await getMerkleProof.call(this, {
           merkleRoot,
@@ -431,12 +444,21 @@ async function mintToHelper(
       if (merkleProof === undefined) {
         const client = await this.expectClient()
 
-        const { merkleRootHash: merkleRoot } = await client.readContract({
-          abi: minterAbiMap[interfaceIds.IMerkleDropMinterV2_1],
+        const params = {
           address: mintSchedule.minterAddress,
           functionName: 'mintInfo',
-          args: [mintSchedule.editionAddress, BigInt(mintSchedule.mintId)],
-        })
+          args: [mintSchedule.editionAddress, mintSchedule.mintId],
+        } as const
+
+        const { merkleRootHash: merkleRoot } = await (interfaceId === interfaceIds.IMerkleDropMinterV2
+          ? client.readContract({
+              ...params,
+              abi: minterAbiMap[interfaceId],
+            })
+          : client.readContract({
+              ...params,
+              abi: minterAbiMap[interfaceId],
+            }))
 
         proof = await getMerkleProof.call(this, {
           merkleRoot,
