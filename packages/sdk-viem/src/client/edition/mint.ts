@@ -1,4 +1,4 @@
-import { InvalidMerkleProofError, InvalidQuantityError, NotEligibleMint, UnsupportedMinterError } from '../../errors'
+import { InvalidQuantityError, NotEligibleMint } from '../../errors'
 import type {
   EstimatableTransaction,
   MintOptions,
@@ -7,13 +7,15 @@ import type {
   SoundContractValidation,
   TransactionGasOptions,
 } from '../../types'
+import { MINT_FALLBACK_GAS_LIMIT, MINT_GAS_LIMIT_MULTIPLIER, minterAbiMap, NULL_ADDRESS } from '../../utils/constants'
 import {
-  MINT_FALLBACK_GAS_LIMIT,
-  MINT_GAS_LIMIT_MULTIPLIER,
-  minterFactoryMap,
-  NULL_ADDRESS,
-} from '../../utils/constants'
-import { BigIntMax, BigIntMin, exhaustiveGuard, isMerkleProof, scaleAmount, validateAddress } from '../../utils/helpers'
+  BigIntMax,
+  BigIntMin,
+  assertIsHexList,
+  exhaustiveGuard,
+  scaleAmount,
+  validateAddress,
+} from '../../utils/helpers'
 import { SoundClientInstance } from '../instance'
 import { validateSoundEdition } from '../validation'
 import { getMerkleProof } from './merkle'
@@ -152,37 +154,15 @@ async function mintHelper(
       const args = [mintSchedule.editionAddress, BigInt(mintSchedule.mintId), quantity, affiliate] as const
 
       async function startTransaction() {
-        const transactionHashPromise =
-          interfaceId === interfaceIds.IRangeEditionMinter
-            ? wallet.writeContract({
-                abi: minterFactoryMap[interfaceId],
-                ...sharedWriteContractParameters,
-                ...txnOverrides,
-                args,
-              })
-            : interfaceId === interfaceIds.IRangeEditionMinterV2
-            ? wallet.writeContract({
-                abi: minterFactoryMap[interfaceId],
-                ...sharedWriteContractParameters,
-                ...txnOverrides,
-                args,
-              })
-            : interfaceId === interfaceIds.IRangeEditionMinterV2_1
-            ? wallet.writeContract({
-                abi: minterFactoryMap[interfaceId],
-                ...sharedWriteContractParameters,
-                ...txnOverrides,
-                args,
-              })
-            : null
-
-        if (!transactionHashPromise)
-          throw new UnsupportedMinterError({
-            interfaceId,
-          })
+        const transactionHash = await wallet.writeContract({
+          abi: minterAbiMap[interfaceIds.IRangeEditionMinterV2_1],
+          ...sharedWriteContractParameters,
+          ...txnOverrides,
+          args,
+        })
 
         return {
-          transactionHash: await transactionHashPromise,
+          transactionHash,
         }
       }
 
@@ -194,26 +174,12 @@ async function mintHelper(
       }
 
       try {
-        const gasEstimate = await (interfaceId === interfaceIds.IRangeEditionMinter
-          ? client.estimateContractGas({
-              abi: minterFactoryMap[interfaceId],
-              ...sharedWriteContractParameters,
-              ...txnOverrides,
-              args,
-            })
-          : interfaceId === interfaceIds.IRangeEditionMinterV2
-          ? client.estimateContractGas({
-              abi: minterFactoryMap[interfaceId],
-              ...sharedWriteContractParameters,
-              ...txnOverrides,
-              args,
-            })
-          : client.estimateContractGas({
-              abi: minterFactoryMap[interfaceId],
-              ...sharedWriteContractParameters,
-              ...txnOverrides,
-              args,
-            }))
+        const gasEstimate = await client.estimateContractGas({
+          abi: minterAbiMap[interfaceIds.IRangeEditionMinterV2_1],
+          ...sharedWriteContractParameters,
+          ...txnOverrides,
+          args,
+        })
 
         // Add a buffer to the gas estimate to account for node provider estimate variance.
         txnOverrides.gas = scaleAmount({ amount: gasEstimate, multiplier: MINT_GAS_LIMIT_MULTIPLIER })
@@ -234,26 +200,12 @@ async function mintHelper(
       let proof: string[] | null
 
       if (merkleProof === undefined) {
-        const { merkleRootHash: merkleRoot } = await (interfaceId === interfaceIds.IMerkleDropMinter
-          ? client.readContract({
-              abi: minterFactoryMap[interfaceId],
-              address: mintSchedule.minterAddress,
-              functionName: 'mintInfo',
-              args: [mintSchedule.editionAddress, BigInt(mintSchedule.mintId)],
-            })
-          : interfaceId === interfaceIds.IMerkleDropMinterV2
-          ? client.readContract({
-              abi: minterFactoryMap[interfaceId],
-              address: mintSchedule.minterAddress,
-              functionName: 'mintInfo',
-              args: [mintSchedule.editionAddress, BigInt(mintSchedule.mintId)],
-            })
-          : client.readContract({
-              abi: minterFactoryMap[interfaceId],
-              address: mintSchedule.minterAddress,
-              functionName: 'mintInfo',
-              args: [mintSchedule.editionAddress, BigInt(mintSchedule.mintId)],
-            }))
+        const { merkleRootHash: merkleRoot } = await client.readContract({
+          abi: minterAbiMap[interfaceIds.IMerkleDropMinterV2_1],
+          address: mintSchedule.minterAddress,
+          functionName: 'mintInfo',
+          args: [mintSchedule.editionAddress, mintSchedule.mintId],
+        })
 
         proof = await getMerkleProof.call(this, {
           merkleRoot,
@@ -271,46 +223,20 @@ async function mintHelper(
         })
       }
 
-      if (!isMerkleProof(proof)) {
-        throw new InvalidMerkleProofError({
-          proof,
-        })
-      }
+      assertIsHexList(proof)
 
-      const args = [mintSchedule.editionAddress, BigInt(mintSchedule.mintId), quantity, proof, affiliate] as const
+      const args = [mintSchedule.editionAddress, mintSchedule.mintId, quantity, proof, affiliate] as const
 
       async function startTransaction() {
-        const transactionHashPromise =
-          interfaceId === interfaceIds.IMerkleDropMinter
-            ? wallet.writeContract({
-                abi: minterFactoryMap[interfaceId],
-                ...sharedWriteContractParameters,
-                ...txnOverrides,
-                args,
-              })
-            : interfaceId === interfaceIds.IMerkleDropMinterV2
-            ? wallet.writeContract({
-                abi: minterFactoryMap[interfaceId],
-                ...sharedWriteContractParameters,
-                ...txnOverrides,
-                args,
-              })
-            : interfaceId === interfaceIds.IMerkleDropMinterV2_1
-            ? wallet.writeContract({
-                abi: minterFactoryMap[interfaceId],
-                ...sharedWriteContractParameters,
-                ...txnOverrides,
-                args,
-              })
-            : null
-
-        if (!transactionHashPromise)
-          throw new UnsupportedMinterError({
-            interfaceId,
-          })
+        const transactionHash = await wallet.writeContract({
+          abi: minterAbiMap[interfaceIds.IMerkleDropMinterV2_1],
+          ...sharedWriteContractParameters,
+          ...txnOverrides,
+          args,
+        })
 
         return {
-          transactionHash: await transactionHashPromise,
+          transactionHash,
         }
       }
 
@@ -322,26 +248,12 @@ async function mintHelper(
       }
 
       try {
-        const gasEstimate = await (interfaceId === interfaceIds.IMerkleDropMinter
-          ? client.estimateContractGas({
-              abi: minterFactoryMap[interfaceId],
-              ...sharedWriteContractParameters,
-              ...txnOverrides,
-              args,
-            })
-          : interfaceId === interfaceIds.IMerkleDropMinterV2
-          ? client.estimateContractGas({
-              abi: minterFactoryMap[interfaceId],
-              ...sharedWriteContractParameters,
-              ...txnOverrides,
-              args,
-            })
-          : client.estimateContractGas({
-              abi: minterFactoryMap[interfaceId],
-              ...sharedWriteContractParameters,
-              ...txnOverrides,
-              args,
-            }))
+        const gasEstimate = await client.estimateContractGas({
+          abi: minterAbiMap[interfaceIds.IMerkleDropMinterV2_1],
+          ...sharedWriteContractParameters,
+          ...txnOverrides,
+          args,
+        })
 
         // Add a buffer to the gas estimate to account for node provider estimate variance.
 
@@ -456,12 +368,7 @@ async function mintToHelper(
   switch (interfaceId) {
     case interfaceIds.IRangeEditionMinterV2:
     case interfaceIds.IRangeEditionMinterV2_1: {
-      // const rangeMinter = minterFactoryMap[interfaceId].connect(mintSchedule.minterAddress, signer)
-
-      if (!isMerkleProof(affiliateProof))
-        throw new InvalidMerkleProofError({
-          proof: affiliateProof,
-        })
+      assertIsHexList(affiliateProof)
 
       const args = [
         mintSchedule.editionAddress,
@@ -474,30 +381,15 @@ async function mintToHelper(
       ] as const
 
       async function startTransaction() {
-        const transactionHashPromise =
-          interfaceId === interfaceIds.IRangeEditionMinterV2
-            ? wallet.writeContract({
-                abi: minterFactoryMap[interfaceId],
-                ...sharedWriteContractParameters,
-                ...txnOverrides,
-                args,
-              })
-            : interfaceId === interfaceIds.IRangeEditionMinterV2_1
-            ? wallet.writeContract({
-                abi: minterFactoryMap[interfaceId],
-                ...sharedWriteContractParameters,
-                ...txnOverrides,
-                args,
-              })
-            : null
-
-        if (!transactionHashPromise)
-          throw new UnsupportedMinterError({
-            interfaceId,
-          })
+        const transactionHash = await wallet.writeContract({
+          abi: minterAbiMap[interfaceIds.IRangeEditionMinterV2_1],
+          ...sharedWriteContractParameters,
+          ...txnOverrides,
+          args,
+        })
 
         return {
-          transactionHash: await transactionHashPromise,
+          transactionHash,
         }
       }
 
@@ -511,19 +403,12 @@ async function mintToHelper(
       try {
         const client = await this.expectClient()
 
-        const gasEstimate = await (interfaceId === interfaceIds.IRangeEditionMinterV2
-          ? client.estimateContractGas({
-              abi: minterFactoryMap[interfaceId],
-              ...sharedWriteContractParameters,
-              ...txnOverrides,
-              args,
-            })
-          : client.estimateContractGas({
-              abi: minterFactoryMap[interfaceId],
-              ...sharedWriteContractParameters,
-              ...txnOverrides,
-              args,
-            }))
+        const gasEstimate = await client.estimateContractGas({
+          abi: minterAbiMap[interfaceIds.IRangeEditionMinterV2_1],
+          ...sharedWriteContractParameters,
+          ...txnOverrides,
+          args,
+        })
 
         // Add a buffer to the gas estimate to account for node provider estimate variance.
 
@@ -546,19 +431,12 @@ async function mintToHelper(
       if (merkleProof === undefined) {
         const client = await this.expectClient()
 
-        const { merkleRootHash: merkleRoot } = await (interfaceId === interfaceIds.IMerkleDropMinterV2
-          ? client.readContract({
-              abi: minterFactoryMap[interfaceId],
-              address: mintSchedule.minterAddress,
-              functionName: 'mintInfo',
-              args: [mintSchedule.editionAddress, BigInt(mintSchedule.mintId)],
-            })
-          : client.readContract({
-              abi: minterFactoryMap[interfaceId],
-              address: mintSchedule.minterAddress,
-              functionName: 'mintInfo',
-              args: [mintSchedule.editionAddress, BigInt(mintSchedule.mintId)],
-            }))
+        const { merkleRootHash: merkleRoot } = await client.readContract({
+          abi: minterAbiMap[interfaceIds.IMerkleDropMinterV2_1],
+          address: mintSchedule.minterAddress,
+          functionName: 'mintInfo',
+          args: [mintSchedule.editionAddress, BigInt(mintSchedule.mintId)],
+        })
 
         proof = await getMerkleProof.call(this, {
           merkleRoot,
@@ -576,17 +454,9 @@ async function mintToHelper(
         })
       }
 
-      if (!isMerkleProof(proof)) {
-        throw new InvalidMerkleProofError({
-          proof,
-        })
-      }
+      assertIsHexList(proof)
 
-      if (!isMerkleProof(affiliateProof)) {
-        throw new InvalidMerkleProofError({
-          proof: affiliateProof,
-        })
-      }
+      assertIsHexList(affiliateProof)
 
       const args = [
         mintSchedule.editionAddress,
@@ -602,30 +472,15 @@ async function mintToHelper(
       ] as const
 
       async function startTransaction() {
-        const transactionHashPromise =
-          interfaceId === interfaceIds.IMerkleDropMinterV2
-            ? wallet.writeContract({
-                abi: minterFactoryMap[interfaceId],
-                ...sharedWriteContractParameters,
-                ...txnOverrides,
-                args,
-              })
-            : interfaceId === interfaceIds.IMerkleDropMinterV2_1
-            ? wallet.writeContract({
-                abi: minterFactoryMap[interfaceId],
-                ...sharedWriteContractParameters,
-                ...txnOverrides,
-                args,
-              })
-            : null
-
-        if (!transactionHashPromise)
-          throw new UnsupportedMinterError({
-            interfaceId,
-          })
+        const transactionHash = await wallet.writeContract({
+          abi: minterAbiMap[interfaceIds.IMerkleDropMinterV2_1],
+          ...sharedWriteContractParameters,
+          ...txnOverrides,
+          args,
+        })
 
         return {
-          transactionHash: await transactionHashPromise,
+          transactionHash,
         }
       }
 
@@ -639,19 +494,12 @@ async function mintToHelper(
       try {
         const client = await this.expectClient()
 
-        const gasEstimate = await (interfaceId === interfaceIds.IMerkleDropMinterV2
-          ? client.estimateContractGas({
-              abi: minterFactoryMap[interfaceId],
-              ...sharedWriteContractParameters,
-              ...txnOverrides,
-              args,
-            })
-          : client.estimateContractGas({
-              abi: minterFactoryMap[interfaceId],
-              ...sharedWriteContractParameters,
-              ...txnOverrides,
-              args,
-            }))
+        const gasEstimate = await client.estimateContractGas({
+          abi: minterAbiMap[interfaceIds.IMerkleDropMinterV2_1],
+          ...sharedWriteContractParameters,
+          ...txnOverrides,
+          args,
+        })
 
         // Add a buffer to the gas estimate to account for node provider estimate variance.
         txnOverrides.gas = scaleAmount({ amount: gasEstimate, multiplier: MINT_GAS_LIMIT_MULTIPLIER })
@@ -766,16 +614,10 @@ export async function eligibleQuantity(
     (typeof mintSchedule.maxMintable === 'function' ? mintSchedule.maxMintable(timestamp) : mintSchedule.maxMintable) -
     mintSchedule.totalMinted
 
-  const mintedByUserFromSchedule = await (mintSchedule.interfaceId === interfaceIds.IMerkleDropMinterV2
+  const mintedByUserFromSchedule = await (mintSchedule.interfaceId === interfaceIds.IMerkleDropMinterV2 ||
+  mintSchedule.interfaceId === interfaceIds.IMerkleDropMinterV2_1
     ? readContract({
-        abi: minterFactoryMap[mintSchedule.interfaceId],
-        address: mintSchedule.minterAddress,
-        functionName: 'mintCount',
-        args: [mintSchedule.editionAddress, mintSchedule.mintId, userAddress],
-      })
-    : mintSchedule.interfaceId === interfaceIds.IMerkleDropMinterV2_1
-    ? readContract({
-        abi: minterFactoryMap[mintSchedule.interfaceId],
+        abi: minterAbiMap[interfaceIds.IMerkleDropMinterV2_1],
         address: mintSchedule.minterAddress,
         functionName: 'mintCount',
         args: [mintSchedule.editionAddress, mintSchedule.mintId, userAddress],

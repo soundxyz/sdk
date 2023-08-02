@@ -1,5 +1,5 @@
 import { isAddress, type Address, isHex, type Hex } from 'viem'
-import { InvalidAddressError, InvalidHexaError } from '../errors'
+import { InvalidAddressError, InvalidHexError } from '../errors'
 import keccak256 from 'keccak256'
 import type { AddressInputType } from '../types'
 import { NULL_ADDRESS } from './constants'
@@ -25,7 +25,7 @@ export function assertAddress(
 }
 
 export function assertIsHex(value: string): asserts value is Hex {
-  if (!isHex(value, { strict: false })) throw new InvalidHexaError({ value })
+  if (!isHex(value, { strict: false })) throw new InvalidHexError({ value })
 }
 
 export function validateAddress(
@@ -112,9 +112,16 @@ export async function retry<T>(
   return fn()
 }
 
-export function isMerkleProof(proof: readonly string[]): proof is Hex[] {
-  return proof.every((value) => isHex(value, { strict: false }))
+export function isHexList(list: string[]): list is Hex[] {
+  return list.every((value) => isHex(value, { strict: false }))
 }
+
+export function assertIsHexList(list: string[]): asserts list is Hex[] {
+  for (const value of list) {
+    assertIsHex(value)
+  }
+}
+
 type NonEmptyArray<T> = [T, ...T[]]
 
 export function BigIntMin(...[firstValue, ...values]: NonEmptyArray<bigint>): bigint {

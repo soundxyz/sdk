@@ -6,7 +6,7 @@ import { merkleDropMinterV1Abi } from '../abi/merkle-drop-minter-v1'
 import { merkleDropMinterV2Abi } from '../abi/merkle-drop-minter-v2'
 import { merkleDropMinterV2_1Abi } from '../abi/merkle-drop-minter-v2_1'
 
-export const minterFactoryMap = {
+export const minterAbiMap = {
   [interfaceIds.IRangeEditionMinter]: rangeEditionMinterV1Abi,
   [interfaceIds.IRangeEditionMinterV2]: rangeEditionMinterV2Abi,
   [interfaceIds.IRangeEditionMinterV2_1]: rangeEditionMinterV2_1Abi,

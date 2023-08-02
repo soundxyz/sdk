@@ -393,8 +393,8 @@ export class InvalidMerkleProofError extends Error {
   }
 }
 
-export class InvalidHexaError extends Error {
-  readonly name = 'InvalidHexaError'
+export class InvalidHexError extends Error {
+  readonly name = 'InvalidHexError'
 
   readonly value: string
 
