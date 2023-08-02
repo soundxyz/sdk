@@ -1,6 +1,7 @@
 import { keccak256 as solidityKeccak256 } from '@ethersproject/solidity'
 import keccak256 from 'keccak256'
 import { MerkleTree } from 'merkletreejs'
+import { assertIsHexList } from '../../src/utils/helpers'
 
 // default addresses generated for 'test test ...' mnemonic
 const snapshot = [
@@ -31,7 +32,11 @@ export const MerkleTestHelper = () => {
   }
 
   function getProof({ merkleTree, address }: { merkleTree: MerkleTree; address: string }) {
-    return merkleTree.getHexProof(getNodeLeaf(address))
+    const proof = merkleTree.getHexProof(getNodeLeaf(address))
+
+    assertIsHexList(proof)
+
+    return proof
   }
 
   const emptyMerkleTree = new MerkleTree([], keccak256, { sortPairs: true })

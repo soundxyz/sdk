@@ -1,13 +1,7 @@
-import {
-  InvalidMerkleProofError,
-  InvalidOffsetError,
-  InvalidQuantityError,
-  SamNotFoundError,
-  UnsupportedMinterError,
-} from '../../errors'
+import { InvalidOffsetError, InvalidQuantityError, SamNotFoundError, UnsupportedMinterError } from '../../errors'
 import type { SAM, SoundContractValidation, TransactionGasOptions } from '../../types'
 import { MINT_FALLBACK_GAS_LIMIT, MINT_GAS_LIMIT_MULTIPLIER, NULL_ADDRESS } from '../../utils/constants'
-import { isMerkleProof, scaleAmount, validateAddress } from '../../utils/helpers'
+import { assertIsHexList, scaleAmount, validateAddress } from '../../utils/helpers'
 import { isSoundV1_2_OrGreater } from '../edition/interface'
 import { SoundClientInstance } from '../instance'
 import { validateSoundEdition } from '../validation'
@@ -78,15 +72,13 @@ export async function SamSell(
     type: 'SOUND_EDITION',
   })
 
-  const args = [editionAddress, tokenIdsContract, minimumPayout, userAddress, attributonId] as const
-
   const contractParameters = {
     abi: samv1Abi,
     account: userAddress,
     address: userAddress,
     chain: null,
     functionName: 'sell',
-    args,
+    args: [editionAddress, tokenIdsContract, minimumPayout, userAddress, attributonId],
     ...txnOverrides,
   } as const
 
@@ -111,7 +103,6 @@ export async function SamSell(
     .writeContract({
       ...contractParameters,
       ...txnOverrides,
-      args,
     })
     .then((transactionHash) => ({ transactionHash }))
 }
@@ -158,13 +149,7 @@ export async function SamBuy(
     maxPriorityFeePerGas,
   } satisfies TransactionGasOptions
 
-  if (!isMerkleProof(affiliateProof)) {
-    throw new InvalidMerkleProofError({
-      proof: affiliateProof,
-    })
-  }
-
-  const args = [editionAddress, userAddress, quantity, affiliate, affiliateProof, attributonId] as const
+  assertIsHexList(affiliateProof)
 
   const contractParameters = {
     abi: samv1Abi,
@@ -172,7 +157,7 @@ export async function SamBuy(
     address: userAddress,
     chain: null,
     functionName: 'buy',
-    args,
+    args: [editionAddress, userAddress, quantity, affiliate, affiliateProof, attributonId],
     value: maxTotalValue,
     ...txnOverrides,
   } as const

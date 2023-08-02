@@ -6,7 +6,7 @@ import { minterModuleV2_1Abi } from '../../abi/minter-module-v2_1'
 import { soundEditionV1_2Abi } from '../../abi/sound-edition-v1_2'
 import { UnsupportedMinterError } from '../../errors'
 import { type BlockOrBlockHash, isHandledMinterInterfaceId, type MintSchedule } from '../../types'
-import { minterFactoryMap } from '../../utils/constants'
+import { minterAbiMap } from '../../utils/constants'
 import { exhaustiveGuard, validateAddress } from '../../utils/helpers'
 import { LazyPromise } from '../../utils/promise'
 import { SoundClientInstance } from '../instance'
@@ -275,7 +275,7 @@ export async function mintInfosFromMinter(
           const scheduleWithPlatformFee =
             interfaceId === interfaceIds.IRangeEditionMinterV2_1
               ? await readContract({
-                  abi: minterFactoryMap[interfaceId],
+                  abi: minterAbiMap[interfaceId],
                   address: minterAddress,
                   args: [editionAddress, BigInt(mintId)],
                   functionName: 'mintInfo',
@@ -287,14 +287,14 @@ export async function mintInfosFromMinter(
               ? scheduleWithPlatformFee
               : interfaceId === interfaceIds.IRangeEditionMinter
               ? await readContract({
-                  abi: minterFactoryMap[interfaceId],
+                  abi: minterAbiMap[interfaceId],
                   address: minterAddress,
                   args: [editionAddress, BigInt(mintId)],
                   functionName: 'mintInfo',
                 })
               : interfaceId === interfaceIds.IRangeEditionMinterV2
               ? await readContract({
-                  abi: minterFactoryMap[interfaceId],
+                  abi: minterAbiMap[interfaceId],
                   address: minterAddress,
                   args: [editionAddress, BigInt(mintId)],
                   functionName: 'mintInfo',
@@ -338,7 +338,7 @@ export async function mintInfosFromMinter(
           const scheduleWithPlatformFee =
             interfaceId === interfaceIds.IMerkleDropMinterV2_1
               ? await readContract({
-                  abi: minterFactoryMap[interfaceId],
+                  abi: minterAbiMap[interfaceId],
                   address: minterAddress,
                   args: [editionAddress, BigInt(mintId)],
                   functionName: 'mintInfo',
@@ -350,14 +350,14 @@ export async function mintInfosFromMinter(
               ? scheduleWithPlatformFee
               : interfaceId === interfaceIds.IMerkleDropMinter
               ? await readContract({
-                  abi: minterFactoryMap[interfaceId],
+                  abi: minterAbiMap[interfaceId],
                   address: minterAddress,
                   args: [editionAddress, BigInt(mintId)],
                   functionName: 'mintInfo',
                 })
               : interfaceId === interfaceIds.IMerkleDropMinterV2
               ? await readContract({
-                  abi: minterFactoryMap[interfaceId],
+                  abi: minterAbiMap[interfaceId],
                   address: minterAddress,
                   args: [editionAddress, BigInt(mintId)],
                   functionName: 'mintInfo',
