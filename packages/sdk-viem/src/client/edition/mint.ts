@@ -91,6 +91,7 @@ async function mintHelper(
     skipQuantityChecks = false,
     merkleProof,
     assumeValidSoundContract = false,
+    chain,
   }: MintOptions,
 ): Promise<EstimatableTransaction> {
   await validateSoundEdition.call(this, { editionAddress: mintSchedule.editionAddress, assumeValidSoundContract })
@@ -138,7 +139,7 @@ async function mintHelper(
   const sharedWriteContractParameters = {
     account: userAddress,
     address: userAddress,
-    chain: null,
+    chain,
     functionName: 'mint',
     value,
   } as const
@@ -314,7 +315,7 @@ async function mintToHelper(
     mintSchedule,
     mintToAddress,
     quantity,
-
+    chain,
     skipQuantityChecks = false,
     merkleProof,
     assumeValidSoundContract = false,
@@ -371,7 +372,7 @@ async function mintToHelper(
   const sharedWriteContractParameters = {
     account: userAddress,
     address: userAddress,
-    chain: null,
+    chain,
     functionName: 'mintTo',
     value,
   } as const

@@ -1,4 +1,4 @@
-import { encodeFunctionData } from 'viem'
+import { encodeFunctionData, type Chain } from 'viem'
 import { soundCreatorV1Abi } from '../../abi/sound-creator-v1'
 import {
   InvalidEditionMaxMintableError,
@@ -283,6 +283,15 @@ export async function estimateCreateEdition(
   })
 }
 
+export interface CreateEditionOptions extends TransactionGasOptions {
+  editionConfig: EditionConfig
+  mintConfigs: MintConfig[]
+
+  chain: Chain
+
+  salt?: string | number
+}
+
 export async function createEdition(
   this: SoundClientInstance,
   { creatorAddress }: { creatorAddress: string },
@@ -291,15 +300,12 @@ export async function createEdition(
     mintConfigs,
     salt: customSalt,
 
+    chain,
+
     gas,
     maxFeePerGas,
     maxPriorityFeePerGas,
-  }: {
-    editionConfig: EditionConfig
-    mintConfigs: MintConfig[]
-
-    salt?: string | number
-  } & TransactionGasOptions,
+  }: CreateEditionOptions,
 ) {
   const {
     formattedSalt,
@@ -327,7 +333,7 @@ export async function createEdition(
 
     account: userAddress,
     address: creatorAddress,
-    chain: null,
+    chain,
     functionName: 'createSoundAndMints',
     args: [formattedSalt, editionInitData, addresses, calldata],
     ...txnOverrides,
