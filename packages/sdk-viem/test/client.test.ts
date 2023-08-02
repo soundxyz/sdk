@@ -102,6 +102,8 @@ let buyerWalletAccount: Account
 let buyer2Wallet: SignerWithAddress
 let buyer2WalletAccount: Account
 
+const chain = hardhatChain
+
 /*********************************************************
                         SETUP
  ********************************************************/
@@ -886,6 +888,7 @@ describe('eligibleQuantity: single RangeEditionMinter instance', () => {
     await client.edition.mint({
       mintSchedule: allMints[0],
       quantity: mint1MaxMintablePerAccount,
+      chain,
     })
 
     const mintSchedule = (
@@ -981,6 +984,7 @@ describe('eligibleQuantity: single RangeEditionMinter instance', () => {
     await client.edition.mint({
       mintSchedule: mintSchedules[0],
       quantity: EDITION_MAX,
+      chain,
     })
 
     // Check that the eligible quantity for the next mint schedule is zero for both buyers
@@ -1233,7 +1237,7 @@ describe('mint', () => {
         ethers.provider,
       ).balanceOf(buyerWallet.address)
 
-      await client.edition.mint({ mintSchedule: mintSchedules[0], quantity })
+      await client.edition.mint({ mintSchedule: mintSchedules[0], quantity, chain })
 
       const finalBalance = await SoundEditionV1_2__factory.connect(
         precomputedEditionAddress,
@@ -1257,7 +1261,7 @@ describe('mint', () => {
 
       const expectedGasLimit = scaleAmount({ amount: gasEstimate, multiplier: MINT_GAS_LIMIT_MULTIPLIER })
 
-      const clientMintCall = await client.edition.estimateMint({ mintSchedule: mintSchedules[0], quantity: 1 })
+      const clientMintCall = await client.edition.estimateMint({ mintSchedule: mintSchedules[0], quantity: 1, chain })
 
       expect(clientMintCall).to.equal(expectedGasLimit)
     })
@@ -1265,7 +1269,12 @@ describe('mint', () => {
     it(`Doesn't scale gasLimit if custom gasLimit not provided`, async () => {
       const gas = 12345678n
 
-      const clientMintCall = await client.edition.estimateMint({ mintSchedule: mintSchedules[0], quantity: 1, gas })
+      const clientMintCall = await client.edition.estimateMint({
+        mintSchedule: mintSchedules[0],
+        quantity: 1,
+        gas,
+        chain,
+      })
 
       expect(clientMintCall).to.equal(gas)
     })
@@ -1273,7 +1282,7 @@ describe('mint', () => {
     it(`Should throw error if invalid quantity requested`, async () => {
       const quantity = 0
       await client.edition
-        .mint({ mintSchedule: mintSchedules[0], quantity })
+        .mint({ mintSchedule: mintSchedules[0], quantity, chain })
         .then(didntThrowExpectedError)
         .catch((error) => {
           expect(error).instanceOf(InvalidQuantityError)
@@ -1287,7 +1296,7 @@ describe('mint', () => {
         userAddress: buyerWallet.address,
       })
       await client.edition
-        .mint({ mintSchedule: mintSchedules[0], quantity })
+        .mint({ mintSchedule: mintSchedules[0], quantity, chain })
         .then(didntThrowExpectedError)
         .catch((error) => {
           expect(error).instanceOf(NotEligibleMint)
@@ -1363,6 +1372,7 @@ describe('mint', () => {
       await client.edition.mint({
         mintSchedule: mintSchedules[0],
         quantity,
+        chain,
       })
 
       const finalBalance = await SoundEditionV1_2__factory.connect(
@@ -1380,6 +1390,7 @@ describe('mint', () => {
         .mint({
           mintSchedule: mintSchedules[0],
           quantity: 1,
+          chain,
         })
         .then(didntThrowExpectedError)
         .catch((error) => {
@@ -1394,6 +1405,7 @@ describe('mint', () => {
         .mint({
           mintSchedule: mintSchedules[0],
           quantity: 1,
+          chain,
         })
         .catch((err) => err)
 
@@ -1471,6 +1483,7 @@ describe('createEdition', () => {
       editionConfig,
       mintConfigs,
       salt: SALT,
+      chain,
     })
 
     const editionContract = SoundEditionV1_2__factory.connect(precomputedEditionAddress, ethers.provider)
@@ -1578,6 +1591,7 @@ describe('createEdition', () => {
       editionConfig,
       mintConfigs,
       salt: SALT,
+      chain,
     })
 
     const { schedules } = await client.edition.mintSchedules({
@@ -1659,6 +1673,7 @@ describe('createEdition', () => {
       editionConfig,
       mintConfigs,
       salt: SALT,
+      chain,
     })
 
     const { schedules } = await client.edition.mintSchedules({
@@ -1702,6 +1717,7 @@ describe('createEdition', () => {
         editionConfig,
         mintConfigs: [getGenericRangeMintConfig({ minterAddress: rangeEditionMinter.address })],
         salt: SALT,
+        chain,
       })
       .then(didntThrowExpectedError)
       .catch((error) => {
@@ -1722,6 +1738,7 @@ describe('createEdition', () => {
         editionConfig,
         mintConfigs: [getGenericRangeMintConfig({ minterAddress: rangeEditionMinter.address })],
         salt: SALT,
+        chain,
       })
       .then(didntThrowExpectedError)
       .catch((error) => {
@@ -1741,6 +1758,7 @@ describe('createEdition', () => {
         editionConfig,
         mintConfigs: [getGenericRangeMintConfig({ minterAddress: BAD_ADDRESS })],
         salt: SALT,
+        chain,
       })
       .then(didntThrowExpectedError)
       .catch((error) => {
@@ -1761,6 +1779,7 @@ describe('createEdition', () => {
         editionConfig,
         mintConfigs: [getGenericRangeMintConfig({ minterAddress: rangeEditionMinter.address })],
         salt: SALT,
+        chain,
       })
       .then(didntThrowExpectedError)
       .catch((error) => {
@@ -1782,6 +1801,7 @@ describe('createEdition', () => {
         editionConfig,
         mintConfigs: [getGenericRangeMintConfig({ minterAddress: rangeEditionMinter.address })],
         salt: SALT,
+        chain,
       })
       .then(didntThrowExpectedError)
       .catch((error) => {
@@ -1801,6 +1821,7 @@ describe('createEdition', () => {
         editionConfig,
         mintConfigs: [mintConfig],
         salt: SALT,
+        chain,
       })
       .then(didntThrowExpectedError)
       .catch((error) => {
@@ -1821,6 +1842,7 @@ describe('createEdition', () => {
         editionConfig,
         mintConfigs: [mintConfig],
         salt: SALT,
+        chain,
       })
       .then(didntThrowExpectedError)
       .catch((error) => {
@@ -1840,6 +1862,7 @@ describe('createEdition', () => {
         editionConfig,
         mintConfigs: [mintConfig],
         salt: SALT,
+        chain,
       })
       .then(didntThrowExpectedError)
       .catch((error) => {
@@ -1859,6 +1882,7 @@ describe('createEdition', () => {
         editionConfig,
         mintConfigs: [mintConfig],
         salt: SALT,
+        chain,
       })
       .then(didntThrowExpectedError)
       .catch((error) => {
@@ -1890,6 +1914,7 @@ describe('createEdition', () => {
         editionConfig,
         mintConfigs: [mintConfig],
         salt: SALT,
+        chain,
       })
       .then(didntThrowExpectedError)
       .catch((error) => {
@@ -1904,6 +1929,7 @@ describe('createEdition', () => {
         editionConfig,
         mintConfigs: [mintConfig],
         salt: SALT,
+        chain,
       })
       .then(didntThrowExpectedError)
       .catch((error) => {
@@ -1918,6 +1944,7 @@ describe('createEdition', () => {
         editionConfig,
         mintConfigs: [mintConfig],
         salt: SALT,
+        chain,
       })
       .then(didntThrowExpectedError)
       .catch((error) => {
@@ -2072,6 +2099,7 @@ describe('editionInfo', () => {
           affiliateFeeBPS: 0,
         },
       ],
+      chain,
     })
   })
 
@@ -2510,10 +2538,10 @@ describe.skip('getContractError returns expected error', () => {
     await setAutoMine(false)
 
     // Mint full quantity
-    await client.edition.mint({ mintSchedule: mintSchedules[0], quantity: EDITION_MAX })
+    await client.edition.mint({ mintSchedule: mintSchedules[0], quantity: EDITION_MAX, chain })
 
     // Attempt to mint again
-    const tx = await client.edition.mint({ mintSchedule: mintSchedules[0], quantity: 1 })
+    const tx = await client.edition.mint({ mintSchedule: mintSchedules[0], quantity: 1, chain })
 
     await mineBlock()
 
@@ -2552,10 +2580,10 @@ describe.skip('getContractError returns expected error', () => {
       await setAutoMine(false)
 
       // Mint full quantity
-      client.edition.mint({ mintSchedule: mintSchedules[0], quantity: MAX_QUANTITY })
+      client.edition.mint({ mintSchedule: mintSchedules[0], quantity: MAX_QUANTITY, chain })
 
       // Attempt to mint again
-      const tx = await client.edition.mint({ mintSchedule: mintSchedules[0], quantity: 1 })
+      const tx = await client.edition.mint({ mintSchedule: mintSchedules[0], quantity: 1, chain })
 
       await mineBlock()
 
@@ -2593,10 +2621,10 @@ describe.skip('getContractError returns expected error', () => {
 
       await setAutoMine(false)
 
-      await client.edition.mint({ mintSchedule: mintSchedules[0], quantity: MAX_MINTABLE_PER_ACCOUNT })
+      await client.edition.mint({ mintSchedule: mintSchedules[0], quantity: MAX_MINTABLE_PER_ACCOUNT, chain })
 
       // Attempt to mint again
-      const tx = await client.edition.mint({ mintSchedule: mintSchedules[0], quantity: 1 })
+      const tx = await client.edition.mint({ mintSchedule: mintSchedules[0], quantity: 1, chain })
 
       await mineBlock()
 
@@ -2635,10 +2663,10 @@ describe.skip('getContractError returns expected error', () => {
       await setAutoMine(false)
 
       // Mint full quantity
-      await client.edition.mint({ mintSchedule: mintSchedules[0], quantity: MAX_QUANTITY })
+      await client.edition.mint({ mintSchedule: mintSchedules[0], quantity: MAX_QUANTITY, chain })
 
       // Attempt to mint again
-      const tx = await client.edition.mint({ mintSchedule: mintSchedules[0], quantity: 1 })
+      const tx = await client.edition.mint({ mintSchedule: mintSchedules[0], quantity: 1, chain })
 
       await mineBlock()
 
@@ -2675,10 +2703,10 @@ describe.skip('getContractError returns expected error', () => {
 
       await setAutoMine(false)
 
-      await client.edition.mint({ mintSchedule: mintSchedules[0], quantity: MAX_MINTABLE_PER_ACCOUNT })
+      await client.edition.mint({ mintSchedule: mintSchedules[0], quantity: MAX_MINTABLE_PER_ACCOUNT, chain })
 
       // Attempt to mint again
-      const tx = await client.edition.mint({ mintSchedule: mintSchedules[0], quantity: 1 })
+      const tx = await client.edition.mint({ mintSchedule: mintSchedules[0], quantity: 1, chain })
 
       await mineBlock()
 
@@ -2780,6 +2808,7 @@ describe('SAM', () => {
           affiliateFeeBPS: 0,
         },
       ],
+      chain,
     })
 
     const samAddress = await client.edition.sam({
@@ -2902,6 +2931,7 @@ describe('SAM', () => {
           affiliateFeeBPS: 0,
         },
       ],
+      chain,
     })
 
     const samAddress = await client.edition.sam({
@@ -2927,6 +2957,7 @@ describe('SAM', () => {
     await client.edition.mint({
       mintSchedule: mintSchedule,
       quantity: 10,
+      chain,
     })
 
     expect(
@@ -2951,6 +2982,7 @@ describe('SAM', () => {
     await sam.contract.buy({
       maxTotalValue: totalBuyPrice.total,
       quantity: 10,
+      chain,
     })
 
     expect(
@@ -2971,6 +3003,7 @@ describe('SAM', () => {
     await sam.contract.sell({
       minimumPayout: totalSellPrice,
       tokenIds: [1, 2, 3, 4, 5],
+      chain,
     })
 
     expect(

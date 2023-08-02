@@ -1,5 +1,6 @@
 import type {
   Address,
+  Chain,
   FeeValuesEIP1559,
   PublicActions,
   PublicClient,
@@ -246,6 +247,11 @@ export interface TransactionGasOptions
     Pick<TransactionRequestBase, 'gas'> {}
 
 interface SharedMintOptions extends SoundContractValidation, TransactionGasOptions {
+  /**
+   * Chain of edition to be minted
+   */
+  chain: Chain
+
   /**
    * Amount of NFTs to be minted
    */

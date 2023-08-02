@@ -52,6 +52,8 @@ export async function SamSell(
     maxPriorityFeePerGas,
 
     assumeValidSoundContract = false,
+
+    chain,
   }: SamSellOptions,
 ) {
   const samAddress = await SamContractAddress.call(this, { editionAddress, assumeValidSoundContract })
@@ -76,7 +78,7 @@ export async function SamSell(
     abi: samv1Abi,
     account: userAddress,
     address: userAddress,
-    chain: null,
+    chain,
     functionName: 'sell',
     args: [editionAddress, tokenIdsContract, minimumPayout, userAddress, attributonId],
     ...txnOverrides,
@@ -124,6 +126,8 @@ export async function SamBuy(
     maxPriorityFeePerGas,
 
     assumeValidSoundContract = false,
+
+    chain,
   }: SamBuyOptions,
 ) {
   if (typeof quantity !== 'number' || !Number.isInteger(quantity) || quantity <= 0)
@@ -155,7 +159,7 @@ export async function SamBuy(
     abi: samv1Abi,
     account: userAddress,
     address: userAddress,
-    chain: null,
+    chain,
     functionName: 'buy',
     args: [editionAddress, userAddress, quantity, affiliate, affiliateProof, attributonId],
     value: maxTotalValue,
