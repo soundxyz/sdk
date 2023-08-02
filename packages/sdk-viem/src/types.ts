@@ -121,7 +121,6 @@ export type AddressInputType =
   | 'WALLET'
   | 'CREATOR_ADDRESS'
   | 'GENERIC'
-  | 'MERKLE_ROOT'
 
 export type Bytes = ArrayLike<number>
 
