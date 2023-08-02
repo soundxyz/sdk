@@ -327,7 +327,7 @@ export async function createEdition(
 
     account: userAddress,
     address: creatorAddress,
-    chain: wallet.chain,
+    chain: null,
     functionName: 'createSoundAndMints',
     args: [formattedSalt, editionInitData, addresses, calldata],
     ...txnOverrides,
