@@ -136,7 +136,7 @@ async function mintHelper(
   const sharedWriteContractParameters = {
     account: userAddress,
     address: userAddress,
-    chain: wallet.chain,
+    chain: null,
     functionName: 'mint',
     value,
   } as const
@@ -446,7 +446,7 @@ async function mintToHelper(
   const sharedWriteContractParameters = {
     account: userAddress,
     address: userAddress,
-    chain: wallet.chain,
+    chain: null,
     functionName: 'mintTo',
     value,
   } as const
