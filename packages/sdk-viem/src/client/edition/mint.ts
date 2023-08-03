@@ -138,7 +138,7 @@ async function mintHelper(
 
   const sharedWriteContractParameters = {
     account: userAddress,
-    address: userAddress,
+    address: mintSchedule.minterAddress,
     chain,
     functionName: 'mint',
     value,
@@ -156,7 +156,7 @@ async function mintHelper(
 
       async function startTransaction() {
         const transactionHash = await wallet.writeContract({
-          abi: minterAbiMap[interfaceIds.IRangeEditionMinterV2_1],
+          abi: minterAbiMap[interfaceIds.IRangeEditionMinter],
           ...sharedWriteContractParameters,
           ...txnOverrides,
           args,
@@ -371,7 +371,7 @@ async function mintToHelper(
 
   const sharedWriteContractParameters = {
     account: userAddress,
-    address: userAddress,
+    address: mintSchedule.minterAddress,
     chain,
     functionName: 'mintTo',
     value,
