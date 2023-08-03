@@ -2137,7 +2137,7 @@ describe('editionRegisteredMinters', () => {
 
     let registeredMinters = await client.edition.registeredMinters({
       editionAddress: precomputedEditionAddress,
-      fromBlockOrBlockHash: 0,
+      fromBlock: 0n,
     })
 
     expect(registeredMinters).members([
@@ -2155,7 +2155,7 @@ describe('editionRegisteredMinters', () => {
 
     registeredMinters = await client.edition.registeredMinters({
       editionAddress: precomputedEditionAddress,
-      fromBlockOrBlockHash: 0,
+      fromBlock: 0n,
     })
 
     expect(registeredMinters).members([
@@ -2195,7 +2195,7 @@ describe('editionMinterMintIds', () => {
     const mintIds = await client.edition.minterMintIds({
       editionAddress: precomputedEditionAddress,
       minterAddress: rangeEditionMinter.address,
-      fromBlockOrBlockHash: 0,
+      fromBlock: 0n,
     })
 
     expect(mintIds).deep.eq(Array.from({ length: MINT_SCHEDULE_COUNT }, (_, i) => i))
@@ -2226,7 +2226,7 @@ describe('editionMinterMintIds', () => {
     const mintIds = await client.edition.minterMintIds({
       editionAddress: precomputedEditionAddress,
       minterAddress: rangeEditionMinterV2.address,
-      fromBlockOrBlockHash: 0,
+      fromBlock: 0n,
     })
 
     expect(mintIds).deep.eq(Array.from({ length: MINT_SCHEDULE_COUNT }, (_, i) => i))
@@ -2244,7 +2244,7 @@ describe('editionScheduleIds', () => {
 
     let scheduleIds = await client.edition.scheduleIds({
       editionAddress: precomputedEditionAddress,
-      fromBlockOrBlockHash: 0,
+      fromBlock: 0n,
     })
 
     // Make  1 mint schedule per minter
@@ -2306,7 +2306,7 @@ describe('editionScheduleIds', () => {
 
     scheduleIds = await client.edition.scheduleIds({
       editionAddress: precomputedEditionAddress,
-      fromBlockOrBlockHash: 0,
+      fromBlock: 0n,
     })
 
     expect(scheduleIds).to.have.deep.members([

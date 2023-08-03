@@ -1,9 +1,17 @@
-import type { Address, Chain, FeeValuesEIP1559, PublicClient, TransactionRequestBase, WalletClient } from 'viem'
+import type {
+  Address,
+  Chain,
+  FeeValuesEIP1559,
+  PublicClient,
+  TransactionRequestBase,
+  WalletClient,
+  BlockTag,
+} from 'viem'
 import type { MerkleProofProvider } from './merkle/types'
 import type { SoundAPI } from './api'
 import { interfaceIds } from '@soundxyz/sound-protocol/interfaceIds'
 
-export type BlockOrBlockHash = string | number
+export type BlockOrBlockTag = bigint | BlockTag
 
 export interface SoundContractValidation {
   /**
