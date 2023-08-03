@@ -1,11 +1,11 @@
-import { type Address, parseAbiItem } from 'viem'
+import { type Address } from 'viem'
 
 import { interfaceIds } from '@soundxyz/sound-protocol/interfaceIds'
 
 import { minterModuleV2_1Abi } from '../../abi/minter-module-v2_1'
 import { soundEditionV1_2Abi } from '../../abi/sound-edition-v1_2'
 import { UnsupportedMinterError } from '../../errors'
-import { type BlockOrBlockHash, isHandledMinterInterfaceId, type MintSchedule } from '../../types'
+import { type BlockOrBlockTag, isHandledMinterInterfaceId, type MintSchedule } from '../../types'
 import { minterAbiMap } from '../../utils/constants'
 import { exhaustiveGuard, validateAddress } from '../../utils/helpers'
 import { LazyPromise } from '../../utils/promise'
@@ -70,15 +70,15 @@ export async function editionScheduleIds(
   this: SoundClientInstance,
   {
     editionAddress,
-    fromBlockOrBlockHash,
+    fromBlock,
   }: {
     editionAddress: string
-    fromBlockOrBlockHash?: BlockOrBlockHash
+    fromBlock?: BlockOrBlockTag
   },
 ) {
   const minterAddresses = await editionRegisteredMinters.call(this, {
     editionAddress,
-    fromBlockOrBlockHash,
+    fromBlock,
   })
 
   return Promise.all(
@@ -88,7 +88,7 @@ export async function editionScheduleIds(
         mintIds: await editionMinterMintIds.call(this, {
           editionAddress,
           minterAddress,
-          fromBlockOrBlockHash,
+          fromBlock,
         }),
       }
     }),
@@ -103,10 +103,10 @@ export async function editionRegisteredMinters(
   this: SoundClientInstance,
   {
     editionAddress,
-    fromBlockOrBlockHash,
+    fromBlock,
   }: {
     editionAddress: string
-    fromBlockOrBlockHash?: BlockOrBlockHash
+    fromBlock?: BlockOrBlockTag
   },
 ): Promise<string[]> {
   const {
@@ -141,7 +141,7 @@ export async function editionRegisteredMinters(
       name: 'RolesUpdated',
       type: 'event',
     },
-    fromBlock: fromBlockOrBlockHash != null ? BigInt(fromBlockOrBlockHash) : 'earliest',
+    fromBlock: fromBlock ?? 'earliest',
     address: editionAddress,
     args: {
       roles: minterRole,
@@ -192,11 +192,11 @@ export async function editionMinterMintIds(
   {
     editionAddress,
     minterAddress,
-    fromBlockOrBlockHash,
+    fromBlock,
   }: {
     editionAddress: string
     minterAddress: string
-    fromBlockOrBlockHash?: BlockOrBlockHash
+    fromBlock?: BlockOrBlockTag
   },
 ) {
   const client = await this.expectClient()
@@ -210,16 +210,56 @@ export async function editionMinterMintIds(
   })
 
   // Query MintConfigCreated event, for v1 and v2, this signature is the same
-
   const filter = await client.createEventFilter({
     address: minterAddress,
-    event: parseAbiItem(
-      'event MintConfigCreated(address edition,address creator,uint128 mintId,uint32 startTime,uint32 endTime,uint16 affiliateFeeBPS)',
-    ),
-    fromBlock: fromBlockOrBlockHash != null ? BigInt(fromBlockOrBlockHash) : undefined,
+    event: {
+      anonymous: false,
+      inputs: [
+        {
+          indexed: true,
+          internalType: 'address',
+          name: 'edition',
+          type: 'address',
+        },
+        {
+          indexed: true,
+          internalType: 'address',
+          name: 'creator',
+          type: 'address',
+        },
+        {
+          indexed: false,
+          internalType: 'uint128',
+          name: 'mintId',
+          type: 'uint128',
+        },
+        {
+          indexed: false,
+          internalType: 'uint32',
+          name: 'startTime',
+          type: 'uint32',
+        },
+        {
+          indexed: false,
+          internalType: 'uint32',
+          name: 'endTime',
+          type: 'uint32',
+        },
+        {
+          indexed: false,
+          internalType: 'uint16',
+          name: 'affiliateFeeBPS',
+          type: 'uint16',
+        },
+      ],
+      name: 'MintConfigCreated',
+      type: 'event',
+    },
+    fromBlock: fromBlock ?? 'earliest',
     args: {
       edition: editionAddress,
     },
+    strict: true,
   })
 
   const mintScheduleConfigEvents = await client.getFilterLogs({
@@ -228,7 +268,7 @@ export async function editionMinterMintIds(
 
   return Array.from(
     mintScheduleConfigEvents.reduce((acc, event) => {
-      if (event.args.mintId) acc.add(event.args.mintId)
+      if (event.args?.mintId) acc.add(event.args.mintId)
       return acc
     }, new Set<bigint>()),
   )
