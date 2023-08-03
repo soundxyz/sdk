@@ -1,13 +1,4 @@
-import type {
-  Address,
-  Chain,
-  FeeValuesEIP1559,
-  PublicActions,
-  PublicClient,
-  TransactionRequestBase,
-  WalletActions,
-  WalletClient,
-} from 'viem'
+import type { Address, Chain, FeeValuesEIP1559, PublicClient, TransactionRequestBase, WalletClient } from 'viem'
 import type { MerkleProofProvider } from './merkle/types'
 import type { SoundAPI } from './api'
 import { interfaceIds } from '@soundxyz/sound-protocol/interfaceIds'
@@ -25,8 +16,11 @@ export interface SoundContractValidation {
 
 type LazyOption<T extends object> = T | (() => T | Promise<T>)
 
-export type ClientProvider = Pick<PublicClient, 'chain'> & PublicActions
-export type Wallet = Pick<WalletClient, 'account' | 'chain'> & WalletActions
+export type ClientProvider = Pick<
+  PublicClient,
+  'chain' | 'readContract' | 'getFilterLogs' | 'createEventFilter' | 'estimateContractGas'
+>
+export type Wallet = Pick<WalletClient, 'account' | 'chain' | 'writeContract' | 'signMessage' | 'sendTransaction'>
 
 export type SoundClientContractProvider =
   | {
