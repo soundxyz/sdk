@@ -127,12 +127,26 @@ export async function editionRegisteredMinters(
   })
 
   const rolesUpdatedFilter = await client.createEventFilter({
-    event: parseAbiItem('event RolesUpdated(address user,uint256 roles)'),
-    fromBlock: fromBlockOrBlockHash != null ? BigInt(fromBlockOrBlockHash) : undefined,
+    event: {
+      anonymous: false,
+      inputs: [
+        { indexed: true, internalType: 'address', name: 'user', type: 'address' },
+        {
+          indexed: true,
+          internalType: 'uint256',
+          name: 'roles',
+          type: 'uint256',
+        },
+      ],
+      name: 'RolesUpdated',
+      type: 'event',
+    },
+    fromBlock: fromBlockOrBlockHash != null ? BigInt(fromBlockOrBlockHash) : 'earliest',
     address: editionAddress,
     args: {
       roles: minterRole,
     },
+    strict: true,
   })
 
   const roleEvents = await client.getFilterLogs({
@@ -141,7 +155,7 @@ export async function editionRegisteredMinters(
 
   const candidateMinters = Array.from(
     roleEvents.reduce((acc, event) => {
-      if (event.args.user) acc.add(event.args.user)
+      if (event.args?.user) acc.add(event.args.user)
 
       return acc
     }, new Set<Address>()),
