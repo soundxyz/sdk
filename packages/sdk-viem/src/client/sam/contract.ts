@@ -77,7 +77,7 @@ export async function SamSell(
   const contractParameters = {
     abi: samv1Abi,
     account: userAddress,
-    address: userAddress,
+    address: samAddress,
     chain,
     functionName: 'sell',
     args: [editionAddress, tokenIdsContract, minimumPayout, userAddress, attributonId],
@@ -158,7 +158,7 @@ export async function SamBuy(
   const contractParameters = {
     abi: samv1Abi,
     account: userAddress,
-    address: userAddress,
+    address: samAddress,
     chain,
     functionName: 'buy',
     args: [editionAddress, userAddress, quantity, affiliate, affiliateProof, attributonId],
