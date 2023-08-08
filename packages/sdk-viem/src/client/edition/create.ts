@@ -1,4 +1,5 @@
-import { encodeFunctionData, type Chain } from 'viem'
+import { type Chain } from 'viem'
+import { encodeFunctionData } from 'viem/utils'
 import { soundCreatorV1Abi } from '../../abi/sound-creator-v1'
 import {
   InvalidEditionMaxMintableError,

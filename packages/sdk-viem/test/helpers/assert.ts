@@ -1,5 +1,6 @@
 import assert from 'assert'
-import { isHex, type Hex, isAddress } from 'viem'
+import type { Hex } from 'viem'
+import { isHex, isAddress } from 'viem/utils'
 
 import { assertIsHex } from '../../src/utils/helpers'
 

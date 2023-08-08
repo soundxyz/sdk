@@ -1,4 +1,5 @@
-import { isAddress, type Address, isHex, type Hex } from 'viem'
+import type { Address, Hex } from 'viem'
+import { isAddress, isHex } from 'viem/utils'
 import { InvalidAddressError, InvalidHexError } from '../errors'
 import keccak256 from 'keccak256'
 import type { AddressInputType } from '../types'

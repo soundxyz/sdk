@@ -1,5 +1,3 @@
-import { ethers } from 'hardhat'
-
 import { NON_NULL_ADDRESS, NULL_ADDRESS } from '../../src/utils/constants'
 import { ONE_HOUR, PRICE } from '../test-constants'
 import { MerkleTestHelper } from './merkle'
@@ -65,14 +63,6 @@ export const getGenericMerkleMintConfig = ({ minterAddress }: { minterAddress: s
 
 export const didntThrowExpectedError = () => {
   throw Error(`Didn't throw expected error`)
-}
-
-export const mineBlock = async () => {
-  await ethers.provider.send('evm_mine', [])
-}
-
-export const setAutoMine = async (turnOn: boolean) => {
-  await ethers.provider.send('evm_setAutomine', [turnOn])
 }
 
 export { MerkleTestHelper }
