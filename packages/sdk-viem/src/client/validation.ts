@@ -4,6 +4,7 @@ import { soundEditionV1_2Abi } from '../abi/sound-edition-v1_2'
 import { interfaceIds } from '@soundxyz/sound-protocol'
 import type { SoundContractValidation } from '../types'
 import { NotSoundEditionError } from '../errors'
+import { BaseError, ContractFunctionZeroDataError } from 'viem'
 
 export async function isSoundEdition(
   this: SoundClientInstance,
@@ -27,8 +28,8 @@ export async function isSoundEdition(
         args: [interfaceIds.ISoundEditionV1],
       })
     } catch (err: unknown) {
-      // CALL_EXCEPTION gets thrown if the contract doesn't exist or supportsInterface isn't implemented
-      if (err instanceof Error && 'code' in err && err.code === 'CALL_EXCEPTION') {
+      // ContractFunctionZeroDataError gets thrown if the contract doesn't exist or supportsInterface isn't implemented
+      if (err instanceof BaseError && err.walk((e) => e instanceof ContractFunctionZeroDataError)) {
         return false
       }
 

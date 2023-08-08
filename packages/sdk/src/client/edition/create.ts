@@ -224,13 +224,10 @@ export async function estimateCreateEdition(
       { editionConfig, mintConfigs, salt: customSalt, gasLimit, maxFeePerGas, maxPriorityFeePerGas },
     )
 
-  return soundCreatorContract.estimateGas.createSoundAndMints(
-    formattedSalt,
-    editionInitData,
-    addresses,
-    calldata,
-    txnOverrides,
-  )
+  return soundCreatorContract.estimateGas.createSoundAndMints(formattedSalt, editionInitData, addresses, calldata, {
+    ...txnOverrides,
+    from: 'signer address',
+  })
 }
 
 export async function createEdition(

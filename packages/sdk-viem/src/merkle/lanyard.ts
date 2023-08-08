@@ -1,6 +1,6 @@
 import type { MerkleProofProvider } from './types'
 import { z } from 'zod'
-import { isHex } from 'viem'
+import { isHex } from 'viem/utils'
 
 import { UnexpectedLanyardResponse } from '../errors'
 
