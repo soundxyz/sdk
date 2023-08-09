@@ -1,4 +1,4 @@
-import { testClient } from './test-utils'
+import { contractAddressFromTransaction, testClient } from './test-utils'
 import { SoundEditionV1_2Config } from '../src/abi/sound-edition-v1_2'
 import { test, expect, assert, beforeAll, describe } from 'vitest'
 import { ALICE, DEFAULT_SALT, EDITION_MAX, forkBlockNumber } from './test-constants'
@@ -32,14 +32,6 @@ const client = SoundClient({
   },
 })
 
-async function contractAddressFromTransaction({ hash }: { hash: Hash }): Promise<Address> {
-  const { contractAddress } = await testClient.waitForTransactionReceipt({
-    hash,
-  })
-  assert(contractAddress)
-  return contractAddress
-}
-
 let creatorAddress: Address
 let rangeEditionV1Address: Address
 let rangeEditionV2Address: Address
@@ -50,6 +42,8 @@ let merkleDropV2_1Address: Address
 
 beforeAll(async () => {
   await expect(testClient.getBlockNumber()).resolves.toBe(forkBlockNumber)
+
+  testClient.setAutomine(false)
 
   const editionImplementationTxHash = await testClient.deployContract({
     ...SoundEditionV1_2Config,
@@ -64,8 +58,6 @@ beforeAll(async () => {
     args: [editionImplementationAddress],
     account: ALICE,
   })
-
-  const _creatorAddress = await contractAddressFromTransaction({ hash: creatorHash })
 
   // TODO replace null address with fee registry
   const rangeEditionV1Hash = await testClient.deployContract({
@@ -96,6 +88,8 @@ beforeAll(async () => {
   })
 
   const [
+    _creatorAddress,
+
     _rangeEditionV1Address,
     _rangeEditionV2Address,
     _rangeEditionV2_1Address,
@@ -104,6 +98,8 @@ beforeAll(async () => {
     _merkleDropV2Address,
     _merkleDropV2_1Address,
   ] = await Promise.all([
+    contractAddressFromTransaction({ hash: creatorHash }),
+
     contractAddressFromTransaction({ hash: rangeEditionV1Hash }),
     contractAddressFromTransaction({ hash: rangeEditionV2Hash }),
     contractAddressFromTransaction({ hash: rangeEditionV2_1Hash }),
@@ -127,7 +123,15 @@ beforeAll(async () => {
 /**
  * Sets up an edition and mint schedules.
  */
-export async function setupTest({ minterCalls = [] }: { minterCalls?: { contractAddress: Address; calldata: Hex }[] }) {
+export async function setupTest({
+  deployer,
+  salt,
+  minterCalls,
+}: {
+  deployer: Address
+  salt: Hex
+  minterCalls: { contractAddress: Address; calldata: Hex }[]
+}) {
   const editionInitData = encodeFunctionData({
     abi: SoundEditionV1_2Config.abi,
     functionName: 'initialize',
@@ -145,25 +149,6 @@ export async function setupTest({ minterCalls = [] }: { minterCalls?: { contract
       2,
     ],
   })
-  const [editionAddress, _] = await testClient.readContract({
-    address: creatorAddress,
-    abi: SoundCreatorV1Config.abi,
-    functionName: 'soundEditionAddress',
-    args: [ALICE, DEFAULT_SALT],
-  })
-
-  const grantRolesCalls = [
-    {
-      contractAddress: editionAddress,
-      calldata: encodeFunctionData({
-        abi: SoundCreatorV1Config.abi,
-        functionName: 'grantRoles',
-        args: [rangeEditionV2_1Address, MINTER_ROLE],
-      }),
-    },
-  ]
-
-  const allContractCalls = [...grantRolesCalls, ...minterCalls]
 
   await testClient.writeContract({
     abi: SoundCreatorV1Config.abi,
@@ -172,8 +157,8 @@ export async function setupTest({ minterCalls = [] }: { minterCalls?: { contract
     args: [
       DEFAULT_SALT,
       editionInitData,
-      allContractCalls.map((d) => d.contractAddress),
-      allContractCalls.map((d) => d.calldata),
+      minterCalls.map((d) => d.contractAddress),
+      minterCalls.map((d) => d.calldata),
     ],
     account: ALICE,
   })
