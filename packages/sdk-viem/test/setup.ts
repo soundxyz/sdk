@@ -1,6 +1,6 @@
 import { afterAll, afterEach, vi } from 'vitest'
-import { setBlockNumber, testClient } from './test-utils'
-import { forkBlockNumber, poolId } from './test-constants'
+import { testViemClient } from './test-utils'
+import { forkBlockNumber, forkUrl, poolId } from './test-constants'
 import { fetchLogs } from '@viem/anvil'
 
 afterAll(async () => {
@@ -8,9 +8,10 @@ afterAll(async () => {
 
   // Reset the anvil instance to the same state it was in before the tests started.
   await Promise.all([
-    setBlockNumber(forkBlockNumber),
-    testClient.setAutomine(false),
-    testClient.setIntervalMining({ interval: 1 }),
+    testViemClient.reset({
+      blockNumber: forkBlockNumber,
+      jsonRpcUrl: forkUrl,
+    }),
   ])
 })
 
