@@ -20,8 +20,11 @@ import { RangeEditionMinterV1Config } from '../../abi/range-edition-minter-v1'
 import { RangeEditionMinterV2Config } from '../../abi/range-edition-minter-v2'
 import { RangeEditionMinterV2_1Config } from '../../abi/range-edition-minter-v2_1'
 import { MerkleTestHelper } from '../../../test/helpers'
-import type MerkleTree from 'merkletreejs'
 import type { MintSchedule } from '../../types'
+import { MerkleDropMinterV1Config } from '../../abi/merkle-drop-minter-v1'
+import { assertIsHex } from '../../utils/helpers'
+import { MerkleDropMinterV2Config } from '../../abi/merkle-drop-minter-v2'
+import { MerkleDropMinterV2_1Config } from '../../abi/merkle-drop-minter-v2_1'
 
 async function contractAddressFromTransaction({ hash }: { hash: Hash }): Promise<Address> {
   const { contractAddress } = await testViemClient.waitForTransactionReceipt({
@@ -31,12 +34,21 @@ async function contractAddressFromTransaction({ hash }: { hash: Hash }): Promise
   return contractAddress
 }
 
+// blocktime
 let startTime: number
+// creator
 let creatorAddress: Address
+// minters
 let rangeEditionV1Address: Address
 let rangeEditionV2Address: Address
 let rangeEditionV2_1Address: Address
+let merkleDropV1Address: Address
+let merkleDropV2Address: Address
+let merkleDropV2_1Address: Address
+// expected address for first Alice contract
 let precomputedEditionAddress: Address
+
+let setupSnapshot: Hash
 
 beforeAll(async () => {
   const block = await testViemClient.getBlock()
@@ -57,8 +69,15 @@ beforeAll(async () => {
     account: ALICE,
   })
 
-  // deploy range edition minters
-  const [rangeEditionV1Hash, rangeEditionV2Hash, rangeEditionV2_1Hash] = await Promise.all([
+  // deploy minters
+  const [
+    rangeEditionV1Hash,
+    rangeEditionV2Hash,
+    rangeEditionV2_1Hash,
+    merkleDropV1Hash,
+    merkleDropV2Hash,
+    merkleDropV2_1Hash,
+  ] = await Promise.all([
     testViemClient.deployContract({
       ...RangeEditionMinterV1Config,
       args: [NULL_ADDRESS],
@@ -72,21 +91,46 @@ beforeAll(async () => {
       ...RangeEditionMinterV2_1Config,
       account: ACCOUNTS[2],
     }),
+    testViemClient.deployContract({
+      ...MerkleDropMinterV1Config,
+      args: [NULL_ADDRESS],
+      account: ACCOUNTS[3],
+    }),
+    testViemClient.deployContract({
+      ...MerkleDropMinterV2Config,
+      account: ACCOUNTS[4],
+    }),
+    testViemClient.deployContract({
+      ...MerkleDropMinterV2_1Config,
+      account: ACCOUNTS[5],
+    }),
   ])
 
   // retrieve and set addresses for tests
-  const [_creatorAddress, _rangeEditionV1Address, _rangeEditionV2Address, _rangeEditionV2_1Address] = await Promise.all(
-    [
-      contractAddressFromTransaction({ hash: creatorHash }),
-      contractAddressFromTransaction({ hash: rangeEditionV1Hash }),
-      contractAddressFromTransaction({ hash: rangeEditionV2Hash }),
-      contractAddressFromTransaction({ hash: rangeEditionV2_1Hash }),
-    ],
-  )
+  const [
+    _creatorAddress,
+    _rangeEditionV1Address,
+    _rangeEditionV2Address,
+    _rangeEditionV2_1Address,
+    _merkleDropV1Address,
+    _merkleDropV2Address,
+    _merkleDropV2_1Address,
+  ] = await Promise.all([
+    contractAddressFromTransaction({ hash: creatorHash }),
+    contractAddressFromTransaction({ hash: rangeEditionV1Hash }),
+    contractAddressFromTransaction({ hash: rangeEditionV2Hash }),
+    contractAddressFromTransaction({ hash: rangeEditionV2_1Hash }),
+    contractAddressFromTransaction({ hash: merkleDropV1Hash }),
+    contractAddressFromTransaction({ hash: merkleDropV2Hash }),
+    contractAddressFromTransaction({ hash: merkleDropV2_1Hash }),
+  ])
   creatorAddress = _creatorAddress
   rangeEditionV1Address = _rangeEditionV1Address
   rangeEditionV2Address = _rangeEditionV2Address
   rangeEditionV2_1Address = _rangeEditionV2_1Address
+  merkleDropV1Address = _merkleDropV1Address
+  merkleDropV2Address = _merkleDropV2Address
+  merkleDropV2_1Address = _merkleDropV2_1Address
 
   // compute the edition address
   const [_precomputedEditionAddress] = await testViemClient.readContract({
@@ -96,297 +140,392 @@ beforeAll(async () => {
     args: [ALICE, DEFAULT_SALT],
   })
   precomputedEditionAddress = _precomputedEditionAddress
+  setupSnapshot = await testViemClient.snapshot()
 })
 
 describe('numberMinted', () => {
-  test(
-    'returns the number of tokens minted',
-    async () => {
-      const MINT_ID = 0n
+  test('returns the number of tokens minted', async () => {
+    const MINT_ID = 0n
 
-      // deploy the sound edition and setup the minters
-      const editionInitData = encodeFunctionData({
-        abi: SoundEditionV1_2Config.abi,
-        functionName: 'initialize',
-        args: [
-          'Song Name',
-          'SYMBOL',
-          NULL_ADDRESS,
-          'https://baseURI.com',
-          'https://contractURI.com',
-          NON_NULL_ADDRESS,
-          0, //royaltyBPS,
-          EDITION_MAX, // maxMintableLower
-          EDITION_MAX, // maxMintableUpper
-          UINT32_MAX, // cutoffTime
-          2,
-        ],
-      })
-      const minterCalls = [
-        {
-          contractAddress: precomputedEditionAddress,
-          calldata: encodeFunctionData({
-            abi: SoundEditionV1_2Config.abi,
-            functionName: 'grantRoles',
-            args: [rangeEditionV1Address, MINTER_ROLE],
-          }),
-        },
-        {
-          contractAddress: rangeEditionV1Address,
-          calldata: encodeFunctionData({
-            abi: RangeEditionMinterV1Config.abi,
-            functionName: 'createEditionMint',
-            args: [
-              precomputedEditionAddress,
-              PRICE,
-              startTime,
-              startTime + ONE_HOUR, // cutoffTime
-              startTime + ONE_HOUR * 2, // endTime
-              0, // affiliateFeeBPS,
-              4, // maxMintableLower,
-              5, // maxMintableUpper,
-              2, // maxMintablePerAccount
-            ],
-          }),
-        },
-        {
-          contractAddress: precomputedEditionAddress,
-          calldata: encodeFunctionData({
-            abi: SoundEditionV1_2Config.abi,
-            functionName: 'grantRoles',
-            args: [rangeEditionV2Address, MINTER_ROLE],
-          }),
-        },
-        {
-          contractAddress: rangeEditionV2Address,
-          calldata: encodeFunctionData({
-            abi: RangeEditionMinterV2Config.abi,
-            functionName: 'createEditionMint',
-            args: [
-              precomputedEditionAddress,
-              PRICE,
-              startTime,
-              startTime + ONE_HOUR, // cutoffTime
-              startTime + ONE_HOUR * 2, // endTime
-              0, // affiliateFeeBPS,
-              4, // maxMintableLower,
-              5, // maxMintableUpper,
-              2, // maxMintablePerAccount
-            ],
-          }),
-        },
-        {
-          contractAddress: precomputedEditionAddress,
-          calldata: encodeFunctionData({
-            abi: SoundEditionV1_2Config.abi,
-            functionName: 'grantRoles',
-            args: [rangeEditionV2_1Address, MINTER_ROLE],
-          }),
-        },
-        {
-          contractAddress: rangeEditionV2_1Address,
-          calldata: encodeFunctionData({
-            abi: RangeEditionMinterV2_1Config.abi,
-            functionName: 'createEditionMint',
-            args: [
-              precomputedEditionAddress,
-              PRICE,
-              startTime,
-              startTime + ONE_HOUR, // cutoffTime
-              startTime + ONE_HOUR * 2, // endTime
-              0, // affiliateFeeBPS,
-              4, // maxMintableLower,
-              5, // maxMintableUpper,
-              2, // maxMintablePerAccount
-            ],
-          }),
-        },
-      ]
-
-      // create edition
-      await testViemClient
-        .writeContract({
-          abi: SoundCreatorV1Config.abi,
-          address: creatorAddress,
-          functionName: 'createSoundAndMints',
-          args: [
-            DEFAULT_SALT,
-            editionInitData,
-            minterCalls.map((d) => d.contractAddress),
-            minterCalls.map((d) => d.calldata),
-          ],
-          account: ALICE,
-        })
-        .then((hash) => testViemClient.waitForTransactionReceipt({ hash }))
-
-      // numberMintedBefore shows 0
-      const numberMintedBefore = await testSoundClient.edition.numberMinted({
-        editionAddress: precomputedEditionAddress,
-        userAddress: ALICE,
-      })
-      expect(numberMintedBefore).toEqual(0n)
-
-      // Alice mints one
-      await testViemClient
-        .writeContract({
+    // deploy the sound edition and setup the minters
+    const editionInitData = encodeFunctionData({
+      abi: SoundEditionV1_2Config.abi,
+      functionName: 'initialize',
+      args: [
+        'Song Name',
+        'SYMBOL',
+        NULL_ADDRESS,
+        'https://baseURI.com',
+        'https://contractURI.com',
+        NON_NULL_ADDRESS,
+        0, //royaltyBPS,
+        EDITION_MAX, // maxMintableLower
+        EDITION_MAX, // maxMintableUpper
+        UINT32_MAX, // cutoffTime
+        2,
+      ],
+    })
+    const minterCalls = [
+      {
+        contractAddress: precomputedEditionAddress,
+        calldata: encodeFunctionData({
+          abi: SoundEditionV1_2Config.abi,
+          functionName: 'grantRoles',
+          args: [rangeEditionV1Address, MINTER_ROLE],
+        }),
+      },
+      {
+        contractAddress: rangeEditionV1Address,
+        calldata: encodeFunctionData({
           abi: RangeEditionMinterV1Config.abi,
-          address: rangeEditionV1Address,
+          functionName: 'createEditionMint',
+          args: [
+            precomputedEditionAddress,
+            PRICE,
+            startTime,
+            startTime + ONE_HOUR, // cutoffTime
+            startTime + ONE_HOUR * 2, // endTime
+            0, // affiliateFeeBPS,
+            4, // maxMintableLower,
+            5, // maxMintableUpper,
+            2, // maxMintablePerAccount
+          ],
+        }),
+      },
+      {
+        contractAddress: precomputedEditionAddress,
+        calldata: encodeFunctionData({
+          abi: SoundEditionV1_2Config.abi,
+          functionName: 'grantRoles',
+          args: [rangeEditionV2Address, MINTER_ROLE],
+        }),
+      },
+      {
+        contractAddress: rangeEditionV2Address,
+        calldata: encodeFunctionData({
+          abi: RangeEditionMinterV2Config.abi,
+          functionName: 'createEditionMint',
+          args: [
+            precomputedEditionAddress,
+            PRICE,
+            startTime,
+            startTime + ONE_HOUR, // cutoffTime
+            startTime + ONE_HOUR * 2, // endTime
+            0, // affiliateFeeBPS,
+            4, // maxMintableLower,
+            5, // maxMintableUpper,
+            2, // maxMintablePerAccount
+          ],
+        }),
+      },
+      {
+        contractAddress: precomputedEditionAddress,
+        calldata: encodeFunctionData({
+          abi: SoundEditionV1_2Config.abi,
+          functionName: 'grantRoles',
+          args: [rangeEditionV2_1Address, MINTER_ROLE],
+        }),
+      },
+      {
+        contractAddress: rangeEditionV2_1Address,
+        calldata: encodeFunctionData({
+          abi: RangeEditionMinterV2_1Config.abi,
+          functionName: 'createEditionMint',
+          args: [
+            precomputedEditionAddress,
+            PRICE,
+            startTime,
+            startTime + ONE_HOUR, // cutoffTime
+            startTime + ONE_HOUR * 2, // endTime
+            0, // affiliateFeeBPS,
+            4, // maxMintableLower,
+            5, // maxMintableUpper,
+            2, // maxMintablePerAccount
+          ],
+        }),
+      },
+    ]
+
+    // create edition
+    await testViemClient
+      .writeContract({
+        abi: SoundCreatorV1Config.abi,
+        address: creatorAddress,
+        functionName: 'createSoundAndMints',
+        args: [
+          DEFAULT_SALT,
+          editionInitData,
+          minterCalls.map((d) => d.contractAddress),
+          minterCalls.map((d) => d.calldata),
+        ],
+        account: ALICE,
+      })
+      .then((hash) => testViemClient.waitForTransactionReceipt({ hash }))
+
+    // numberMintedBefore shows 0
+    const numberMintedBefore = await testSoundClient.edition.numberMinted({
+      editionAddress: precomputedEditionAddress,
+      userAddress: ALICE,
+    })
+    expect(numberMintedBefore).toEqual(0n)
+
+    // Alice mints one
+    await testViemClient
+      .writeContract({
+        abi: RangeEditionMinterV1Config.abi,
+        address: rangeEditionV1Address,
+        functionName: 'mint',
+        args: [precomputedEditionAddress, MINT_ID, 1, NULL_ADDRESS],
+        account: ALICE,
+        value: PRICE,
+        gas: 150_000n,
+      })
+      .then((hash) => testViemClient.waitForTransactionReceipt({ hash }))
+
+    // numberMintedAfter for Alice shows 1
+    const numberMintedAfterOne = await testSoundClient.edition.numberMinted({
+      editionAddress: precomputedEditionAddress,
+      userAddress: ALICE,
+    })
+    expect(numberMintedAfterOne).toEqual(1n)
+
+    // Alice mints second and Bob mints third
+    await Promise.all([
+      testViemClient
+        .writeContract({
+          account: ALICE,
+          abi: RangeEditionMinterV1Config.abi,
+          address: rangeEditionV2Address,
           functionName: 'mint',
           args: [precomputedEditionAddress, MINT_ID, 1, NULL_ADDRESS],
-          account: ALICE,
           value: PRICE,
           gas: 150_000n,
         })
-        .then((hash) => testViemClient.waitForTransactionReceipt({ hash }))
+        .then((hash) => testViemClient.waitForTransactionReceipt({ hash })),
+      testViemClient
+        .writeContract({
+          account: BOB,
+          abi: RangeEditionMinterV1Config.abi,
+          address: rangeEditionV2_1Address,
+          functionName: 'mint',
+          args: [precomputedEditionAddress, MINT_ID, 1, NULL_ADDRESS],
+          value: PRICE,
+          gas: 150_000n,
+        })
+        .then((hash) => testViemClient.waitForTransactionReceipt({ hash })),
+    ])
 
-      // numberMintedAfter for Alice shows 1
-      const numberMintedAfterOne = await testSoundClient.edition.numberMinted({
+    // numberMintedAfter shows 2 for Alice, and 1 for Bob
+    const [aliceMinted, bobMinted] = await Promise.all([
+      testSoundClient.edition.numberMinted({
         editionAddress: precomputedEditionAddress,
         userAddress: ALICE,
-      })
-      expect(numberMintedAfterOne).toEqual(1n)
-
-      // Alice mints second and Bob mints third
-      await Promise.all([
-        testViemClient
-          .writeContract({
-            account: ALICE,
-            abi: RangeEditionMinterV1Config.abi,
-            address: rangeEditionV2Address,
-            functionName: 'mint',
-            args: [precomputedEditionAddress, MINT_ID, 1, NULL_ADDRESS],
-            value: PRICE,
-            gas: 150_000n,
-          })
-          .then((hash) => testViemClient.waitForTransactionReceipt({ hash })),
-        testViemClient
-          .writeContract({
-            account: BOB,
-            abi: RangeEditionMinterV1Config.abi,
-            address: rangeEditionV2_1Address,
-            functionName: 'mint',
-            args: [precomputedEditionAddress, MINT_ID, 1, NULL_ADDRESS],
-            value: PRICE,
-            gas: 150_000n,
-          })
-          .then((hash) => testViemClient.waitForTransactionReceipt({ hash })),
-      ])
-
-      // numberMintedAfter shows 2 for Alice, and 1 for Bob
-      const [aliceMinted, bobMinted] = await Promise.all([
-        testSoundClient.edition.numberMinted({
-          editionAddress: precomputedEditionAddress,
-          userAddress: ALICE,
-        }),
-        testSoundClient.edition.numberMinted({
-          editionAddress: precomputedEditionAddress,
-          userAddress: BOB,
-        }),
-      ])
-      expect(aliceMinted).toEqual(2n)
-      expect(bobMinted).toEqual(1n)
-    },
-    { timeout: 20_000 },
-  )
+      }),
+      testSoundClient.edition.numberMinted({
+        editionAddress: precomputedEditionAddress,
+        userAddress: BOB,
+      }),
+    ])
+    expect(aliceMinted).toEqual(2n)
+    expect(bobMinted).toEqual(1n)
+  })
 })
 
-// describe('eligibleQuantity: merkleDrop', () => {
-//   const merkleTestHelper = MerkleTestHelper()
-//   let merkleTree: MerkleTree
-//   let mintSchedules: MintSchedule[] = []
+describe('eligibleQuantity: merkleDrop', () => {
+  const merkleTestHelper = MerkleTestHelper()
+  const merkleTree = merkleTestHelper.getMerkleTree([ALICE, BOB])
+  const merkleRoot = merkleTestHelper.getMerkleRoot(merkleTree)
+  assertIsHex(merkleRoot)
+  // override merkleProvider for tests
+  testSoundClient.instance.instance.merkleProvider = {
+    merkleProof({ userAddress }) {
+      return merkleTestHelper.getProof({ merkleTree, address: userAddress })
+    },
+  }
 
-//   beforeEach(async () => {
-//     merkleTree = merkleTestHelper.getMerkleTree()
-//     const merkleRoot = merkleTestHelper.getMerkleRoot(merkleTree)
+  let mintSchedules: MintSchedule[] = []
 
-//     const minterCalls = [
-//       {
-//         contractAddress: merkleDropMinter.address,
-//         calldata: MerkleDropMinter__factory.createInterface().encodeFunctionData('createEditionMint', [
-//           precomputedEditionAddress,
-//           merkleRoot,
-//           PRICE,
-//           startTime,
-//           startTime + ONE_HOUR,
-//           0, // affiliateFeeBPS
-//           5, // maxMintable,
-//           1, // maxMintablePerAccount
-//         ]),
-//       },
-//       {
-//         contractAddress: merkleDropMinterV2.address,
-//         calldata: MerkleDropMinterV2__factory.createInterface().encodeFunctionData('createEditionMint', [
-//           precomputedEditionAddress,
-//           merkleRoot,
-//           PRICE,
-//           startTime,
-//           startTime + ONE_HOUR,
-//           0, // affiliateFeeBPS
-//           5, // maxMintable,
-//           2, // maxMintablePerAccount
-//         ]),
-//       },
-//     ]
+  beforeAll(async () => {
+    await testViemClient.revert({ id: setupSnapshot })
 
-//     await setupTest({ minterCalls })
+    const minterCalls = [
+      {
+        contractAddress: precomputedEditionAddress,
+        calldata: encodeFunctionData({
+          abi: SoundEditionV1_2Config.abi,
+          functionName: 'grantRoles',
+          args: [merkleDropV1Address, MINTER_ROLE],
+        }),
+      },
+      {
+        contractAddress: merkleDropV1Address,
+        calldata: encodeFunctionData({
+          abi: MerkleDropMinterV1Config.abi,
+          functionName: 'createEditionMint',
+          args: [
+            precomputedEditionAddress,
+            merkleRoot,
+            PRICE,
+            startTime,
+            startTime + ONE_HOUR,
+            0, // affiliateFeeBPS
+            5, // maxMintable,
+            1, // maxMintablePerAccount
+          ],
+        }),
+      },
+      {
+        contractAddress: precomputedEditionAddress,
+        calldata: encodeFunctionData({
+          abi: SoundEditionV1_2Config.abi,
+          functionName: 'grantRoles',
+          args: [merkleDropV2Address, MINTER_ROLE],
+        }),
+      },
+      {
+        contractAddress: merkleDropV2Address,
+        calldata: encodeFunctionData({
+          abi: MerkleDropMinterV2Config.abi,
+          functionName: 'createEditionMint',
+          args: [
+            precomputedEditionAddress,
+            merkleRoot,
+            PRICE,
+            startTime,
+            startTime + ONE_HOUR,
+            0, // affiliateFeeBPS
+            5, // maxMintable,
+            2, // maxMintablePerAccount
+          ],
+        }),
+      },
+      {
+        contractAddress: precomputedEditionAddress,
+        calldata: encodeFunctionData({
+          abi: SoundEditionV1_2Config.abi,
+          functionName: 'grantRoles',
+          args: [merkleDropV2_1Address, MINTER_ROLE],
+        }),
+      },
+      {
+        contractAddress: merkleDropV2_1Address,
+        calldata: encodeFunctionData({
+          abi: MerkleDropMinterV2_1Config.abi,
+          functionName: 'createEditionMint',
+          args: [
+            precomputedEditionAddress,
+            merkleRoot,
+            PRICE,
+            startTime,
+            startTime + ONE_HOUR,
+            0, // affiliateFeeBPS
+            5, // maxMintable,
+            3, // maxMintablePerAccount
+          ],
+        }),
+      },
+    ]
 
-//     const testClient = createTestClient({
-//       chain: hardhatChain,
-//       mode: 'hardhat',
-//       transport: http(),
-//       account: soundWalletAccount,
-//     })
-//       .extend(walletActions)
-//       .extend(publicActions)
+    // deploy the sound edition and setup the minters
+    const editionInitData = encodeFunctionData({
+      abi: SoundEditionV1_2Config.abi,
+      functionName: 'initialize',
+      args: [
+        'Song Name',
+        'SYMBOL',
+        NULL_ADDRESS,
+        'https://baseURI.com',
+        'https://contractURI.com',
+        NON_NULL_ADDRESS,
+        0, //royaltyBPS,
+        EDITION_MAX, // maxMintableLower
+        EDITION_MAX, // maxMintableUpper
+        UINT32_MAX, // cutoffTime
+        2,
+      ],
+    })
 
-//     client = SoundClient({
-//       soundAPI: MockAPI(),
-//       client: testClient,
-//       account: testClient,
-//       merkleProvider: {
-//         merkleProof({ userAddress }) {
-//           return merkleTestHelper.getProof({ merkleTree, address: userAddress })
-//         },
-//       },
-//     })
+    // create edition
+    await testViemClient
+      .writeContract({
+        abi: SoundCreatorV1Config.abi,
+        address: creatorAddress,
+        functionName: 'createSoundAndMints',
+        args: [
+          DEFAULT_SALT,
+          editionInitData,
+          minterCalls.map((d) => d.contractAddress),
+          minterCalls.map((d) => d.calldata),
+        ],
+        account: ALICE,
+      })
+      .then((hash) => testViemClient.waitForTransactionReceipt({ hash }))
 
-//     mintSchedules = (await client.edition.mintSchedules({ editionAddress: precomputedEditionAddress })).activeSchedules
-//     expect(mintSchedules[0].mintType).to.eq('MerkleDrop')
-//     expect(mintSchedules[1].mintType).to.eq('MerkleDrop')
-//   })
+    mintSchedules = (
+      await testSoundClient.edition.mintSchedules({
+        editionAddress: precomputedEditionAddress,
+        scheduleIds: [
+          { minterAddress: merkleDropV1Address, mintIds: [0] },
+          { minterAddress: merkleDropV2Address, mintIds: [0] },
+          { minterAddress: merkleDropV2_1Address, mintIds: [0] },
+        ],
+        timestamp: startTime,
+      })
+    ).activeSchedules
 
-//   it('returns eligible quantity if the user is in the allowlist', async () => {
-//     const [v1EligibleQuantity, v2EligibleQuantity] = await Promise.all([
-//       client.edition.eligibleQuantity({
-//         userAddress: buyerWallet.address,
-//         mintSchedule: mintSchedules[0],
-//       }),
-//       client.edition.eligibleQuantity({
-//         userAddress: buyerWallet.address,
-//         mintSchedule: mintSchedules[1],
-//       }),
-//     ])
+    expect(mintSchedules[0].mintType).to.eq('MerkleDrop')
+    expect(mintSchedules[1].mintType).to.eq('MerkleDrop')
+    expect(mintSchedules[2].mintType).to.eq('MerkleDrop')
+  })
 
-//     expect(v1EligibleQuantity).to.equal(1)
-//     expect(v2EligibleQuantity).to.equal(2)
-//   })
+  test('returns eligible quantity if the user is in the allowlist', async () => {
+    const [v1EligibleQuantity, v2EligibleQuantity, v2_1EligibleQuantity] = await Promise.all([
+      testSoundClient.edition.eligibleQuantity({
+        userAddress: ALICE,
+        mintSchedule: mintSchedules[0],
+        timestamp: startTime,
+      }),
+      testSoundClient.edition.eligibleQuantity({
+        userAddress: ALICE,
+        mintSchedule: mintSchedules[1],
+        timestamp: startTime,
+      }),
+      testSoundClient.edition.eligibleQuantity({
+        userAddress: ALICE,
+        mintSchedule: mintSchedules[2],
+        timestamp: startTime,
+      }),
+    ])
 
-//   it('returns 0 if the user is not in the allowlist', async () => {
-//     const [v1EligibleQuantity, v2EligibleQuantity] = await Promise.all([
-//       client.edition.eligibleQuantity({
-//         userAddress: '0x52D52188D89f912538fe5933F1d2307Bc8076D05',
-//         mintSchedule: mintSchedules[0],
-//       }),
-//       client.edition.eligibleQuantity({
-//         userAddress: '0x52D52188D89f912538fe5933F1d2307Bc8076D05',
-//         mintSchedule: mintSchedules[1],
-//       }),
-//     ])
+    expect(v1EligibleQuantity).to.equal(1n)
+    expect(v2EligibleQuantity).to.equal(2n)
+    expect(v2_1EligibleQuantity).to.equal(3n)
+  })
 
-//     expect(v1EligibleQuantity).to.equal(0)
-//     expect(v2EligibleQuantity).to.equal(0)
-//   })
-// })
+  test('returns 0 if the user is not in the allowlist', async () => {
+    const [v1EligibleQuantity, v2EligibleQuantity, v2_1EligibleQuantity] = await Promise.all([
+      testSoundClient.edition.eligibleQuantity({
+        userAddress: '0x52D52188D89f912538fe5933F1d2307Bc8076D05',
+        mintSchedule: mintSchedules[0],
+        timestamp: startTime,
+      }),
+      testSoundClient.edition.eligibleQuantity({
+        userAddress: '0x52D52188D89f912538fe5933F1d2307Bc8076D05',
+        mintSchedule: mintSchedules[1],
+        timestamp: startTime,
+      }),
+      testSoundClient.edition.eligibleQuantity({
+        userAddress: '0x52D52188D89f912538fe5933F1d2307Bc8076D05',
+        mintSchedule: mintSchedules[2],
+        timestamp: startTime,
+      }),
+    ])
+
+    expect(v1EligibleQuantity).to.equal(0n)
+    expect(v2EligibleQuantity).to.equal(0n)
+    expect(v2_1EligibleQuantity).to.equal(0n)
+  })
+})
 
 // describe('eligibleQuantity: single RangeEditionMinter instance', () => {
 //   it(`Eligible quantity is user specific and changes with mint`, async () => {
