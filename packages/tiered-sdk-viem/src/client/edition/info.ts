@@ -3,7 +3,6 @@ import { SoundNotFoundError } from '../../errors'
 import type { SoundContractValidation } from '../../types'
 import { LazyPromise } from '../../utils/promise'
 import { SoundClientInstance } from '../instance'
-import { validateSoundEdition } from '../validation'
 import { validateAddress } from '../../utils/helpers'
 import { SoundEditionV2Config } from '../../abi/sound-edition-v2'
 
@@ -11,7 +10,7 @@ export function editionInfo(
   this: SoundClientInstance,
   soundParams: ReleaseInfoQueryVariables & SoundContractValidation,
 ) {
-  const { contractAddress, assumeValidSoundContract = false } = soundParams
+  const { contractAddress } = soundParams
 
   validateAddress(contractAddress, {
     type: 'SOUND_EDITION',
