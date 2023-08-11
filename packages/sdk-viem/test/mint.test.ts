@@ -1,30 +1,21 @@
 import type { Address, Hash } from 'viem'
 import { encodeFunctionData } from 'viem/utils'
 import { assert, beforeAll, describe, expect, test } from 'vitest'
-import {
-  ACCOUNTS,
-  ALICE,
-  BOB,
-  DEFAULT_SALT,
-  EDITION_MAX,
-  ONE_HOUR,
-  PRICE,
-  forkBlockNumber,
-} from '../../../test/test-constants'
-import { testSoundClient, testViemClient } from '../../../test/test-utils'
-import { SoundCreatorV1Config } from '../../abi/sound-creator-v1'
-import { SoundEditionV1_2Config } from '../../abi/sound-edition-v1_2'
+import { ACCOUNTS, ALICE, BOB, DEFAULT_SALT, EDITION_MAX, ONE_HOUR, PRICE, forkBlockNumber } from './test-constants'
+import { testSoundClient, testViemClient } from './test-utils'
+import { SoundCreatorV1Config } from '../src/abi/sound-creator-v1'
+import { SoundEditionV1_2Config } from '../src/abi/sound-edition-v1_2'
 
-import { MINTER_ROLE, NON_NULL_ADDRESS, NULL_ADDRESS, UINT32_MAX } from '../../utils/constants'
-import { RangeEditionMinterV1Config } from '../../abi/range-edition-minter-v1'
-import { RangeEditionMinterV2Config } from '../../abi/range-edition-minter-v2'
-import { RangeEditionMinterV2_1Config } from '../../abi/range-edition-minter-v2_1'
-import { MerkleTestHelper } from '../../../test/helpers'
-import type { MintSchedule } from '../../types'
-import { MerkleDropMinterV1Config } from '../../abi/merkle-drop-minter-v1'
-import { assertIsHex } from '../../utils/helpers'
-import { MerkleDropMinterV2Config } from '../../abi/merkle-drop-minter-v2'
-import { MerkleDropMinterV2_1Config } from '../../abi/merkle-drop-minter-v2_1'
+import { MINTER_ROLE, NON_NULL_ADDRESS, NULL_ADDRESS, UINT32_MAX } from '../src/utils/constants'
+import { RangeEditionMinterV1Config } from '../src/abi/range-edition-minter-v1'
+import { RangeEditionMinterV2Config } from '../src/abi/range-edition-minter-v2'
+import { RangeEditionMinterV2_1Config } from '../src/abi/range-edition-minter-v2_1'
+import { MerkleTestHelper } from './helpers'
+import type { MintSchedule } from '../src/types'
+import { MerkleDropMinterV1Config } from '../src/abi/merkle-drop-minter-v1'
+import { assertIsHex } from '../src/utils/helpers'
+import { MerkleDropMinterV2Config } from '../src/abi/merkle-drop-minter-v2'
+import { MerkleDropMinterV2_1Config } from '../src/abi/merkle-drop-minter-v2_1'
 
 async function contractAddressFromTransaction({ hash }: { hash: Hash }): Promise<Address> {
   const { contractAddress } = await testViemClient.waitForTransactionReceipt({
