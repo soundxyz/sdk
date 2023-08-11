@@ -1,14 +1,14 @@
 import type { Address } from 'viem'
 import { encodeFunctionData } from 'viem/utils'
 import { beforeAll, describe, expect, test } from 'vitest'
-import { didntThrowExpectedError } from '../../test/helpers'
-import { ALICE, DEFAULT_SALT, forkBlockNumber } from '../../test/test-constants'
-import { contractAddressFromTransaction, testSoundClient, testViemClient } from '../../test/test-utils'
-import { SoundCreatorV1Config } from '../abi/sound-creator-v1'
-import { SoundEditionV2Config } from '../abi/sound-edition-v2'
-import { InvalidAddressError } from '../errors'
+import { didntThrowExpectedError } from './helpers'
+import { ALICE, DEFAULT_SALT, forkBlockNumber } from './test-constants'
+import { contractAddressFromTransaction, testSoundClient, testViemClient } from './test-utils'
+import { SoundCreatorV1Config } from '../src/abi/sound-creator-v1'
+import { SoundEditionV2Config } from '../src/abi/sound-edition-v2'
+import { InvalidAddressError } from '../src/errors'
 
-import { NON_NULL_ADDRESS, NULL_ADDRESS, UINT32_MAX } from '../utils/constants'
+import { NON_NULL_ADDRESS, NULL_ADDRESS, UINT32_MAX } from '../src/utils/constants'
 
 let creatorAddress: Address
 
