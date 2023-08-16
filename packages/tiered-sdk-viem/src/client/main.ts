@@ -1,5 +1,6 @@
 import type { SoundClientConfig } from '../types'
-import { validateAddress } from '../utils/helpers'
+import { curry, validateAddress } from '../utils/helpers'
+import { createEdition, estimateCreateEdition, expectedEditionAddress } from './edition/create'
 // import { createEdition, estimateCreateEdition, expectedEditionAddress } from './edition/create'
 import { editionInfo } from './edition/info'
 import { mintSchedules } from './edition/schedules'
@@ -44,9 +45,9 @@ export function SoundClient(config: SoundClientConfig) {
       })
 
       return {
-        // createEdition: curry(createEdition.bind(client))({ creatorAddress }),
-        // estimateEdition: curry(estimateCreateEdition.bind(client))({ creatorAddress }),
-        // expectedEditionAddress: curry(expectedEditionAddress.bind(client))({ creatorAddress }),
+        createEdition: curry(createEdition.bind(client))({ creatorAddress }),
+        estimateEdition: curry(estimateCreateEdition.bind(client))({ creatorAddress }),
+        expectedEditionAddress: curry(expectedEditionAddress.bind(client))({ creatorAddress }),
       } as const
     },
   }

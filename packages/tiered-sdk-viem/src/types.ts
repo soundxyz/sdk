@@ -6,6 +6,7 @@ import type {
   TransactionRequestBase,
   WalletClient,
   BlockTag,
+  Hex,
 } from 'viem'
 import type { MerkleProofProvider } from './merkle/types'
 import type { SoundAPI } from './api'
@@ -377,3 +378,13 @@ export type RangeEditionConfig = MintConfigBase & {
 }
 
 export type MintConfig = MerkleDropConfig | RangeEditionConfig
+
+export type SuperMinterConfig = MintConfig & {
+  maxMintable: number
+  affiliateMerkleRoot: Hex
+  tier: number
+  platform: Address
+  mode: number
+  signer: Address
+  merkleRoot: Hex
+}
