@@ -1,5 +1,11 @@
 # @soundxyz/sdk
 
+## 2.0.1
+
+### Patch Changes
+
+- [#269](https://github.com/soundxyz/sdk/pull/269) [`e77ee3b`](https://github.com/soundxyz/sdk/commit/e77ee3b3605259d105e164cfd79f18030945bed3) Thanks [@vigneshka](https://github.com/vigneshka)! - expose mintTo
+
 ## 2.0.0
 
 ### Major Changes
