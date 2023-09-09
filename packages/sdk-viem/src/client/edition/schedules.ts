@@ -268,7 +268,7 @@ export async function editionMinterMintIds(
 
   return Array.from(
     mintScheduleConfigEvents.reduce((acc, event) => {
-      if (event.args?.mintId) acc.add(event.args.mintId)
+      if (event.args?.mintId != null) acc.add(event.args.mintId)
       return acc
     }, new Set<bigint>()),
   )
