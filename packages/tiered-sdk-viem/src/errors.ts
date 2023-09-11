@@ -1,4 +1,4 @@
-import type { AddressInputType, GraphQLExecutionErrors, MintSchedule } from './types'
+import type { AddressInputType, GraphQLExecutionErrors } from './types'
 import type { ZodError } from 'zod'
 
 export class MissingSignerError extends Error {
@@ -226,29 +226,29 @@ export class InvalidAttributonIdError extends Error {
   }
 }
 
-export class NotEligibleMint extends Error {
-  readonly name = 'NotEligibleMintError'
+// export class NotEligibleMint extends Error {
+//   readonly name = 'NotEligibleMintError'
 
-  readonly userAddress: string
-  readonly eligibleMintQuantity?: bigint
-  readonly mintSchedule: MintSchedule
+//   readonly userAddress: string
+//   readonly eligibleMintQuantity?: bigint
+//   readonly mintSchedule: MintSchedule
 
-  constructor({
-    userAddress,
-    eligibleMintQuantity,
-    mintSchedule,
-  }: {
-    userAddress: string
-    eligibleMintQuantity?: bigint
-    mintSchedule: MintSchedule
-  }) {
-    super('Not eligible to mint')
+//   constructor({
+//     userAddress,
+//     eligibleMintQuantity,
+//     mintSchedule,
+//   }: {
+//     userAddress: string
+//     eligibleMintQuantity?: bigint
+//     mintSchedule: MintSchedule
+//   }) {
+//     super('Not eligible to mint')
 
-    this.userAddress = userAddress
-    this.eligibleMintQuantity = eligibleMintQuantity
-    this.mintSchedule = mintSchedule
-  }
-}
+//     this.userAddress = userAddress
+//     this.eligibleMintQuantity = eligibleMintQuantity
+//     this.mintSchedule = mintSchedule
+//   }
+// }
 
 export class MissingApiKey extends Error {
   readonly name = 'MissingApiKeyError'

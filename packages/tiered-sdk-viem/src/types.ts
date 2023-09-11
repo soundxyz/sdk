@@ -10,7 +10,6 @@ import type {
 } from 'viem'
 import type { MerkleProofProvider } from './merkle/types'
 import type { SoundAPI } from './api'
-import { interfaceIds } from '@soundxyz/sound-protocol/interfaceIds'
 
 export type BlockOrBlockTag = bigint | BlockTag
 
@@ -139,23 +138,6 @@ type TupleSplit<T, N extends number, O extends readonly any[] = readonly []> = O
 
 export type TakeFirst<T extends readonly any[], N extends number> = TupleSplit<T, N>[0]
 
-export const HANDLED_MINTER_INTERFACE_IDS = [
-  interfaceIds.IMerkleDropMinter,
-  interfaceIds.IMerkleDropMinterV2,
-  interfaceIds.IMerkleDropMinterV2_1,
-  interfaceIds.IRangeEditionMinter,
-  interfaceIds.IRangeEditionMinterV2,
-  interfaceIds.IRangeEditionMinterV2_1,
-] as const
-export type MinterInterfaceId = (typeof HANDLED_MINTER_INTERFACE_IDS)[number]
-
-export function isHandledMinterInterfaceId(interfaceId: string): interfaceId is MinterInterfaceId {
-  return HANDLED_MINTER_INTERFACE_IDS.findIndex((value) => value === interfaceId) !== -1
-}
-
-export const HANDLED_SAM_INTERFACE_IDS = [interfaceIds.ISAM, interfaceIds.ISAMV1_1] as const
-export type SAMInterfaceId = (typeof HANDLED_SAM_INTERFACE_IDS)[number]
-
 export interface MintScheduleBase {
   editionAddress: Address
   minterAddress: Address
@@ -168,80 +150,6 @@ export interface MintScheduleBase {
   totalMinted: number
   affiliateFeeBPS: number
   platformTransactionFee: bigint
-}
-
-export interface RangeEditionSchedule extends MintScheduleBase {
-  mintType: 'RangeEdition'
-  interfaceId:
-    | typeof interfaceIds.IRangeEditionMinter
-    | typeof interfaceIds.IRangeEditionMinterV2
-    | typeof interfaceIds.IRangeEditionMinterV2_1
-  maxMintableLower: number
-  maxMintableUpper: number
-  cutoffTime: number
-  maxMintable: (unixTimestamp?: number) => number
-}
-export interface RangeEditionV1Schedule extends RangeEditionSchedule {
-  interfaceId: typeof interfaceIds.IRangeEditionMinter
-}
-export interface RangeEditionV2Schedule extends RangeEditionSchedule {
-  interfaceId: typeof interfaceIds.IRangeEditionMinterV2
-}
-
-export interface RangeEditionV2_1Schedule extends RangeEditionSchedule {
-  interfaceId: typeof interfaceIds.IRangeEditionMinterV2_1
-}
-
-export interface MerkleDropSchedule extends MintScheduleBase {
-  mintType: 'MerkleDrop'
-  interfaceId:
-    | typeof interfaceIds.IMerkleDropMinter
-    | typeof interfaceIds.IMerkleDropMinterV2
-    | typeof interfaceIds.IMerkleDropMinterV2_1
-  maxMintable: number
-  merkleRoot: string
-}
-export interface MerkleDropV1Schedule extends MerkleDropSchedule {
-  interfaceId: typeof interfaceIds.IMerkleDropMinter
-}
-export interface MerkleDropV2Schedule extends MerkleDropSchedule {
-  interfaceId: typeof interfaceIds.IMerkleDropMinterV2
-}
-
-export interface MerkleDropV2_1Schedule extends MerkleDropSchedule {
-  interfaceId: typeof interfaceIds.IMerkleDropMinterV2_1
-}
-
-export type V1MintSchedule = RangeEditionV1Schedule | MerkleDropV1Schedule
-export type V2MintSchedule = RangeEditionV2Schedule | MerkleDropV2Schedule
-export type V2_1MintSchedule = RangeEditionV2_1Schedule | MerkleDropV2_1Schedule
-
-export type MintSchedule = V1MintSchedule | V2MintSchedule | V2_1MintSchedule
-
-export function isRangeEditionSchedule(schedule: MintSchedule): schedule is RangeEditionSchedule {
-  return schedule.mintType === 'RangeEdition'
-}
-
-export function isMerkleDropSchedule(schedule: MintSchedule): schedule is MerkleDropSchedule {
-  return schedule.mintType === 'MerkleDrop'
-}
-
-export interface SAM {
-  platformFeeBPS: number
-  platformPerTxFlatFee: bigint
-  basePrice: bigint
-  linearPriceSlope: bigint
-  inflectionPrice: bigint
-  inflectionPoint: number
-  goldenEggFeesAccrued: bigint
-  balance: bigint
-  supply: number
-  maxSupply: number
-  buyFreezeTime: number
-  artistFeeBPS: number
-  affiliateFeeBPS: number
-  goldenEggFeeBPS: number
-  affiliateMerkleRoot: `0x${string}`
 }
 
 export interface TransactionGasOptions
@@ -279,29 +187,6 @@ interface SharedMintOptions extends SoundContractValidation, TransactionGasOptio
    * If null or empty array is provided, not eligible safe-check will be thrown
    */
   merkleProof?: string[] | null | undefined
-}
-
-export interface MintOptions extends SharedMintOptions {
-  /**
-   * Mint Schedule to mint from
-   */
-  mintSchedule: MintSchedule
-}
-
-export interface MintToOptions extends SharedMintOptions {
-  /**
-   * Mint Schedule to mint from
-   */
-  mintSchedule: V2MintSchedule | V2_1MintSchedule
-
-  /**
-   * Recipient address that should receive the NFT(s)
-   */
-  mintToAddress?: string
-
-  attributonId?: bigint
-
-  affiliateProof?: string[]
 }
 
 export type EstimatableTransaction = {
