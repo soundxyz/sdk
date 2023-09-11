@@ -386,6 +386,9 @@ importers:
         specifier: ^3.21.4
         version: 3.21.4
     devDependencies:
+      '@ethersproject/solidity':
+        specifier: ^5.7.0
+        version: 5.7.0
       '@graphql-codegen/cli':
         specifier: ^5.0.0
         version: 5.0.0(@types/node@20.4.5)(graphql@16.7.1)
