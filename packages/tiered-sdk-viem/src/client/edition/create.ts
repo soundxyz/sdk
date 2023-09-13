@@ -1,4 +1,4 @@
-import { type Chain } from 'viem'
+import { type Address, type Chain } from 'viem'
 import { encodeFunctionData } from 'viem/utils'
 import { soundCreatorV1Abi } from '../../abi/sound-creator-v1'
 import {
@@ -10,14 +10,14 @@ import {
 } from '../../errors'
 import type { ContractCall, EditionConfig, MintConfig, SuperMinterConfig, TransactionGasOptions } from '../../types'
 import { editionInitFlags, MINTER_ROLE, NULL_BYTES32, UINT32_MAX } from '../../utils/constants'
-import { getSaltAsBytes32, retry, validateAddress } from '../../utils/helpers'
+import { getSaltAsBytes32, retry } from '../../utils/helpers'
 import { SoundClientInstance } from '../instance'
 import { SoundEditionV2Config } from '../../abi/sound-edition-v2'
 import { SuperMinterV1Config } from '../../abi/super-minter-v1'
 
 async function createEditionHelper(
   this: SoundClientInstance,
-  { creatorAddress }: { creatorAddress: string },
+  { creatorAddress }: { creatorAddress: Address },
   {
     editionConfig,
     mintConfigs,
@@ -33,11 +33,6 @@ async function createEditionHelper(
     salt?: string | number
   } & TransactionGasOptions,
 ) {
-  validateAddress(creatorAddress, {
-    type: 'CREATOR_ADDRESS',
-    notNull: true,
-  })
-
   validateEditionConfig(editionConfig)
 
   validateMintConfigs(mintConfigs)
@@ -78,10 +73,6 @@ async function createEditionHelper(
   // Grant MINTER_ROLE for each minter.
   const mintersToGrantRole = Array.from(new Set(mintConfigs.map((m) => m.minterAddress)))
   for (const minterAddress of mintersToGrantRole) {
-    validateAddress(minterAddress, {
-      type: 'MINTER',
-    })
-
     contractCalls.push({
       contractAddress: editionAddress,
       calldata: encodeFunctionData({
@@ -94,10 +85,6 @@ async function createEditionHelper(
 
   // Add the createEditionMint calls.
   for (const mintConfig of mintConfigs) {
-    validateAddress(mintConfig.minterAddress, {
-      type: 'MINTER',
-    })
-
     contractCalls.push({
       contractAddress: mintConfig.minterAddress,
 
@@ -131,14 +118,6 @@ async function createEditionHelper(
   if (editionConfig.shouldFreezeMetadata) flags |= editionInitFlags.METADATA_IS_FROZEN
   if (editionConfig.shouldEnableMintRandomness) flags |= editionInitFlags.MINT_RANDOMNESS_ENABLED
   if (editionConfig.enableOperatorFiltering) flags |= editionInitFlags.OPERATOR_FILTERING_ENABLED
-
-  validateAddress(editionConfig.metadataModule, {
-    type: 'METADATA_MODULE',
-  })
-
-  validateAddress(editionConfig.fundingRecipient, {
-    type: 'FUNDING_RECIPIENT',
-  })
 
   /**
    * Encode the SoundEdition.initialize call.
@@ -197,7 +176,7 @@ async function createEditionHelper(
 
 export async function estimateCreateEdition(
   this: SoundClientInstance,
-  { creatorAddress }: { creatorAddress: string },
+  { creatorAddress }: { creatorAddress: Address },
   {
     editionConfig,
     mintConfigs,
@@ -228,10 +207,6 @@ export async function estimateCreateEdition(
     { editionConfig, mintConfigs, salt: customSalt, gas, maxFeePerGas, maxPriorityFeePerGas },
   )
 
-  validateAddress(creatorAddress, {
-    type: 'CREATOR_ADDRESS',
-  })
-
   return estimateContractGas({
     abi: soundCreatorContractAbi,
     account: userAddress,
@@ -253,7 +228,7 @@ export interface CreateEditionOptions extends TransactionGasOptions {
 
 export async function createEdition(
   this: SoundClientInstance,
-  { creatorAddress }: { creatorAddress: string },
+  { creatorAddress }: { creatorAddress: Address },
   {
     editionConfig,
     mintConfigs,
@@ -283,10 +258,6 @@ export async function createEdition(
     { editionConfig, mintConfigs, salt: customSalt, gas, maxFeePerGas, maxPriorityFeePerGas },
   )
 
-  validateAddress(creatorAddress, {
-    type: 'CREATOR_ADDRESS',
-  })
-
   return wallet.writeContract({
     abi: soundCreatorContractAbi,
 
@@ -300,16 +271,7 @@ export async function createEdition(
 }
 
 export function validateEditionConfig(config: EditionConfig) {
-  const { editionMaxMintableLower, editionMaxMintableUpper, fundingRecipient, metadataModule } = config
-
-  validateAddress(fundingRecipient, {
-    type: 'FUNDING_RECIPIENT',
-    notNull: true,
-  })
-
-  validateAddress(metadataModule, {
-    type: 'METADATA_MODULE',
-  })
+  const { editionMaxMintableLower, editionMaxMintableUpper } = config
 
   if (editionMaxMintableLower > editionMaxMintableUpper) {
     throw new InvalidEditionMaxMintableError({
@@ -321,12 +283,7 @@ export function validateEditionConfig(config: EditionConfig) {
 
 export function validateMintConfigs(mintConfigs: MintConfig[]) {
   for (const mintConfig of mintConfigs) {
-    const { maxMintablePerAccount, minterAddress } = mintConfig
-
-    validateAddress(minterAddress, {
-      type: 'MINTER',
-      notNull: true,
-    })
+    const { maxMintablePerAccount } = mintConfig
 
     if (maxMintablePerAccount < 1) {
       throw new InvalidMaxMintablePerAccountError({ maxMintablePerAccount })
@@ -359,14 +316,10 @@ export async function expectedEditionAddress(
   {
     creatorAddress,
   }: {
-    creatorAddress: string
+    creatorAddress: Address
   },
-  { deployer, salt }: { deployer: string; salt: string | number },
+  { deployer, salt }: { deployer: Address; salt: string | number },
 ) {
-  validateAddress(deployer, { type: 'DEPLOYER' })
-  validateAddress(creatorAddress, {
-    type: 'CREATOR_ADDRESS',
-  })
   const { readContract } = await this.expectClient()
 
   const [editionAddress, exists] = await readContract({

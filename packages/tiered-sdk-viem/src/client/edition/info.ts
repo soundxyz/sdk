@@ -3,18 +3,15 @@ import { SoundNotFoundError } from '../../errors'
 import type { SoundContractValidation } from '../../types'
 import { LazyPromise } from '../../utils/promise'
 import { SoundClientInstance } from '../instance'
-import { validateAddress } from '../../utils/helpers'
 import { SoundEditionV2Config } from '../../abi/sound-edition-v2'
+import { isAddress } from 'viem/utils'
+import assert from 'assert'
 
 export function editionInfo(
   this: SoundClientInstance,
   soundParams: ReleaseInfoQueryVariables & SoundContractValidation,
 ) {
   const { contractAddress } = soundParams
-
-  validateAddress(contractAddress, {
-    type: 'SOUND_EDITION',
-  })
 
   const { expectClient, expectSoundAPI } = this
 
@@ -24,6 +21,8 @@ export function editionInfo(
     //   assumeValidSoundContract,
     // })
     const { readContract } = await expectClient()
+
+    assert(isAddress(contractAddress), 'contractAddress must be a valid address')
 
     return readContract({
       abi: SoundEditionV2Config.abi,

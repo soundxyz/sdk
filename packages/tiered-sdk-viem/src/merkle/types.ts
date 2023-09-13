@@ -1,8 +1,8 @@
-import type { Hex } from 'viem'
+import type { Address, Hex } from 'viem'
 
 export interface MerkleProofParameters {
-  merkleRoot: string
-  userAddress: string
+  merkleRoot: Hex
+  userAddress: Address
 }
 
 export interface MerkleProofProvider {

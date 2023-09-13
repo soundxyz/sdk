@@ -1,54 +1,8 @@
-import type { Address, Hex } from 'viem'
-import { isAddress, isHex } from 'viem/utils'
-import { InvalidAddressError, InvalidHexError } from '../errors'
 import keccak256 from 'keccak256'
-import type { AddressInputType } from '../types'
-import { NULL_ADDRESS } from './constants'
+import { isHex, type Hex } from 'viem'
 
-const addressCheckSet = new Set()
-
-export function assertAddress(
-  address: string,
-  {
-    type = 'GENERIC',
-  }: {
-    type?: AddressInputType
-  } = {},
-): asserts address is Address {
-  if (addressCheckSet.has(address)) return
-
-  if (isAddress(address)) {
-    addressCheckSet.add(address)
-    return
-  }
-
-  throw new InvalidAddressError({ address, type })
-}
-
-export function assertIsHex(value: string): asserts value is Hex {
-  if (!isHex(value, { strict: false })) throw new InvalidHexError({ value })
-}
-
-export function validateAddress(
-  address: string,
-  {
-    type,
-    notNull,
-  }: {
-    type: AddressInputType
-
-    notNull?: true
-  },
-): asserts address is Address {
-  if (notNull) {
-    if (address === NULL_ADDRESS) {
-      throw new InvalidAddressError({ type, address, message: 'Address cannot be null address' })
-    }
-  }
-  // We can skip the isAddress check on null address
-  else if (address === NULL_ADDRESS) return
-
-  assertAddress(address, { type })
+export function isHexList(list: string[]): list is Hex[] {
+  return list.every((value) => isHex(value))
 }
 
 export function getSaltAsBytes32(salt: string | number) {
@@ -111,16 +65,6 @@ export async function retry<T>(
   }
 
   return fn()
-}
-
-export function isHexList(list: string[]): list is Hex[] {
-  return list.every((value) => isHex(value, { strict: false }))
-}
-
-export function assertIsHexList(list: string[]): asserts list is Hex[] {
-  for (const value of list) {
-    assertIsHex(value)
-  }
 }
 
 type NonEmptyArray<T> = [T, ...T[]]

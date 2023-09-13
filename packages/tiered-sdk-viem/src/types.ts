@@ -176,10 +176,10 @@ export interface SamConfig {
 export type EditionConfig = {
   name: string
   symbol: string
-  metadataModule: string
+  metadataModule: Address
   baseURI: string
   contractURI: string
-  fundingRecipient: string
+  fundingRecipient: Address
   royaltyBPS: number
   editionMaxMintableLower: number
   editionMaxMintableUpper: number
@@ -195,7 +195,7 @@ export type EditionConfig = {
  * The arguments required for all minter calls.
  */
 export type MintConfigBase = {
-  minterAddress: string
+  minterAddress: Address
   price: bigint
   startTime: number
   endTime: number
@@ -207,7 +207,7 @@ export type MintConfigBase = {
  */
 export type MerkleDropConfig = MintConfigBase & {
   mintType: 'MerkleDrop'
-  merkleRoot: string
+  merkleRoot: Hex
   maxMintable: number
   maxMintablePerAccount: number
 }

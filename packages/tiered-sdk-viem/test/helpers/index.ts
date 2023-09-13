@@ -1,6 +1,7 @@
 import { NON_NULL_ADDRESS, NULL_ADDRESS } from '../../src/utils/constants'
 import { ONE_HOUR, PRICE } from '../test-constants'
 import { MerkleTestHelper } from './merkle'
+import type { Address } from 'viem'
 
 import type { EditionConfig, MerkleDropConfig, RangeEditionConfig } from '../../src/types'
 export function now() {
@@ -30,7 +31,7 @@ const startTime = now()
 const cutoffTime = startTime + ONE_HOUR / 2
 const endTime = cutoffTime + ONE_HOUR
 
-export const getGenericRangeMintConfig = ({ minterAddress }: { minterAddress: string }): RangeEditionConfig => ({
+export const getGenericRangeMintConfig = ({ minterAddress }: { minterAddress: Address }): RangeEditionConfig => ({
   mintType: 'RangeEdition' as const,
   minterAddress,
   price: PRICE,
@@ -43,7 +44,7 @@ export const getGenericRangeMintConfig = ({ minterAddress }: { minterAddress: st
   affiliateFeeBPS: 0,
 })
 
-export const getGenericMerkleMintConfig = ({ minterAddress }: { minterAddress: string }): MerkleDropConfig => {
+export const getGenericMerkleMintConfig = ({ minterAddress }: { minterAddress: Address }): MerkleDropConfig => {
   const merkleTestHelper = MerkleTestHelper()
   const merkleTree = merkleTestHelper.getMerkleTree()
   const merkleRoot = merkleTestHelper.getMerkleRoot(merkleTree)
