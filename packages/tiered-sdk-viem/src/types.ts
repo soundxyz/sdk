@@ -1,13 +1,4 @@
-import type {
-  Address,
-  Chain,
-  FeeValuesEIP1559,
-  PublicClient,
-  TransactionRequestBase,
-  WalletClient,
-  BlockTag,
-  Hex,
-} from 'viem'
+import type { Address, FeeValuesEIP1559, PublicClient, TransactionRequestBase, WalletClient, BlockTag, Hex } from 'viem'
 import type { MerkleProofProvider } from './merkle/types'
 import type { SoundAPI } from './api'
 
@@ -155,39 +146,6 @@ export interface MintScheduleBase {
 export interface TransactionGasOptions
   extends Partial<Pick<FeeValuesEIP1559, 'maxFeePerGas' | 'maxPriorityFeePerGas'>>,
     Pick<TransactionRequestBase, 'gas'> {}
-
-interface SharedMintOptions extends SoundContractValidation, TransactionGasOptions {
-  /**
-   * Chain of edition to be minted
-   */
-  chain: Chain
-
-  /**
-   * Amount of NFTs to be minted
-   */
-  quantity: number
-
-  /**
-   * Optional affiliate address
-   */
-  affiliate?: string
-
-  /**
-   * Skip quantity eligibility pre-mint checks
-   *
-   * @default false
-   */
-  skipQuantityChecks?: boolean
-
-  /**
-   * Pre-provide merkle proof to be used for merkle drops
-   *
-   * By default if it's not specified, it will use the pre-specified Merkle Provider on Sound Client instance
-   *
-   * If null or empty array is provided, not eligible safe-check will be thrown
-   */
-  merkleProof?: string[] | null | undefined
-}
 
 export type EstimatableTransaction = {
   gasEstimate: bigint

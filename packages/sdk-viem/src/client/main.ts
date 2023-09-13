@@ -1,5 +1,6 @@
+import type { Address } from 'viem'
 import type { SoundClientConfig } from '../types'
-import { curry, validateAddress } from '../utils/helpers'
+import { curry } from '../utils/helpers'
 import { LazyPromise } from '../utils/promise'
 import { createEdition, estimateCreateEdition, expectedEditionAddress } from './edition/create'
 import { editionInfo } from './edition/info'
@@ -71,12 +72,7 @@ export function SoundClient(config: SoundClientConfig) {
       minterMintIds: editionMinterMintIds.bind(client),
     },
 
-    creation({ creatorAddress }: { creatorAddress: string }) {
-      validateAddress(creatorAddress, {
-        type: 'CREATOR_ADDRESS',
-        notNull: true,
-      })
-
+    creation({ creatorAddress }: { creatorAddress: Address }) {
       return {
         createEdition: curry(createEdition.bind(client))({ creatorAddress }),
         estimateEdition: curry(estimateCreateEdition.bind(client))({ creatorAddress }),

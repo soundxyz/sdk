@@ -1,5 +1,6 @@
+import type { Address } from 'viem'
 import { InvalidQuantityError } from '../../errors'
-import { parseTokenIdNumber, validateAddress } from '../../utils/helpers'
+import { parseTokenIdNumber } from '../../utils/helpers'
 import { SoundClientInstance } from '../instance'
 
 export function SamAvailableTokensToSell(
@@ -7,21 +8,11 @@ export function SamAvailableTokensToSell(
   {
     editionAddress,
   }: {
-    editionAddress: string
+    editionAddress: Address
   },
   { quantity, ownerPublicAddress }: { quantity: number; ownerPublicAddress: string },
 ) {
   const soundAPI = this.expectSoundAPI()
-
-  validateAddress(editionAddress, {
-    notNull: true,
-    type: 'SOUND_EDITION',
-  })
-
-  validateAddress(ownerPublicAddress, {
-    notNull: true,
-    type: 'WALLET',
-  })
 
   if (typeof quantity !== 'number' || !Number.isInteger(quantity) || quantity <= 0)
     throw new InvalidQuantityError({ quantity })

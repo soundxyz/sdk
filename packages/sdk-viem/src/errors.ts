@@ -1,3 +1,4 @@
+import type { Address } from 'viem'
 import type { AddressInputType, GraphQLExecutionErrors, MintSchedule } from './types'
 import type { ZodError } from 'zod'
 
@@ -74,7 +75,7 @@ export class NotSoundEditionError extends Error {
 
   readonly contractAddress: string
 
-  constructor({ contractAddress }: { contractAddress: string }) {
+  constructor({ contractAddress }: { contractAddress: Address }) {
     super('Address must be a sound edition contract')
 
     this.contractAddress = contractAddress

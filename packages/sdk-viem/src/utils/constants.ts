@@ -1,10 +1,10 @@
-import { interfaceIds } from '@soundxyz/sound-protocol'
 import { rangeEditionMinterV1Abi } from '../abi/range-edition-minter-v1'
 import { rangeEditionMinterV2Abi } from '../abi/range-edition-minter-v2'
 import { rangeEditionMinterV2_1Abi } from '../abi/range-edition-minter-v2_1'
 import { merkleDropMinterV1Abi } from '../abi/merkle-drop-minter-v1'
 import { merkleDropMinterV2Abi } from '../abi/merkle-drop-minter-v2'
 import { merkleDropMinterV2_1Abi } from '../abi/merkle-drop-minter-v2_1'
+import { interfaceIds } from '../constants'
 
 export const minterAbiMap = {
   [interfaceIds.IRangeEditionMinter]: rangeEditionMinterV1Abi,

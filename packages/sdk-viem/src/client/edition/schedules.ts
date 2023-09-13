@@ -1,15 +1,14 @@
 import { type Address } from 'viem'
 
-import { interfaceIds } from '@soundxyz/sound-protocol/interfaceIds'
-
 import { minterModuleV2_1Abi } from '../../abi/minter-module-v2_1'
 import { soundEditionV1_2Abi } from '../../abi/sound-edition-v1_2'
 import { UnsupportedMinterError } from '../../errors'
 import { type BlockOrBlockTag, isHandledMinterInterfaceId, type MintSchedule } from '../../types'
 import { minterAbiMap } from '../../utils/constants'
-import { exhaustiveGuard, validateAddress } from '../../utils/helpers'
+import { exhaustiveGuard } from '../../utils/helpers'
 import { LazyPromise } from '../../utils/promise'
 import { SoundClientInstance } from '../instance'
+import { interfaceIds } from '../../constants'
 
 export async function mintSchedules(
   this: SoundClientInstance,
@@ -18,10 +17,10 @@ export async function mintSchedules(
     scheduleIds: scheduleIdsArg,
     timestamp = Math.floor(Date.now() / 1000),
   }: {
-    editionAddress: string
+    editionAddress: Address
     scheduleIds?:
       | {
-          minterAddress: string
+          minterAddress: Address
           mintIds: (number | bigint)[]
         }[]
       | null
@@ -72,7 +71,7 @@ export async function editionScheduleIds(
     editionAddress,
     fromBlock,
   }: {
-    editionAddress: string
+    editionAddress: Address
     fromBlock?: BlockOrBlockTag
   },
 ) {
@@ -105,19 +104,15 @@ export async function editionRegisteredMinters(
     editionAddress,
     fromBlock,
   }: {
-    editionAddress: string
+    editionAddress: Address
     fromBlock?: BlockOrBlockTag
   },
-): Promise<string[]> {
+): Promise<Address[]> {
   const {
     expectClient,
     instance: { onUnhandledError },
   } = this
   const client = await expectClient()
-
-  validateAddress(editionAddress, {
-    type: 'SOUND_EDITION',
-  })
 
   // Get the addresses with MINTER_ROLE
   const minterRole = await client.readContract({
@@ -194,20 +189,12 @@ export async function editionMinterMintIds(
     minterAddress,
     fromBlock,
   }: {
-    editionAddress: string
-    minterAddress: string
+    editionAddress: Address
+    minterAddress: Address
     fromBlock?: BlockOrBlockTag
   },
 ) {
   const client = await this.expectClient()
-
-  validateAddress(editionAddress, {
-    type: 'SOUND_EDITION',
-  })
-
-  validateAddress(minterAddress, {
-    type: 'MINTER',
-  })
 
   // Query MintConfigCreated event, for v1 and v2, this signature is the same
   const filter = await client.createEventFilter({
@@ -284,8 +271,8 @@ export async function mintInfosFromMinter(
     minterAddress,
     mintIds,
   }: {
-    editionAddress: string
-    minterAddress: string
+    editionAddress: Address
+    minterAddress: Address
     mintIds: (number | bigint)[]
   },
 ): Promise<MintSchedule[]> {
@@ -293,14 +280,6 @@ export async function mintInfosFromMinter(
     expectClient,
     instance: { idempotentCachedCall },
   } = this
-
-  validateAddress(editionAddress, {
-    type: 'SOUND_EDITION',
-  })
-
-  validateAddress(minterAddress, {
-    type: 'MINTER',
-  })
 
   const clientPromise = LazyPromise(() => expectClient())
 

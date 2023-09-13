@@ -8,20 +8,14 @@ import type {
   TransactionGasOptions,
 } from '../../types'
 import { MINT_FALLBACK_GAS_LIMIT, MINT_GAS_LIMIT_MULTIPLIER, minterAbiMap, NULL_ADDRESS } from '../../utils/constants'
-import {
-  BigIntMax,
-  BigIntMin,
-  assertIsHexList,
-  exhaustiveGuard,
-  scaleAmount,
-  validateAddress,
-} from '../../utils/helpers'
+import { BigIntMax, BigIntMin, assertIsHexList, exhaustiveGuard, scaleAmount } from '../../utils/helpers'
 import { SoundClientInstance } from '../instance'
 import { validateSoundEdition } from '../validation'
 import { getMerkleProof } from './merkle'
 import { isSchedulePaused } from './schedules'
-import { interfaceIds } from '@soundxyz/sound-protocol/interfaceIds'
 import { soundEditionV1_2Abi } from '../../abi/sound-edition-v1_2'
+import { interfaceIds } from '../../constants'
+import type { Address } from 'viem'
 
 export async function numberOfTokensOwned(
   this: SoundClientInstance,
@@ -29,19 +23,11 @@ export async function numberOfTokensOwned(
     editionAddress,
     userAddress,
     assumeValidSoundContract = false,
-  }: { editionAddress: string; userAddress: string } & SoundContractValidation,
+  }: { editionAddress: Address; userAddress: Address } & SoundContractValidation,
 ) {
   await validateSoundEdition.call(this, { editionAddress, assumeValidSoundContract })
 
   const { readContract } = await this.expectClient()
-
-  validateAddress(editionAddress, {
-    type: 'SOUND_EDITION',
-  })
-
-  validateAddress(userAddress, {
-    type: 'WALLET',
-  })
 
   return readContract({
     abi: soundEditionV1_2Abi,
@@ -57,19 +43,11 @@ export async function numberMinted(
     editionAddress,
     userAddress,
     assumeValidSoundContract = false,
-  }: { editionAddress: string; userAddress: string } & SoundContractValidation,
+  }: { editionAddress: Address; userAddress: Address } & SoundContractValidation,
 ) {
   await validateSoundEdition.call(this, { editionAddress, assumeValidSoundContract })
 
   const { readContract } = await this.expectClient()
-
-  validateAddress(editionAddress, {
-    type: 'SOUND_EDITION',
-  })
-
-  validateAddress(userAddress, {
-    type: 'WALLET',
-  })
 
   return readContract({
     abi: soundEditionV1_2Abi,
@@ -123,18 +101,6 @@ async function mintHelper(
     maxFeePerGas,
     maxPriorityFeePerGas,
   } satisfies TransactionGasOptions
-
-  validateAddress(mintSchedule.editionAddress, {
-    type: 'SOUND_EDITION',
-  })
-
-  validateAddress(affiliate, {
-    type: 'AFFILIATE',
-  })
-
-  validateAddress(mintSchedule.minterAddress, {
-    type: 'MINTER',
-  })
 
   const sharedWriteContractParameters = {
     account: userAddress,
@@ -329,10 +295,6 @@ async function mintToHelper(
 
   const toAddress = mintToAddress ?? userAddress
 
-  validateAddress(toAddress, {
-    type: 'WALLET',
-  })
-
   let eligibleMintQuantity: bigint | undefined
 
   if (!skipQuantityChecks) {
@@ -348,18 +310,6 @@ async function mintToHelper(
       })
     }
   }
-
-  validateAddress(mintSchedule.editionAddress, {
-    type: 'SOUND_EDITION',
-  })
-
-  validateAddress(affiliate, {
-    type: 'AFFILIATE',
-  })
-
-  validateAddress(mintSchedule.minterAddress, {
-    type: 'MINTER',
-  })
 
   const value = BigInt(mintSchedule.price * BigInt(quantity)) + mintSchedule.platformTransactionFee
 
@@ -564,7 +514,7 @@ export async function eligibleQuantity(
   }: {
     mintSchedule: MintSchedule
     timestamp?: number
-    userAddress: string
+    userAddress: Address
   },
 ): Promise<bigint> {
   // check valid mint time
@@ -596,18 +546,6 @@ export async function eligibleQuantity(
       break
     }
   }
-
-  validateAddress(mintSchedule.editionAddress, {
-    type: 'SOUND_EDITION',
-  })
-
-  validateAddress(userAddress, {
-    type: 'WALLET',
-  })
-
-  validateAddress(mintSchedule.minterAddress, {
-    type: 'MINTER',
-  })
 
   // Get the edition's remaining token quantity.
   const { readContract } = await this.expectClient()

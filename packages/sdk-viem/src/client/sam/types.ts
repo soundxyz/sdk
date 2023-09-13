@@ -1,8 +1,8 @@
-import type { Chain } from 'viem'
+import type { Address, Chain } from 'viem'
 import type { SoundContractValidation, TransactionGasOptions } from '../../types'
 
 export interface SamEditionAddress extends SoundContractValidation {
-  editionAddress: string
+  editionAddress: Address
 }
 
 export interface SamBuyOptions extends SoundContractValidation, TransactionGasOptions {
@@ -12,7 +12,7 @@ export interface SamBuyOptions extends SoundContractValidation, TransactionGasOp
 
   attributonId?: bigint
 
-  affiliate?: string
+  affiliate?: Address
   affiliateProof?: string[]
 
   /**

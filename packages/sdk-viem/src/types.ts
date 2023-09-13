@@ -9,7 +9,7 @@ import type {
 } from 'viem'
 import type { MerkleProofProvider } from './merkle/types'
 import type { SoundAPI } from './api'
-import { interfaceIds } from '@soundxyz/sound-protocol/interfaceIds'
+import { interfaceIds } from './constants'
 
 export type BlockOrBlockTag = bigint | BlockTag
 
@@ -261,7 +261,7 @@ interface SharedMintOptions extends SoundContractValidation, TransactionGasOptio
   /**
    * Optional affiliate address
    */
-  affiliate?: string
+  affiliate?: Address
 
   /**
    * Skip quantity eligibility pre-mint checks
@@ -296,7 +296,7 @@ export interface MintToOptions extends SharedMintOptions {
   /**
    * Recipient address that should receive the NFT(s)
    */
-  mintToAddress?: string
+  mintToAddress?: Address
 
   attributonId?: bigint
 
@@ -314,7 +314,7 @@ export type ContractCall = {
 }
 
 export interface SamConfig {
-  contractAddress: string
+  contractAddress: Address
 
   basePrice: bigint
   linearPriceSlope: bigint | string | number
@@ -332,10 +332,10 @@ export interface SamConfig {
 export type EditionConfig = {
   name: string
   symbol: string
-  metadataModule: string
+  metadataModule: Address
   baseURI: string
   contractURI: string
-  fundingRecipient: string
+  fundingRecipient: Address
   royaltyBPS: number
   editionMaxMintableLower: number
   editionMaxMintableUpper: number
@@ -351,7 +351,7 @@ export type EditionConfig = {
  * The arguments required for all minter calls.
  */
 export type MintConfigBase = {
-  minterAddress: string
+  minterAddress: Address
   price: bigint
   startTime: number
   endTime: number

@@ -1,23 +1,21 @@
 import type { SoundClientInstance } from './instance'
-import { validateAddress } from '../utils/helpers'
 import { soundEditionV1_2Abi } from '../abi/sound-edition-v1_2'
-import { interfaceIds } from '@soundxyz/sound-protocol'
 import type { SoundContractValidation } from '../types'
 import { NotSoundEditionError } from '../errors'
-import { BaseError, ContractFunctionZeroDataError } from 'viem'
+import { BaseError, ContractFunctionZeroDataError, type Address } from 'viem'
+import { interfaceIds } from '../constants'
 
 export async function isSoundEdition(
   this: SoundClientInstance,
   {
     editionAddress,
   }: {
-    editionAddress: string
+    editionAddress: Address
   },
 ) {
   const { instance } = this
 
   return instance.idempotentCachedCall(`is-sound-edition-${editionAddress}`, async () => {
-    validateAddress(editionAddress, { type: 'SOUND_EDITION' })
     const client = await this.expectClient()
 
     try {
@@ -40,7 +38,7 @@ export async function isSoundEdition(
 
 export function validateSoundEdition(
   this: SoundClientInstance,
-  { editionAddress, assumeValidSoundContract }: { editionAddress: string } & Required<SoundContractValidation>,
+  { editionAddress, assumeValidSoundContract }: { editionAddress: Address } & Required<SoundContractValidation>,
 ) {
   if (assumeValidSoundContract) return
 

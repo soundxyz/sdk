@@ -6,7 +6,8 @@ import { SoundClientInstance } from '../instance'
 import { validateSoundEdition } from '../validation'
 import { isSoundV1_2_OrGreater } from './interface'
 import { soundEditionV1_2Abi } from '../../abi/sound-edition-v1_2'
-import { validateAddress } from '../../utils/helpers'
+import { isAddress } from 'viem'
+import assert from 'assert'
 
 export function editionInfo(
   this: SoundClientInstance,
@@ -14,11 +15,9 @@ export function editionInfo(
 ) {
   const { contractAddress, assumeValidSoundContract = false } = soundParams
 
-  validateAddress(contractAddress, {
-    type: 'SOUND_EDITION',
-  })
-
   const { expectClient, expectSoundAPI } = this
+
+  assert(isAddress(contractAddress), 'contractAddress must be a valid address')
 
   const isVersionAtLeastV1_2 = LazyPromise(() => {
     return isSoundV1_2_OrGreater.call(this, {

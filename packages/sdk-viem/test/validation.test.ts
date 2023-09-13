@@ -1,20 +1,20 @@
 import type { Address } from 'viem'
 import { encodeFunctionData } from 'viem/utils'
 import { beforeAll, describe, expect, test } from 'vitest'
-import { didntThrowExpectedError } from './helpers'
 import { ALICE, DEFAULT_SALT, EDITION_MAX, forkBlockNumber } from './test-constants'
 import { contractAddressFromTransaction, testSoundClient, testViemClient } from './test-utils'
 import { SoundCreatorV1Config } from '../src/abi/sound-creator-v1'
 import { SoundEditionV1_2Config } from '../src/abi/sound-edition-v1_2'
-import { InvalidAddressError } from '../src/errors'
 
 import { NON_NULL_ADDRESS, NULL_ADDRESS, UINT32_MAX } from '../src/utils/constants'
 
 let creatorAddress: Address
 
 beforeAll(async () => {
+  // ensure that the chain is forked to the correct block
   await expect(testViemClient.getBlockNumber()).resolves.toBe(forkBlockNumber)
 
+  // deploy the edition implementation and then get its address
   const editionImplementationTxHash = await testViemClient.deployContract({
     ...SoundEditionV1_2Config,
     account: ALICE,
@@ -23,48 +23,16 @@ beforeAll(async () => {
     hash: editionImplementationTxHash,
   })
 
+  // deploy the creator contract with the implementation set, and then get the creator address
   const creatorHash = await testViemClient.deployContract({
     ...SoundCreatorV1Config,
     args: [editionImplementationAddress],
     account: ALICE,
   })
-
   creatorAddress = await contractAddressFromTransaction({ hash: creatorHash })
 })
 
 describe('isSoundEdition', () => {
-  test("Should throw error if the address isn't valid", async () => {
-    const BAD_ADDRESS = 'not an address'
-
-    const err1 = await testSoundClient
-      .isSoundEdition({ editionAddress: BAD_ADDRESS })
-      .then(didntThrowExpectedError)
-      .catch((error) => {
-        expect(error.message).to.equal('Invalid address')
-        expect(error.type).equal('SOUND_EDITION')
-        expect(error.address).equal(BAD_ADDRESS)
-
-        return error
-      })
-
-    const err2 = await testSoundClient
-      .isSoundEdition({ editionAddress: BAD_ADDRESS })
-      .then(didntThrowExpectedError)
-      .catch((error) => {
-        expect(error).to.be.instanceOf(InvalidAddressError)
-        expect(error.message).to.equal('Invalid address')
-        expect(error.type).equal('SOUND_EDITION')
-        expect(error.address).equal(BAD_ADDRESS)
-
-        return error
-      })
-
-    expect(err1).instanceOf(Error)
-    expect(err2).instanceOf(Error)
-
-    expect(err1).not.equal(err2)
-  })
-
   test('Correctly identifies SoundEdition addresses', async () => {
     let isEdition = await testSoundClient.isSoundEdition({ editionAddress: ALICE })
     expect(isEdition).to.be.false

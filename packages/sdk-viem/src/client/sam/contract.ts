@@ -1,15 +1,15 @@
 import { InvalidOffsetError, InvalidQuantityError, SamNotFoundError, UnsupportedMinterError } from '../../errors'
 import type { SAM, SoundContractValidation, TransactionGasOptions } from '../../types'
 import { MINT_FALLBACK_GAS_LIMIT, MINT_GAS_LIMIT_MULTIPLIER, NULL_ADDRESS } from '../../utils/constants'
-import { assertIsHexList, scaleAmount, validateAddress } from '../../utils/helpers'
+import { assertIsHexList, scaleAmount } from '../../utils/helpers'
 import { isSoundV1_2_OrGreater } from '../edition/interface'
 import { SoundClientInstance } from '../instance'
 import { validateSoundEdition } from '../validation'
 import type { SamBuyOptions, SamEditionAddress, SamSellOptions } from './types'
-import { interfaceIds } from '@soundxyz/sound-protocol/interfaceIds'
 import { soundEditionV1_2Abi } from '../../abi/sound-edition-v1_2'
 import { samv1Abi } from '../../abi/sam-v1'
 import { samV1_1Abi } from '../../abi/sam-v1_1'
+import { interfaceIds } from '../../constants'
 
 export async function SamContractAddress(
   this: SoundClientInstance,
@@ -24,10 +24,6 @@ export async function SamContractAddress(
     if (!(await isSoundV1_2_OrGreater.call(this, { editionAddress }))) return null
 
     const { readContract } = await this.expectClient()
-
-    validateAddress(editionAddress, {
-      type: 'SOUND_EDITION',
-    })
 
     return readContract({
       abi: soundEditionV1_2Abi,
@@ -69,10 +65,6 @@ export async function SamSell(
     maxFeePerGas,
     maxPriorityFeePerGas,
   } satisfies TransactionGasOptions
-
-  validateAddress(editionAddress, {
-    type: 'SOUND_EDITION',
-  })
 
   const contractParameters = {
     abi: samv1Abi,
@@ -137,14 +129,6 @@ export async function SamBuy(
 
   if (!samAddress) throw new SamNotFoundError({ contractAddress: editionAddress })
 
-  validateAddress(affiliate, {
-    type: 'AFFILIATE',
-  })
-
-  validateAddress(editionAddress, {
-    type: 'SOUND_EDITION',
-  })
-
   const { wallet, userAddress } = await this.expectWallet()
 
   const txnOverrides = {
@@ -199,10 +183,6 @@ export async function SamTotalSellPrice(
 
   if (!samAddress) return null
 
-  validateAddress(editionAddress, {
-    type: 'SOUND_EDITION',
-  })
-
   const { readContract } = await this.expectClient()
 
   if (typeof quantity !== 'number' || !Number.isInteger(quantity) || quantity <= 0)
@@ -226,10 +206,6 @@ export async function SamTotalBuyPrice(
   const samAddress = await SamContractAddress.call(this, { editionAddress, assumeValidSoundContract })
 
   if (!samAddress) return null
-
-  validateAddress(editionAddress, {
-    type: 'SOUND_EDITION',
-  })
 
   const { readContract } = await this.expectClient()
 
@@ -274,10 +250,6 @@ export async function SamEditionInfo(
       address: samAddress,
       functionName: 'moduleInterfaceId',
     })
-  })
-
-  validateAddress(editionAddress, {
-    type: 'SOUND_EDITION',
   })
 
   switch (interfaceId) {
