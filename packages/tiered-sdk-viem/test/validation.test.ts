@@ -11,8 +11,10 @@ import { NON_NULL_ADDRESS, NULL_ADDRESS, UINT32_MAX } from '../src/utils/constan
 let creatorAddress: Address
 
 beforeAll(async () => {
+  // ensure that the chain is forked to the correct block
   await expect(testViemClient.getBlockNumber()).resolves.toBe(forkBlockNumber)
 
+  // deploy the edition implementation and then get its address
   const editionImplementationTxHash = await testViemClient.deployContract({
     ...SoundEditionV2Config,
     account: ALICE,
@@ -21,12 +23,12 @@ beforeAll(async () => {
     hash: editionImplementationTxHash,
   })
 
+  // deploy the creator contract with the implementation set, and then get the creator address
   const creatorHash = await testViemClient.deployContract({
     ...SoundCreatorV1Config,
     args: [editionImplementationAddress],
     account: ALICE,
   })
-
   creatorAddress = await contractAddressFromTransaction({ hash: creatorHash })
 })
 
@@ -47,7 +49,6 @@ describe('isSoundEdition', () => {
           fundingRecipient: NON_NULL_ADDRESS,
           royaltyBPS: 0,
           isMetadataFrozen: false,
-          operatorFilteringEnabled: false,
           isCreateTierFrozen: false,
           metadataModule: NULL_ADDRESS,
           tierCreations: [
@@ -64,10 +65,8 @@ describe('isSoundEdition', () => {
       ],
     })
 
-    console.log(editionInitData)
-
     // compute the edition address, while kicking off the transaction to create it
-    const [asd, res] = await Promise.all([
+    const [[editionAddress], d] = await Promise.all([
       testViemClient.readContract({
         abi: SoundCreatorV1Config.abi,
         address: creatorAddress,
@@ -85,9 +84,8 @@ describe('isSoundEdition', () => {
         .then((hash) => testViemClient.waitForTransactionReceipt({ hash })),
     ])
 
-    const [editionAddress] = asd
-
-    console.log(res)
+    console.log(d)
+    console.log(editionAddress)
 
     isEdition = await testSoundClient.isSoundEdition({ editionAddress })
     expect(isEdition).to.be.true

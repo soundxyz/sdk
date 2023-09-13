@@ -134,7 +134,6 @@ async function createEditionHelper(
         contractURI: editionConfig.contractURI,
         fundingRecipient: editionConfig.fundingRecipient,
         royaltyBPS: editionConfig.royaltyBPS,
-        operatorFilteringEnabled: true,
         isCreateTierFrozen: false,
         isMetadataFrozen: false,
         tierCreations: [
