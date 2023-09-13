@@ -13,7 +13,6 @@ import { RangeEditionMinterV2_1Config } from '../src/abi/range-edition-minter-v2
 import { MerkleTestHelper } from './helpers'
 import type { MintSchedule } from '../src/types'
 import { MerkleDropMinterV1Config } from '../src/abi/merkle-drop-minter-v1'
-import { assertIsHex } from '../src/utils/helpers'
 import { MerkleDropMinterV2Config } from '../src/abi/merkle-drop-minter-v2'
 import { MerkleDropMinterV2_1Config } from '../src/abi/merkle-drop-minter-v2_1'
 
@@ -326,7 +325,7 @@ describe('eligibleQuantity: merkleDrop', () => {
   const merkleTestHelper = MerkleTestHelper()
   const merkleTree = merkleTestHelper.getMerkleTree([ALICE, BOB])
   const merkleRoot = merkleTestHelper.getMerkleRoot(merkleTree)
-  assertIsHex(merkleRoot)
+
   // override merkleProvider for tests
   testSoundClient.instance.instance.merkleProvider = {
     merkleProof({ userAddress }) {

@@ -1,7 +1,7 @@
 import { InvalidOffsetError, InvalidQuantityError, SamNotFoundError, UnsupportedMinterError } from '../../errors'
 import type { SAM, SoundContractValidation, TransactionGasOptions } from '../../types'
 import { MINT_FALLBACK_GAS_LIMIT, MINT_GAS_LIMIT_MULTIPLIER, NULL_ADDRESS } from '../../utils/constants'
-import { assertIsHexList, scaleAmount } from '../../utils/helpers'
+import { scaleAmount } from '../../utils/helpers'
 import { isSoundV1_2_OrGreater } from '../edition/interface'
 import { SoundClientInstance } from '../instance'
 import { validateSoundEdition } from '../validation'
@@ -136,8 +136,6 @@ export async function SamBuy(
     maxFeePerGas,
     maxPriorityFeePerGas,
   } satisfies TransactionGasOptions
-
-  assertIsHexList(affiliateProof)
 
   const contractParameters = {
     abi: samv1Abi,

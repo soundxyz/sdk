@@ -10,7 +10,7 @@ import {
 } from '../../errors'
 import type { ContractCall, EditionConfig, MintConfig, TransactionGasOptions } from '../../types'
 import { editionInitFlags, MINTER_ROLE, NULL_ADDRESS, NULL_BYTES32, UINT32_MAX } from '../../utils/constants'
-import { assertIsHex, getSaltAsBytes32, retry } from '../../utils/helpers'
+import { getSaltAsBytes32, retry } from '../../utils/helpers'
 import { SoundClientInstance } from '../instance'
 import { soundEditionV1_2Abi } from '../../abi/sound-edition-v1_2'
 import { rangeEditionMinterV2_1Abi } from '../../abi/range-edition-minter-v2_1'
@@ -114,8 +114,6 @@ async function createEditionHelper(
         break
       }
       case 'MerkleDrop': {
-        assertIsHex(mintConfig.merkleRoot)
-
         contractCalls.push({
           contractAddress: mintConfig.minterAddress,
           calldata: encodeFunctionData({
@@ -338,7 +336,6 @@ export function validateMintConfigs(mintConfigs: MintConfig[]) {
       const { merkleRoot } = mintConfig
       if (
         merkleRoot === NULL_BYTES32 ||
-        merkleRoot.slice(0, 2) !== '0x' ||
         // Merkle root is 32 bytes, which is 64 hex characters + '0x'
         merkleRoot.length !== 66
       ) {

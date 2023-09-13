@@ -1,4 +1,4 @@
-import type { Address, Chain } from 'viem'
+import type { Address, Chain, Hex } from 'viem'
 import type { SoundContractValidation, TransactionGasOptions } from '../../types'
 
 export interface SamEditionAddress extends SoundContractValidation {
@@ -13,7 +13,7 @@ export interface SamBuyOptions extends SoundContractValidation, TransactionGasOp
   attributonId?: bigint
 
   affiliate?: Address
-  affiliateProof?: string[]
+  affiliateProof?: Hex[]
 
   /**
    * Chain of expected edition to be minted

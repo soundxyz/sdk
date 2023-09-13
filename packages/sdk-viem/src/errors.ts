@@ -1,5 +1,5 @@
-import type { Address } from 'viem'
-import type { AddressInputType, GraphQLExecutionErrors, MintSchedule } from './types'
+import type { Address, Hex } from 'viem'
+import type { GraphQLExecutionErrors, MintSchedule } from './types'
 import type { ZodError } from 'zod'
 
 export class MissingSignerError extends Error {
@@ -42,19 +42,6 @@ export class CreatorAddressMissing extends Error {
 
   constructor() {
     super('"soundCreatorAddress" was not specified and it\'s required for the requested action')
-  }
-}
-export class InvalidAddressError extends Error {
-  readonly name = 'InvalidAddressError'
-
-  readonly type: AddressInputType
-  readonly address: string
-
-  constructor({ type, address, message }: { type: AddressInputType; address: string; message?: string }) {
-    super(message || 'Invalid address')
-
-    this.type = type
-    this.address = address
   }
 }
 
@@ -345,9 +332,9 @@ export class InvalidMaxMintablePerAccountError extends Error {
 export class InvalidMerkleRootError extends Error {
   readonly name = 'InvalidMerkleRootError'
 
-  readonly merkleRoot: string
+  readonly merkleRoot: Hex
 
-  constructor({ merkleRoot }: { merkleRoot: string }) {
+  constructor({ merkleRoot }: { merkleRoot: Hex }) {
     super('merkleRoot must be a valid bytes32 hash')
 
     this.merkleRoot = merkleRoot
@@ -367,41 +354,5 @@ export class InvalidTimeValuesError extends Error {
     this.startTime = startTime
     this.cutoffTime = cutoffTime
     this.endTime = endTime
-  }
-}
-
-export class InvalidTxHashError extends Error {
-  readonly name = 'InvalidTxHashError'
-
-  readonly txHash: string
-
-  constructor({ txHash }: { txHash: string }) {
-    super('Must be a valid bytes32 transaction hash')
-
-    this.txHash = txHash
-  }
-}
-
-export class InvalidMerkleProofError extends Error {
-  readonly name = 'InvalidMerkleProofError'
-
-  readonly proof: readonly string[]
-
-  constructor({ proof }: { proof: readonly string[] }) {
-    super('Must be a valid merkle proof')
-
-    this.proof = proof
-  }
-}
-
-export class InvalidHexError extends Error {
-  readonly name = 'InvalidHexError'
-
-  readonly value: string
-
-  constructor({ value }: { value: string }) {
-    super('Must be a valid hex value that starts with 0x')
-
-    this.value = value
   }
 }

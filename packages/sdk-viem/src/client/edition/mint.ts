@@ -8,14 +8,14 @@ import type {
   TransactionGasOptions,
 } from '../../types'
 import { MINT_FALLBACK_GAS_LIMIT, MINT_GAS_LIMIT_MULTIPLIER, minterAbiMap, NULL_ADDRESS } from '../../utils/constants'
-import { BigIntMax, BigIntMin, assertIsHexList, exhaustiveGuard, scaleAmount } from '../../utils/helpers'
+import { BigIntMax, BigIntMin, exhaustiveGuard, scaleAmount } from '../../utils/helpers'
 import { SoundClientInstance } from '../instance'
 import { validateSoundEdition } from '../validation'
 import { getMerkleProof } from './merkle'
 import { isSchedulePaused } from './schedules'
 import { soundEditionV1_2Abi } from '../../abi/sound-edition-v1_2'
 import { interfaceIds } from '../../constants'
-import type { Address } from 'viem'
+import type { Address, Hex } from 'viem'
 
 export async function numberOfTokensOwned(
   this: SoundClientInstance,
@@ -164,7 +164,7 @@ async function mintHelper(
     case interfaceIds.IMerkleDropMinter:
     case interfaceIds.IMerkleDropMinterV2:
     case interfaceIds.IMerkleDropMinterV2_1: {
-      let proof: string[] | null
+      let proof: Hex[] | null
 
       if (merkleProof === undefined) {
         const params = {
@@ -202,8 +202,6 @@ async function mintHelper(
           eligibleMintQuantity,
         })
       }
-
-      assertIsHexList(proof)
 
       const args = [mintSchedule.editionAddress, mintSchedule.mintId, quantity, proof, affiliate] as const
 
@@ -332,8 +330,6 @@ async function mintToHelper(
   switch (interfaceId) {
     case interfaceIds.IRangeEditionMinterV2:
     case interfaceIds.IRangeEditionMinterV2_1: {
-      assertIsHexList(affiliateProof)
-
       const args = [
         mintSchedule.editionAddress,
         BigInt(mintSchedule.mintId),
@@ -390,7 +386,7 @@ async function mintToHelper(
 
     case interfaceIds.IMerkleDropMinterV2:
     case interfaceIds.IMerkleDropMinterV2_1: {
-      let proof: string[] | null
+      let proof: Hex[] | null
 
       if (merkleProof === undefined) {
         const client = await this.expectClient()
@@ -426,10 +422,6 @@ async function mintToHelper(
           eligibleMintQuantity,
         })
       }
-
-      assertIsHexList(proof)
-
-      assertIsHexList(affiliateProof)
 
       const args = [
         mintSchedule.editionAddress,

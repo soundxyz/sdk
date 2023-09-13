@@ -3,7 +3,8 @@ import { ONE_HOUR, PRICE } from '../test-constants'
 import { MerkleTestHelper } from './merkle'
 
 import type { EditionConfig, MerkleDropConfig, RangeEditionConfig } from '../../src/types'
-import type { Address } from 'viem'
+import { isHex, type Address } from 'viem'
+import assert from 'assert'
 export function now() {
   return Math.floor(Date.now() / 1000)
 }
@@ -48,6 +49,8 @@ export const getGenericMerkleMintConfig = ({ minterAddress }: { minterAddress: A
   const merkleTestHelper = MerkleTestHelper()
   const merkleTree = merkleTestHelper.getMerkleTree()
   const merkleRoot = merkleTestHelper.getMerkleRoot(merkleTree)
+
+  assert(isHex(merkleTree))
 
   return {
     mintType: 'MerkleDrop' as const,

@@ -20,7 +20,6 @@ import {
 } from './api/graphql/gql'
 
 import type { ExecutionResult, MerkleProofParameters } from './types'
-import { isHexList } from './utils/helpers'
 
 const graphqlRequestBody = z.object({
   data: z.record(z.unknown()).nullable().optional(),
@@ -132,7 +131,7 @@ export function SoundAPI({ apiEndpoint = 'https://api.sound.xyz/graphql', apiKey
 
       if (errors) throw new SoundAPIGraphQLError({ graphqlErrors: errors })
 
-      if (!data?.merkleTreeProof || !isHexList(data.merkleTreeProof.proof)) return null
+      if (!data?.merkleTreeProof) return null
 
       return data.merkleTreeProof.proof
     },

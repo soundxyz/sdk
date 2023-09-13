@@ -6,6 +6,7 @@ import type {
   TransactionRequestBase,
   WalletClient,
   BlockTag,
+  Hex,
 } from 'viem'
 import type { MerkleProofProvider } from './merkle/types'
 import type { SoundAPI } from './api'
@@ -112,18 +113,6 @@ export type Expand<T> = T extends infer O ? { [K in keyof O]: O[K] } : never
 
 export * from './merkle/types'
 
-export type AddressInputType =
-  | 'DEPLOYER'
-  | 'SOUND_EDITION'
-  | 'MINTER'
-  | 'FUNDING_RECIPIENT'
-  | 'METADATA_MODULE'
-  | 'SAM'
-  | 'AFFILIATE'
-  | 'WALLET'
-  | 'CREATOR_ADDRESS'
-  | 'GENERIC'
-
 export type Bytes = ArrayLike<number>
 
 export type BytesLike = Bytes | string
@@ -198,7 +187,7 @@ export interface MerkleDropSchedule extends MintScheduleBase {
     | typeof interfaceIds.IMerkleDropMinterV2
     | typeof interfaceIds.IMerkleDropMinterV2_1
   maxMintable: number
-  merkleRoot: string
+  merkleRoot: Hex
 }
 export interface MerkleDropV1Schedule extends MerkleDropSchedule {
   interfaceId: typeof interfaceIds.IMerkleDropMinter
@@ -240,7 +229,7 @@ export interface SAM {
   artistFeeBPS: number
   affiliateFeeBPS: number
   goldenEggFeeBPS: number
-  affiliateMerkleRoot: `0x${string}`
+  affiliateMerkleRoot: Hex
 }
 
 export interface TransactionGasOptions
@@ -277,7 +266,7 @@ interface SharedMintOptions extends SoundContractValidation, TransactionGasOptio
    *
    * If null or empty array is provided, not eligible safe-check will be thrown
    */
-  merkleProof?: string[] | null | undefined
+  merkleProof?: Hex[] | null | undefined
 }
 
 export interface MintOptions extends SharedMintOptions {
@@ -300,7 +289,7 @@ export interface MintToOptions extends SharedMintOptions {
 
   attributonId?: bigint
 
-  affiliateProof?: string[]
+  affiliateProof?: Hex[]
 }
 
 export type EstimatableTransaction = {
@@ -363,7 +352,7 @@ export type MintConfigBase = {
  */
 export type MerkleDropConfig = MintConfigBase & {
   mintType: 'MerkleDrop'
-  merkleRoot: string
+  merkleRoot: Hex
   maxMintable: number
   maxMintablePerAccount: number
 }
