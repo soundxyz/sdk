@@ -1,7 +1,5 @@
 import type { SoundClientInstance } from './instance'
 import { soundEditionV1_2Abi } from '../abi/sound-edition-v1_2'
-import type { SoundContractValidation } from '../types'
-import { NotSoundEditionError } from '../errors'
 import { BaseError, ContractFunctionZeroDataError, type Address } from 'viem'
 import { interfaceIds } from '../constants'
 
@@ -34,27 +32,4 @@ export async function isSoundEdition(
       throw err
     }
   })
-}
-
-export function validateSoundEdition(
-  this: SoundClientInstance,
-  { editionAddress, assumeValidSoundContract }: { editionAddress: Address } & Required<SoundContractValidation>,
-) {
-  if (assumeValidSoundContract) return
-
-  return isSoundEdition.call(this, { editionAddress }).then((isEdition) => {
-    if (!isEdition) throw new NotSoundEditionError({ contractAddress: editionAddress })
-  })
-}
-
-async function getNetworkChainId(this: SoundClientInstance) {
-  const client = await this.expectClient()
-
-  return client.chain?.id
-}
-
-export async function networkChainMatches(this: SoundClientInstance, { chainId }: { chainId: number }) {
-  const networkChain = await getNetworkChainId.call(this)
-
-  return networkChain === chainId
 }

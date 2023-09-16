@@ -4,15 +4,6 @@ import type { SoundAPI } from './api'
 
 export type BlockOrBlockTag = bigint | BlockTag
 
-export interface SoundContractValidation {
-  /**
-   * Assume valid Sound.xyz contract, skipping safety checks
-   *
-   * @default false
-   */
-  assumeValidSoundContract?: boolean
-}
-
 type LazyOption<T extends object> = T | (() => T | Promise<T>)
 
 export type ClientProvider = Pick<

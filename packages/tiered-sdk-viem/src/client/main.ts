@@ -4,8 +4,6 @@ import { createEdition, estimateCreateEdition, expectedEditionAddress } from './
 import type { Address } from 'viem'
 import { editionInfo } from './edition/info'
 import { mintSchedules } from './edition/schedules'
-// import { eligibleQuantity, estimateMint, mint, numberMinted, numberOfTokensOwned } from './edition/mint'
-// import { editionMinterMintIds, editionRegisteredMinters, editionScheduleIds, mintSchedules } from './edition/schedules'
 import { SoundClientInstance } from './instance'
 
 import { isSoundEdition, networkChainMatches } from './validation'
@@ -23,7 +21,6 @@ export function SoundClient(config: SoundClientConfig) {
 
     edition: {
       info: editionInfo.bind(client),
-
       mintSchedules: mintSchedules.bind(client),
 
       // mint: mint.bind(client),

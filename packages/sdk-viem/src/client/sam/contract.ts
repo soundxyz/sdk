@@ -1,26 +1,17 @@
 import { InvalidOffsetError, InvalidQuantityError, SamNotFoundError, UnsupportedMinterError } from '../../errors'
-import type { SAM, SoundContractValidation, TransactionGasOptions } from '../../types'
+import type { SAM, TransactionGasOptions } from '../../types'
 import { MINT_FALLBACK_GAS_LIMIT, MINT_GAS_LIMIT_MULTIPLIER, NULL_ADDRESS } from '../../utils/constants'
 import { scaleAmount } from '../../utils/helpers'
 import { isSoundV1_2_OrGreater } from '../edition/interface'
 import { SoundClientInstance } from '../instance'
-import { validateSoundEdition } from '../validation'
 import type { SamBuyOptions, SamEditionAddress, SamSellOptions } from './types'
 import { soundEditionV1_2Abi } from '../../abi/sound-edition-v1_2'
 import { samv1Abi } from '../../abi/sam-v1'
 import { samV1_1Abi } from '../../abi/sam-v1_1'
 import { interfaceIds } from '../../constants'
 
-export async function SamContractAddress(
-  this: SoundClientInstance,
-  { editionAddress, assumeValidSoundContract = false }: SamEditionAddress & SoundContractValidation,
-) {
+export async function SamContractAddress(this: SoundClientInstance, { editionAddress }: SamEditionAddress) {
   return this.instance.idempotentCachedCall(`sam-contract-address-${editionAddress}`, async () => {
-    await validateSoundEdition.call(this, {
-      editionAddress,
-      assumeValidSoundContract,
-    })
-
     if (!(await isSoundV1_2_OrGreater.call(this, { editionAddress }))) return null
 
     const { readContract } = await this.expectClient()
@@ -47,12 +38,10 @@ export async function SamSell(
     maxFeePerGas,
     maxPriorityFeePerGas,
 
-    assumeValidSoundContract = false,
-
     chain,
   }: SamSellOptions,
 ) {
-  const samAddress = await SamContractAddress.call(this, { editionAddress, assumeValidSoundContract })
+  const samAddress = await SamContractAddress.call(this, { editionAddress })
 
   if (!samAddress) throw new SamNotFoundError({ contractAddress: editionAddress })
 
@@ -116,16 +105,13 @@ export async function SamBuy(
     gas,
     maxFeePerGas,
     maxPriorityFeePerGas,
-
-    assumeValidSoundContract = false,
-
     chain,
   }: SamBuyOptions,
 ) {
   if (typeof quantity !== 'number' || !Number.isInteger(quantity) || quantity <= 0)
     throw new InvalidQuantityError({ quantity })
 
-  const samAddress = await SamContractAddress.call(this, { editionAddress, assumeValidSoundContract })
+  const samAddress = await SamContractAddress.call(this, { editionAddress })
 
   if (!samAddress) throw new SamNotFoundError({ contractAddress: editionAddress })
 
@@ -174,10 +160,10 @@ export async function SamBuy(
 
 export async function SamTotalSellPrice(
   this: SoundClientInstance,
-  { editionAddress, assumeValidSoundContract = false }: SamEditionAddress,
+  { editionAddress }: SamEditionAddress,
   { offset, quantity }: { offset: number; quantity: number },
 ) {
-  const samAddress = await SamContractAddress.call(this, { editionAddress, assumeValidSoundContract })
+  const samAddress = await SamContractAddress.call(this, { editionAddress })
 
   if (!samAddress) return null
 
@@ -198,10 +184,10 @@ export async function SamTotalSellPrice(
 
 export async function SamTotalBuyPrice(
   this: SoundClientInstance,
-  { editionAddress, assumeValidSoundContract = false }: SamEditionAddress,
+  { editionAddress }: SamEditionAddress,
   { offset, quantity }: { offset: number; quantity: number },
 ) {
-  const samAddress = await SamContractAddress.call(this, { editionAddress, assumeValidSoundContract })
+  const samAddress = await SamContractAddress.call(this, { editionAddress })
 
   if (!samAddress) return null
 
@@ -230,9 +216,9 @@ export async function SamTotalBuyPrice(
 
 export async function SamEditionInfo(
   this: SoundClientInstance,
-  { editionAddress, assumeValidSoundContract = false }: SamEditionAddress,
+  { editionAddress }: SamEditionAddress,
 ): Promise<SAM | null> {
-  const samAddress = await SamContractAddress.call(this, { editionAddress, assumeValidSoundContract })
+  const samAddress = await SamContractAddress.call(this, { editionAddress })
   if (!samAddress) return null
 
   const {

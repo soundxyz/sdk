@@ -4,13 +4,11 @@ import type {
   MintOptions,
   MintSchedule,
   MintToOptions,
-  SoundContractValidation,
   TransactionGasOptions,
 } from '../../types'
 import { MINT_FALLBACK_GAS_LIMIT, MINT_GAS_LIMIT_MULTIPLIER, minterAbiMap, NULL_ADDRESS } from '../../utils/constants'
 import { BigIntMax, BigIntMin, exhaustiveGuard, scaleAmount } from '../../utils/helpers'
 import { SoundClientInstance } from '../instance'
-import { validateSoundEdition } from '../validation'
 import { getMerkleProof } from './merkle'
 import { isSchedulePaused } from './schedules'
 import { soundEditionV1_2Abi } from '../../abi/sound-edition-v1_2'
@@ -19,14 +17,8 @@ import type { Address, Hex } from 'viem'
 
 export async function numberOfTokensOwned(
   this: SoundClientInstance,
-  {
-    editionAddress,
-    userAddress,
-    assumeValidSoundContract = false,
-  }: { editionAddress: Address; userAddress: Address } & SoundContractValidation,
+  { editionAddress, userAddress }: { editionAddress: Address; userAddress: Address },
 ) {
-  await validateSoundEdition.call(this, { editionAddress, assumeValidSoundContract })
-
   const { readContract } = await this.expectClient()
 
   return readContract({
@@ -39,14 +31,8 @@ export async function numberOfTokensOwned(
 
 export async function numberMinted(
   this: SoundClientInstance,
-  {
-    editionAddress,
-    userAddress,
-    assumeValidSoundContract = false,
-  }: { editionAddress: Address; userAddress: Address } & SoundContractValidation,
+  { editionAddress, userAddress }: { editionAddress: Address; userAddress: Address },
 ) {
-  await validateSoundEdition.call(this, { editionAddress, assumeValidSoundContract })
-
   const { readContract } = await this.expectClient()
 
   return readContract({
@@ -68,12 +54,9 @@ async function mintHelper(
     maxPriorityFeePerGas,
     skipQuantityChecks = false,
     merkleProof,
-    assumeValidSoundContract = false,
     chain,
   }: MintOptions,
 ): Promise<EstimatableTransaction> {
-  await validateSoundEdition.call(this, { editionAddress: mintSchedule.editionAddress, assumeValidSoundContract })
-
   if (quantity <= 0 || Math.floor(quantity) !== quantity) throw new InvalidQuantityError({ quantity })
 
   const { userAddress, wallet } = await this.expectWallet()
@@ -282,11 +265,8 @@ async function mintToHelper(
     chain,
     skipQuantityChecks = false,
     merkleProof,
-    assumeValidSoundContract = false,
   }: MintToOptions,
 ): Promise<EstimatableTransaction> {
-  await validateSoundEdition.call(this, { editionAddress: mintSchedule.editionAddress, assumeValidSoundContract })
-
   if (quantity <= 0 || Math.floor(quantity) !== quantity) throw new InvalidQuantityError({ quantity })
 
   const { wallet, userAddress } = await this.expectWallet()

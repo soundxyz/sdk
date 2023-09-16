@@ -1,11 +1,11 @@
 import type { Address, Chain, Hex } from 'viem'
-import type { SoundContractValidation, TransactionGasOptions } from '../../types'
+import type { TransactionGasOptions } from '../../types'
 
-export interface SamEditionAddress extends SoundContractValidation {
+export interface SamEditionAddress {
   editionAddress: Address
 }
 
-export interface SamBuyOptions extends SoundContractValidation, TransactionGasOptions {
+export interface SamBuyOptions extends TransactionGasOptions {
   quantity: number
 
   maxTotalValue: bigint
@@ -21,7 +21,7 @@ export interface SamBuyOptions extends SoundContractValidation, TransactionGasOp
   chain: Chain
 }
 
-export interface SamSellOptions extends SoundContractValidation, TransactionGasOptions {
+export interface SamSellOptions extends TransactionGasOptions {
   /**
    * Chain of expected edition to be minted
    */

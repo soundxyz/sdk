@@ -1,19 +1,14 @@
 import type { ReleaseInfoQueryVariables, ReleaseShareInfoQueryVariables } from '../../api/graphql/gql'
 import { SoundNotFoundError } from '../../errors'
-import type { SoundContractValidation } from '../../types'
 import { LazyPromise } from '../../utils/promise'
 import { SoundClientInstance } from '../instance'
-import { validateSoundEdition } from '../validation'
 import { isSoundV1_2_OrGreater } from './interface'
 import { soundEditionV1_2Abi } from '../../abi/sound-edition-v1_2'
 import { isAddress } from 'viem'
 import assert from 'assert'
 
-export function editionInfo(
-  this: SoundClientInstance,
-  soundParams: ReleaseInfoQueryVariables & SoundContractValidation,
-) {
-  const { contractAddress, assumeValidSoundContract = false } = soundParams
+export function editionInfo(this: SoundClientInstance, soundParams: ReleaseInfoQueryVariables) {
+  const { contractAddress } = soundParams
 
   const { expectClient, expectSoundAPI } = this
 
@@ -26,10 +21,6 @@ export function editionInfo(
   })
 
   const info = LazyPromise(async () => {
-    await validateSoundEdition.call(this, {
-      editionAddress: contractAddress,
-      assumeValidSoundContract,
-    })
     const { readContract } = await expectClient()
 
     return readContract({

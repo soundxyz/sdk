@@ -69,18 +69,6 @@ export class UnsupportedMinterError extends Error {
   }
 }
 
-export class NotSoundEditionError extends Error {
-  readonly name = 'NotSoundEditionError'
-
-  readonly contractAddress: string
-
-  constructor({ contractAddress }: { contractAddress: string }) {
-    super('Address must be a sound edition contract')
-
-    this.contractAddress = contractAddress
-  }
-}
-
 export class SamNotFoundError extends Error {
   readonly name = 'SamNotFoundError'
 

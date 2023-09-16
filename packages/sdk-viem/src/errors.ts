@@ -1,4 +1,4 @@
-import type { Address, Hex } from 'viem'
+import type { Hex } from 'viem'
 import type { GraphQLExecutionErrors, MintSchedule } from './types'
 import type { ZodError } from 'zod'
 
@@ -54,18 +54,6 @@ export class UnsupportedMinterError extends Error {
     super('Minter not handled by sdk')
 
     this.interfaceId = interfaceId
-  }
-}
-
-export class NotSoundEditionError extends Error {
-  readonly name = 'NotSoundEditionError'
-
-  readonly contractAddress: string
-
-  constructor({ contractAddress }: { contractAddress: Address }) {
-    super('Address must be a sound edition contract')
-
-    this.contractAddress = contractAddress
   }
 }
 

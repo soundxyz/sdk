@@ -14,15 +14,6 @@ import { interfaceIds } from './constants'
 
 export type BlockOrBlockTag = bigint | BlockTag
 
-export interface SoundContractValidation {
-  /**
-   * Assume valid Sound.xyz contract, skipping safety checks
-   *
-   * @default false
-   */
-  assumeValidSoundContract?: boolean
-}
-
 type LazyOption<T extends object> = T | (() => T | Promise<T>)
 
 export type ClientProvider = Pick<
@@ -236,7 +227,7 @@ export interface TransactionGasOptions
   extends Partial<Pick<FeeValuesEIP1559, 'maxFeePerGas' | 'maxPriorityFeePerGas'>>,
     Pick<TransactionRequestBase, 'gas'> {}
 
-interface SharedMintOptions extends SoundContractValidation, TransactionGasOptions {
+interface SharedMintOptions extends TransactionGasOptions {
   /**
    * Chain of edition to be minted
    */

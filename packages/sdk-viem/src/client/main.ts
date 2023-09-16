@@ -17,7 +17,7 @@ import {
   SamTotalSellPrice,
 } from './sam/contract'
 import type { SamEditionAddress } from './sam/types'
-import { isSoundEdition, networkChainMatches } from './validation'
+import { isSoundEdition } from './validation'
 
 export function SoundClient(config: SoundClientConfig) {
   const instance = SoundClientInstance(config)
@@ -28,7 +28,6 @@ export function SoundClient(config: SoundClientConfig) {
     instance,
 
     isSoundEdition: isSoundEdition.bind(instance),
-    networkChainMatches: networkChainMatches.bind(instance),
 
     edition: {
       info: editionInfo.bind(client),
@@ -38,24 +37,23 @@ export function SoundClient(config: SoundClientConfig) {
       mint: mint.bind(client),
       estimateMint: estimateMint.bind(client),
 
-      sam({ editionAddress, assumeValidSoundContract = false }: SamEditionAddress) {
+      sam({ editionAddress }: SamEditionAddress) {
         return {
           contract: {
             address: LazyPromise(() => {
               return SamContractAddress.call(client, {
                 editionAddress,
-                assumeValidSoundContract,
               })
             }),
             info: LazyPromise(() => {
-              return SamEditionInfo.call(client, { editionAddress, assumeValidSoundContract })
+              return SamEditionInfo.call(client, { editionAddress })
             }),
 
-            totalBuyPrice: curry(SamTotalBuyPrice.bind(client))({ editionAddress, assumeValidSoundContract }),
-            totalSellPrice: curry(SamTotalSellPrice.bind(client))({ editionAddress, assumeValidSoundContract }),
+            totalBuyPrice: curry(SamTotalBuyPrice.bind(client))({ editionAddress }),
+            totalSellPrice: curry(SamTotalSellPrice.bind(client))({ editionAddress }),
 
-            buy: curry(SamBuy.bind(client))({ editionAddress, assumeValidSoundContract }),
-            sell: curry(SamSell.bind(client))({ editionAddress, assumeValidSoundContract }),
+            buy: curry(SamBuy.bind(client))({ editionAddress }),
+            sell: curry(SamSell.bind(client))({ editionAddress }),
           },
           api: {
             availableTokensToSell: curry(SamAvailableTokensToSell.bind(client))({ editionAddress }),
