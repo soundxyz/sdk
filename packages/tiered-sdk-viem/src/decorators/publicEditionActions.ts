@@ -1,4 +1,4 @@
-import type { PublicClient } from 'viem'
+import type { Chain, PublicClient, Transport } from 'viem'
 import {
   type GetEditionContractInfoParams,
   type GetEditionContractInfoReturnType,
@@ -15,7 +15,10 @@ export interface PublicEditionActions {
   getMintingSchedules: (args: GetMintingSchedulesParams) => Promise<GetMintingSchedulesReturnType>
 }
 
-export function publicEditionActions(client: PublicClient): PublicEditionActions {
+export function publicEditionActions<
+  TTransport extends Transport = Transport,
+  TChain extends Chain | undefined = Chain | undefined,
+>(client: PublicClient<TTransport, TChain>): PublicEditionActions {
   return {
     getEditionContractInfo: (args) => getEditionContractInfo(client, args),
     getMintingSchedules: (args) => getMintingSchedules(client, args),

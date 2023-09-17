@@ -1,4 +1,4 @@
-import type { Address, PublicClient } from 'viem'
+import type { Address, Chain, PublicClient, Transport } from 'viem'
 import { SoundEditionV2Config } from '../../abi/sound-edition-v2'
 
 export interface GetEditionContractInfoParams {
@@ -33,8 +33,8 @@ export interface GetEditionContractInfoReturnType {
   }[]
 }
 
-export async function getEditionContractInfo(
-  client: PublicClient,
+export async function getEditionContractInfo<TChain extends Chain | undefined>(
+  client: PublicClient<Transport, TChain>,
   { editionAddress }: GetEditionContractInfoParams,
 ): Promise<GetEditionContractInfoReturnType> {
   const data = await client.readContract({
