@@ -1,4 +1,4 @@
-import type { Chain, Hex, PublicClient, Transport } from 'viem'
+import type { Hex, PublicClient } from 'viem'
 import { Address } from 'viem'
 import { SuperMinterV1Config } from '../../abi/super-minter-v1'
 
@@ -44,8 +44,8 @@ export interface GetMintingSchedulesReturnType {
   activeSchedules: readonly SuperMinterSchedule[]
 }
 
-export async function getMintingSchedules<TChain extends Chain | undefined>(
-  client: PublicClient<Transport, TChain>,
+export async function getMintingSchedules(
+  client: PublicClient,
   { editionAddress, superMinterAddress, unixTimestamp = Date.now() / 1000 }: GetMintingSchedulesParams,
 ): Promise<GetMintingSchedulesReturnType> {
   const schedules: SuperMinterSchedule[] = await client
