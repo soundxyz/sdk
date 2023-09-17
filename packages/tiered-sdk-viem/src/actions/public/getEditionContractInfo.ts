@@ -1,5 +1,4 @@
-import type { PublicClient } from 'viem'
-import { Address } from 'viem'
+import type { Address, PublicClient } from 'viem'
 import { SoundEditionV2Config } from '../../abi/sound-edition-v2'
 
 export interface GetEditionContractInfoParams {

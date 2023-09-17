@@ -1,12 +1,12 @@
-import { PublicClient } from 'viem'
+import type { PublicClient } from 'viem'
 import {
-  GetEditionContractInfoParams,
-  GetEditionContractInfoReturnType,
+  type GetEditionContractInfoParams,
+  type GetEditionContractInfoReturnType,
   getEditionContractInfo,
 } from '../actions/public/getEditionContractInfo'
 import {
-  GetMintingSchedulesParams,
-  GetMintingSchedulesReturnType,
+  type GetMintingSchedulesParams,
+  type GetMintingSchedulesReturnType,
   getMintingSchedules,
 } from '../actions/public/getMintingSchedules'
 

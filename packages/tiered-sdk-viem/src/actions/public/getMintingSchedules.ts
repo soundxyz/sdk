@@ -1,5 +1,4 @@
-import type { Hex, PublicClient } from 'viem'
-import { Address } from 'viem'
+import type { Address, Hex, PublicClient } from 'viem'
 import { SuperMinterV1Config } from '../../abi/super-minter-v1'
 
 export interface GetMintingSchedulesParams {
