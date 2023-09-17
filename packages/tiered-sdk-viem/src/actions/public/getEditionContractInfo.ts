@@ -1,11 +1,11 @@
 import type { Address, Chain, PublicClient, Transport } from 'viem'
 import { SoundEditionV2Config } from '../../abi/sound-edition-v2'
 
-export interface GetEditionContractInfoParams {
+export type GetEditionContractInfoParams = {
   editionAddress: Address
 }
 
-export interface GetEditionContractInfoReturnType {
+export type GetEditionContractInfoReturnType = {
   baseURI: string
   contractURI: string
   name: string

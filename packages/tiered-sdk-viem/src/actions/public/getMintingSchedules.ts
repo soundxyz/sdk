@@ -1,13 +1,13 @@
 import type { Address, Chain, Hex, PublicClient, Transport } from 'viem'
 import { SuperMinterV1Config } from '../../abi/super-minter-v1'
 
-export interface GetMintingSchedulesParams {
+export type GetMintingSchedulesParams = {
   editionAddress: Address
   superMinterAddress: Address
   unixTimestamp?: number
 }
 
-export interface ScheduleBase {
+export type ScheduleBase = {
   edition: Address
   tier: number
   scheduleNum: number
@@ -23,14 +23,14 @@ export interface ScheduleBase {
   hasMints: boolean
   affiliateMerkleRoot: Hex
 }
-export interface DefaultSchedule extends ScheduleBase {
+export type DefaultSchedule = ScheduleBase & {
   type: 'DEFAULT'
 }
-export interface MerkleSchedule extends ScheduleBase {
+export type MerkleSchedule = ScheduleBase & {
   type: 'VERIFY_MERKLE'
   merkleRoot: Hex
 }
-export interface SignatureSchedules extends ScheduleBase {
+export type SignatureSchedules = ScheduleBase & {
   type: 'VERIFY_SIGNATURE'
   signer: Address
   usePlatformSigner: boolean
@@ -38,7 +38,7 @@ export interface SignatureSchedules extends ScheduleBase {
 
 export type SuperMinterSchedule = DefaultSchedule | MerkleSchedule | SignatureSchedules
 
-export interface GetMintingSchedulesReturnType {
+export type GetMintingSchedulesReturnType = {
   schedules: readonly SuperMinterSchedule[]
   activeSchedules: readonly SuperMinterSchedule[]
 }

@@ -10,7 +10,7 @@ import {
   getMintingSchedules,
 } from '../actions/public/getMintingSchedules'
 
-export interface PublicEditionActions {
+export type PublicEditionActions = {
   getEditionContractInfo: (args: GetEditionContractInfoParams) => Promise<GetEditionContractInfoReturnType>
   getMintingSchedules: (args: GetMintingSchedulesParams) => Promise<GetMintingSchedulesReturnType>
 }
