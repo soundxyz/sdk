@@ -10,15 +10,15 @@ import {
   getMintingSchedules,
 } from '../actions/public/getMintingSchedules'
 
-export type PublicEditionActions = {
+export type PublicTieredEditionActions = {
   getEditionContractInfo: (args: GetEditionContractInfoParams) => Promise<GetEditionContractInfoReturnType>
   getMintingSchedules: (args: GetMintingSchedulesParams) => Promise<GetMintingSchedulesReturnType>
 }
 
-export function publicEditionActions<
+export function publicTieredEditionActions<
   TTransport extends Transport = Transport,
   TChain extends Chain | undefined = Chain | undefined,
->(client: PublicClient<TTransport, TChain>): PublicEditionActions {
+>(client: PublicClient<TTransport, TChain>): PublicTieredEditionActions {
   return {
     getEditionContractInfo: (args) => getEditionContractInfo(client, args),
     getMintingSchedules: (args) => getMintingSchedules(client, args),

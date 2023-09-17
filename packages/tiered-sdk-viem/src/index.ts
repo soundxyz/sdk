@@ -4,4 +4,4 @@ export * as Error from './errors'
 
 export * from './types'
 
-export { publicEditionActions } from './decorators/publicEditionActions'
+export { publicTieredEditionActions } from './decorators/publicTieredEditionActions'

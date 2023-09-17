@@ -24,14 +24,14 @@ export type ScheduleBase = {
   affiliateMerkleRoot: Hex
 }
 export type DefaultSchedule = ScheduleBase & {
-  type: 'DEFAULT'
+  mode: 'DEFAULT'
 }
 export type MerkleSchedule = ScheduleBase & {
-  type: 'VERIFY_MERKLE'
+  mode: 'VERIFY_MERKLE'
   merkleRoot: Hex
 }
 export type SignatureSchedules = ScheduleBase & {
-  type: 'VERIFY_SIGNATURE'
+  mode: 'VERIFY_SIGNATURE'
   signer: Address
   usePlatformSigner: boolean
 }
@@ -57,7 +57,7 @@ export async function getMintingSchedules<TChain extends Chain | undefined>(
     .then((schedules) =>
       schedules.map((schedule) => ({
         ...schedule,
-        type: schedule.mode === 0 ? 'DEFAULT' : schedule.mode === 1 ? 'VERIFY_MERKLE' : 'VERIFY_SIGNATURE',
+        mode: schedule.mode === 0 ? 'DEFAULT' : schedule.mode === 1 ? 'VERIFY_MERKLE' : 'VERIFY_SIGNATURE',
       })),
     )
 
