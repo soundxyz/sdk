@@ -1,42 +1,12 @@
-import type { Address, Chain, Hex, PublicClient, Transport } from 'viem'
+import type { Address, Chain, PublicClient, Transport } from 'viem'
 import { SuperMinterV1Config } from '../../abi/super-minter-v1'
+import type { SuperMinterSchedule } from '../../types'
 
 export type GetMintingSchedulesParams = {
   editionAddress: Address
   superMinterAddress: Address
   unixTimestamp?: number
 }
-
-export type ScheduleBase = {
-  edition: Address
-  tier: number
-  scheduleNum: number
-  platform: Address
-  price: bigint
-  startTime: number
-  endTime: number
-  maxMintablePerAccount: number
-  maxMintable: number
-  minted: number
-  affiliateFeeBPS: number
-  paused: boolean
-  hasMints: boolean
-  affiliateMerkleRoot: Hex
-}
-export type DefaultSchedule = ScheduleBase & {
-  mode: 'DEFAULT'
-}
-export type MerkleSchedule = ScheduleBase & {
-  mode: 'VERIFY_MERKLE'
-  merkleRoot: Hex
-}
-export type SignatureSchedules = ScheduleBase & {
-  mode: 'VERIFY_SIGNATURE'
-  signer: Address
-  usePlatformSigner: boolean
-}
-
-export type SuperMinterSchedule = DefaultSchedule | MerkleSchedule | SignatureSchedules
 
 export type GetMintingSchedulesReturnType = {
   schedules: readonly SuperMinterSchedule[]

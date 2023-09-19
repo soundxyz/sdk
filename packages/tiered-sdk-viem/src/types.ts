@@ -120,20 +120,6 @@ type TupleSplit<T, N extends number, O extends readonly any[] = readonly []> = O
 
 export type TakeFirst<T extends readonly any[], N extends number> = TupleSplit<T, N>[0]
 
-export interface MintScheduleBase {
-  editionAddress: Address
-  minterAddress: Address
-  mintId: bigint
-  startTime: number
-  endTime: number
-  mintPaused: boolean
-  price: bigint
-  maxMintablePerAccount: number
-  totalMinted: number
-  affiliateFeeBPS: number
-  platformTransactionFee: bigint
-}
-
 export interface TransactionGasOptions
   extends Partial<Pick<FeeValuesEIP1559, 'maxFeePerGas' | 'maxPriorityFeePerGas'>>,
     Pick<TransactionRequestBase, 'gas'> {}
@@ -148,23 +134,10 @@ export type ContractCall = {
   calldata: Address
 }
 
-export interface SamConfig {
-  contractAddress: string
-
-  basePrice: bigint
-  linearPriceSlope: bigint | string | number
-  inflectionPrice: bigint | number | string
-  inflectionPoint: number
-
-  artistFeeBPS: number
-  goldenEggFeeBPS: number
-  affiliateFeeBPS: number
-}
-
 /**
  * The arguments required by SoundEdition.initialize
  */
-export type EditionConfig = {
+export type TieredEditionConfig = {
   name: string
   symbol: string
   metadataModule: Address
@@ -176,49 +149,63 @@ export type EditionConfig = {
   editionMaxMintableUpper: number
   editionCutoffTime: number
   shouldFreezeMetadata: boolean
-  shouldEnableMintRandomness: boolean
-  enableOperatorFiltering: boolean
-
-  setSAM: SamConfig | null
+  shouldFreezeTierCreation: boolean
 }
 
-/**
- * The arguments required for all minter calls.
- */
-export type MintConfigBase = {
-  minterAddress: Address
+export type TierConfig = {
+  tier: number
+  cutoffTime: number
+  isFrozen: boolean
+  maxMintableLower: number
+  maxMintableUpper: number
+  mintRandomnessEnabled: false
+}
+
+type ScheduleConfigBase = {
+  edition: Address
+  tier: number
+  scheduleNum: number
+  platform: Address
   price: bigint
   startTime: number
   endTime: number
+  maxMintablePerAccount: number
+  maxMintable: number
+  minted: number
   affiliateFeeBPS: number
-}
-
-/**
- * The custom arguments required by each minter
- */
-export type MerkleDropConfig = MintConfigBase & {
-  mintType: 'MerkleDrop'
-  merkleRoot: Hex
-  maxMintable: number
-  maxMintablePerAccount: number
-}
-
-export type RangeEditionConfig = MintConfigBase & {
-  mintType: 'RangeEdition'
-  cutoffTime: number
-  maxMintableLower: number
-  maxMintableUpper: number
-  maxMintablePerAccount: number
-}
-
-export type MintConfig = MerkleDropConfig | RangeEditionConfig
-
-export type SuperMinterConfig = MintConfig & {
-  maxMintable: number
+  paused: boolean
+  hasMints: boolean
   affiliateMerkleRoot: Hex
-  tier: number
-  platform: Address
-  mode: number
-  signer: Address
+}
+export type DefaultScheduleConfig = ScheduleConfigBase & {
+  mode: 'DEFAULT'
+}
+export type MerkleScheduleConfig = ScheduleConfigBase & {
+  mode: 'VERIFY_MERKLE'
   merkleRoot: Hex
 }
+export type SignatureScheduleConfig = ScheduleConfigBase & {
+  mode: 'VERIFY_SIGNATURE'
+  signer: Address
+  usePlatformSigner: boolean
+}
+export type MinterScheduleConfig = DefaultScheduleConfig | MerkleScheduleConfig | SignatureScheduleConfig
+
+export type ScheduleBase = ScheduleConfigBase & {
+  minted: number
+  hasMints: boolean
+}
+export type DefaultSchedule = ScheduleBase & {
+  mode: 'DEFAULT'
+}
+export type MerkleSchedule = ScheduleBase & {
+  mode: 'VERIFY_MERKLE'
+  merkleRoot: Hex
+}
+export type SignatureSchedule = ScheduleBase & {
+  mode: 'VERIFY_SIGNATURE'
+  signer: Address
+  usePlatformSigner: boolean
+}
+
+export type SuperMinterSchedule = DefaultSchedule | MerkleSchedule | SignatureSchedule

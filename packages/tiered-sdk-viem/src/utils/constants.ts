@@ -18,11 +18,12 @@
 // This is hardcoded on the contract so we always know its 2
 export const MINTER_ROLE = 2n
 
-export const editionInitFlags = {
-  METADATA_IS_FROZEN: 1, // 1 << 0
-  MINT_RANDOMNESS_ENABLED: 2, // 1 << 1
-  OPERATOR_FILTERING_ENABLED: 4, // 1 << 2
-} as const
+// export const tieredEditionInitFlags = {
+//   // The boolean flag on whether the metadata is frozen.
+//   METADATA_IS_FROZEN: 1, // 1 << 0
+//   // The boolean flag on whether the ability to create a new tier is frozen.
+//   CREATE_TIER_IS_FROZEN: 2, // 1 << 1
+// } as const
 
 export const UINT32_MAX = 4294967295
 
