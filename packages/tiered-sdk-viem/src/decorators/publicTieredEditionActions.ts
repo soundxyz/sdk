@@ -9,10 +9,16 @@ import {
   type GetMintingSchedulesReturnType,
   getMintingSchedules,
 } from '../actions/public/getMintingSchedules'
+import {
+  getExpectedEditionAddress,
+  type GetExpectedEditionAddressParams,
+  type GetExpectedEditionAddressReturnType,
+} from '../actions/public/getExpectedEditionAddress'
 
 export type PublicTieredEditionActions = {
   getEditionContractInfo: (args: GetEditionContractInfoParams) => Promise<GetEditionContractInfoReturnType>
   getMintingSchedules: (args: GetMintingSchedulesParams) => Promise<GetMintingSchedulesReturnType>
+  getExpectedEditionAddress: (args: GetExpectedEditionAddressParams) => Promise<GetExpectedEditionAddressReturnType>
 }
 
 export function publicTieredEditionActions<
@@ -22,5 +28,6 @@ export function publicTieredEditionActions<
   return {
     getEditionContractInfo: (args) => getEditionContractInfo(client, args),
     getMintingSchedules: (args) => getMintingSchedules(client, args),
+    getExpectedEditionAddress: (args) => getExpectedEditionAddress(client, args),
   }
 }
