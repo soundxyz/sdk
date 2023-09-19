@@ -1,5 +1,8 @@
 import type { Account, Chain, Transport, WalletClient, WriteContractReturnType } from 'viem'
-import { writeCreateTieredEdition, type WriteCreateTieredEditionParameters } from '../actions/wallet/writeCreateEdition'
+import {
+  writeCreateTieredEdition,
+  type WriteCreateTieredEditionParameters,
+} from '../actions/wallet/writeCreateTieredEdition'
 
 export type WalletTieredEditionActions = {
   writeCreateTieredEdition: (args: WriteCreateTieredEditionParameters) => Promise<WriteContractReturnType>
@@ -11,6 +14,6 @@ export function walletTieredEditionActions<
   TAccount extends Account = Account,
 >(client: WalletClient<TTransport, TChain, TAccount>): WalletTieredEditionActions {
   return {
-    writeCreateTieredEdition: (args) => writeCreateTieredEdition<TChain, TAccount>(client, args),
+    writeCreateTieredEdition: (args) => writeCreateTieredEdition(client, args),
   }
 }

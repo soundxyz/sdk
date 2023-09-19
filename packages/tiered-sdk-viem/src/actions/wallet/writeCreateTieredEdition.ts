@@ -6,7 +6,6 @@ import {
   type Chain,
   type Account,
   type Transport,
-  type WriteContractParameters,
 } from 'viem'
 import { soundCreatorV1Abi } from '../../abi/sound-creator-v1'
 import type { ContractCall, MinterScheduleConfig, TieredEditionConfig, TierConfig } from '../../types'
@@ -32,16 +31,13 @@ export type WriteCreateTieredEditionParameters = {
     distributorFee: number
     controller: Address
   } | null
+  chain: Chain
 }
 
 const ABI = soundCreatorV1Abi
 const FUNC = 'createSoundAndMints'
 
-export async function writeCreateTieredEdition<
-  TChain extends Chain | undefined,
-  TAccount extends Account | undefined,
-  TChainOverride extends Chain | undefined = undefined,
->(
+export async function writeCreateTieredEdition<TChain extends Chain | undefined, TAccount extends Account>(
   client: WalletClient<Transport, TChain, TAccount>,
   {
     creatorAddress,
@@ -52,6 +48,7 @@ export async function writeCreateTieredEdition<
     tierConfigs,
     mintConfigs,
     createSplit,
+    chain,
   }: WriteCreateTieredEditionParameters,
 ) {
   /**
@@ -154,9 +151,11 @@ export async function writeCreateTieredEdition<
   const calldata = contractCalls.map((d) => d.calldata)
 
   return client.writeContract({
+    chain,
     abi: ABI,
     address: creatorAddress,
     functionName: FUNC,
     args: [formattedSalt, editionInitData, addresses, calldata],
-  } as unknown as WriteContractParameters<typeof ABI, typeof FUNC, TChain, TAccount, TChainOverride>)
+    account: client.account.address,
+  })
 }
