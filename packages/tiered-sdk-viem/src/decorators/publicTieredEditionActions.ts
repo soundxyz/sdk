@@ -26,8 +26,8 @@ export function publicTieredEditionActions<
   TChain extends Chain | undefined = Chain | undefined,
 >(client: PublicClient<TTransport, TChain>): PublicTieredEditionActions {
   return {
-    getEditionContractInfo: (args) => getEditionContractInfo(client, args),
-    getMintingSchedules: (args) => getMintingSchedules(client, args),
-    getExpectedEditionAddress: (args) => getExpectedEditionAddress(client, args),
+    getEditionContractInfo: (args) => getEditionContractInfo<TChain>(client, args),
+    getMintingSchedules: (args) => getMintingSchedules<TChain>(client, args),
+    getExpectedEditionAddress: (args) => getExpectedEditionAddress<TChain>(client, args),
   }
 }

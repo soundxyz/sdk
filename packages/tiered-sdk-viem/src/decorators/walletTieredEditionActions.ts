@@ -11,6 +11,6 @@ export function walletTieredEditionActions<
   TAccount extends Account = Account,
 >(client: WalletClient<TTransport, TChain, TAccount>): WalletTieredEditionActions {
   return {
-    writeCreateTieredEdition: (args) => writeCreateTieredEdition(client, args),
+    writeCreateTieredEdition: (args) => writeCreateTieredEdition<TChain, TAccount>(client, args),
   }
 }
