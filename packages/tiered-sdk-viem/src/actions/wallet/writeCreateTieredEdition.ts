@@ -91,7 +91,10 @@ export async function writeCreateTieredEdition<TChain extends Chain | undefined,
             // TODO: add better typesafety here
             mode: mintConfig.mode === 'DEFAULT' ? 1 : mintConfig.mode === 'VERIFY_MERKLE' ? 2 : 3,
             signer: 'signer' in mintConfig ? mintConfig.signer : NULL_ADDRESS,
-            merkleRoot: 'signer' in mintConfig ? mintConfig.signer : '0x',
+            merkleRoot:
+              'signer' in mintConfig
+                ? mintConfig.signer
+                : '0x0000000000000000000000000000000000000000000000000000000000000000',
           },
         ],
       }),
