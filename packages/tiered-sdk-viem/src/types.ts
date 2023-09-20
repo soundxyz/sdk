@@ -145,9 +145,6 @@ export type TieredEditionConfig = {
   contractURI: string
   fundingRecipient: Address
   royaltyBPS: number
-  editionMaxMintableLower: number
-  editionMaxMintableUpper: number
-  editionCutoffTime: number
   shouldFreezeMetadata: boolean
   shouldFreezeTierCreation: boolean
 }
