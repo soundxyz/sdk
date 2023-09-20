@@ -6,6 +6,7 @@ import {
   type Chain,
   type Account,
   type Transport,
+  pad,
 } from 'viem'
 import { soundCreatorV1Abi } from '../../abi/sound-creator-v1'
 import type { ContractCall, MinterScheduleConfig, TieredEditionConfig, TierConfig } from '../../types'
@@ -91,10 +92,7 @@ export async function writeCreateTieredEdition<TChain extends Chain | undefined,
             // TODO: add better typesafety here
             mode: mintConfig.mode === 'DEFAULT' ? 1 : mintConfig.mode === 'VERIFY_MERKLE' ? 2 : 3,
             signer: 'signer' in mintConfig ? mintConfig.signer : NULL_ADDRESS,
-            merkleRoot:
-              'signer' in mintConfig
-                ? mintConfig.signer
-                : '0x0000000000000000000000000000000000000000000000000000000000000000',
+            merkleRoot: 'merkleRoot' in mintConfig ? mintConfig.merkleRoot : pad('0x0', { size: 32 }),
           },
         ],
       }),
