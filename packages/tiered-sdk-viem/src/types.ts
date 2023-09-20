@@ -155,7 +155,7 @@ export type TierConfig = {
   isFrozen: boolean
   maxMintableLower: number
   maxMintableUpper: number
-  mintRandomnessEnabled: false
+  mintRandomnessEnabled: boolean
   baseURI: string
 }
 
