@@ -160,7 +160,6 @@ export type TierConfig = {
 }
 
 type ScheduleConfigBase = {
-  edition: Address
   tier: number
   scheduleNum: number
   platform: Address
@@ -169,10 +168,7 @@ type ScheduleConfigBase = {
   endTime: number
   maxMintablePerAccount: number
   maxMintable: number
-  minted: number
   affiliateFeeBPS: number
-  paused: boolean
-  hasMints: boolean
   affiliateMerkleRoot: Hex
 }
 export type DefaultScheduleConfig = ScheduleConfigBase & {
@@ -192,6 +188,7 @@ export type MinterScheduleConfig = DefaultScheduleConfig | MerkleScheduleConfig 
 export type ScheduleBase = ScheduleConfigBase & {
   minted: number
   hasMints: boolean
+  paused: boolean
 }
 export type DefaultSchedule = ScheduleBase & {
   mode: 'DEFAULT'
