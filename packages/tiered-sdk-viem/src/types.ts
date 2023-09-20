@@ -156,6 +156,7 @@ export type TierConfig = {
   maxMintableLower: number
   maxMintableUpper: number
   mintRandomnessEnabled: false
+  baseURI: string
 }
 
 type ScheduleConfigBase = {

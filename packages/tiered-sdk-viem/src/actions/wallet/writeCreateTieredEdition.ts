@@ -13,12 +13,14 @@ import { SoundEditionV2Config } from '../../abi/sound-edition-v2'
 import { MINTER_ROLE, NULL_ADDRESS } from '../../utils/constants'
 import { SuperMinterV1Config } from '../../abi/super-minter-v1'
 import { splitMainAbi } from '../../abi/external/split-main'
+import { soundMetadataAbi } from '../../abi/sound-metadata'
 
 export type WriteCreateTieredEditionParameters = {
   creatorAddress: Address
   formattedSalt: Hex
   precomputedEditionAddress: Address
   superMinterAddress: Address
+  soundMetadataAddress: Address
   editionConfig: TieredEditionConfig
   tierConfigs: TierConfig[]
   mintConfigs: MinterScheduleConfig[]
@@ -44,6 +46,7 @@ export async function writeCreateTieredEdition<TChain extends Chain | undefined,
     formattedSalt,
     precomputedEditionAddress,
     superMinterAddress,
+    soundMetadataAddress,
     editionConfig,
     tierConfigs,
     mintConfigs,
@@ -66,7 +69,7 @@ export async function writeCreateTieredEdition<TChain extends Chain | undefined,
     }),
   })
 
-  // Add the createEditionMint calls.
+  // Set up tier schedules on super minter
   for (const mintConfig of mintConfigs) {
     contractCalls.push({
       contractAddress: superMinterAddress,
@@ -91,6 +94,19 @@ export async function writeCreateTieredEdition<TChain extends Chain | undefined,
             merkleRoot: 'signer' in mintConfig ? mintConfig.signer : '0x',
           },
         ],
+      }),
+    })
+  }
+
+  // set up tier metadata on sound metadata
+  for (const tierConfig of tierConfigs) {
+    // set tier metadata
+    contractCalls.push({
+      contractAddress: soundMetadataAddress,
+      calldata: encodeFunctionData({
+        abi: soundMetadataAbi,
+        functionName: 'setBaseURI',
+        args: [precomputedEditionAddress, tierConfig.tier, tierConfig.baseURI],
       }),
     })
   }
