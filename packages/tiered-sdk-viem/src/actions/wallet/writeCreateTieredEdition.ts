@@ -126,7 +126,7 @@ export async function writeCreateTieredEdition<TChain extends Chain | undefined,
     })
 
     contractCalls.push({
-      contractAddress: superMinterAddress,
+      contractAddress: precomputedEditionAddress,
       calldata: encodeFunctionData({
         abi: SoundEditionV2Config.abi,
         functionName: 'createSplit',
