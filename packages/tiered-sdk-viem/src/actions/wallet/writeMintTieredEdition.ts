@@ -2,7 +2,7 @@ import { type WalletClient, type Address, type Hex, type Chain, type Account, ty
 import { NULL_ADDRESS } from '../../utils/constants'
 import { SuperMinterV1Config } from '../../abi/super-minter-v1'
 
-export type WriteMintTieredEdition = {
+export type WriteMintTieredEditionParameters = {
   chain: Chain
   edition: Address
   superMinterAddress: Address
@@ -30,7 +30,7 @@ export type WriteMintTieredEdition = {
   attributionId?: bigint
 }
 
-export async function writeCreateTieredEdition<TChain extends Chain | undefined, TAccount extends Account>(
+export async function writeMintTieredEdition<TChain extends Chain | undefined, TAccount extends Account>(
   client: WalletClient<Transport, TChain, TAccount>,
   {
     chain,
@@ -44,7 +44,7 @@ export async function writeCreateTieredEdition<TChain extends Chain | undefined,
     affiliate = NULL_ADDRESS,
     affiliateProof = [],
     attributionId = 0n,
-  }: WriteMintTieredEdition,
+  }: WriteMintTieredEditionParameters,
 ) {
   const allowlistedQuantity = 0
 
