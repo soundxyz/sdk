@@ -1,6 +1,6 @@
 import type { Address, Chain, Hex, PublicClient, Transport } from 'viem'
-import { getSaltAsBytes32 } from '../../utils/helpers'
 import { soundCreatorV1Abi } from '../../abi/sound-creator-v1'
+import { getSaltAsBytes32 } from '../../utils/helpers'
 
 export type GetExpectedEditionAddressParams = {
   creatorAddress: Address

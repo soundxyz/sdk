@@ -1,29 +1,30 @@
 import type { Chain, PublicClient, Transport } from 'viem'
+import type { GetCreateTieredEditionGasEstimateParams } from '../actions/public/getCreateTieredEditionGasEstimate'
 import {
+  getEditionContractInfo,
   type GetEditionContractInfoParams,
   type GetEditionContractInfoReturnType,
-  getEditionContractInfo,
 } from '../actions/public/getEditionContractInfo'
-import {
-  type GetMintingSchedulesParams,
-  type GetMintingSchedulesReturnType,
-  getMintingSchedules,
-} from '../actions/public/getMintingSchedules'
 import {
   getExpectedEditionAddress,
   type GetExpectedEditionAddressParams,
   type GetExpectedEditionAddressReturnType,
 } from '../actions/public/getExpectedEditionAddress'
 import {
-  getPlatformFees,
-  type GetPlatformFeesParams,
-  type GetPlatformFeesReturnType,
-} from '../actions/public/getPlatformFees'
-import {
   getMintEligibility,
   type GetMintEligibilityParams,
   type GetMintEligibilityReturnType,
 } from '../actions/public/getMintEligibility'
+import {
+  getMintingSchedules,
+  type GetMintingSchedulesParams,
+  type GetMintingSchedulesReturnType,
+} from '../actions/public/getMintingSchedules'
+import {
+  getPlatformFees,
+  type GetPlatformFeesParams,
+  type GetPlatformFeesReturnType,
+} from '../actions/public/getPlatformFees'
 
 export type PublicTieredEditionActions = {
   getEditionContractInfo: (args: GetEditionContractInfoParams) => Promise<GetEditionContractInfoReturnType>
@@ -31,6 +32,7 @@ export type PublicTieredEditionActions = {
   getExpectedEditionAddress: (args: GetExpectedEditionAddressParams) => Promise<GetExpectedEditionAddressReturnType>
   getPlatformFees: (args: GetPlatformFeesParams) => Promise<GetPlatformFeesReturnType>
   getMintEligibility: (args: GetMintEligibilityParams) => Promise<GetMintEligibilityReturnType>
+  getCreateTieredEditionGasEstimate: (args: GetCreateTieredEditionGasEstimateParams) => Promise<bigint>
 }
 
 export function publicTieredEditionActions<
@@ -43,5 +45,9 @@ export function publicTieredEditionActions<
     getExpectedEditionAddress: (args) => getExpectedEditionAddress<TChain>(client, args),
     getPlatformFees: (args) => getPlatformFees<TChain>(client, args),
     getMintEligibility: (args) => getMintEligibility<TChain>(client, args),
+    getCreateTieredEditionGasEstimate: (args) => getCreateTieredEditionGasEstimate(args),
   }
+}
+function getCreateTieredEditionGasEstimate(args: GetCreateTieredEditionGasEstimateParams): Promise<bigint> {
+  throw new Error('Function not implemented.')
 }

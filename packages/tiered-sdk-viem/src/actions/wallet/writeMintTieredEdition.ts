@@ -1,6 +1,6 @@
-import { type WalletClient, type Address, type Hex, type Chain, type Account, type Transport } from 'viem'
-import { NULL_ADDRESS, UINT32_MAX } from '../../utils/constants'
+import { type Account, type Address, type Chain, type Hex, type Transport, type WalletClient } from 'viem'
 import { SuperMinterV1Config } from '../../abi/super-minter-v1'
+import { NULL_ADDRESS, UINT32_MAX } from '../../utils/constants'
 
 export type WriteMintTieredEditionParameters = {
   chain: Chain
