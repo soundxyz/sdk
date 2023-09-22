@@ -1,5 +1,5 @@
 import { type WalletClient, type Address, type Hex, type Chain, type Account, type Transport } from 'viem'
-import { NULL_ADDRESS } from '../../utils/constants'
+import { NULL_ADDRESS, UINT32_MAX } from '../../utils/constants'
 import { SuperMinterV1Config } from '../../abi/super-minter-v1'
 
 export type WriteMintTieredEditionParameters = {
@@ -46,7 +46,7 @@ export async function writeMintTieredEdition<TChain extends Chain | undefined, T
     attributionId = 0n,
   }: WriteMintTieredEditionParameters,
 ) {
-  const allowlistedQuantity = 0
+  const allowlistedQuantity = UINT32_MAX
 
   const { allowlisted, allowlistProof }: { allowlisted: Address; allowlistProof: Hex[] } =
     mintParams.mode === 'VERIFY_MERKLE' ? mintParams : { allowlisted: NULL_ADDRESS, allowlistProof: [] }
