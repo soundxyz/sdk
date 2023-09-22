@@ -3,7 +3,7 @@ import { SuperMinterV1Config } from '../../abi/super-minter-v1'
 
 export type GetPlatformFeesParams = {
   superMinterAddress: Address
-  platform: Address
+  platformAddress: Address
   tiers: number[]
 }
 
@@ -16,14 +16,14 @@ export type GetPlatformFeesReturnType = {
 
 export async function getPlatformFees<TChain extends Chain | undefined>(
   client: PublicClient<Transport, TChain>,
-  { superMinterAddress, platform, tiers }: GetPlatformFeesParams,
+  { superMinterAddress, platformAddress, tiers }: GetPlatformFeesParams,
 ): Promise<GetPlatformFeesReturnType> {
   return client.multicall({
     contracts: tiers.map((tier) => ({
       abi: SuperMinterV1Config.abi,
       address: superMinterAddress,
       functionName: 'platformFeeConfig',
-      args: [platform, tier],
+      args: [platformAddress, tier],
     })),
     allowFailure: false,
   })

@@ -19,12 +19,18 @@ import {
   type GetPlatformFeesParams,
   type GetPlatformFeesReturnType,
 } from '../actions/public/getPlatformFees'
+import {
+  getMintEligibility,
+  type GetMintEligibilityParams,
+  type GetMintEligibilityReturnType,
+} from '../actions/public/getMintEligibility'
 
 export type PublicTieredEditionActions = {
   getEditionContractInfo: (args: GetEditionContractInfoParams) => Promise<GetEditionContractInfoReturnType>
   getMintingSchedules: (args: GetMintingSchedulesParams) => Promise<GetMintingSchedulesReturnType>
   getExpectedEditionAddress: (args: GetExpectedEditionAddressParams) => Promise<GetExpectedEditionAddressReturnType>
   getPlatformFees: (args: GetPlatformFeesParams) => Promise<GetPlatformFeesReturnType>
+  getMintEligibility: (args: GetMintEligibilityParams) => Promise<GetMintEligibilityReturnType>
 }
 
 export function publicTieredEditionActions<
@@ -36,5 +42,6 @@ export function publicTieredEditionActions<
     getMintingSchedules: (args) => getMintingSchedules<TChain>(client, args),
     getExpectedEditionAddress: (args) => getExpectedEditionAddress<TChain>(client, args),
     getPlatformFees: (args) => getPlatformFees<TChain>(client, args),
+    getMintEligibility: (args) => getMintEligibility<TChain>(client, args),
   }
 }
