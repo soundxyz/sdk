@@ -6,6 +6,7 @@ import {
 
 export type WalletTieredEditionActions = {
   writeCreateTieredEdition: (args: WriteCreateTieredEditionParameters) => Promise<WriteContractReturnType>
+  WriteMintTieredEdition: (args: WriteCreateTieredEditionParameters) => Promise<WriteContractReturnType>
 }
 
 export function walletTieredEditionActions<
@@ -15,5 +16,6 @@ export function walletTieredEditionActions<
 >(client: WalletClient<TTransport, TChain, TAccount>): WalletTieredEditionActions {
   return {
     writeCreateTieredEdition: (args) => writeCreateTieredEdition(client, args),
+    WriteMintTieredEdition: (args) => writeCreateTieredEdition(client, args),
   }
 }
