@@ -2,22 +2,22 @@ import type { Address, Chain, PublicClient, Transport } from 'viem'
 import { soundCreatorV1Abi } from '../../abi/sound-creator-v1'
 import { createTieredEditionArgs, type CreateTieredEditionArgs } from '../../helpers/createTieredEditionArgs'
 
-export type GetCreateTieredEditionGasEstimateParams = CreateTieredEditionArgs & {
+export type EstimateGasCreateTieredEditionParams = CreateTieredEditionArgs & {
   soundCreatorAddress: Address
-  deployerAddress: Address
+  account: Address
 }
 
-export async function getCreateTieredEditionGasEstimate<TChain extends Chain | undefined>(
+export async function estimateGasCreateTieredEdition<TChain extends Chain | undefined>(
   client: PublicClient<Transport, TChain>,
-  args: GetCreateTieredEditionGasEstimateParams,
+  args: EstimateGasCreateTieredEditionParams,
 ): Promise<bigint> {
-  const { soundCreatorAddress, deployerAddress } = args
+  const { soundCreatorAddress, account } = args
 
   return client.estimateContractGas({
     address: soundCreatorAddress,
     abi: soundCreatorV1Abi,
     functionName: 'createSoundAndMints',
     args: createTieredEditionArgs(args),
-    account: deployerAddress,
+    account,
   })
 }

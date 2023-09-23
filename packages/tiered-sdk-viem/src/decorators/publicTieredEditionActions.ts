@@ -1,8 +1,8 @@
 import type { Chain, PublicClient, Transport } from 'viem'
 import {
-  getCreateTieredEditionGasEstimate,
-  type GetCreateTieredEditionGasEstimateParams,
-} from '../actions/public/getCreateTieredEditionGasEstimate'
+  estimateGasCreateTieredEdition,
+  type EstimateGasCreateTieredEditionParams,
+} from '../actions/public/estimateGasCreateTieredEdition'
 import {
   getEditionContractInfo,
   type GetEditionContractInfoParams,
@@ -28,6 +28,11 @@ import {
   type GetPlatformFeesParams,
   type GetPlatformFeesReturnType,
 } from '../actions/public/getPlatformFees'
+import {
+  getTotalMintPriceAndFees,
+  type GetTotalMintPriceAndFeesParams,
+  type GetTotalMintPriceAndFeesReturnType,
+} from '../actions/public/getTotalMintPriceAndFees'
 
 export type PublicTieredEditionActions = {
   getEditionContractInfo: (args: GetEditionContractInfoParams) => Promise<GetEditionContractInfoReturnType>
@@ -35,7 +40,9 @@ export type PublicTieredEditionActions = {
   getExpectedEditionAddress: (args: GetExpectedEditionAddressParams) => Promise<GetExpectedEditionAddressReturnType>
   getPlatformFees: (args: GetPlatformFeesParams) => Promise<GetPlatformFeesReturnType>
   getMintEligibility: (args: GetMintEligibilityParams) => Promise<GetMintEligibilityReturnType>
-  getCreateTieredEditionGasEstimate: (args: GetCreateTieredEditionGasEstimateParams) => Promise<bigint>
+  estimateGasCreateTieredEdition: (args: EstimateGasCreateTieredEditionParams) => Promise<bigint>
+  estimateGasMintTieredEdition: (args: EstimateGasCreateTieredEditionParams) => Promise<bigint>
+  getTotalMintPriceAndFees: (args: GetTotalMintPriceAndFeesParams) => Promise<GetTotalMintPriceAndFeesReturnType>
 }
 
 export function publicTieredEditionActions<
@@ -48,6 +55,8 @@ export function publicTieredEditionActions<
     getExpectedEditionAddress: (args) => getExpectedEditionAddress<TChain>(client, args),
     getPlatformFees: (args) => getPlatformFees<TChain>(client, args),
     getMintEligibility: (args) => getMintEligibility<TChain>(client, args),
-    getCreateTieredEditionGasEstimate: (args) => getCreateTieredEditionGasEstimate<TChain>(client, args),
+    estimateGasCreateTieredEdition: (args) => estimateGasCreateTieredEdition<TChain>(client, args),
+    estimateGasMintTieredEdition: (args) => estimateGasCreateTieredEdition<TChain>(client, args),
+    getTotalMintPriceAndFees: (args) => getTotalMintPriceAndFees<TChain>(client, args),
   }
 }

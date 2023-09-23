@@ -35,9 +35,6 @@ export function createTieredEditionArgs({
   mintConfigs,
   createSplit,
 }: CreateTieredEditionArgs) {
-  /**
-   * Encode all the bundled contract calls.
-   */
   const contractCalls: ContractCall[] = []
 
   // Grant MINTER_ROLE for super minter
@@ -79,7 +76,7 @@ export function createTieredEditionArgs({
     })
   }
 
-  // set up tier metadata on sound metadata
+  // Set up tier metadata on sound metadata
   for (const tierConfig of tierConfigs) {
     // set tier metadata
     contractCalls.push({
@@ -92,6 +89,7 @@ export function createTieredEditionArgs({
     })
   }
 
+  // Create split if supplied
   if (createSplit) {
     const { splitMainAddress, accountAllocations, controller, distributorFee } = createSplit
     // accounts are expected to be ordered alphabetically
@@ -115,9 +113,7 @@ export function createTieredEditionArgs({
     })
   }
 
-  /**
-   * Encode the SoundEdition.initialize call.
-   */
+  // Encode the SoundEdition.initialize call.
   const editionInitData = encodeFunctionData({
     abi: SoundEditionV2Config.abi,
     functionName: 'initialize',
