@@ -1,5 +1,8 @@
 import type { Chain, PublicClient, Transport } from 'viem'
-import type { GetCreateTieredEditionGasEstimateParams } from '../actions/public/getCreateTieredEditionGasEstimate'
+import {
+  getCreateTieredEditionGasEstimate,
+  type GetCreateTieredEditionGasEstimateParams,
+} from '../actions/public/getCreateTieredEditionGasEstimate'
 import {
   getEditionContractInfo,
   type GetEditionContractInfoParams,
@@ -45,9 +48,6 @@ export function publicTieredEditionActions<
     getExpectedEditionAddress: (args) => getExpectedEditionAddress<TChain>(client, args),
     getPlatformFees: (args) => getPlatformFees<TChain>(client, args),
     getMintEligibility: (args) => getMintEligibility<TChain>(client, args),
-    getCreateTieredEditionGasEstimate: (args) => getCreateTieredEditionGasEstimate(args),
+    getCreateTieredEditionGasEstimate: (args) => getCreateTieredEditionGasEstimate<TChain>(client, args),
   }
-}
-function getCreateTieredEditionGasEstimate(args: GetCreateTieredEditionGasEstimateParams): Promise<bigint> {
-  throw new Error('Function not implemented.')
 }
