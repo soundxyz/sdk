@@ -15,7 +15,7 @@ export async function writeMintTieredEdition<TChain extends Chain | undefined, T
 ) {
   const { chain, superMinterAddress, gasLimit, value } = args
 
-  return client.sendTransaction({
+  return client.writeContract({
     chain,
     abi: SuperMinterV1Config.abi,
     address: superMinterAddress,
@@ -23,6 +23,6 @@ export async function writeMintTieredEdition<TChain extends Chain | undefined, T
     args: mintTieredEditionArgs(args),
     account: client.account.address,
     gas: gasLimit,
-    value,
+    value: value as any,
   })
 }
