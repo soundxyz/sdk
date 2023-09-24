@@ -19,7 +19,6 @@ export type ContractCall = {
 export type TieredEditionConfig = {
   name: string
   symbol: string
-  metadataModule: Address
   baseURI: string
   contractURI: string
   fundingRecipient: Address

@@ -119,7 +119,7 @@ export function createTieredEditionArgs({
       {
         name: editionConfig.name,
         symbol: editionConfig.symbol,
-        metadataModule: editionConfig.metadataModule,
+        metadataModule: SOUND_METADATA_ADDRESS,
         baseURI: editionConfig.baseURI,
         contractURI: editionConfig.contractURI,
         fundingRecipient: editionConfig.fundingRecipient,
