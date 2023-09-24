@@ -1,21 +1,21 @@
-import { encodeFunctionData, pad, type Address, type Hex } from 'viem'
-import { splitMainAbi } from '../abi/external/split-main'
-import { SoundEditionV2Config } from '../abi/sound-edition-v2'
-import { soundMetadataAbi } from '../abi/sound-metadata'
-import { SuperMinterV1Config } from '../abi/super-minter-v1'
+import { encodeFunctionData, pad, type Address, type EncodeFunctionDataParameters, type Hex } from 'viem'
+import { SPLIT_MAIN_ABI, SPLIT_MAIN_ADDRESS } from '../abi/external/split-main'
+import { SOUND_CREATOR_V2_ABI } from '../abi/sound-creator-v2'
+import { SOUND_EDITION_V2_ABI, SOUND_EDITION_V2_IMPLEMENTATION_ADDRESS } from '../abi/sound-edition-v2'
+import { SOUND_METADATA_ABI, SOUND_METADATA_ADDRESS } from '../abi/sound-metadata'
+import { SUPER_MINTER_ABI, SUPER_MINTER_ADDRESS } from '../abi/super-minter'
 import type { ContractCall, MinterScheduleConfig, TierConfig, TieredEditionConfig } from '../types'
 import { MINTER_ROLE, NULL_ADDRESS } from '../utils/constants'
 
 export type CreateTieredEditionArgs = {
+  owner: Address
   formattedSalt: Hex
-  precomputedEditionAddress: Address
-  superMinterAddress: Address
-  soundMetadataAddress: Address
+  precomputedEdition: Address
   editionConfig: TieredEditionConfig
   tierConfigs: TierConfig[]
   mintConfigs: MinterScheduleConfig[]
   createSplit: {
-    splitMainAddress: Address
+    splitMain: Address
     accountAllocations: {
       account: Address
       percentAllocation: number
@@ -26,37 +26,36 @@ export type CreateTieredEditionArgs = {
 }
 
 export function createTieredEditionArgs({
+  owner,
   formattedSalt,
-  precomputedEditionAddress,
-  superMinterAddress,
-  soundMetadataAddress,
+  precomputedEdition,
   editionConfig,
   tierConfigs,
   mintConfigs,
   createSplit,
-}: CreateTieredEditionArgs) {
+}: CreateTieredEditionArgs): EncodeFunctionDataParameters<typeof SOUND_CREATOR_V2_ABI, 'create'> {
   const contractCalls: ContractCall[] = []
 
   // Grant MINTER_ROLE for super minter
   contractCalls.push({
-    contractAddress: precomputedEditionAddress,
+    contractAddress: precomputedEdition,
     calldata: encodeFunctionData({
-      abi: SoundEditionV2Config.abi,
+      abi: SOUND_EDITION_V2_ABI,
       functionName: 'grantRoles',
-      args: [superMinterAddress, MINTER_ROLE],
+      args: [SUPER_MINTER_ADDRESS, MINTER_ROLE],
     }),
   })
 
   // Set up tier schedules on super minter
   for (const mintConfig of mintConfigs) {
     contractCalls.push({
-      contractAddress: superMinterAddress,
+      contractAddress: SUPER_MINTER_ADDRESS,
       calldata: encodeFunctionData({
-        abi: SuperMinterV1Config.abi,
+        abi: SUPER_MINTER_ABI,
         functionName: 'createEditionMint',
         args: [
           {
-            edition: precomputedEditionAddress,
+            edition: precomputedEdition,
             price: mintConfig.price,
             startTime: Math.floor(mintConfig.startTime),
             endTime: Math.floor(mintConfig.endTime),
@@ -80,42 +79,42 @@ export function createTieredEditionArgs({
   for (const tierConfig of tierConfigs) {
     // set tier metadata
     contractCalls.push({
-      contractAddress: soundMetadataAddress,
+      contractAddress: SOUND_METADATA_ADDRESS,
       calldata: encodeFunctionData({
-        abi: soundMetadataAbi,
+        abi: SOUND_METADATA_ABI,
         functionName: 'setBaseURI',
-        args: [precomputedEditionAddress, tierConfig.tier, tierConfig.baseURI],
+        args: [precomputedEdition, tierConfig.tier, tierConfig.baseURI],
       }),
     })
   }
 
   // Create split if supplied
   if (createSplit) {
-    const { splitMainAddress, accountAllocations, controller, distributorFee } = createSplit
+    const { accountAllocations, controller, distributorFee } = createSplit
     // accounts are expected to be ordered alphabetically
     accountAllocations.sort((a, b) => a.account.toLowerCase().localeCompare(b.account.toLowerCase()))
     const accounts = accountAllocations.map(({ account }) => account)
     const percentAllocations = accountAllocations.map(({ percentAllocation }) => percentAllocation)
 
     const splitCalldata = encodeFunctionData({
-      abi: splitMainAbi,
+      abi: SPLIT_MAIN_ABI,
       functionName: 'createSplit',
       args: [accounts, percentAllocations, distributorFee, controller],
     })
 
     contractCalls.push({
-      contractAddress: precomputedEditionAddress,
+      contractAddress: precomputedEdition,
       calldata: encodeFunctionData({
-        abi: SoundEditionV2Config.abi,
+        abi: SOUND_EDITION_V2_ABI,
         functionName: 'createSplit',
-        args: [splitMainAddress, splitCalldata],
+        args: [SPLIT_MAIN_ADDRESS, splitCalldata],
       }),
     })
   }
 
   // Encode the SoundEdition.initialize call.
   const editionInitData = encodeFunctionData({
-    abi: SoundEditionV2Config.abi,
+    abi: SOUND_EDITION_V2_ABI,
     functionName: 'initialize',
     args: [
       {
@@ -143,5 +142,20 @@ export function createTieredEditionArgs({
   const addresses = contractCalls.map((d) => d.contractAddress)
   const calldata = contractCalls.map((d) => d.calldata)
 
-  return [formattedSalt, editionInitData, addresses, calldata] as const
+  return {
+    abi: SOUND_CREATOR_V2_ABI,
+    functionName: 'create',
+    args: [
+      {
+        contracts: addresses,
+        data: calldata,
+        implementation: SOUND_EDITION_V2_IMPLEMENTATION_ADDRESS,
+        initData: editionInitData,
+        owner,
+        salt: formattedSalt,
+        // doesn't matter outside of signature
+        nonce: 0n,
+      },
+    ],
+  }
 }

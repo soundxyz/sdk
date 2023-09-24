@@ -1,10 +1,9 @@
-import { type Account, type Address, type Chain, type Transport, type WalletClient } from 'viem'
-import { SuperMinterV1Config } from '../../abi/super-minter-v1'
+import { type Account, type Chain, type Transport, type WalletClient } from 'viem'
+import { SUPER_MINTER_ABI, SUPER_MINTER_ADDRESS } from '../../abi/super-minter'
 import { mintTieredEditionArgs, type MintTieredEditionArgs } from '../../helpers/mintTieredEditionArgs'
 
 export type WriteMintTieredEditionParameters = MintTieredEditionArgs & {
   chain: Chain
-  superMinterAddress: Address
   gasLimit?: bigint
   value: bigint
 }
@@ -13,12 +12,12 @@ export async function writeMintTieredEdition<TChain extends Chain | undefined, T
   client: WalletClient<Transport, TChain, TAccount>,
   args: WriteMintTieredEditionParameters,
 ) {
-  const { chain, superMinterAddress, gasLimit, value } = args
+  const { chain, gasLimit, value } = args
 
   return client.writeContract({
     chain,
-    abi: SuperMinterV1Config.abi,
-    address: superMinterAddress,
+    abi: SUPER_MINTER_ABI,
+    address: SUPER_MINTER_ADDRESS,
     functionName: 'mintTo',
     args: mintTieredEditionArgs(args),
     account: client.account.address,

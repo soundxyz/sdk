@@ -1,10 +1,9 @@
 import type { Address, Chain, PublicClient, Transport } from 'viem'
-import { SuperMinterV1Config } from '../../abi/super-minter-v1'
+import { SUPER_MINTER_ABI, SUPER_MINTER_ADDRESS } from '../../abi/super-minter'
 import type { MerkleProvider } from '../../types'
 
 export type GetMintEligibilityParams = {
   editionAddress: Address
-  superMinterAddress: Address
   tier: number
   scheduleNum: number
   collectorAddress: Address
@@ -18,19 +17,19 @@ export type GetMintEligibilityReturnType = {
 
 export async function getMintEligibility<TChain extends Chain | undefined>(
   client: PublicClient<Transport, TChain>,
-  { editionAddress, superMinterAddress, tier, scheduleNum, collectorAddress, merkleProvider }: GetMintEligibilityParams,
+  { editionAddress, tier, scheduleNum, collectorAddress, merkleProvider }: GetMintEligibilityParams,
 ): Promise<GetMintEligibilityReturnType> {
   const [numberMintedOnSchedule, scheduleInfo] = await client.multicall({
     contracts: [
       {
-        abi: SuperMinterV1Config.abi,
-        address: superMinterAddress,
+        abi: SUPER_MINTER_ABI,
+        address: SUPER_MINTER_ADDRESS,
         functionName: 'numberMinted',
         args: [editionAddress, tier, scheduleNum, collectorAddress],
       },
       {
-        abi: SuperMinterV1Config.abi,
-        address: superMinterAddress,
+        abi: SUPER_MINTER_ABI,
+        address: SUPER_MINTER_ADDRESS,
         functionName: 'mintInfo',
         args: [editionAddress, tier, scheduleNum],
       },

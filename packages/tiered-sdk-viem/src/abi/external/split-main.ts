@@ -1,4 +1,6 @@
-export const splitMainAbi = [
+export const SPLIT_MAIN_ADDRESS = '0x2ed6c4B5dA6378c7897AC67Ba9e43102Feb694EE'
+
+export const SPLIT_MAIN_ABI = [
   {
     inputs: [],
     stateMutability: 'nonpayable',

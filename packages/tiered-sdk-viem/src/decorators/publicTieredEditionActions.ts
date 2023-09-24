@@ -4,6 +4,10 @@ import {
   type EstimateGasCreateTieredEditionParams,
 } from '../actions/public/estimateGasCreateTieredEdition'
 import {
+  estimateGasMintTieredEdition,
+  type EstimateGasMintTieredEditionParams,
+} from '../actions/public/estimateGasMintTieredEdition'
+import {
   getEditionContractInfo,
   type GetEditionContractInfoParams,
   type GetEditionContractInfoReturnType,
@@ -41,7 +45,7 @@ export type PublicTieredEditionActions = {
   getPlatformFees: (args: GetPlatformFeesParams) => Promise<GetPlatformFeesReturnType>
   getMintEligibility: (args: GetMintEligibilityParams) => Promise<GetMintEligibilityReturnType>
   estimateGasCreateTieredEdition: (args: EstimateGasCreateTieredEditionParams) => Promise<bigint>
-  estimateGasMintTieredEdition: (args: EstimateGasCreateTieredEditionParams) => Promise<bigint>
+  estimateGasMintTieredEdition: (args: EstimateGasMintTieredEditionParams) => Promise<bigint>
   getTotalMintPriceAndFees: (args: GetTotalMintPriceAndFeesParams) => Promise<GetTotalMintPriceAndFeesReturnType>
 }
 
@@ -56,7 +60,7 @@ export function publicTieredEditionActions<
     getPlatformFees: (args) => getPlatformFees<TChain>(client, args),
     getMintEligibility: (args) => getMintEligibility<TChain>(client, args),
     estimateGasCreateTieredEdition: (args) => estimateGasCreateTieredEdition<TChain>(client, args),
-    estimateGasMintTieredEdition: (args) => estimateGasCreateTieredEdition<TChain>(client, args),
+    estimateGasMintTieredEdition: (args) => estimateGasMintTieredEdition<TChain>(client, args),
     getTotalMintPriceAndFees: (args) => getTotalMintPriceAndFees<TChain>(client, args),
   }
 }

@@ -1,9 +1,8 @@
 import type { Address, Chain, PublicClient, Transport } from 'viem'
-import { SuperMinterV1Config } from '../../abi/super-minter-v1'
+import { SUPER_MINTER_ABI, SUPER_MINTER_ADDRESS } from '../../abi/super-minter'
 
 export type GetPlatformFeesParams = {
-  superMinterAddress: Address
-  platformAddress: Address
+  platform: Address
   tiers: number[]
 }
 
@@ -16,14 +15,14 @@ export type GetPlatformFeesReturnType = {
 
 export async function getPlatformFees<TChain extends Chain | undefined>(
   client: PublicClient<Transport, TChain>,
-  { superMinterAddress, platformAddress, tiers }: GetPlatformFeesParams,
+  { platform, tiers }: GetPlatformFeesParams,
 ): Promise<GetPlatformFeesReturnType> {
   return client.multicall({
     contracts: tiers.map((tier) => ({
-      abi: SuperMinterV1Config.abi,
-      address: superMinterAddress,
+      abi: SUPER_MINTER_ABI,
+      address: SUPER_MINTER_ADDRESS,
       functionName: 'platformFeeConfig',
-      args: [platformAddress, tier],
+      args: [platform, tier],
     })),
     allowFailure: false,
   })

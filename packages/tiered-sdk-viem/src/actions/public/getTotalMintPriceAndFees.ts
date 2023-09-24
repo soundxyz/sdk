@@ -1,9 +1,8 @@
 import type { Address, Chain, PublicClient, Transport } from 'viem'
-import { SuperMinterV1Config } from '../../abi/super-minter-v1'
+import { SUPER_MINTER_ABI, SUPER_MINTER_ADDRESS } from '../../abi/super-minter'
 
 export type GetTotalMintPriceAndFeesParams = {
-  superMinterAddress: Address
-  editionAddress: Address
+  edition: Address
   tier: number
   scheduleNum: number
   quantity: number
@@ -35,12 +34,12 @@ export type GetTotalMintPriceAndFeesReturnType = {
 
 export async function getTotalMintPriceAndFees<TChain extends Chain | undefined>(
   client: PublicClient<Transport, TChain>,
-  { superMinterAddress, editionAddress, tier, scheduleNum, quantity }: GetTotalMintPriceAndFeesParams,
+  { edition, tier, scheduleNum, quantity }: GetTotalMintPriceAndFeesParams,
 ): Promise<GetTotalMintPriceAndFeesReturnType> {
   return client.readContract({
-    abi: SuperMinterV1Config.abi,
-    address: superMinterAddress,
+    abi: SUPER_MINTER_ABI,
+    address: SUPER_MINTER_ADDRESS,
     functionName: 'totalPriceAndFees',
-    args: [editionAddress, tier, scheduleNum, quantity],
+    args: [edition, tier, scheduleNum, quantity],
   })
 }

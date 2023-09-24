@@ -1,10 +1,9 @@
-import { type Account, type Address, type Chain, type Transport, type WalletClient } from 'viem'
-import { soundCreatorV1Abi } from '../../abi/sound-creator-v1'
+import { type Account, type Chain, type Transport, type WalletClient } from 'viem'
+import { SOUND_CREATOR_V2_ADDRESS } from '../../abi/sound-creator-v2'
 import { createTieredEditionArgs, type CreateTieredEditionArgs } from '../../helpers/createTieredEditionArgs'
 
 export type WriteCreateTieredEditionParameters = CreateTieredEditionArgs & {
   chain: Chain
-  creatorAddress: Address
   gasLimit?: bigint
 }
 
@@ -12,14 +11,13 @@ export async function writeCreateTieredEdition<TChain extends Chain | undefined,
   client: WalletClient<Transport, TChain, TAccount>,
   args: WriteCreateTieredEditionParameters,
 ) {
-  const { creatorAddress, chain, gasLimit } = args
+  const { chain, gasLimit } = args
 
   return client.writeContract({
+    ...createTieredEditionArgs(args),
+    address: SOUND_CREATOR_V2_ADDRESS,
+    functionName: 'create',
     chain,
-    abi: soundCreatorV1Abi,
-    address: creatorAddress,
-    functionName: 'createSoundAndMints',
-    args: createTieredEditionArgs(args),
     account: client.account.address,
     gas: gasLimit,
   })
