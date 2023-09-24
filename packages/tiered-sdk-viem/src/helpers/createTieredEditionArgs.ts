@@ -15,7 +15,6 @@ export type CreateTieredEditionArgs = {
   tierConfigs: TierConfig[]
   mintConfigs: MinterScheduleConfig[]
   createSplit: {
-    splitMain: Address
     accountAllocations: {
       account: Address
       percentAllocation: number
