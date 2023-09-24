@@ -1,4 +1,4 @@
-export const SOUND_CREATOR_V2_ADDRESS = '0x0000000000c78FEE168002D89D141517b8E6E0FE'
+export const SOUND_CREATOR_V2_ADDRESS = '0x0000000000aec84F5BFc2af15EAfb943bf4e3522'
 
 export const SOUND_CREATOR_V2_ABI = [
   { inputs: [], name: 'ArrayLengthsMismatch', type: 'error' },
