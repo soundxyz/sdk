@@ -4,13 +4,14 @@ import { mintTieredEditionArgs, type MintTieredEditionArgs } from '../../helpers
 
 export type EstimateGasMintTieredEditionParams = MintTieredEditionArgs & {
   account: Address
+  value: bigint
 }
 
 export async function estimateGasMintTieredEdition<TChain extends Chain | undefined>(
   client: PublicClient<Transport, TChain>,
   args: EstimateGasMintTieredEditionParams,
 ): Promise<bigint> {
-  const { account } = args
+  const { account, value } = args
 
   return client.estimateContractGas({
     address: SUPER_MINTER_ADDRESS,
@@ -18,5 +19,6 @@ export async function estimateGasMintTieredEdition<TChain extends Chain | undefi
     functionName: 'mintTo',
     args: mintTieredEditionArgs(args),
     account,
+    value,
   })
 }
