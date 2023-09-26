@@ -55,8 +55,7 @@ export async function getMintEligibility<TChain extends Chain | undefined>(
     }
   }
 
-  const tierCurrentMax =
-    tierInfo.isFrozen || tierInfo.mintConcluded ? 0 : Math.max(getTierCurrentMaxMintable(tierInfo) - tierInfo.minted, 0)
+  const tierCurrentMax = tierInfo.mintConcluded ? 0 : Math.max(getTierCurrentMaxMintable(tierInfo) - tierInfo.minted, 0)
 
   const availableOnSchedule = maxMintable - minted
   const remainingPerAccountLimit = maxMintablePerAccount - numberMintedOnSchedule
