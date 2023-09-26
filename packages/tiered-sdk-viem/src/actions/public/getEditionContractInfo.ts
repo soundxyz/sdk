@@ -1,5 +1,6 @@
 import type { Address, Chain, PublicClient, Transport } from 'viem'
 import { SOUND_EDITION_V2_ABI } from '../../abi/sound-edition-v2'
+import { getTierCurrentMaxMintable } from '../../helpers/tierCurrentMaxMintable'
 
 export type GetEditionContractInfoParams = {
   edition: Address
@@ -50,9 +51,7 @@ export async function getEditionContractInfo<TChain extends Chain | undefined>(
       maxMintable:
         tierInfo.maxMintableLower === tierInfo.maxMintableUpper
           ? tierInfo.maxMintableLower
-          : (unixTimestamp: number | undefined = Date.now() / 1000) =>
-              // if before the cutoff time, use the upper limit, otherwise use the lower limit
-              unixTimestamp < tierInfo.cutoffTime ? tierInfo.maxMintableUpper : tierInfo.maxMintableLower,
+          : (unixTimestamp?: number) => getTierCurrentMaxMintable(tierInfo, unixTimestamp),
     })),
   }
 }

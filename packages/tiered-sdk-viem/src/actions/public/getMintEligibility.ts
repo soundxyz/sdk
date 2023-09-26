@@ -1,5 +1,8 @@
 import type { Address, Chain, PublicClient, Transport } from 'viem'
+import { SOUND_EDITION_V2_ABI } from '../../abi/sound-edition-v2'
 import { SUPER_MINTER_ABI, SUPER_MINTER_ADDRESS } from '../../abi/super-minter'
+import { getTierCurrentMaxMintable } from '../../helpers/tierCurrentMaxMintable'
+
 import type { MerkleProvider } from '../../types'
 
 export type GetMintEligibilityParams = {
@@ -19,7 +22,7 @@ export async function getMintEligibility<TChain extends Chain | undefined>(
   client: PublicClient<Transport, TChain>,
   { editionAddress, tier, scheduleNum, collectorAddress, merkleProvider }: GetMintEligibilityParams,
 ): Promise<GetMintEligibilityReturnType> {
-  const [numberMintedOnSchedule, scheduleInfo] = await client.multicall({
+  const [numberMintedOnSchedule, scheduleInfo, tierInfo] = await client.multicall({
     contracts: [
       {
         abi: SUPER_MINTER_ABI,
@@ -32,6 +35,12 @@ export async function getMintEligibility<TChain extends Chain | undefined>(
         address: SUPER_MINTER_ADDRESS,
         functionName: 'mintInfo',
         args: [editionAddress, tier, scheduleNum],
+      },
+      {
+        abi: SOUND_EDITION_V2_ABI,
+        address: editionAddress,
+        functionName: 'tierInfo',
+        args: [tier],
       },
     ],
     allowFailure: false,
@@ -46,9 +55,12 @@ export async function getMintEligibility<TChain extends Chain | undefined>(
     }
   }
 
+  const tierCurrentMax =
+    tierInfo.isFrozen || tierInfo.mintConcluded ? 0 : Math.max(getTierCurrentMaxMintable(tierInfo) - tierInfo.minted, 0)
+
   const availableOnSchedule = maxMintable - minted
   const remainingPerAccountLimit = maxMintablePerAccount - numberMintedOnSchedule
-  const remainingEligibility = Math.min(availableOnSchedule, remainingPerAccountLimit)
+  const remainingEligibility = Math.min(availableOnSchedule, remainingPerAccountLimit, tierCurrentMax)
 
   // default
   if (mode === 0) {
