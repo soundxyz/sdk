@@ -77,7 +77,8 @@ async function mintHelper(
     }
   }
 
-  const value = BigInt(mintSchedule.price * BigInt(quantity)) + mintSchedule.platformTransactionFee
+  const value =
+    (mintSchedule.price + mintSchedule.platformPerTokenFee) * BigInt(quantity) + mintSchedule.platformPerTransactionFee
 
   const txnOverrides = {
     gas,
@@ -289,7 +290,8 @@ async function mintToHelper(
     }
   }
 
-  const value = BigInt(mintSchedule.price * BigInt(quantity)) + mintSchedule.platformTransactionFee
+  const value =
+    (mintSchedule.price + mintSchedule.platformPerTokenFee) * BigInt(quantity) + mintSchedule.platformPerTransactionFee
 
   const txnOverrides = {
     gas,

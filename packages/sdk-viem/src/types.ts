@@ -18,7 +18,7 @@ type LazyOption<T extends object> = T | (() => T | Promise<T>)
 
 export type ClientProvider = Pick<
   PublicClient,
-  'chain' | 'readContract' | 'getFilterLogs' | 'createEventFilter' | 'estimateContractGas'
+  'chain' | 'readContract' | 'getFilterLogs' | 'createEventFilter' | 'estimateContractGas' | 'multicall'
 >
 export type Wallet = Pick<WalletClient, 'account' | 'chain' | 'writeContract' | 'signMessage' | 'sendTransaction'>
 
@@ -146,7 +146,8 @@ export interface MintScheduleBase {
   maxMintablePerAccount: number
   totalMinted: number
   affiliateFeeBPS: number
-  platformTransactionFee: bigint
+  platformPerTransactionFee: bigint
+  platformPerTokenFee: bigint
 }
 
 export interface RangeEditionSchedule extends MintScheduleBase {

@@ -3,7 +3,17 @@ import { type Address } from 'viem'
 import { minterModuleV2_1Abi } from '../../abi/minter-module-v2_1'
 import { soundEditionV1_2Abi } from '../../abi/sound-edition-v1_2'
 import { UnsupportedMinterError } from '../../errors'
-import { type BlockOrBlockTag, isHandledMinterInterfaceId, type MintSchedule } from '../../types'
+import {
+  type BlockOrBlockTag,
+  isHandledMinterInterfaceId,
+  type MintSchedule,
+  type RangeEditionV1Schedule,
+  type RangeEditionV2Schedule,
+  type RangeEditionV2_1Schedule,
+  type MerkleDropV1Schedule,
+  type MerkleDropV2Schedule,
+  type MerkleDropV2_1Schedule,
+} from '../../types'
 import { minterAbiMap } from '../../utils/constants'
 import { exhaustiveGuard } from '../../utils/helpers'
 import { LazyPromise } from '../../utils/promise'
@@ -293,56 +303,25 @@ export async function mintInfosFromMinter(
     })
   })
 
+  if (!isHandledMinterInterfaceId(interfaceId)) {
+    throw new UnsupportedMinterError({ interfaceId })
+  }
+
+  const { readContract, multicall } = await clientPromise
+
   return Promise.all(
     mintIds.map(async (mintId): Promise<MintSchedule> => {
-      if (!isHandledMinterInterfaceId(interfaceId)) {
-        throw new UnsupportedMinterError({ interfaceId })
-      }
-
-      const { readContract } = await clientPromise
-
       switch (interfaceId) {
-        case interfaceIds.IRangeEditionMinter:
-        case interfaceIds.IRangeEditionMinterV2:
-        case interfaceIds.IRangeEditionMinterV2_1: {
-          const scheduleWithPlatformFee =
-            interfaceId === interfaceIds.IRangeEditionMinterV2_1
-              ? await readContract({
-                  abi: minterAbiMap[interfaceId],
-                  address: minterAddress,
-                  args: [editionAddress, BigInt(mintId)],
-                  functionName: 'mintInfo',
-                })
-              : null
-
-          const scheduleInfo =
-            scheduleWithPlatformFee != null
-              ? scheduleWithPlatformFee
-              : interfaceId === interfaceIds.IRangeEditionMinter
-              ? await readContract({
-                  abi: minterAbiMap[interfaceId],
-                  address: minterAddress,
-                  args: [editionAddress, BigInt(mintId)],
-                  functionName: 'mintInfo',
-                })
-              : interfaceId === interfaceIds.IRangeEditionMinterV2
-              ? await readContract({
-                  abi: minterAbiMap[interfaceId],
-                  address: minterAddress,
-                  args: [editionAddress, BigInt(mintId)],
-                  functionName: 'mintInfo',
-                })
-              : null
-
-          if (!scheduleInfo) {
-            throw new UnsupportedMinterError({
-              interfaceId,
-            })
-          }
+        case interfaceIds.IRangeEditionMinter: {
+          const scheduleInfo = await readContract({
+            abi: minterAbiMap[interfaceId],
+            address: minterAddress,
+            functionName: 'mintInfo',
+            args: [editionAddress, BigInt(mintId)],
+          })
 
           return {
             mintType: 'RangeEdition',
-
             affiliateFeeBPS: scheduleInfo.affiliateFeeBPS,
             cutoffTime: scheduleInfo.cutoffTime,
             editionAddress: editionAddress,
@@ -361,47 +340,92 @@ export async function mintInfosFromMinter(
             price: scheduleInfo.price,
             startTime: scheduleInfo.startTime,
             totalMinted: scheduleInfo.totalMinted,
-
-            platformTransactionFee: scheduleWithPlatformFee?.platformPerTxFlatFee ?? 0n,
-          }
+            platformPerTokenFee: 0n,
+            platformPerTransactionFee: 0n,
+          } satisfies RangeEditionV1Schedule
         }
-        case interfaceIds.IMerkleDropMinter:
-        case interfaceIds.IMerkleDropMinterV2:
-        case interfaceIds.IMerkleDropMinterV2_1: {
-          const scheduleWithPlatformFee =
-            interfaceId === interfaceIds.IMerkleDropMinterV2_1
-              ? await readContract({
-                  abi: minterAbiMap[interfaceId],
-                  address: minterAddress,
-                  args: [editionAddress, BigInt(mintId)],
-                  functionName: 'mintInfo',
-                })
-              : null
+        case interfaceIds.IRangeEditionMinterV2: {
+          const [scheduleInfo, platformPerTokenFee] = await multicall({
+            contracts: [
+              {
+                abi: minterAbiMap[interfaceId],
+                address: minterAddress,
+                functionName: 'mintInfo',
+                args: [editionAddress, BigInt(mintId)],
+              },
+              {
+                abi: minterAbiMap[interfaceId],
+                address: minterAddress,
+                functionName: 'platformFlatFee',
+              },
+            ],
+            allowFailure: false,
+          })
 
-          const scheduleInfo =
-            scheduleWithPlatformFee != null
-              ? scheduleWithPlatformFee
-              : interfaceId === interfaceIds.IMerkleDropMinter
-              ? await readContract({
-                  abi: minterAbiMap[interfaceId],
-                  address: minterAddress,
-                  args: [editionAddress, BigInt(mintId)],
-                  functionName: 'mintInfo',
-                })
-              : interfaceId === interfaceIds.IMerkleDropMinterV2
-              ? await readContract({
-                  abi: minterAbiMap[interfaceId],
-                  address: minterAddress,
-                  args: [editionAddress, BigInt(mintId)],
-                  functionName: 'mintInfo',
-                })
-              : null
+          return {
+            mintType: 'RangeEdition',
+            affiliateFeeBPS: scheduleInfo.affiliateFeeBPS,
+            cutoffTime: scheduleInfo.cutoffTime,
+            editionAddress: editionAddress,
+            endTime: scheduleInfo.endTime,
+            interfaceId,
+            maxMintable: (unixTimestamp?: number) =>
+              (unixTimestamp || Math.floor(Date.now() / 1000)) < scheduleInfo.cutoffTime
+                ? scheduleInfo.maxMintableUpper
+                : scheduleInfo.maxMintableLower,
+            maxMintableLower: scheduleInfo.maxMintableLower,
+            maxMintablePerAccount: scheduleInfo.maxMintablePerAccount,
+            maxMintableUpper: scheduleInfo.maxMintableUpper,
+            minterAddress,
+            mintId: BigInt(mintId),
+            mintPaused: scheduleInfo.mintPaused,
+            price: scheduleInfo.price,
+            startTime: scheduleInfo.startTime,
+            totalMinted: scheduleInfo.totalMinted,
+            platformPerTokenFee,
+            platformPerTransactionFee: 0n,
+          } satisfies RangeEditionV2Schedule
+        }
 
-          if (!scheduleInfo) {
-            throw new UnsupportedMinterError({
-              interfaceId,
-            })
-          }
+        case interfaceIds.IRangeEditionMinterV2_1: {
+          const scheduleInfo = await readContract({
+            abi: minterAbiMap[interfaceId],
+            address: minterAddress,
+            args: [editionAddress, BigInt(mintId)],
+            functionName: 'mintInfo',
+          })
+
+          return {
+            mintType: 'RangeEdition',
+            affiliateFeeBPS: scheduleInfo.affiliateFeeBPS,
+            cutoffTime: scheduleInfo.cutoffTime,
+            editionAddress: editionAddress,
+            endTime: scheduleInfo.endTime,
+            interfaceId,
+            maxMintable: (unixTimestamp?: number) =>
+              (unixTimestamp || Math.floor(Date.now() / 1000)) < scheduleInfo.cutoffTime
+                ? scheduleInfo.maxMintableUpper
+                : scheduleInfo.maxMintableLower,
+            maxMintableLower: scheduleInfo.maxMintableLower,
+            maxMintablePerAccount: scheduleInfo.maxMintablePerAccount,
+            maxMintableUpper: scheduleInfo.maxMintableUpper,
+            minterAddress,
+            mintId: BigInt(mintId),
+            mintPaused: scheduleInfo.mintPaused,
+            price: scheduleInfo.price,
+            startTime: scheduleInfo.startTime,
+            totalMinted: scheduleInfo.totalMinted,
+            platformPerTokenFee: scheduleInfo.platformFlatFee,
+            platformPerTransactionFee: scheduleInfo.platformPerTxFlatFee,
+          } satisfies RangeEditionV2_1Schedule
+        }
+        case interfaceIds.IMerkleDropMinter: {
+          const scheduleInfo = await readContract({
+            abi: minterAbiMap[interfaceId],
+            address: minterAddress,
+            functionName: 'mintInfo',
+            args: [editionAddress, BigInt(mintId)],
+          })
 
           return {
             mintType: 'MerkleDrop',
@@ -422,8 +446,81 @@ export async function mintInfosFromMinter(
 
             merkleRoot: scheduleInfo.merkleRootHash,
 
-            platformTransactionFee: scheduleWithPlatformFee?.platformPerTxFlatFee ?? 0n,
-          }
+            platformPerTokenFee: 0n,
+            platformPerTransactionFee: 0n,
+          } satisfies MerkleDropV1Schedule
+        }
+        case interfaceIds.IMerkleDropMinterV2: {
+          const [scheduleInfo, platformPerTokenFee] = await multicall({
+            contracts: [
+              {
+                abi: minterAbiMap[interfaceId],
+                address: minterAddress,
+                functionName: 'mintInfo',
+                args: [editionAddress, BigInt(mintId)],
+              },
+              {
+                abi: minterAbiMap[interfaceId],
+                address: minterAddress,
+                functionName: 'platformFlatFee',
+              },
+            ],
+            allowFailure: false,
+          })
+
+          return {
+            mintType: 'MerkleDrop',
+
+            affiliateFeeBPS: scheduleInfo.affiliateFeeBPS,
+            editionAddress: editionAddress,
+            endTime: scheduleInfo.endTime,
+            interfaceId,
+
+            maxMintablePerAccount: scheduleInfo.maxMintablePerAccount,
+            minterAddress,
+            mintId: BigInt(mintId),
+            mintPaused: scheduleInfo.mintPaused,
+            price: scheduleInfo.price,
+            startTime: scheduleInfo.startTime,
+            totalMinted: scheduleInfo.totalMinted,
+            maxMintable: scheduleInfo.maxMintable,
+
+            merkleRoot: scheduleInfo.merkleRootHash,
+
+            platformPerTokenFee,
+            platformPerTransactionFee: 0n,
+          } satisfies MerkleDropV2Schedule
+        }
+        case interfaceIds.IMerkleDropMinterV2_1: {
+          const scheduleInfo = await readContract({
+            abi: minterAbiMap[interfaceId],
+            address: minterAddress,
+            args: [editionAddress, BigInt(mintId)],
+            functionName: 'mintInfo',
+          })
+
+          return {
+            mintType: 'MerkleDrop',
+
+            affiliateFeeBPS: scheduleInfo.affiliateFeeBPS,
+            editionAddress: editionAddress,
+            endTime: scheduleInfo.endTime,
+            interfaceId,
+
+            maxMintablePerAccount: scheduleInfo.maxMintablePerAccount,
+            minterAddress,
+            mintId: BigInt(mintId),
+            mintPaused: scheduleInfo.mintPaused,
+            price: scheduleInfo.price,
+            startTime: scheduleInfo.startTime,
+            totalMinted: scheduleInfo.totalMinted,
+            maxMintable: scheduleInfo.maxMintable,
+
+            merkleRoot: scheduleInfo.merkleRootHash,
+
+            platformPerTokenFee: scheduleInfo.platformFlatFee,
+            platformPerTransactionFee: scheduleInfo.platformPerTxFlatFee,
+          } satisfies MerkleDropV2_1Schedule
         }
 
         default: {
