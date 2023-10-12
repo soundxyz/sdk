@@ -1,9 +1,15 @@
 import { BigNumber } from '@ethersproject/bignumber'
-import { ContractTransaction, PayableOverrides } from '@ethersproject/contracts'
+import type { ContractTransaction, PayableOverrides } from '@ethersproject/contracts'
 import { MerkleDropMinterV2__factory, SoundEditionV1_2__factory } from '@soundxyz/sound-protocol/typechain'
 
 import { InvalidAttributonIdError, InvalidQuantityError, NotEligibleMint } from '../../errors'
-import { EstimatableTransaction, MintOptions, MintSchedule, MintToOptions, SoundContractValidation } from '../../types'
+import type {
+  EstimatableTransaction,
+  MintOptions,
+  MintSchedule,
+  MintToOptions,
+  SoundContractValidation,
+} from '../../types'
 import {
   MINT_FALLBACK_GAS_LIMIT,
   MINT_GAS_LIMIT_MULTIPLIER,
@@ -430,7 +436,8 @@ export async function eligibleQuantity(
     (typeof mintSchedule.maxMintable === 'function' ? mintSchedule.maxMintable(timestamp) : mintSchedule.maxMintable) -
     mintSchedule.totalMinted
 
-  const mintedByUserFromSchedule = await (mintSchedule.interfaceId === interfaceIds.IMerkleDropMinterV2
+  const mintedByUserFromSchedule = await (mintSchedule.interfaceId === interfaceIds.IMerkleDropMinterV2 ||
+  mintSchedule.interfaceId === interfaceIds.IMerkleDropMinterV2_1
     ? MerkleDropMinterV2__factory.connect(mintSchedule.minterAddress, providerOrSigner)
         .mintCount(mintSchedule.editionAddress, mintSchedule.mintId, userAddress)
         .then((v) => v.toNumber())

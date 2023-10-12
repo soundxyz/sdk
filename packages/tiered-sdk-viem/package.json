@@ -1,0 +1,62 @@
+{
+  "name": "@soundxyz/tiered-sdk-viem",
+  "version": "0.0.1",
+  "homepage": "https://docs.sound.xyz",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/soundxyz/sdk",
+    "directory": "packages/sdk"
+  },
+  "license": "MIT",
+  "author": "Sound.xyz",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.js",
+      "import": "./dist/index.mjs"
+    },
+    "./*": {
+      "types": "./dist/*.d.ts",
+      "require": "./dist/*.js",
+      "import": "./dist/*.mjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "prepack": "node build.mjs",
+    "prepare": "node build.mjs",
+    "pull-env": "dotenv-vault pull",
+    "test": "vitest dev",
+    "test:cov": "vitest dev --coverage",
+    "test:ci": "CI=true vitest --coverage"
+  },
+  "dependencies": {
+    "keccak256": "^1.0.6",
+    "zod": "^3.21.4"
+  },
+  "devDependencies": {
+    "@ethersproject/solidity": "^5.7.0",
+    "@types/node": "20.4.5",
+    "@viem/anvil": "^0.0.6",
+    "bob-ts": "^4.1.1",
+    "bob-tsm": "^1.1.2",
+    "cross-undici-fetch": "^0.4.14",
+    "esbuild": "^0.18.17",
+    "merkletreejs": "^0.3.10",
+    "require-env-variable": "^4.0.1",
+    "typescript": "5.1.6",
+    "viem": "^1.10.9"
+  },
+  "peerDependencies": {
+    "viem": "^1.10.9"
+  },
+  "publishConfig": {
+    "access": "public",
+    "directory": "dist",
+    "linkDirectory": true
+  }
+}

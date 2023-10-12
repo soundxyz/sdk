@@ -1,5 +1,5 @@
-import { BigNumberish } from '@ethersproject/bignumber'
-import { BytesLike, SoundContractValidation } from '../../types'
+import type { BigNumberish } from '@ethersproject/bignumber'
+import type { BytesLike, SoundContractValidation } from '../../types'
 
 export interface SamEditionAddress extends SoundContractValidation {
   editionAddress: string

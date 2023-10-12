@@ -13,7 +13,7 @@ import {
 } from './edition/mint'
 import { editionMinterMintIds, editionRegisteredMinters, editionScheduleIds, mintSchedules } from './edition/schedules'
 import { getContractError } from './errors'
-import { SoundClientInstance, SoundClientInstanceConfig } from './instance'
+import { SoundClientInstance, type SoundClientInstanceConfig } from './instance'
 import { SamAvailableTokensToSell } from './sam/api'
 import {
   SamBuy,
@@ -23,7 +23,7 @@ import {
   SamTotalBuyPrice,
   SamTotalSellPrice,
 } from './sam/contract'
-import { SamEditionAddress } from './sam/types'
+import type { SamEditionAddress } from './sam/types'
 import { isSoundEdition, networkChainMatches } from './validation'
 
 export function SoundClient(config: SoundClientInstanceConfig) {

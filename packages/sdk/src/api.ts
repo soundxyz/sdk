@@ -3,20 +3,20 @@ import { z } from 'zod'
 import { MissingApiKey, SoundAPIGraphQLError, UnexpectedApiResponse } from './errors'
 import {
   EditionOwnedTokenIds,
-  EditionOwnedTokenIdsInput,
-  EditionOwnedTokenIdsQuery,
-  EditionOwnedTokenIdsQueryVariables,
+  type EditionOwnedTokenIdsInput,
+  type EditionOwnedTokenIdsQuery,
+  type EditionOwnedTokenIdsQueryVariables,
   MerkleProof,
-  MerkleProofQuery,
-  MerkleProofQueryVariables,
+  type MerkleProofQuery,
+  type MerkleProofQueryVariables,
   ReleaseInfo,
-  ReleaseInfoQuery,
-  ReleaseInfoQueryVariables,
+  type ReleaseInfoQuery,
+  type ReleaseInfoQueryVariables,
   ReleaseShareInfo,
-  ReleaseShareInfoQuery,
-  ReleaseShareInfoQueryVariables,
+  type ReleaseShareInfoQuery,
+  type ReleaseShareInfoQueryVariables,
   Test,
-  TestQuery,
+  type TestQuery,
 } from './api/graphql/gql'
 
 import type { ExecutionResult, MerkleProofParameters } from './types'

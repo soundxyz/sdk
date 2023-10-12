@@ -25,7 +25,9 @@
     "pretty-quick": "pretty-quick --staged",
     "release": "pnpm -r --access=public publish --no-git-checks",
     "release:canary": "(node scripts/canary-release.js && pnpm -r publish --access public --no-git-checks --tag alpha) || echo Skipping Canary...",
-    "test": "pnpm -r --filter=sdk test"
+    "test": "pnpm -r --filter=sdk test",
+    "tsc": "tsc -p tsconfig.json",
+    "typecheck": "pnpm tsc"
   },
   "lint-staged": {
     "**/*": "prettier --write --ignore-unknown"
@@ -50,7 +52,8 @@
     "prettier": "^3.0.0",
     "rimraf": "^5.0.1",
     "semver": "^7.5.4",
-    "typescript": "5.1.6"
+    "typescript": "5.1.6",
+    "vitest": "^0.34.1"
   },
   "packageManager": "pnpm@8.0.0",
   "engines": {

@@ -2,7 +2,12 @@ import { interfaceIds } from '@soundxyz/sound-protocol'
 import { IMinterModuleV2__factory, SoundEditionV1_2__factory } from '@soundxyz/sound-protocol/typechain'
 
 import { UnsupportedMinterError } from '../../errors'
-import { BlockOrBlockHash, HANDLED_MINTER_INTERFACE_IDS, MinterInterfaceId, MintSchedule } from '../../types'
+import {
+  type BlockOrBlockHash,
+  HANDLED_MINTER_INTERFACE_IDS,
+  type MinterInterfaceId,
+  type MintSchedule,
+} from '../../types'
 import { minterFactoryMap } from '../../utils/constants'
 import { LazyPromise } from '../../utils/promise'
 import { SoundClientInstance } from '../instance'

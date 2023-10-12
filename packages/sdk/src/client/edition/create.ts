@@ -1,5 +1,5 @@
-import { BigNumberish } from '@ethersproject/bignumber'
-import { Overrides } from '@ethersproject/contracts'
+import type { BigNumberish } from '@ethersproject/bignumber'
+import type { Overrides } from '@ethersproject/contracts'
 import {
   MerkleDropMinterV2__factory,
   RangeEditionMinterV2__factory,
@@ -15,7 +15,7 @@ import {
   InvalidMerkleRootError,
   InvalidTimeValuesError,
 } from '../../errors'
-import { ContractCall, EditionConfig, MintConfig } from '../../types'
+import type { ContractCall, EditionConfig, MintConfig } from '../../types'
 import { editionInitFlags, MINTER_ROLE, NULL_ADDRESS, NULL_BYTES32, UINT32_MAX } from '../../utils/constants'
 import { getSaltAsBytes32, retry, validateAddress } from '../../utils/helpers'
 import { SoundClientInstance } from '../instance'
@@ -224,13 +224,10 @@ export async function estimateCreateEdition(
       { editionConfig, mintConfigs, salt: customSalt, gasLimit, maxFeePerGas, maxPriorityFeePerGas },
     )
 
-  return soundCreatorContract.estimateGas.createSoundAndMints(
-    formattedSalt,
-    editionInitData,
-    addresses,
-    calldata,
-    txnOverrides,
-  )
+  return soundCreatorContract.estimateGas.createSoundAndMints(formattedSalt, editionInitData, addresses, calldata, {
+    ...txnOverrides,
+    from: 'signer address',
+  })
 }
 
 export async function createEdition(

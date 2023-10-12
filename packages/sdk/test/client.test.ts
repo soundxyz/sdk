@@ -9,17 +9,17 @@ import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 import { SoundEditionV1__factory } from '@soundxyz/sound-protocol-v1-0/typechain/index'
 import { SoundEditionV1_1__factory } from '@soundxyz/sound-protocol-v1-1/typechain/index'
 import {
-  MerkleDropMinter,
+  type MerkleDropMinter,
   MerkleDropMinter__factory,
-  MerkleDropMinterV2,
+  type MerkleDropMinterV2,
   MerkleDropMinterV2__factory,
-  RangeEditionMinter,
+  type RangeEditionMinter,
   RangeEditionMinter__factory,
-  RangeEditionMinterV2,
+  type RangeEditionMinterV2,
   RangeEditionMinterV2__factory,
-  SAM,
+  type SAM,
   SAM__factory,
-  SoundCreatorV1,
+  type SoundCreatorV1,
   SoundCreatorV1__factory,
   SoundEditionV1_2__factory,
   SoundFeeRegistry__factory,

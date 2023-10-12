@@ -8,6 +8,7 @@
     "mint": "bob-tsm src/mint.ts"
   },
   "dependencies": {
+    "@soundxyz/tiered-sdk-viem": "workspace:^",
     "@soundxyz/sdk": "workspace:^",
     "@soundxyz/sound-protocol": "^1.7.0",
     "alchemy-sdk": "^2.9.2",
