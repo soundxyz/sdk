@@ -18,33 +18,6 @@ export class MissingProviderError extends Error {
   }
 }
 
-export class MissingSignerOrProviderError extends Error {
-  readonly name = 'MissingSignerOrProviderError'
-
-  constructor() {
-    super('Must provide signer or provider')
-  }
-}
-
-export class UnsupportedNetworkError extends Error {
-  readonly name = 'UnsupportedNetworkError'
-
-  readonly chainId: number
-  constructor({ chainId }: { chainId: number }) {
-    super('Unsupported network chain ID')
-
-    this.chainId = chainId
-  }
-}
-
-export class CreatorAddressMissing extends Error {
-  readonly name = 'CreatorAddressMissingError'
-
-  constructor() {
-    super('"soundCreatorAddress" was not specified and it\'s required for the requested action')
-  }
-}
-
 export class UnsupportedMinterError extends Error {
   readonly name = 'UnsupportedMinterError'
 
@@ -90,26 +63,6 @@ export class SoundNotFoundError extends Error {
     this.contractAddress = contractAddress
     this.editionId = editionId
 
-    this.graphqlErrors = graphqlErrors
-  }
-}
-
-export class SoundAPILoginError extends Error {
-  readonly name = 'SoundAPILoginError'
-
-  readonly publicAddress: string
-  readonly graphqlErrors: GraphQLExecutionErrors | undefined
-
-  constructor({
-    publicAddress,
-    graphqlErrors,
-  }: {
-    publicAddress: string
-    graphqlErrors: GraphQLExecutionErrors | undefined
-  }) {
-    super('Error while trying to login into Sound.xyz API')
-
-    this.publicAddress = publicAddress
     this.graphqlErrors = graphqlErrors
   }
 }
@@ -175,30 +128,6 @@ export class InvalidOffsetError extends Error {
     super('Must provide valid non-negative integer offset')
 
     this.offset = offset
-  }
-}
-
-export class InvalidTokenIdError extends Error {
-  readonly name = 'InvalidTokenIdError'
-
-  readonly tokenId: string
-
-  constructor({ tokenId }: { tokenId: string }) {
-    super('Must provide valid token id')
-
-    this.tokenId = tokenId
-  }
-}
-
-export class InvalidAttributonIdError extends Error {
-  readonly name = 'InvalidAttributonIdError'
-
-  readonly attributonId: string
-
-  constructor({ attributonId }: { attributonId: string }) {
-    super('Must provide valid BigNumber-like attributon id')
-
-    this.attributonId = attributonId
   }
 }
 
