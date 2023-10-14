@@ -1,5 +1,11 @@
 # @soundxyz/sdk
 
+## 3.0.0
+
+### Major Changes
+
+- [#275](https://github.com/soundxyz/sdk/pull/275) [`c4fbc1f`](https://github.com/soundxyz/sdk/commit/c4fbc1f5ee712da3b6eb856abae45f6d892f1491) Thanks [@vigneshka](https://github.com/vigneshka)! - Add per token fee to value calculation for old minters
+
 ## 2.0.1
 
 ### Patch Changes
