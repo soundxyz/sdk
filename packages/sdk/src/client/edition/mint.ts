@@ -94,8 +94,13 @@ async function mintHelper(
     }
   }
 
+  const value = mintSchedule.price
+    .add(mintSchedule.platformPerTokenFee)
+    .mul(quantity)
+    .add(mintSchedule.platformPerTransactionFee)
+
   const txnOverrides: PayableOverrides = {
-    value: mintSchedule.price.mul(quantity).add(mintSchedule.platformTransactionFee),
+    value,
     gasLimit,
     maxFeePerGas,
     maxPriorityFeePerGas,
@@ -250,8 +255,13 @@ async function mintToHelper(
     }
   }
 
+  const value = mintSchedule.price
+    .add(mintSchedule.platformPerTokenFee)
+    .mul(quantity)
+    .add(mintSchedule.platformPerTransactionFee)
+
   const txnOverrides: PayableOverrides = {
-    value: mintSchedule.price.mul(quantity).add(mintSchedule.platformTransactionFee),
+    value,
     gasLimit,
     maxFeePerGas,
     maxPriorityFeePerGas,

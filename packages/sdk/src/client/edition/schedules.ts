@@ -7,6 +7,12 @@ import {
   HANDLED_MINTER_INTERFACE_IDS,
   type MinterInterfaceId,
   type MintSchedule,
+  type RangeEditionV1Schedule,
+  type RangeEditionV2Schedule,
+  type RangeEditionV2_1Schedule,
+  type MerkleDropV1Schedule,
+  type MerkleDropV2Schedule,
+  type MerkleDropV2_1Schedule,
 } from '../../types'
 import { minterFactoryMap } from '../../utils/constants'
 import { LazyPromise } from '../../utils/promise'
@@ -208,8 +214,64 @@ export async function mintInfosFromMinter(
       }
 
       switch (interfaceId) {
-        case interfaceIds.IRangeEditionMinter:
-        case interfaceIds.IRangeEditionMinterV2:
+        case interfaceIds.IRangeEditionMinter: {
+          const minterContract = minterFactoryMap[interfaceId].connect(minterAddress, await signerOrProvider)
+          const mintSchedule = await minterContract.mintInfo(editionAddress, mintId)
+          return {
+            mintType: 'RangeEdition',
+            interfaceId,
+            mintId,
+            editionAddress,
+            minterAddress,
+            startTime: mintSchedule.startTime,
+            endTime: mintSchedule.endTime,
+            mintPaused: mintSchedule.mintPaused,
+            price: mintSchedule.price,
+            maxMintableLower: mintSchedule.maxMintableLower,
+            maxMintableUpper: mintSchedule.maxMintableUpper,
+            cutoffTime: mintSchedule.cutoffTime,
+            maxMintable: (unixTimestamp?: number) =>
+              (unixTimestamp || Math.floor(Date.now() / 1000)) < mintSchedule.cutoffTime
+                ? mintSchedule.maxMintableUpper
+                : mintSchedule.maxMintableLower,
+            maxMintablePerAccount: mintSchedule.maxMintablePerAccount,
+            totalMinted: mintSchedule.totalMinted,
+            affiliateFeeBPS: mintSchedule.affiliateFeeBPS,
+            platformPerTokenFee: BigNumber.from(0),
+            platformPerTransactionFee: BigNumber.from(0),
+          } satisfies RangeEditionV1Schedule
+        }
+        case interfaceIds.IRangeEditionMinterV2: {
+          const minterContract = minterFactoryMap[interfaceId].connect(minterAddress, await signerOrProvider)
+          const [mintSchedule, platformPerTokenFee] = await Promise.all([
+            minterContract.mintInfo(editionAddress, mintId),
+            minterContract.platformFlatFee(),
+          ])
+          return {
+            mintType: 'RangeEdition',
+            interfaceId,
+            mintId,
+            editionAddress,
+            minterAddress,
+            startTime: mintSchedule.startTime,
+            endTime: mintSchedule.endTime,
+            mintPaused: mintSchedule.mintPaused,
+            price: mintSchedule.price,
+            maxMintableLower: mintSchedule.maxMintableLower,
+            maxMintableUpper: mintSchedule.maxMintableUpper,
+            cutoffTime: mintSchedule.cutoffTime,
+            maxMintable: (unixTimestamp?: number) =>
+              (unixTimestamp || Math.floor(Date.now() / 1000)) < mintSchedule.cutoffTime
+                ? mintSchedule.maxMintableUpper
+                : mintSchedule.maxMintableLower,
+            maxMintablePerAccount: mintSchedule.maxMintablePerAccount,
+            totalMinted: mintSchedule.totalMinted,
+            affiliateFeeBPS: mintSchedule.affiliateFeeBPS,
+            platformPerTokenFee,
+            platformPerTransactionFee: BigNumber.from(0),
+          } satisfies RangeEditionV2Schedule
+        }
+
         case interfaceIds.IRangeEditionMinterV2_1: {
           const minterContract = minterFactoryMap[interfaceId].connect(minterAddress, await signerOrProvider)
           const mintSchedule = await minterContract.mintInfo(editionAddress, mintId)
@@ -233,13 +295,58 @@ export async function mintInfosFromMinter(
             maxMintablePerAccount: mintSchedule.maxMintablePerAccount,
             totalMinted: mintSchedule.totalMinted,
             affiliateFeeBPS: mintSchedule.affiliateFeeBPS,
-            platformTransactionFee:
-              'platformPerTxFlatFee' in mintSchedule ? mintSchedule.platformPerTxFlatFee : BigNumber.from(0),
-          }
+            platformPerTokenFee: mintSchedule.platformFlatFee,
+            platformPerTransactionFee: mintSchedule.platformPerTxFlatFee,
+          } satisfies RangeEditionV2_1Schedule
         }
 
-        case interfaceIds.IMerkleDropMinter:
-        case interfaceIds.IMerkleDropMinterV2:
+        case interfaceIds.IMerkleDropMinter: {
+          const minterContract = minterFactoryMap[interfaceId].connect(minterAddress, await signerOrProvider)
+          const mintSchedule = await minterContract.mintInfo(editionAddress, mintId)
+          return {
+            mintType: 'MerkleDrop',
+            interfaceId,
+            mintId,
+            merkleRoot: mintSchedule.merkleRootHash,
+            editionAddress,
+            minterAddress,
+            startTime: mintSchedule.startTime,
+            endTime: mintSchedule.endTime,
+            mintPaused: mintSchedule.mintPaused,
+            price: mintSchedule.price,
+            maxMintable: mintSchedule.maxMintable,
+            maxMintablePerAccount: mintSchedule.maxMintablePerAccount,
+            totalMinted: mintSchedule.totalMinted,
+            affiliateFeeBPS: mintSchedule.affiliateFeeBPS,
+            platformPerTokenFee: BigNumber.from(0),
+            platformPerTransactionFee: BigNumber.from(0),
+          } satisfies MerkleDropV1Schedule
+        }
+        case interfaceIds.IMerkleDropMinterV2: {
+          const minterContract = minterFactoryMap[interfaceId].connect(minterAddress, await signerOrProvider)
+          const [mintSchedule, platformPerTokenFee] = await Promise.all([
+            minterContract.mintInfo(editionAddress, mintId),
+            minterContract.platformFlatFee(),
+          ])
+          return {
+            mintType: 'MerkleDrop',
+            interfaceId,
+            mintId,
+            merkleRoot: mintSchedule.merkleRootHash,
+            editionAddress,
+            minterAddress,
+            startTime: mintSchedule.startTime,
+            endTime: mintSchedule.endTime,
+            mintPaused: mintSchedule.mintPaused,
+            price: mintSchedule.price,
+            maxMintable: mintSchedule.maxMintable,
+            maxMintablePerAccount: mintSchedule.maxMintablePerAccount,
+            totalMinted: mintSchedule.totalMinted,
+            affiliateFeeBPS: mintSchedule.affiliateFeeBPS,
+            platformPerTokenFee,
+            platformPerTransactionFee: BigNumber.from(0),
+          } satisfies MerkleDropV2Schedule
+        }
         case interfaceIds.IMerkleDropMinterV2_1: {
           const minterContract = minterFactoryMap[interfaceId].connect(minterAddress, await signerOrProvider)
           const mintSchedule = await minterContract.mintInfo(editionAddress, mintId)
@@ -258,9 +365,9 @@ export async function mintInfosFromMinter(
             maxMintablePerAccount: mintSchedule.maxMintablePerAccount,
             totalMinted: mintSchedule.totalMinted,
             affiliateFeeBPS: mintSchedule.affiliateFeeBPS,
-            platformTransactionFee:
-              'platformPerTxFlatFee' in mintSchedule ? mintSchedule.platformPerTxFlatFee : BigNumber.from(0),
-          }
+            platformPerTokenFee: mintSchedule.platformFlatFee,
+            platformPerTransactionFee: mintSchedule.platformPerTxFlatFee,
+          } satisfies MerkleDropV2_1Schedule
         }
 
         default: {
