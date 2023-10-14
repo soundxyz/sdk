@@ -55,7 +55,7 @@
     "esbuild": "^0.18.17",
     "merkletreejs": "^0.3.10",
     "require-env-variable": "^4.0.1",
-    "typescript": "5.1.6",
+    "typescript": "5.2.2",
     "viem": "^1.10.8"
   },
   "peerDependencies": {
