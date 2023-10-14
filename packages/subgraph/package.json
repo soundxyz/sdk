@@ -19,6 +19,6 @@
   "devDependencies": {
     "@graphprotocol/graph-cli": "^0.35.0",
     "js-yaml": "^4.1.0",
-    "matchstick-as": "0.5.2"
+    "matchstick-as": "0.6.0"
   }
 }
