@@ -155,7 +155,8 @@ export interface MintScheduleBase {
   maxMintablePerAccount: number
   totalMinted: number
   affiliateFeeBPS: number
-  platformTransactionFee: BigNumber
+  platformPerTransactionFee: BigNumber
+  platformPerTokenFee: BigNumber
 }
 
 export const HANDLED_MINTER_INTERFACE_IDS = [
