@@ -1,9 +1,5 @@
 lockfileVersion: '6.0'
 
-settings:
-  autoInstallPeers: true
-  excludeLinksFromLockfile: false
-
 overrides:
   '@graphql-codegen/visitor-plugin-common': 3.0.2
 
@@ -193,8 +189,8 @@ importers:
         specifier: ^10.0.4
         version: 10.0.4(graphql@16.7.1)
       '@nomicfoundation/hardhat-chai-matchers':
-        specifier: ^1.0.6
-        version: 1.0.6(@nomiclabs/hardhat-ethers@2.2.3)(chai@4.3.7)(ethers@5.7.2)(hardhat@2.17.0)
+        specifier: ^2.0.0
+        version: 2.0.0(@nomicfoundation/hardhat-ethers@3.0.4)(chai@4.3.7)(ethers@5.7.2)(hardhat@2.17.0)
       '@nomicfoundation/hardhat-network-helpers':
         specifier: ^1.0.8
         version: 1.0.8(hardhat@2.17.0)
@@ -3484,16 +3480,16 @@ packages:
       - utf-8-validate
     dev: true
 
-  /@nomicfoundation/hardhat-chai-matchers@1.0.6(@nomiclabs/hardhat-ethers@2.2.3)(chai@4.3.7)(ethers@5.7.2)(hardhat@2.17.0):
-    resolution: {integrity: sha512-f5ZMNmabZeZegEfuxn/0kW+mm7+yV7VNDxLpMOMGXWFJ2l/Ct3QShujzDRF9cOkK9Ui/hbDeOWGZqyQALDXVCQ==}
+  /@nomicfoundation/hardhat-chai-matchers@2.0.0(@nomicfoundation/hardhat-ethers@3.0.4)(chai@4.3.7)(ethers@5.7.2)(hardhat@2.17.0):
+    resolution: {integrity: sha512-e2ZFunJBIWDcFKIxQt6GpFRRKUn8ZshoiZ5cmgaKOR1S9XwimiCs2aLUCZ/xjNrdl049kPqdVKYDj6aYeR6WuQ==}
     peerDependencies:
-      '@nomiclabs/hardhat-ethers': ^2.0.0
+      '@nomicfoundation/hardhat-ethers': ^3.0.0
       chai: ^4.2.0
-      ethers: ^5.0.0
+      ethers: ^6.1.0
       hardhat: ^2.9.4
     dependencies:
       '@ethersproject/abi': 5.7.0
-      '@nomiclabs/hardhat-ethers': 2.2.3(ethers@5.7.2)(hardhat@2.17.0)
+      '@nomicfoundation/hardhat-ethers': 3.0.4(ethers@5.7.2)(hardhat@2.17.0)
       '@types/chai-as-promised': 7.1.5
       chai: 4.3.7
       chai-as-promised: 7.1.1(chai@4.3.7)
@@ -3501,6 +3497,20 @@ packages:
       ethers: 5.7.2
       hardhat: 2.17.0(ts-node@10.9.1)(typescript@5.1.6)
       ordinal: 1.0.3
+    dev: true
+
+  /@nomicfoundation/hardhat-ethers@3.0.4(ethers@5.7.2)(hardhat@2.17.0):
+    resolution: {integrity: sha512-k9qbLoY7qn6C6Y1LI0gk2kyHXil2Tauj4kGzQ8pgxYXIGw8lWn8tuuL72E11CrlKaXRUvOgF0EXrv/msPI2SbA==}
+    peerDependencies:
+      ethers: ^6.1.0
+      hardhat: ^2.0.0
+    dependencies:
+      debug: 4.3.4(supports-color@8.1.1)
+      ethers: 5.7.2
+      hardhat: 2.17.0(ts-node@10.9.1)(typescript@5.1.6)
+      lodash.isequal: 4.5.0
+    transitivePeerDependencies:
+      - supports-color
     dev: true
 
   /@nomicfoundation/hardhat-network-helpers@1.0.8(hardhat@2.17.0):
@@ -8962,6 +8972,10 @@ packages:
   /lodash.camelcase@4.3.0:
     resolution: {integrity: sha512-TwuEnCnxbc3rAvhf/LbG7tJUDzhqXyFnv3dtzLOPgCG/hODL7WFnsbwktkD7yUV0RrreP/l1PALq/YSg6VvjlA==}
 
+  /lodash.isequal@4.5.0:
+    resolution: {integrity: sha512-pDo3lu8Jhfjqls6GkMgpahsF9kCyayhgykjyLMNFTKWrpVdAQtYyB4muAMWozBB4ig/dtWAmsMxLEI8wuz+DYQ==}
+    dev: true
+
   /lodash.kebabcase@4.1.1:
     resolution: {integrity: sha512-N8XRTIMMqqDgSy4VLKPnJ/+hpGZN+PHQiJnSenYqPaVV/NCqEogTnAdZLQiGKhxX+JCs8waWq2t1XHWKOmlY8g==}
     dev: false
@@ -12431,3 +12445,7 @@ packages:
     transitivePeerDependencies:
       - debug
     dev: false
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
