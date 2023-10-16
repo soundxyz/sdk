@@ -208,11 +208,11 @@ importers:
         specifier: ^1.7.0
         version: 1.7.0
       '@soundxyz/sound-protocol-v1-0':
-        specifier: npm:@soundxyz/sound-protocol@1.7.0
-        version: /@soundxyz/sound-protocol@1.7.0
+        specifier: npm:@soundxyz/sound-protocol@1.1.0
+        version: /@soundxyz/sound-protocol@1.1.0
       '@soundxyz/sound-protocol-v1-1':
-        specifier: npm:@soundxyz/sound-protocol@1.7.0
-        version: /@soundxyz/sound-protocol@1.7.0
+        specifier: npm:@soundxyz/sound-protocol@1.3.0
+        version: /@soundxyz/sound-protocol@1.3.0
       '@types/chai':
         specifier: ^4.3.8
         version: 4.3.8
@@ -4354,6 +4354,28 @@ packages:
 
   /@sinclair/typebox@0.27.8:
     resolution: {integrity: sha512-+Fj43pSMwJs4KRrH/938Uf+uAELIgVBmQzg/q1YG10djyfA3TnrU8N8XzqCh/okZdszqBQTZf96idMfE5lnwTA==}
+    dev: true
+
+  /@soundxyz/sound-protocol@1.1.0:
+    resolution: {integrity: sha512-Njsg+ZTm8m3neTMVjRERlGctLvZx8296YET5AVRdsXUxZjXKJkNAbhziDc6kPxmaUwtJFTIUvcwp8BTzQFzoSQ==}
+    dependencies:
+      '@ethersproject/abi': 5.7.0
+      '@ethersproject/providers': 5.7.2
+      ethers: 5.7.2
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
+    dev: true
+
+  /@soundxyz/sound-protocol@1.3.0:
+    resolution: {integrity: sha512-FPZMxfL5KPvnaIBTiBTYyxoFP1XPK8lhSwCx5hYUQH0zRTs3YbGrA91g3S67EQp2Q2JNaT3QcqU4vMKsphe+9w==}
+    dependencies:
+      '@ethersproject/abi': 5.7.0
+      '@ethersproject/providers': 5.7.2
+      ethers: 5.7.2
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
     dev: true
 
   /@soundxyz/sound-protocol@1.7.0:
