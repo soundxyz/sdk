@@ -26,7 +26,7 @@ export const getGenericEditionConfig = () =>
     enableOperatorFiltering: true,
 
     setSAM: null,
-  } satisfies EditionConfig)
+  }) satisfies EditionConfig
 
 const startTime = now()
 const cutoffTime = startTime + ONE_HOUR / 2
