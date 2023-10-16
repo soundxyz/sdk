@@ -2,10 +2,39 @@
   "name": "@soundxyz/sdk",
   "version": "3.0.0",
   "private": true,
+  "homepage": "https://docs.sound.xyz",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/soundxyz/sdk",
+    "directory": "packages/sdk"
+  },
+  "license": "MIT",
+  "author": "Sound.xyz",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.js",
+      "import": "./dist/index.mjs"
+    },
+    "./*": {
+      "types": "./dist/*.d.ts",
+      "require": "./dist/*.js",
+      "import": "./dist/*.mjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
   "devDependencies": {
+    "@graphql-codegen/cli": "^5.0.0",
+    "@graphql-codegen/core": "^4.0.0",
+    "@parcel/watcher": "^2.3.0",
+    "@soundxyz/codegen-fragments": "^2.0.0",
     "@types/node": "20.8.6",
     "bob-ts": "^4.1.1",
     "esbuild": "^0.19.4",
+    "prettier": "^3.0.3",
     "typescript": "5.2.2",
     "viem": "^1.16.6",
     "zod": "^3.22.4"

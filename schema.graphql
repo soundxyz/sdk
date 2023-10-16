@@ -139,6 +139,7 @@ enum ActivityFeedGroupFilterOption {
   ALL
   COLLECTED
   LIKES
+  POSTS
   RELEASE_DROPPED
 }
 
@@ -151,6 +152,7 @@ union ActivityFeedGroupInfo =
   | ShelfCreatedAggregate
   | SongCollectedByManyAggregate
   | UserCollectedManySongsAggregate
+  | UserCreatedPostAggregate
   | UserLikedPlaylistAggregate
   | UserLikedSongsAggregate
 
@@ -217,7 +219,11 @@ type Airdrop implements CollectorAction & Node & ReleaseAction {
   """
   date: DateTime!
   """
-  Starting token ID of NFT for bonding curve sale purchase
+  Starting serial number of NFT for airdrop
+  """
+  fromSerialNumber: Int
+  """
+  Starting token ID of NFT for airdrop
   """
   fromTokenId: Int!
   """
@@ -237,7 +243,15 @@ type Airdrop implements CollectorAction & Node & ReleaseAction {
   """
   serialNumber: Int!
   """
-  Ending token ID of NFT for bonding curve sale purchase
+  tierNumber of the NFT
+  """
+  tierNumber: Int
+  """
+  Ending serial number of NFT for airdrop
+  """
+  toSerialNumber: Int
+  """
+  Ending token ID of NFT for airdrop
   """
   toTokenId: Int!
   """
@@ -287,9 +301,17 @@ Filter the allCollectors result
 """
 input AllCollectorsFilter {
   """
+  Genre names to filter on for collector's releases
+  """
+  genres: [Genres!]
+  """
   Should it include artists as collectors
   """
   includeArtists: Boolean! = true
+  """
+  Location ids to filter on for collector's releases
+  """
+  locationIds: [String!]
   """
   Should it only include collectors with a valid username (twitterHandle, ens or displayName)
   """
@@ -350,6 +372,10 @@ input AllShelvesCursorConnectionSort {
 Filter the shelves of allShelves query
 """
 input AllShelvesFilter {
+  """
+  Genre names to filter on for shelf songs
+  """
+  genres: [Genres!]
   """
   Filter the shelves based on the expected types
   """
@@ -454,6 +480,10 @@ type Artist implements Node {
       releaseType: [SINGLE, ALBUM, ALBUM_TRACK]
     }
   ): Int!
+  """
+  Picked release of artist
+  """
+  pickedRelease: Release
   """
   Paginated releases of artist.
   """
@@ -562,6 +592,7 @@ enum ArtistActivityFeedActivityTypeFilterOption {
   COLLECTIONS
   LIKES
   PLAYLISTS
+  POSTS
   RELEASES
 }
 
@@ -657,6 +688,10 @@ type ArtistApplicationInfo {
   Sound handle
   """
   soundHandle: String!
+  """
+  Spotify URL
+  """
+  spotifyUrl: String
   """
   Twitter handle
   """
@@ -851,9 +886,25 @@ Filter for paginated artists
 """
 input ArtistCursorFilterArgs {
   """
-  Specify whether artist already has at least one minted release
+  Genre names to filter on for artist's releases
+  """
+  genres: [Genres!]
+  """
+  Specify whether artist already has at least one collector (minted release)
+  """
+  hasCollector: Boolean
+  """
+  Specify whether artist already has at least one release
   """
   hasMintedRelease: Boolean
+  """
+  Specify whether artist already has at least one release
+  """
+  hasRelease: Boolean
+  """
+  Location IDs from Google Places API to filter on for artist's releases
+  """
+  locationIds: [String!]
   """
   Specify season to be filtered
   """
@@ -955,6 +1006,68 @@ type ArtistPartnershipHighlight {
 }
 
 """
+Artist private community user member only to be accessed by the artist.
+"""
+type ArtistPrivateCommunityMember implements Node {
+  """
+  Artist community collector
+  """
+  artistCollector: ArtistCollector!
+  """
+  Unique id of user
+  """
+  id: ID!
+  """
+  Verified email address of user if subscribed to artist
+  """
+  subscriptionEmail: String
+  """
+  Artist community user
+  """
+  user: User! @deprecated(reason: "Please use artistCollector")
+}
+
+"""
+Edge of Artist Private Community Member Connection
+"""
+type ArtistPrivateCommunityMemberConnectionEdge implements Edge {
+  """
+  Cursor to be used for pagination
+  """
+  cursor: String!
+  """
+  ArtistPrivateCommunityMember node
+  """
+  node: ArtistPrivateCommunityMember!
+}
+
+"""
+A release by the user was posted to feed by another user
+"""
+type ArtistReleasePosted implements Node & UserNotification {
+  """
+  UserNotification UUID
+  """
+  id: ID!
+  """
+  Post entity
+  """
+  post: Post
+  """
+  Posted release entity
+  """
+  release: Release
+  """
+  Timestamp for notification
+  """
+  timestamp: Timestamp!
+  """
+  Recipient user entity
+  """
+  user: User
+}
+
+"""
 Artist releases author filter option
 """
 enum ArtistReleasesAuthorFilterOption {
@@ -1003,6 +1116,42 @@ input ArtistReleasesFilter {
 }
 
 """
+Filter the artists to be searched
+"""
+input ArtistSearchFilter {
+  """
+  Genre names to filter on for artist's releases
+  """
+  genres: [Genres!]
+  """
+  Only include artists that either have or don't have collectors
+  """
+  hasCollectors: Boolean
+  """
+  Location IDs from Google Places API to filter on for artist's releases
+  """
+  locationIds: [String!]
+}
+
+"""
+Customize sort of releases
+"""
+input ArtistSearchSort {
+  """
+  Sort by creation date
+  """
+  createdAt: SortOrder
+  """
+  Sort by number of mints of each release
+  """
+  totalMinted: SortOrder
+  """
+  Sort by total volume of all artist releases
+  """
+  totalVolume: SortOrder
+}
+
+"""
 Types of seasons for artists
 """
 enum ArtistSeason {
@@ -1011,6 +1160,20 @@ enum ArtistSeason {
   SEASON_ONE
   SEASON_THREE
   SEASON_TWO
+}
+
+"""
+Defines sort order of Artist fields, array index defines tiebreaking
+"""
+input ArtistSortInput {
+  """
+  Field to be sorted
+  """
+  field: SearchArtistsSortEnum!
+  """
+  Sort ascending or descending
+  """
+  order: SortOrder!
 }
 
 """
@@ -1060,11 +1223,31 @@ type ArtistSourceSubAllowlist implements Node & ReleaseBaseSubAllowlist {
 }
 
 """
+Auction listing for releases
+"""
+interface AuctionListingInterface {
+  """
+  Chain associated with contract
+  """
+  chain: ChainType!
+  """
+  Contract address associated with auction
+  """
+  contractAddress: String!
+  """
+  Unique auction listing identifier
+  """
+  id: ID!
+}
+
+"""
 Types of release sales
 """
 enum AuctionType {
   FIXED_QUANTITY
+  FIXED_QUANTITY_WITH_GA
   OPEN_EDITION
+  OPEN_EDITION_WITH_GA
   OPEN_EDITION_WITH_SAM
   RANGE_BOUND
 }
@@ -1086,6 +1269,10 @@ type AudioMedia {
   """
   audio256k: Media
   """
+  Track audio, HLS playlist if available
+  """
+  audioHls: Media
+  """
   Track audio, original non-transcoded version
   """
   audioOriginal: Media!
@@ -1103,6 +1290,10 @@ type BondingCurveSale implements ArtistAction & CollectorAction & Node & Release
   Date of action
   """
   date: DateTime!
+  """
+  Starting serial number of NFT for bonding curve sale purchase
+  """
+  fromSerialNumber: Int
   """
   Starting token ID of NFT for bonding curve sale purchase
   """
@@ -1123,6 +1314,14 @@ type BondingCurveSale implements ArtistAction & CollectorAction & Node & Release
   Starting serial number of nft bonding curve sale purchase
   """
   serialNumber: Int!
+  """
+  tierNumber of the NFT
+  """
+  tierNumber: Int
+  """
+  Ending serial number of NFT for bonding curve sale purchase
+  """
+  toSerialNumber: Int
   """
   Ending token ID of NFT for bonding curve sale purchase
   """
@@ -1168,6 +1367,16 @@ type BondingCurveSold implements ArtistAction & CollectorAction & Node & Release
 }
 
 """
+Chain name supported on the platform
+"""
+enum ChainType {
+  GOERLI
+  MAINNET
+  OPTIMISM
+  OPTIMISM_GOERLI
+}
+
+"""
 Simplified version of Release entity filtered on the owner public address
 """
 type CollectedRelease implements Node {
@@ -1175,6 +1384,10 @@ type CollectedRelease implements Node {
   First backed nft of collected release
   """
   firstNftOwned: Nft
+  """
+  Amount of ga nfts owned
+  """
+  gaNftsCount: Int!
   """
   Returns golden egg if user owns, otherwise null
   """
@@ -1184,13 +1397,29 @@ type CollectedRelease implements Node {
   """
   id: ID!
   """
+  Amount of nfts owned
+  """
+  nftsCount: Int!
+  """
   List of owned nft serial numbers in ascending serial number order
   """
-  ownedSerialNumbers: [Int!]!
+  ownedSerialNumbers: [Int!]! @deprecated(reason: "Use ownedTokens instead")
+  """
+  List of possible owned tokens in ascending tokenId order. If user does not own the release, it returns null
+  """
+  ownedTokens: [OwnedToken!]
   """
   Release entity
   """
   release: Release!
+  """
+  The priority of the NFTs the user owns
+  """
+  tierPriority: Int!
+  """
+  Amount of vip nfts owned
+  """
+  vipNftsCount: Int!
 }
 
 """
@@ -1298,9 +1527,157 @@ enum CollectorActivityFeedTypeFilterOption {
 }
 
 """
+CollectorComment entity
+"""
+type CollectorComment implements Node {
+  """
+  Collector who made the comment
+  """
+  collector: ReleaseCollector!
+  """
+  Comment of NFT
+  """
+  comment: Comment!
+  """
+  Node identifier
+  """
+  id: ID!
+  """
+  Nft associated with comment
+  """
+  nft: Nft!
+  """
+  Song slot reserved by NFT
+  """
+  normalizedSongSlot: Int!
+}
+
+"""
+Paginated CollectorComment connection
+"""
+type CollectorCommentConnection implements Connection {
+  """
+  Edges of current page
+  """
+  edges: [CollectorCommentConnectionEdge!]!
+  """
+  Pagination helpers information
+  """
+  pageInfo: PageInfo!
+}
+
+"""
+CollectorComment Node edge
+"""
+type CollectorCommentConnectionEdge implements Edge {
+  """
+  Cursor to be used for pagination
+  """
+  cursor: String!
+  """
+  CollectorComment Entity
+  """
+  node: CollectorComment!
+}
+
+"""
+Pagination parameters of collector comments
+"""
+input CollectorCommentCursorConnectionArgs {
+  """
+  Start forwards pagination since "after" cursor
+  """
+  after: String
+  """
+  Start backwards pagination since "before" cursor
+  """
+  before: String
+  """
+  Limit the amount of nodes to be fetched, to be used with "after", with a maximum of 51 nodes.
+  """
+  first: NonNegativeInt
+  """
+  Limit the amount of nodes to be fetched, to be used with "before", with a maximum of 51 nodes.
+  """
+  last: NonNegativeInt
+  """
+  Customize sort behavior
+  """
+  sort: CollectorCommentCursorConnectionSort! = { createdAt: DESC }
+}
+
+"""
+Customize sort of release shelves
+"""
+input CollectorCommentCursorConnectionSort {
+  """
+  Sort by date of comment creation
+  """
+  createdAt: SortOrder
+}
+
+"""
+Filter the releases to be searched
+"""
+input CollectorSearchFilter {
+  """
+  Genre names to filter on for collector's releases
+  """
+  genres: [Genres!]
+  """
+  Location ids to filter on for collector's releases
+  """
+  locationIds: [String!]
+}
+
+"""
+Customize sort of collectors
+"""
+input CollectorSearchSort {
+  """
+  Sort by number of distinct artists the collector backed
+  """
+  artistsBacked: SortOrder
+  """
+  Sort by creation date
+  """
+  createdAt: SortOrder
+  """
+  Sort by number of nfts
+  """
+  nftsCount: SortOrder
+  """
+  Sort by number of mints of each release
+  """
+  totalMinted: SortOrder
+  """
+  Sort by total volume of all collector releases
+  """
+  totalVolume: SortOrder
+}
+
+"""
+Defines sort order of Collector fields, array index defines tiebreaking
+"""
+input CollectorSortInput {
+  """
+  Field to be sorted
+  """
+  field: SearchCollectorsSortEnum!
+  """
+  Sort ascending or descending
+  """
+  order: SortOrder!
+}
+
+"""
 Information of collector from release
 """
 type CollectorUpdateInfo {
+  """
+  Amount of ga release nfts owned
+  """
+  gaNftsCount: Int!
   """
   If collector owns golden egg, the serial number of the golden egg
   """
@@ -1321,6 +1698,14 @@ type CollectorUpdateInfo {
   Amount of NFTs collected of release
   """
   nftsCount: Int!
+  """
+  Amount of GA NFTs collected of release
+  """
+  nftsCountGa: Int!
+  """
+  Amount of VIP NFTs collected of release
+  """
+  nftsCountVip: Int!
   """
   If user is an artist, the artist unique identifier
   """
@@ -1353,12 +1738,20 @@ type CollectorUpdateInfo {
   Username of collector
   """
   username: String!
+  """
+  Amount of vip release nfts owned
+  """
+  vipNftsCount: Int!
 }
 
 """
 Comment entity
 """
 type Comment {
+  """
+  Create date of comment
+  """
+  createdAt: DateTime!
   """
   Comment unique identifier
   """
@@ -1440,11 +1833,12 @@ input ContractReleaseInput {
 }
 
 """
-Contract type, currently the playform only supports "ARTIST"
+Contract type on chain
 """
 enum ContractType {
   ARTIST
   EDITION
+  TIERED_EDITION
 }
 
 """
@@ -1940,6 +2334,10 @@ type DraftEditInfo {
   """
   arweaveHash: String
   """
+  Draft GA arweave hash associated with changes if needed
+  """
+  gaArweaveHash: String
+  """
   Draft possibly edited release info
   """
   releaseInfo: DraftEditReleaseInfo
@@ -1987,6 +2385,14 @@ type DraftEditReleaseInfo {
   Cover image
   """
   coverImage: MediaUploadStepInfo
+  """
+  GA Cover image
+  """
+  gaCoverImage: MediaUploadStepInfo
+  """
+  Static version of animated GA cover image of release if the cover is a GIF
+  """
+  gaStaticCoverImage: MediaUploadStepInfo
   """
   Genre
   """
@@ -2116,9 +2522,21 @@ type DraftReleaseInfo {
   """
   coverImage: MediaUploadStepInfo!
   """
+  GA Cover image
+  """
+  gaCoverImage: MediaUploadStepInfo
+  """
+  Static version of animated GA cover image of release if the cover is a GIF
+  """
+  gaStaticCoverImage: MediaUploadStepInfo
+  """
   Genre
   """
   genre: String!
+  """
+  Special golden image
+  """
+  goldenEggImage: MediaUploadStepInfo
   """
   Release key
   """
@@ -2257,7 +2675,7 @@ type EggGame {
   """
   Serial number of nft with egg game
   """
-  winningSerialNum: Int!
+  winningSerialNum: Int! @deprecated(reason: "Look up the NFT of the winner")
 }
 
 """
@@ -2268,80 +2686,6 @@ interface Error {
   Descriptive message of error
   """
   message: String!
-}
-
-"""
-Event type
-"""
-enum EventType {
-  AIRDROP
-  EDITION_PURCHASED
-  ORDERS_MATCHED
-  OTHER_MINTED
-  TRANSFER
-  UNKNOWN
-}
-
-"""
-Event entity
-"""
-type EventV2 implements Node {
-  """
-  Timestamp on blockchain of event
-  """
-  blockTimestamp: DateTime!
-  """
-  Contract address
-  """
-  contractAddress: String!
-  """
-  Date of creation of event entity
-  """
-  createdAt: DateTime!
-  """
-  Edition identifier
-  """
-  editionId: String
-  """
-  Event type
-  """
-  eventType: EventType!
-  """
-  Source public address
-  """
-  fromAddress: String
-  """
-  User associated to source public address
-  """
-  fromAddressUser: User
-  """
-  Event identifier
-  """
-  id: ID!
-  """
-  Release associated with event
-  """
-  release: Release
-  """
-  Target public address
-  """
-  toAddress: String
-  """
-  User associated to target public address
-  """
-  toAddressUser: User
-  """
-  Token ID of associated NFT
-  """
-  tokenId: String!
-  """
-  Value exchanged in Wei
-  """
-  valueExchanged: String!
-  """
-  Formatted version of value exchanged
-  """
-  valueExchangedPretty: ValueExchangedPrettyType!
 }
 
 """
@@ -2393,6 +2737,47 @@ type Genre {
 }
 
 """
+List of genres available on the platform
+"""
+enum Genres {
+  AFROBEAT
+  ALTERNATIVE_ROCK
+  AMBIENT
+  BOUNCE
+  CLASSICAL
+  COUNTRY
+  DANCEHALL
+  DANCE_EDM
+  DEEP_HOUSE
+  DISCO
+  DOWNTEMPO
+  DRUM_BASS
+  DUBSTEP
+  ELECTRONIC
+  EXPERIMENTAL
+  FOLK_SINGER_SONGWRITER
+  HIP_HOP_RAP
+  HOUSE
+  INDIE
+  JAZZ_BLUES
+  LATIN
+  LOFI
+  METAL
+  PIANO
+  POP
+  REGGAE
+  REGGAETON
+  ROCK
+  R_B_SOUL
+  SOUNDTRACK
+  TECHNO
+  TRANCE
+  TRAP
+  TRIPHOP
+  WORLD
+}
+
+"""
 Geographic location associated with Google Maps API
 """
 type GeoLocationPlaceGoogle {
@@ -2404,6 +2789,28 @@ type GeoLocationPlaceGoogle {
   Google Maps API Place identifier
   """
   placeId: String!
+}
+
+"""
+User won the golden egg for a release
+"""
+type GoldenEggWon implements Node & UserNotification {
+  """
+  UserNotification UUID
+  """
+  id: ID!
+  """
+  Release entity
+  """
+  release: Release
+  """
+  Timestamp for notification
+  """
+  timestamp: Timestamp!
+  """
+  Recipient user entity
+  """
+  user: User
 }
 
 """
@@ -2479,84 +2886,6 @@ Status of Key Client
 enum KeyClientStatus {
   ACTIVE
   INACTIVE
-}
-
-"""
-Paginated latest sales events
-"""
-type LatestSalesConnection implements Connection {
-  """
-  Edges of current page
-  """
-  edges: [LatestSalesConnectionEdge!]!
-  """
-  Pagination helpers information
-  """
-  pageInfo: PageInfo!
-}
-
-"""
-Edge of LatestSales Connection
-"""
-type LatestSalesConnectionEdge implements Edge {
-  """
-  Cursor to be used for pagination
-  """
-  cursor: String!
-  """
-  Event node
-  """
-  node: EventV2!
-}
-
-"""
-Pagination parameters for Latest Sales connection
-"""
-input LatestSalesCursorConnectionArgs {
-  """
-  Start forwards pagination since "after" cursor
-  """
-  after: String
-  """
-  Start backwards pagination since "before" cursor
-  """
-  before: String
-  """
-  Limit the amount of nodes to be fetched, to be used with "after", with a maximum of 51 nodes.
-  """
-  first: NonNegativeInt
-  """
-  Limit the amount of nodes to be fetched, to be used with "before", with a maximum of 51 nodes.
-  """
-  last: NonNegativeInt
-  """
-  Customize sorting latest sales
-  """
-  sort: LatestSalesCursorConnectionSort! = { blockTimestamp: DESC }
-}
-
-"""
-Customize sorting latest sales
-"""
-input LatestSalesCursorConnectionSort {
-  """
-  Sort by blockchain timestamp
-  """
-  blockTimestamp: SortOrder
-  """
-  Sort by date of creation of event entity
-  """
-  createdAt: SortOrder
-}
-
-"""
-Filter for paginated latest sales
-"""
-input LatestSalesCursorFilterArgs {
-  """
-  Specify event types to be filtered
-  """
-  eventTypes: [EventType!]
 }
 
 """
@@ -2679,16 +3008,23 @@ enum MediaType {
   AUDIO_128K
   AUDIO_192K
   AUDIO_256K
+  AUDIO_HLS
   AVATAR_IMAGE
   DRAFT_ALLOWLISTED_ADDRESSES_CSV
+  MERKLE_TREE_CSV
   RELEASE_BANNER_IMAGE
   RELEASE_COVER_IMAGE
+  RELEASE_GA_COVER_IMAGE
+  RELEASE_GA_WEB_ANIMATED_IMAGE
+  RELEASE_GA_WEB_STATIC_AUTOGEN_IMAGE
+  RELEASE_GA_WEB_STATIC_IMAGE
   RELEASE_GOLDEN_EGG_IMAGE
   RELEASE_HOLDERS_CSV
   RELEASE_WEB_ANIMATED_GOLDEN_EGG_IMAGE
   RELEASE_WEB_ANIMATED_IMAGE
   RELEASE_WEB_STATIC_AUTOGEN_IMAGE
   RELEASE_WEB_STATIC_IMAGE
+  SHELF_COVER_IMAGE
   TMP_ARTIST_BANNER_AUTOGEN_IMAGE
   TMP_AVATAR_AUTOGEN_IMAGE
   TMP_USER_BANNER_AUTOGEN_IMAGE
@@ -2810,9 +3146,17 @@ input MintedReleasesCursorFilterArgs {
   """
   genre: [String!]
   """
+  Only get releases from specified genres
+  """
+  genres: [Genres!]
+  """
   Remove currently-featured releases from results
   """
   hideFeatured: Boolean
+  """
+  Location ids to filter on for releases
+  """
+  locationIds: [String!]
   """
   Only get releases less or equal to than specified mint time
   """
@@ -2910,9 +3254,95 @@ type MutationVerifyNotificationEmailSuccess {
 }
 
 """
+User received a new follower
+"""
+type NewFollower implements Node & UserNotification {
+  """
+  Featured new followers
+  """
+  featuredFollowers: [User!]!
+  """
+  UserNotification UUID
+  """
+  id: ID!
+  """
+  Number of new followers in this group
+  """
+  numNewFollowers: Int!
+  """
+  Timestamp for notification
+  """
+  timestamp: Timestamp!
+  """
+  Recipient user entity
+  """
+  user: User
+}
+
+"""
+User has received a new comment on their post
+"""
+type NewPostComment implements Node & UserNotification {
+  """
+  Post comment entity. Can be null if deleted
+  """
+  comment: PostComment
+  """
+  UserNotification UUID
+  """
+  id: ID!
+  """
+  Post entity
+  """
+  post: Post
+  """
+  Timestamp for notification
+  """
+  timestamp: Timestamp!
+  """
+  Recipient user entity
+  """
+  user: User
+}
+
+"""
+User has received a new upvote on their post
+"""
+type NewPostUpvote implements Node & UserNotification {
+  """
+  Featured users
+  """
+  featuredUsers: [User!]!
+  """
+  UserNotification UUID
+  """
+  id: ID!
+  """
+  Number of users that created an upvote on the post within the group
+  """
+  numUsers: Int!
+  """
+  Post entity
+  """
+  post: Post
+  """
+  Timestamp for notification
+  """
+  timestamp: Timestamp!
+  """
+  Recipient user entity
+  """
+  user: User
+}
+
+"""
 NFT Entity
 """
 type Nft implements Node {
+  """
+  Audio of Nft
+  """
+  audioUrl: String
   """
   Release collector entity associated with NFT ownership
   """
@@ -2926,13 +3356,13 @@ type Nft implements Node {
   """
   contractAddress: String!
   """
+  Cover image of NFT
+  """
+  coverImage: Media!
+  """
   Date of creation of NFT entity
   """
   createdAt: DateTime!
-  """
-  Block number of the nft mint
-  """
-  createdAtBlockNum: Int! @deprecated(reason: "Use createdAtBlockTime instead")
   """
   Blockchain created date of NFT
   """
@@ -2962,13 +3392,21 @@ type Nft implements Node {
   """
   release: Release!
   """
-  Acumulative serial number
+  Serial number
   """
   serialNumber: Int!
   """
   Song slot reserved by NFT
   """
   songSlot: Int
+  """
+  Tier number
+  """
+  tierNumber: Int
+  """
+  Title of Nft
+  """
+  title: String!
   """
   Unique chain token identifier
   """
@@ -2977,10 +3415,6 @@ type Nft implements Node {
   Last update date of NFT
   """
   updatedAt: DateTime!
-  """
-  Block number of the last transfer state
-  """
-  updatedAtBlockNum: Int! @deprecated(reason: "Use updatedAt instead")
 }
 
 """
@@ -3074,9 +3508,9 @@ Simplified version of Nft entity filtered to be with non-nullable comment
 """
 type NftWithComment {
   """
-  Amount paid in Wei backcompat...
+  Amount paid in Wei
   """
-  amountPaidInWei: String!
+  amountPaidInWei: String! @deprecated(reason: "Not updated, do not use")
   """
   Avatar URL of Nft owner
   """
@@ -3093,6 +3527,10 @@ type NftWithComment {
   Unique identifier of Nft
   """
   id: ID!
+  """
+  Is NFT a golden egg
+  """
+  isGoldenEgg: Boolean!
   """
   If the Nft owner is an artist, returns the name of the artist
   """
@@ -3207,6 +3645,28 @@ type OpenSeaMetadataAttribute {
   Value
   """
   value: String!
+}
+
+"""
+Owned token by the user in release
+"""
+type OwnedToken {
+  """
+  Is the owned token special golden egg
+  """
+  isGoldenEgg: Boolean!
+  """
+  Serial number associated with token relative to tier if present
+  """
+  serialNumber: Int!
+  """
+  Tier number associated with nft if applicable
+  """
+  tierNumber: Int
+  """
+  Token identifier
+  """
+  tokenId: String!
 }
 
 """
@@ -3341,6 +3801,56 @@ input PlaylistActionReleasesCursorConnectionArgs {
 }
 
 """
+Playlist affiliate buyer entity
+"""
+type PlaylistAffiliateBuyer implements Node {
+  """
+  Unique identifier of playlist affiliate buyer
+  """
+  id: ID!
+  """
+  Most recent affiliate purchase date by user from playlist referral.
+  """
+  mostRecentAffiliatePurchaseDate: DateTime
+  """
+  Number of nfts purchased by user from playlist referral.
+  """
+  numAffiliateNftsPurchased: Int
+  """
+  User buyer entity
+  """
+  user: User!
+}
+
+"""
+Paginated playlist affiliate buyers connection
+"""
+type PlaylistAffiliateBuyerConnection implements Connection {
+  """
+  Edges of current page
+  """
+  edges: [PlaylistAffiliateBuyerConnectionEdge!]!
+  """
+  Pagination helpers information
+  """
+  pageInfo: PageInfo!
+}
+
+"""
+Edge of Playlist Affiliate Buyer Connection
+"""
+type PlaylistAffiliateBuyerConnectionEdge implements Edge {
+  """
+  Cursor to be used for pagination
+  """
+  cursor: String!
+  """
+  Playlist Affiliate Buyer node
+  """
+  node: PlaylistAffiliateBuyer!
+}
+
+"""
 Playlist of tracks of an artist
 """
 type PlaylistArtist implements Playlist {
@@ -3353,6 +3863,135 @@ type PlaylistArtist implements Playlist {
   Track list
   """
   tracks: [PlaylistTrack!]!
+}
+
+"""
+Playlist chart entity
+"""
+type PlaylistChart implements Node {
+  """
+  Chart ranks of release chart
+  """
+  chartRanks(
+    """
+    Pagination parameters
+    """
+    pagination: PlaylistChartRankCursorConnectionArgs! = { after: null, first: 10, sort: { currentRank: ASC } }
+  ): PlaylistChartRankConnection!
+  """
+  UUID of Playlist chart entity
+  """
+  id: ID!
+  """
+  Last full day of the chart period (inclusive)
+  """
+  lastDayOfChartInclusive: DateTime!
+  """
+  Playlist chart period end exclusive
+  """
+  periodEndExclusive: DateTime!
+  """
+  Playlist chart period start inclusive
+  """
+  periodStartInclusive: DateTime!
+}
+
+"""
+Playlist chart rank entity
+"""
+type PlaylistChartRank implements Node {
+  """
+  Current ranking of release
+  """
+  currentRank: Int!
+  """
+  UUID of Playlist chart entity
+  """
+  id: ID!
+  """
+  Chart rank release
+  """
+  playlist: Shelf!
+  """
+  Last ranking of release
+  """
+  rankLast: Int
+  """
+  Peak ranking of release
+  """
+  rankPeak: Int
+  """
+  Trending indicator of release
+  """
+  trendingIndicator: TrendingIndicator!
+  """
+  Trending streak of release
+  """
+  trendingStreak: Int!
+}
+
+"""
+Paginated connection of Playlist Chart Ranks
+"""
+type PlaylistChartRankConnection implements Connection {
+  """
+  Edges of current page
+  """
+  edges: [PlaylistChartRankConnectionEdge!]!
+  """
+  Pagination helpers information
+  """
+  pageInfo: PageInfo!
+}
+
+"""
+Edge of Playlist Chart Rank Connection
+"""
+type PlaylistChartRankConnectionEdge implements Edge {
+  """
+  Cursor to be used for pagination
+  """
+  cursor: String!
+  """
+  Playlist Chart Rank node
+  """
+  node: PlaylistChartRank!
+}
+
+"""
+Pagination paramaters for release chart ranks
+"""
+input PlaylistChartRankCursorConnectionArgs {
+  """
+  Start forwards pagination since "after" cursor
+  """
+  after: String
+  """
+  Start backwards pagination since "before" cursor
+  """
+  before: String
+  """
+  Limit the amount of nodes to be fetched, to be used with "after", with a maximum of 51 nodes.
+  """
+  first: NonNegativeInt
+  """
+  Limit the amount of nodes to be fetched, to be used with "before", with a maximum of 51 nodes.
+  """
+  last: NonNegativeInt
+  """
+  Customize sort behavior
+  """
+  sort: PlaylistChartRankCursorConnectionSort! = { currentRank: ASC }
+}
+
+"""
+Customize sort of collectors
+"""
+input PlaylistChartRankCursorConnectionSort {
+  """
+  Sort by playlist chart current rank
+  """
+  currentRank: SortOrder
 }
 
 """
@@ -3479,6 +4118,161 @@ Integers that will have a value greater than 0.
 scalar PositiveInt
 
 """
+Post entity
+"""
+interface Post {
+  """
+  Number of comments on the post
+  """
+  commentCount: Int!
+  """
+  Comments on the post
+  """
+  comments(
+    """
+    Pagination parameters
+    """
+    pagination: PostCommentCursorConnectionArgs! = { after: null, first: 30, sort: { createdAt: DESC } }
+  ): PostCommentConnection!
+  """
+  Content of the post
+  """
+  content: String!
+  """
+  Creation date of entity
+  """
+  createdAt: DateTime!
+  """
+  User who created the post
+  """
+  creator: User!
+  """
+  Unique identifier of the Post
+  """
+  id: ID!
+  """
+  Number of upvotes on the post
+  """
+  upvoteCount: Int!
+  """
+  Webapp URI of Post
+  """
+  webappUri: String!
+}
+
+"""
+Post Comment entity
+"""
+type PostComment implements Node {
+  """
+  User who created the comment
+  """
+  author: User!
+  """
+  Content of the comment
+  """
+  content: String!
+  """
+  Creation date of the comment
+  """
+  createdAt: DateTime!
+  """
+  Unique identifier of the Post Comment
+  """
+  id: ID!
+  """
+  Last update date of the comment
+  """
+  updatedAt: DateTime!
+}
+
+"""
+Paginated Post Comments connection
+"""
+type PostCommentConnection implements Connection {
+  """
+  Edges of current page
+  """
+  edges: [PostCommentConnectionEdge!]!
+  """
+  Pagination helpers information
+  """
+  pageInfo: PageInfo!
+}
+
+"""
+Post Comment Node edge
+"""
+type PostCommentConnectionEdge implements Edge {
+  """
+  Cursor to be used for pagination
+  """
+  cursor: String!
+  """
+  Post Comment Entity
+  """
+  node: PostComment!
+}
+
+"""
+Cursor connection parameters for Post Comments
+"""
+input PostCommentCursorConnectionArgs {
+  """
+  Start forwards pagination since "after" cursor
+  """
+  after: String
+  """
+  Start backwards pagination since "before" cursor
+  """
+  before: String
+  """
+  Limit the amount of nodes to be fetched, to be used with "after", with a maximum of 51 nodes.
+  """
+  first: NonNegativeInt
+  """
+  Limit the amount of nodes to be fetched, to be used with "before", with a maximum of 51 nodes.
+  """
+  last: NonNegativeInt
+  """
+  Customize sort behavior
+  """
+  sort: PostCommentCursorConnectionSort! = { createdAt: DESC }
+}
+
+"""
+Customize the sort behavior of Post Comments pagination
+"""
+input PostCommentCursorConnectionSort {
+  """
+  Sort by created date
+  """
+  createdAt: SortOrder
+}
+
+"""
+A subscribed artist release presale has dropped and user is eligible
+"""
+type PresaleStarted implements Node & UserNotification {
+  """
+  UserNotification UUID
+  """
+  id: ID!
+  """
+  Dropped presale release entity
+  """
+  release: Release
+  """
+  Timestamp for notification
+  """
+  timestamp: Timestamp!
+  """
+  Recipient user entity
+  """
+  user: User
+}
+
+"""
 Primary sale collector action entity
 """
 type PrimarySale implements ArtistAction & CollectorAction & Node & ReleaseAction {
@@ -3491,7 +4285,11 @@ type PrimarySale implements ArtistAction & CollectorAction & Node & ReleaseActio
   """
   date: DateTime!
   """
-  Starting token ID of NFT for bonding curve sale purchase
+  Starting serial number of NFT for primary sale purchase
+  """
+  fromSerialNumber: Int
+  """
+  Starting token ID of NFT for primary sale purchase
   """
   fromTokenId: Int!
   """
@@ -3511,13 +4309,43 @@ type PrimarySale implements ArtistAction & CollectorAction & Node & ReleaseActio
   """
   serialNumber: Int!
   """
-  Ending token ID of NFT for bonding curve sale purchase
+  tierNumber of the NFT
+  """
+  tierNumber: Int
+  """
+  Ending serial Number of NFT for primary sale purchase
+  """
+  toSerialNumber: Int
+  """
+  Ending token ID of NFT for primary sale purchase
   """
   toTokenId: Int!
   """
   User corresponding to collector action entity
   """
   user: User!
+}
+
+"""
+A subscribed artist release has dropped
+"""
+type PublicSaleStarted implements Node & UserNotification {
+  """
+  UserNotification UUID
+  """
+  id: ID!
+  """
+  Dropped release entity
+  """
+  release: Release
+  """
+  Timestamp for notification
+  """
+  timestamp: Timestamp!
+  """
+  Recipient user entity
+  """
+  user: User
 }
 
 """
@@ -3533,6 +4361,10 @@ type Query {
     """
     filter: ActivityFeedFilterArgs! = { activityFeedType: GLOBAL }
   ): ActivityFeed
+  """
+  [PUBLIC] Release activity feed
+  """
+  activityFeedRecommendedFollows: RecommendedFollows!
   """
   [PUBLIC] Paginate through all collectors of the system
   """
@@ -3655,6 +4487,10 @@ type Query {
   """
   Get current release chart
   """
+  currentPlaylistChart: PlaylistChart!
+  """
+  Get current release chart
+  """
   currentReleaseChart: ReleaseChart!
   """
   [PUBLIC] Get DraftAllowList from release and mintType
@@ -3684,15 +4520,6 @@ type Query {
     releaseId: UUID!
   ): EggGame
   """
-  Get an Event information from the unique identifier
-  """
-  eventFromId(
-    """
-    Unique event identifier
-    """
-    id: UUID!
-  ): EventV2
-  """
   [PUBLIC] Get feature flag value by name
   """
   featureFlag(
@@ -3709,19 +4536,6 @@ type Query {
   [PUBLIC] Get the top 5 highlighted releases
   """
   highlightedReleases: [Release!]!
-  """
-  [PUBLIC] Get the latest events
-  """
-  latestEventsPaginated(
-    """
-    Paginated latest sales filters
-    """
-    filter: LatestSalesCursorFilterArgs
-    """
-    Pagination parameters
-    """
-    pagination: LatestSalesCursorConnectionArgs! = { first: 10, sort: { blockTimestamp: DESC } }
-  ): LatestSalesConnection! @deprecated(reason: "No longer used")
   """
   [PUBLIC] Get playlist based on given type and associationId
   """
@@ -3762,6 +4576,15 @@ type Query {
     """
     root: String!
   ): MerkleTree! @deprecated(reason: "Use merkleTreeFromRoot instead")
+  """
+  [PUBLIC] Allowlisted addresses from merkle tree csv url
+  """
+  merkleTreeCSVUrl(
+    """
+    Merkle root of allowlisted schedule
+    """
+    merkleRoot: String!
+  ): String
   """
   [PUBLIC] Get merkle tree information
   """
@@ -3863,6 +4686,15 @@ type Query {
     id: UUID!
   ): Shelf
   """
+  [PUBLIC] Post entity
+  """
+  post(
+    """
+    Unique Post identifier
+    """
+    postId: UUID!
+  ): Post
+  """
   [PUBLIC] Purchase activity Feed with filter parameters
   """
   purchaseActivityFeed(
@@ -3909,7 +4741,7 @@ type Query {
     Release identifier
     """
     releaseId: UUID!
-  ): String
+  ): String @deprecated(reason: "Use Query.merkleTreeCSVUrl instead")
   """
   [PUBLIC] Get allowlist for release
   """
@@ -3982,7 +4814,7 @@ type Query {
     pagination: CursorConnectionArgs! = { first: 10, sort: DESC }
   ): UserConnection!
   """
-  [PUBLIC] Get specifiec release collector from unique identifier
+  [PUBLIC] Get specified release collector from unique identifier
   """
   releaseCollectorFromId(
     """
@@ -4013,7 +4845,7 @@ type Query {
     input: ReleaseFromTokenInput!
   ): Release
   """
-  [PUBLIC] List of genres that have at least 1 past minted release, sorted by popularity
+  [PUBLIC] List of genres that have at least 1 release
   """
   releaseGenres: [Genre!]!
   """
@@ -4029,6 +4861,15 @@ type Query {
     """
     pagination: ReleasesCursorConnectionArgs! = { first: 10, sort: { mintStartTime: DESC } }
   ): ReleaseConnection!
+  """
+  [PUBLIC] Get all releases that collectors of a given release have also minted
+  """
+  releasesCollectorsAlsoMinted(
+    """
+    Identifier of release
+    """
+    releaseId: UUID!
+  ): [Release!]!
   """
   [PUBLIC] Search releases or artists based on text inputs
   """
@@ -4264,6 +5105,42 @@ type Query {
 }
 
 """
+Users and artists that are recommended for following
+"""
+type RecommendedFollows {
+  """
+  List of recommended artists
+  """
+  artists: [Artist!]!
+  """
+  List of recommended users
+  """
+  users: [User!]!
+}
+
+"""
+Referrals received notification
+"""
+type ReferralReceivedNotification implements Node & UserNotification {
+  """
+  UserNotification UUID
+  """
+  id: ID!
+  """
+  Timestamp for notification
+  """
+  timestamp: Timestamp!
+  """
+  Total received for grouped referrals in WEI
+  """
+  totalReceivedWei: String
+  """
+  Recipient user entity
+  """
+  user: User
+}
+
+"""
 Pagination parameters of referred users
 """
 input ReferredUsersCursorConnectionArgs {
@@ -4339,6 +5216,10 @@ type Release implements Node {
   """
   artist: Artist!
   """
+  Type of auction contract
+  """
+  auctionContractType: ContractType
+  """
   Auction type defined on upload flow
   """
   auctionType: AuctionType
@@ -4362,6 +5243,15 @@ type Release implements Node {
   Currently claimed song slots
   """
   claimedSongSlots: [Int!]!
+  """
+  Collector comments
+  """
+  collectorComments(
+    """
+    Pagination parameters
+    """
+    pagination: CollectorCommentCursorConnectionArgs! = { after: null, first: 20, sort: { createdAt: DESC } }
+  ): CollectorCommentConnection!
   """
   Collectors of release
   """
@@ -4429,6 +5319,10 @@ type Release implements Node {
   """
   fundingAddress: String!
   """
+  GA Cover image of release for tiered editions
+  """
+  gaCoverImage: Media
+  """
   Genre of Release
   """
   genre: Genre!
@@ -4437,13 +5331,21 @@ type Release implements Node {
   """
   goldenEggImage: Media!
   """
+  Golden egg NFT
+  """
+  goldenEggNft: Nft
+  """
   Is the release a range bound edition
   """
-  hasRangeBoundSale: Boolean!
+  hasRangeBoundSale: Boolean! @deprecated(reason: "Should not be used moving forward")
   """
   Release identifier
   """
   id: ID!
+  """
+  Is the auction listing currently sold out. If the release doesn't have an auction associated, it returns null instead
+  """
+  isAuctionSoldOut: Boolean
   """
   Is release sold out relative to the final quantity
   """
@@ -4469,6 +5371,10 @@ type Release implements Node {
     """
     pagination: CursorConnectionArgs! = { first: 10, sort: DESC }
   ): UserConnection!
+  """
+  Auction listing associated with release
+  """
+  listing: AuctionListingInterface
   """
   Associated market place url
   """
@@ -4643,6 +5549,10 @@ type Release implements Node {
   Type of Release
   """
   type: ReleaseType!
+  """
+  VIP Cover image of release for tiered editions
+  """
+  vipCoverImage: Media
   """
   Web HTML iframe embed
   """
@@ -5094,6 +6004,10 @@ type ReleaseCollector implements Node {
   """
   firstNftCollectedDate: DateTime!
   """
+  Amount of ga release nfts owned
+  """
+  gaNftsCount: Int!
+  """
   Unique id of release collector
   """
   id: ID!
@@ -5126,9 +6040,17 @@ type ReleaseCollector implements Node {
   """
   release: Release!
   """
+  Tier priority of the nft
+  """
+  tierPriority: Int!
+  """
   Collector user
   """
   user: User!
+  """
+  Amount of vip release nfts owned
+  """
+  vipNftsCount: Int!
 }
 
 """
@@ -5160,7 +6082,7 @@ type ReleaseCollectorConnectionEdge implements Edge {
 }
 
 """
-Pagination paramaters for artist collectors
+Pagination parameters for release collectors
 """
 input ReleaseCollectorCursorConnectionArgs {
   """
@@ -5183,6 +6105,10 @@ input ReleaseCollectorCursorConnectionArgs {
   Customize sort behavior
   """
   sort: ReleaseCollectorCursorConnectionSort! = { nftsCount: DESC }
+  """
+  The NFT tier you want to select for ReleaseCollectors, defaults All
+  """
+  tier: TierNFT
 }
 
 """
@@ -5194,6 +6120,10 @@ input ReleaseCollectorCursorConnectionSort {
   """
   firstNftCollectedDate: SortOrder
   """
+  Sort by amount ga nfts collected, with tie-breaker of earliest collector first
+  """
+  gaNftsCount: SortOrder
+  """
   Sort by lowest owned serial number
   """
   lowestOwnedSerialNumber: SortOrder
@@ -5201,6 +6131,18 @@ input ReleaseCollectorCursorConnectionSort {
   Sort by amount nfts collected, with tie-breaker of earliest collector first
   """
   nftsCount: SortOrder
+  """
+  Sort by vips first, then ga, tie-breaker of first nft collected date
+  """
+  priorityFirstNftDate: SortOrder
+  """
+  Sort by vips first, then ga, tie-breaker most nfts collected
+  """
+  priorityTop: SortOrder
+  """
+  Sort by amount vip nfts collected, with tie-breaker of earliest collector first
+  """
+  vipNftsCount: SortOrder
 }
 
 """
@@ -5469,6 +6411,10 @@ Release allowlist behind merkle tree
 """
 type ReleaseMerkleAllowlist implements Node {
   """
+  Creation date of allowlist
+  """
+  createdAt: DateTime!
+  """
   Unique identifier of merkle allowlist of release
   """
   id: ID!
@@ -5531,175 +6477,45 @@ type ReleaseMerkleAllowlistInfo {
 }
 
 """
-Release NFT Update
+A release was minted by users
 """
-type ReleaseNftUpdate implements ReleaseNftUpdateInfo {
+type ReleaseMinted implements Node & UserNotification {
   """
-  Possible comment associated with NFT
+  Featured collectors
   """
-  commentMessage: String
+  featuredCollectors: [User!]!
   """
-  Contract address associated with nft
-  """
-  contractAddress: String!
-  """
-  Unique identifier of NFT
+  UserNotification UUID
   """
   id: ID!
   """
-  Was the NFT burned
+  Number of total collectors in this group
   """
-  isBurned: Boolean!
+  numTotalCollectors: Int!
   """
-  Is the NFT the golden egg
+  Number of total mints in this group
   """
-  isGoldenEgg: Boolean!
+  numTotalMints: Int!
   """
-  If user is an artist, the artist unique identifier
+  Minted release entity
   """
-  ownerArtistId: ID
+  release: Release
   """
-  If user is an artist, the artist name
+  Timestamp for notification
   """
-  ownerArtistName: String
+  timestamp: Timestamp!
   """
-  If user is an artist, the artist sound handle
+  Recipient user entity
   """
-  ownerArtistSoundHandle: String
-  """
-  Possible avatar URL of NFT owner
-  """
-  ownerAvatarUrl: String
-  """
-  User wallet public address
-  """
-  ownerPublicAddress: String!
-  """
-  Serial number of the lowest owned nft of the collected release
-  """
-  ownerReleaseLowestNftSerialNumber: Int!
-  """
-  Amount of NFTs owned by collector on the same release
-  """
-  ownerReleaseNftCount: Int!
-  """
-  User unique identifier of owner
-  """
-  ownerUserId: ID!
-  """
-  Username of NFT owner
-  """
-  ownerUsername: String!
-  """
-  User webapp uri
-  """
-  ownerWebappUri: String!
-  """
-  Serial number of nft within release
-  """
-  serialNumber: Int!
-  """
-  Selected song slot associated with nft
-  """
-  songSlot: Int
-  """
-  Unique token identifier of nft
-  """
-  tokenId: String!
-  """
-  Date of last ownership transfer
-  """
-  updatedAt: DateTime!
-}
-
-"""
-Release NFT Update information
-"""
-interface ReleaseNftUpdateInfo {
-  """
-  Possible comment associated with NFT
-  """
-  commentMessage: String
-  """
-  Contract address associated with nft
-  """
-  contractAddress: String!
-  """
-  Unique identifier of NFT
-  """
-  id: ID!
-  """
-  Was the NFT burned
-  """
-  isBurned: Boolean!
-  """
-  Is the NFT the golden egg
-  """
-  isGoldenEgg: Boolean!
-  """
-  If user is an artist, the artist unique identifier
-  """
-  ownerArtistId: ID
-  """
-  If user is an artist, the artist name
-  """
-  ownerArtistName: String
-  """
-  If user is an artist, the artist sound handle
-  """
-  ownerArtistSoundHandle: String
-  """
-  Possible avatar URL of NFT owner
-  """
-  ownerAvatarUrl: String
-  """
-  User wallet public address
-  """
-  ownerPublicAddress: String!
-  """
-  Serial number of the lowest owned nft of the collected release
-  """
-  ownerReleaseLowestNftSerialNumber: Int!
-  """
-  Amount of NFTs owned by collector on the same release
-  """
-  ownerReleaseNftCount: Int!
-  """
-  User unique identifier of owner
-  """
-  ownerUserId: ID!
-  """
-  Username of NFT owner
-  """
-  ownerUsername: String!
-  """
-  User webapp uri
-  """
-  ownerWebappUri: String!
-  """
-  Serial number of nft within release
-  """
-  serialNumber: Int!
-  """
-  Selected song slot associated with nft
-  """
-  songSlot: Int
-  """
-  Unique token identifier of nft
-  """
-  tokenId: String!
-  """
-  Date of last ownership transfer
-  """
-  updatedAt: DateTime!
+  user: User
 }
 
 """
 Release NFT Update
 """
-type ReleaseNftWithCommentUpdate implements ReleaseNftUpdateInfo {
+type ReleaseNftWithCommentUpdate {
   """
-  Comment associated with NFT
+  Possible comment associated with NFT
   """
   commentMessage: String!
   """
@@ -5777,6 +6593,53 @@ type ReleaseNftWithCommentUpdate implements ReleaseNftUpdateInfo {
 }
 
 """
+Release Post entity
+"""
+type ReleasePost implements Post {
+  """
+  Number of comments on the post
+  """
+  commentCount: Int!
+  """
+  Comments on the post
+  """
+  comments(
+    """
+    Pagination parameters
+    """
+    pagination: PostCommentCursorConnectionArgs! = { after: null, first: 30, sort: { createdAt: DESC } }
+  ): PostCommentConnection!
+  """
+  Content of the post
+  """
+  content: String!
+  """
+  Creation date of entity
+  """
+  createdAt: DateTime!
+  """
+  User who created the post
+  """
+  creator: User!
+  """
+  Unique identifier of the Post
+  """
+  id: ID!
+  """
+  The release associated with the post
+  """
+  release: Release
+  """
+  Number of upvotes on the post
+  """
+  upvoteCount: Int!
+  """
+  Webapp URI of Post
+  """
+  webappUri: String!
+}
+
+"""
 Referred collector data within a release
 """
 type ReleaseReferredCollector implements Node {
@@ -5835,9 +6698,47 @@ Filter the releases to be searched
 """
 input ReleaseSearchFilter {
   """
+  Filter releases that are made by specified artists. You can only specify up to 51 artists.
+  """
+  artistIds: [UUID!]
+  """
+  Genre names to filter on for releases
+  """
+  genres: [Genres!]
+  """
+  Only include releases that either have or don't have collectors
+  """
+  hasCollectors: Boolean
+  """
+  Location ids to filter on for releases
+  """
+  locationIds: [String!]
+  """
+  Only get release with specified status
+  """
+  releaseStatus: [ReleaseStatus!]
+  """
   Filters on release type
   """
   type: [ReleaseType!]
+}
+
+"""
+Customize sort of releases
+"""
+input ReleaseSearchSort {
+  """
+  Sort by time the release was minted
+  """
+  mintStartTime: SortOrder
+  """
+  Sort by number of mints of each release
+  """
+  totalMinted: SortOrder
+  """
+  Sort by total volume of each release
+  """
+  totalVolume: SortOrder
 }
 
 """
@@ -5874,6 +6775,10 @@ input ReleaseShelvesCursorConnectionSort {
   Sort by date of release being added in the shelf
   """
   addedAtDate: SortOrder
+  """
+  Sort by shelf score
+  """
+  score: SortOrder
 }
 
 """
@@ -5884,6 +6789,24 @@ input ReleaseShelvesFilter {
   Filter shelves to be included by identifier. You can only specify up to 51 shelves.
   """
   shelfIds: [UUID!]
+  """
+  Filter shelves types to be included
+  """
+  type: [ShelfType!]
+}
+
+"""
+Defines sort order of Release fields, array index defines tiebreaking
+"""
+input ReleaseSortInput {
+  """
+  Field to be sorted
+  """
+  field: SearchReleasesSortEnum!
+  """
+  Sort ascending or descending
+  """
+  order: SortOrder!
 }
 
 """
@@ -5938,6 +6861,7 @@ Release current status type
 enum ReleaseStatus {
   AVAILABLE_TO_MINT
   SOLD_OUT
+  UPCOMING
 }
 
 """
@@ -6166,6 +7090,11 @@ type ReleasesAddedToShelfAggregate {
   shelf: Shelf
 }
 
+enum ReleasesCollectorSortEnum {
+  FIRST_NFT_COLLECTED_DATE
+  NFTS_COUNT
+}
+
 """
 Pagination parameters for releases connection
 """
@@ -6231,9 +7160,17 @@ input ReleasesCursorFilterArgs {
   """
   genre: [String!]
   """
+  Only get releases from specified genres
+  """
+  genres: [Genres!]
+  """
   Remove currently-featured releases from results
   """
   hideFeatured: Boolean
+  """
+  Location ids to filter on for releases
+  """
+  locationIds: [String!]
   """
   Only get releases less or equal to than specified mint time
   """
@@ -6577,6 +7514,20 @@ type ScheduleIdentifier {
   minterAddress: String!
 }
 
+enum SearchArtistsSortEnum {
+  CREATED_AT
+  TOTAL_MINTED
+  TOTAL_VOLUME
+}
+
+enum SearchCollectorsSortEnum {
+  ARTISTS_BACKED
+  CREATED_AT
+  NFTS_COUNT
+  TOTAL_MINTED
+  TOTAL_VOLUME
+}
+
 """
 Pagination arguments for search
 """
@@ -6602,7 +7553,13 @@ input SearchInput {
   """
   Text search
   """
-  text: String!
+  text: String
+}
+
+enum SearchReleasesSortEnum {
+  MINT_START_TIME
+  TOTAL_MINTED
+  TOTAL_VOLUME
 }
 
 """
@@ -6614,27 +7571,55 @@ type SearchResult {
   """
   artists(
     """
+    Filter the artists to be searched
+    """
+    filter: ArtistSearchFilter
+    """
     How many artists to be fetched, maximum of 20
     """
     limit: PositiveInt
-  ): [Artist!]!
+  ): [Artist!]! @deprecated(reason: "Use `artistsPaginated` instead")
   """
   Paginated artists that match the search input, including artists where any of their releases matches the given input
   """
   artistsPaginated(
     """
+    Filter the artists to be searched
+    """
+    filter: ArtistSearchFilter
+    """
     Pagination parameters
     """
     pagination: SearchConnectionArgs! = { after: null, first: 10 }
+    """
+    Sort releases to be searched
+    """
+    sort: ArtistSearchSort
+    """
+    Tiebreaking order of sortable fields
+    """
+    sortFields: [ArtistSortInput!]! = [{ field: TOTAL_VOLUME, order: DESC }]
   ): ArtistConnection!
   """
   Paginated collectors that match the search input within the ens, twitter handle, displayName and publicAddress
   """
   collectors(
     """
+    Filter the collectors to be searched
+    """
+    filter: CollectorSearchFilter
+    """
     Pagination parameters
     """
     pagination: SearchConnectionArgs! = { after: null, first: 10 }
+    """
+    Sort the collectors to be searched
+    """
+    sort: CollectorSearchSort
+    """
+    Tiebreaking order of sortable fields
+    """
+    sortFields: [CollectorSortInput!]! = [{ field: TOTAL_VOLUME, order: DESC }]
   ): UserConnection!
   """
   Unique identifier of search result
@@ -6652,7 +7637,7 @@ type SearchResult {
     How many releases to be fetched, maximum of 20
     """
     limit: PositiveInt
-  ): [Release!]!
+  ): [Release!]! @deprecated(reason: "Use `releasesPaginated` instead")
   """
   Paginated releases that match the search input, including releases where the artist name matches the given input
   """
@@ -6665,16 +7650,42 @@ type SearchResult {
     Pagination parameters
     """
     pagination: SearchConnectionArgs! = { after: null, first: 10 }
+    """
+    Sort the releases to be searched
+    """
+    sort: ReleaseSearchSort
+    """
+    Tiebreaking order of sortable fields
+    """
+    sortFields: [ReleaseSortInput!]! = [{ field: TOTAL_VOLUME, order: DESC }]
   ): ReleaseConnection!
   """
   Paginated shelves that match the search input within the shelf name, releases titles and artists names
   """
   shelves(
     """
+    Filter the shelves to be searched
+    """
+    filter: ShelfSearchFilter
+    """
     Pagination parameters
     """
     pagination: SearchConnectionArgs! = { after: null, first: 10 }
+    """
+    Sort shelves to be searched
+    """
+    sort: ShelfSearchSort
+    """
+    Tiebreaking order of sortable fields
+    """
+    sortFields: [ShelfSortInput!]! = [{ field: NUM_LIKES, order: DESC }]
   ): ShelfConnection!
+}
+
+enum SearchShelvesSortEnum {
+  CREATED_AT
+  NUM_LIKES
+  NUM_REFERRAL_PURCHASES
 }
 
 """
@@ -6690,7 +7701,11 @@ type SecondarySale implements ArtistAction & CollectorAction & Node & ReleaseAct
   """
   date: DateTime!
   """
-  Starting token ID of NFT for bonding curve sale purchase
+  Starting serial number of NFT for secondary sale purchase
+  """
+  fromSerialNumber: Int
+  """
+  Starting token ID of NFT for secondary sale purchase
   """
   fromTokenId: Int!
   """
@@ -6714,7 +7729,15 @@ type SecondarySale implements ArtistAction & CollectorAction & Node & ReleaseAct
   """
   serialNumber: Int!
   """
-  Ending token ID of NFT for bonding curve sale purchase
+  tierNumber of the nft
+  """
+  tierNumber: Int
+  """
+  Ending serial number of NFT for secondary sale purchase
+  """
+  toSerialNumber: Int
+  """
+  Ending token ID of NFT for secondary sale purchase
   """
   toTokenId: Int!
   """
@@ -6732,6 +7755,19 @@ scalar SemanticVersion
 Shelf entity
 """
 type Shelf implements Node {
+  """
+  Paginate through affiliate buyers of this shelf.
+  """
+  affiliateBuyers(
+    """
+    Pagination parameters
+    """
+    pagination: CursorConnectionArgs! = { first: 10, sort: DESC }
+  ): PlaylistAffiliateBuyerConnection!
+  """
+  Cover image of Shelf
+  """
+  coverImage: Media
   """
   Top 4 releases to be used as cover for shelf
   """
@@ -6778,9 +7814,25 @@ type Shelf implements Node {
   """
   linkSlug: String!
   """
+  Number of mints driven by shelf referral.
+  """
+  mintsDriven: Int! @deprecated(reason: "Please use Shelf.numReferralPurchases")
+  """
   Shelf name
   """
   name: String!
+  """
+  Number of likes for the shelf.
+  """
+  numLikes: Int!
+  """
+  Number of mints driven by shelf referral.
+  """
+  numReferralPurchases: Int!
+  """
+  Number of users that collected from shelf referral.
+  """
+  numUsersReferred: Int!
   """
   Paginated releases of shelf ordered depending on shelfType
   """
@@ -6811,6 +7863,10 @@ type Shelf implements Node {
     """
     sort: ShelfReleasesSort! = { index: ASC }
   ): [String!]!
+  """
+  Playlist affiliate purchase users ordered by follower count
+  """
+  socialProofReferrals(userPublicAddress: String): [User!]!
   """
   List of track identifiers in the shelf ordered depending on shelfType
   """
@@ -6976,7 +8032,11 @@ type ShelfRelease implements Node {
   """
   List of possibly owned nft serial numbers in ascending serial number order. If user does not own the release, it returns null
   """
-  ownedSerialNumbers: [Int!]
+  ownedSerialNumbers: [Int!] @deprecated(reason: "Use ownedTokens instead")
+  """
+  List of possible owned tokens in ascending tokenId order. If user does not own the release, it returns null
+  """
+  ownedTokens: [OwnedToken!]
   """
   Release of the shelf
   """
@@ -7023,6 +8083,48 @@ input ShelfReleasesSort {
   Sort by release index of shelf
   """
   index: SortOrder! = ASC
+}
+
+"""
+Filter the shelf to be searched
+"""
+input ShelfSearchFilter {
+  """
+  Genre names to filter on for shelf songs
+  """
+  genres: [Genres!]
+}
+
+"""
+Customize sorting of shelves
+"""
+input ShelfSearchSort {
+  """
+  Sort by time playlist was created
+  """
+  createdAt: SortOrder
+  """
+  Sort by number of likes
+  """
+  numLikes: SortOrder
+  """
+  Sort by number of referral purchases (Mints Driven)
+  """
+  numReferralPurchases: SortOrder
+}
+
+"""
+Defines sort order of Shelf fields, array index defines tiebreaking
+"""
+input ShelfSortInput {
+  """
+  Field to be sorted
+  """
+  field: SearchShelvesSortEnum!
+  """
+  Sort ascending or descending
+  """
+  order: SortOrder!
 }
 
 """
@@ -7157,6 +8259,24 @@ type SplitsUploadStepInfo {
 }
 
 """
+Subscribe with email notification
+"""
+type SubscribeToEmailCTA implements Node & UserNotification {
+  """
+  UserNotification UUID
+  """
+  id: ID!
+  """
+  Timestamp for notification
+  """
+  timestamp: Timestamp!
+  """
+  Recipient user entity
+  """
+  user: User
+}
+
+"""
 Realtime Subscriptions
 """
 type Subscription {
@@ -7188,15 +8308,6 @@ type Subscription {
     """
     releaseId: UUID!
   ): [ReleaseNftWithCommentUpdate!]!
-  """
-  Subscribe to NFTs updates of specified release
-  """
-  releaseNftUpdate(
-    """
-    Release identifier
-    """
-    releaseId: UUID!
-  ): [ReleaseNftUpdate!]!
   """
   Subscribe to release updates
   """
@@ -7230,6 +8341,218 @@ type SupportedVersion implements VersionStatusResponseInterface {
   Recommended version
   """
   recommendedVersion: String!
+}
+
+"""
+Tier associated with tiered edition listing
+"""
+type Tier {
+  """
+  Chain associated with auction
+  """
+  chain: ChainType!
+  """
+  Cutoff timestamp of auction tier
+  """
+  cutoffTime: DateTime!
+  """
+  Contract address associated with edition auction
+  """
+  editionAddress: String!
+  """
+  Unique identifier
+  """
+  id: ID!
+  """
+  Is the minting of the tier frozen
+  """
+  isFrozen: Boolean!
+  """
+  Is the tier considered GA (General Admission)
+  """
+  isGA: Boolean!
+  """
+  Is golden egg enabled for tier
+  """
+  isGoldenEggEnabled: Boolean!
+  """
+  Minimum amount of editions to be sold within range of cutoff time
+  """
+  maxMintableLower: Int!
+  """
+  Maximum amount of editions to be sold within before cutoff time
+  """
+  maxMintableUpper: Int!
+  """
+  Is the tier minting considered finished
+  """
+  mintConcluded: Boolean!
+  """
+  All schedules within tier
+  """
+  schedules: [TierSchedule!]!
+  """
+  Unique tier number associated within edition contract
+  """
+  tierNumber: Int!
+  """
+  Total amount of minted editions within tier
+  """
+  totalMinted: Int!
+}
+
+"""
+The Tier of the NFT owned by ReleaseCollector
+"""
+enum TierNFT {
+  ALL
+  GA
+  VIP
+}
+
+"""
+Schedule associated with Tier of auction Listing
+"""
+type TierSchedule {
+  """
+  Affiliate fee in basis per point for schedule
+  """
+  affiliateFeeBPS: Int!
+  """
+  Chain associated with auction
+  """
+  chain: ChainType!
+  """
+  Contract address associated with edition auction
+  """
+  editionAddress: String!
+  """
+  End timestamp for minting on schedule
+  """
+  endTime: DateTime!
+  """
+  Unique identifier
+  """
+  id: ID!
+  """
+  Is minting on schedule paused
+  """
+  isPaused: Boolean!
+  """
+  Fixed amount of maximum mintable editions within schedule
+  """
+  maxMintable: Int!
+  """
+  Limit of mints per account within schedule
+  """
+  maxMintablePerAccount: Int!
+  """
+  Merkle tree root associated with tier schedule
+  """
+  merkleTreeRoot: String
+  """
+  Mode of minting associated with schedule
+  """
+  mode: TierScheduleMode!
+  """
+  Price for minting on schedule
+  """
+  priceInWei: String!
+  """
+  Unique schedule number associated within edition contract and tier
+  """
+  scheduleNumber: Int!
+  """
+  Start timestamp for minting on schedule
+  """
+  startTime: DateTime!
+  """
+  Tier associated for schedule
+  """
+  tier: Tier!
+  """
+  Unique tier number associated within edition contract
+  """
+  tierNumber: Int!
+  """
+  Total amount of minted editions within schedule
+  """
+  totalMinted: Int!
+}
+
+"""
+Mode that differentiates behavior of tier schedule
+"""
+enum TierScheduleMode {
+  DEFAULT
+  VERIFY_MERKLE
+  VERIFY_SIGNATURE
+}
+
+"""
+Tiered Edition Auction Listing
+"""
+type TieredEditionListing implements AuctionListingInterface {
+  """
+  Chain associated with auction
+  """
+  chain: ChainType!
+  """
+  Contract address associated with edition auction
+  """
+  contractAddress: String!
+  """
+  Has the tier auction enabled GA
+  """
+  hasGA: Boolean!
+  """
+  Unique identifier
+  """
+  id: ID!
+  """
+  Name associated on contract information
+  """
+  name: String!
+  """
+  Price of earliest public merkle schedule if present
+  """
+  presalePriceWei: String
+  """
+  Start time of earliest merkle schedule if present
+  """
+  presaleStartTime: DateTime
+  """
+  Price of earliest public schedule if present
+  """
+  publicPriceWei: String
+  """
+  Start time of earliest public schedule if present
+  """
+  publicStartTime: DateTime
+  """
+  Royalty basis per point
+  """
+  royaltyBPS: Int!
+  """
+  All schedules associated with tiered edition
+  """
+  schedules: [TierSchedule!]!
+  """
+  Tiers associated with tiered edition auction
+  """
+  tiers: [Tier!]!
+  """
+  Total amount of burned editions
+  """
+  totalBurned: Int!
+  """
+  Total amount of minted editions
+  """
+  totalMinted: Int!
+  """
+  Total amount of minted editions that are not burned
+  """
+  totalSupply: Int!
 }
 
 """
@@ -7700,6 +9023,10 @@ type User implements Node {
     Pagination parameters
     """
     pagination: CursorConnectionArgs! = { first: 10, sort: DESC }
+    """
+    Sort the collected releases of the user
+    """
+    sort: ReleasesCollectorSortEnum! = FIRST_NFT_COLLECTED_DATE
   ): CollectedReleaseConnection!
   """
   Total amount of collected release of user
@@ -7792,6 +9119,14 @@ type User implements Node {
   """
   instagramHandle: String
   """
+  User ID of the user who invited this user
+  """
+  invitedByUser: User
+  """
+  User ID of the user who invited this user
+  """
+  invitedByUserId: ID @deprecated(reason: "Use User.invitedByUser instead")
+  """
   Is top notable collector
   """
   isTopNotableCollector: Boolean!
@@ -7867,7 +9202,7 @@ type User implements Node {
   """
   showSplitsFeature: Boolean!
   """
-  Rank of user for total number of bought nfts with secondary sort on total spent. Rank is capped at 200.
+  Rank of user by total spent. Rank is capped at 200.
   """
   topCollectorPosition: Int
   """
@@ -7911,9 +9246,17 @@ Filter of User.collectedReleases paginated field
 """
 input UserCollectedReleasesFilter {
   """
+  Filters on a list of specified genres
+  """
+  genres: [Genres!]
+  """
   Filters on whether album releases have been revealed or not
   """
   releaseAlbumRevealStatus: ReleaseAlbumRevealFilterOption! = ALL
+  """
+  Filter on a list of specified release ids
+  """
+  releaseIds: [UUID!]
   """
   Text search on release title or artist's name or handle
   """
@@ -7950,6 +9293,16 @@ type UserConnectionEdge implements Edge {
   User node
   """
   node: User!
+}
+
+"""
+User created post aggregate
+"""
+type UserCreatedPostAggregate {
+  """
+  Post that the user created. Can be NULL if the post was deleted
+  """
+  post: Post
 }
 
 """
@@ -8018,6 +9371,38 @@ input UserNftsConnectionFilters {
   Only include Nfts from specified releases
   """
   releases: [UUID!]
+}
+
+"""
+Entity that represents user notifications
+"""
+interface UserNotification implements Node {
+  """
+  UserNotification UUID
+  """
+  id: ID!
+  """
+  Timestamp for notification
+  """
+  timestamp: Timestamp!
+  """
+  Recipient user entity
+  """
+  user: User
+}
+
+"""
+Edge of UserNotification connection
+"""
+type UserNotificationConnectionEdge implements Edge {
+  """
+  Cursor to be used for pagination
+  """
+  cursor: String!
+  """
+  UserNotification node
+  """
+  node: UserNotification!
 }
 
 """
@@ -8103,16 +9488,6 @@ input UserShelvesFilter {
 }
 
 """
-Exchanged amount pretty equivalent
-"""
-type ValueExchangedPrettyType {
-  """
-  Formatted Ethereum value
-  """
-  eth: String!
-}
-
-"""
 Input of VersionSupported query
 """
 input VersionStatusInput {
@@ -8139,6 +9514,32 @@ interface VersionStatusResponseInterface {
   Recommended version
   """
   recommendedVersion: String!
+}
+
+"""
+A release has reached viral mints status
+"""
+type ViralMintsReached implements Node & UserNotification {
+  """
+  Featured collectors
+  """
+  featuredCollectors: [User!]!
+  """
+  UserNotification UUID
+  """
+  id: ID!
+  """
+  Viral mints release entity
+  """
+  release: Release
+  """
+  Timestamp for notification
+  """
+  timestamp: Timestamp!
+  """
+  Recipient user entity
+  """
+  user: User
 }
 
 """

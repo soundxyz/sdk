@@ -19,9 +19,9 @@ export type Scalars = {
   /** A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar. */
   DateTime: string
   /** Ethereum name service value with `.eth` suffix */
-  ENS: any
+  ENS: string
   /** A field whose value is a JSON Web Token (JWT): https://jwt.io/introduction. */
-  JWT: any
+  JWT: string
   /** A string that cannot be passed as an empty value */
   NonEmptyString: string
   /** Integers that will have a value of 0 or more. */
@@ -29,7 +29,7 @@ export type Scalars = {
   /** Integers that will have a value greater than 0. */
   PositiveInt: number
   /** Semantic version string */
-  SemanticVersion: any
+  SemanticVersion: string
   /** The javascript `Date` as integer. Type represents date and time as number of milliseconds from start of UNIX epoch. */
   Timestamp: number
   /** UUID v4 */
@@ -1414,109 +1414,8 @@ export type VersionStatusInput = {
   version: Scalars['SemanticVersion']
 }
 
-export type MerkleProofQueryVariables = Exact<{
-  root: Scalars['String']
-  unhashedLeaf: Scalars['String']
-}>
-
-export type MerkleProofQuery = { merkleTreeProof: { proof: Array<string> } | null }
-
-export type ReleaseInfoQueryVariables = Exact<{
-  contractAddress: Scalars['Address']
-  editionId?: InputMaybe<Scalars['String']>
-}>
-
-export type ReleaseInfoQuery = {
-  release: {
-    id: string
-    contractAddress: string
-    editionId: string | null
-    type: ReleaseType
-    mintStartTime: number
-    mintStartTimestamp: number
-    webappUri: string
-    externalUrl: string | null
-    marketPlaceUrl: string | null
-    title: string
-    behindTheMusic: string
-    season: string | null
-    scheduleIds: Array<{ mintIds: Array<number>; minterAddress: string }> | null
-    genre: { id: string; name: string }
-    track: {
-      id: string
-      duration: number
-      audio: {
-        audio128k: { id: string; url: string } | null
-        audio192k: { id: string; url: string } | null
-        audio256k: { id: string; url: string } | null
-        audioOriginal: { id: string; url: string }
-      }
-    }
-    artist: {
-      id: string
-      webappUri: string
-      season: string | null
-      soundHandle: string
-      bannerImage: { id: string; url: string } | null
-      user: {
-        id: string
-        publicAddress: string
-        description: string | null
-        displayName: string | null
-        twitterHandle: string | null
-        avatar: { id: string; url: string } | null
-      }
-    }
-    rewards: Array<{ id: string; description: string; title: string }>
-    coverImage: { id: string; url: string }
-    goldenEggImage: { id: string; url: string }
-    eggGame: { id: string; winningSerialNum: number } | null
-  } | null
-}
-
-export type ReleaseShareInfoQueryVariables = Exact<{
-  contractAddress: Scalars['Address']
-  editionId?: InputMaybe<Scalars['String']>
-  releaseWebappUriInput?: InputMaybe<ReleaseWebappUriInput>
-  releaseEmbedUriInput?: InputMaybe<ReleaseWebEmbedInput>
-}>
-
-export type ReleaseShareInfoQuery = {
-  release: {
-    id: string
-    contractAddress: string
-    editionId: string | null
-    type: ReleaseType
-    mintStartTime: number
-    mintStartTimestamp: number
-    webappUri: string
-    webEmbed: string
-    coverImage: { id: string; url: string }
-    track: {
-      id: string
-      duration: number
-      audio: {
-        audio128k: { id: string; url: string } | null
-        audio192k: { id: string; url: string } | null
-        audio256k: { id: string; url: string } | null
-        audioOriginal: { id: string; url: string }
-      }
-    }
-  } | null
-}
-
 export type TestQueryVariables = Exact<{ [key: string]: never }>
 
 export type TestQuery = { __typename: 'Query' }
 
-export type EditionOwnedTokenIdsQueryVariables = Exact<{
-  input: EditionOwnedTokenIdsInput
-}>
-
-export type EditionOwnedTokenIdsQuery = { editionOwnedTokenIds: Array<string> }
-
-export const MerkleProof = `query MerkleProof($root:String!$unhashedLeaf:String!){merkleTreeProof(root:$root unhashedLeaf:$unhashedLeaf){proof}}`
-export const ReleaseInfo = `query ReleaseInfo($contractAddress:Address!$editionId:String){release:releaseFromContract(contractAddress:$contractAddress editionId:$editionId){id contractAddress editionId type mintStartTime mintStartTimestamp webappUri externalUrl marketPlaceUrl title behindTheMusic season scheduleIds{mintIds minterAddress}genre{id name}track{id duration audio{audio128k{id url}audio192k{id url}audio256k{id url}audioOriginal{id url}}}artist{id webappUri season soundHandle bannerImage{id url}user{id publicAddress description displayName twitterHandle avatar{id url}}}rewards{id description title}coverImage{id url}goldenEggImage{id url}eggGame{id winningSerialNum}}}`
-export const ReleaseShareInfo = `query ReleaseShareInfo($contractAddress:Address!$editionId:String$releaseWebappUriInput:ReleaseWebappUriInput$releaseEmbedUriInput:ReleaseWebEmbedInput){release:releaseFromContract(contractAddress:$contractAddress editionId:$editionId){id contractAddress editionId type mintStartTime mintStartTimestamp webappUri(input:$releaseWebappUriInput)webEmbed(input:$releaseEmbedUriInput)coverImage{id url}track{id duration audio{audio128k{id url}audio192k{id url}audio256k{id url}audioOriginal{id url}}}}}`
 export const Test = `query Test{__typename}`
-export const EditionOwnedTokenIds = `query EditionOwnedTokenIds($input:EditionOwnedTokenIdsInput!){editionOwnedTokenIds(input:$input)}`
