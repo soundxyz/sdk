@@ -26,13 +26,13 @@ import { isSoundEdition } from './validation'
 
 export interface SoundClient {
   instance: SoundClientInstance
-  isSoundEdition: typeof isSoundEdition
+  isSoundEdition: OmitThisParameter<typeof isSoundEdition>
 
   edition: {
-    info: typeof editionInfo
-    mintSchedules: typeof mintSchedules
-    mint: typeof mint
-    estimateMint: typeof estimateMint
+    info: OmitThisParameter<typeof editionInfo>
+    mintSchedules: OmitThisParameter<typeof mintSchedules>
+    mint: OmitThisParameter<typeof mint>
+    estimateMint: OmitThisParameter<typeof estimateMint>
     sam: (args: SamEditionAddress) => {
       contract: {
         address: Promise<string | null>
@@ -60,13 +60,13 @@ export interface SoundClient {
       }
     }
 
-    eligibleQuantity: typeof eligibleQuantity
-    numberOfTokensOwned: typeof numberOfTokensOwned
-    numberMinted: typeof numberMinted
+    eligibleQuantity: OmitThisParameter<typeof eligibleQuantity>
+    numberOfTokensOwned: OmitThisParameter<typeof numberOfTokensOwned>
+    numberMinted: OmitThisParameter<typeof numberMinted>
 
-    scheduleIds: typeof editionScheduleIds
-    registeredMinters: typeof editionRegisteredMinters
-    minterMintIds: typeof editionMinterMintIds
+    scheduleIds: OmitThisParameter<typeof editionScheduleIds>
+    registeredMinters: OmitThisParameter<typeof editionRegisteredMinters>
+    minterMintIds: OmitThisParameter<typeof editionMinterMintIds>
   }
 
   creation: ({ creatorAddress }: { creatorAddress: Address }) => {
