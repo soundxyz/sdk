@@ -75,3 +75,5 @@ yarn-error.log
 !.env.vault
 
 cache
+packages/sdk/src/api/graphql/gql.ts
+packages/sdk-viem/src/api/graphql/gql.ts

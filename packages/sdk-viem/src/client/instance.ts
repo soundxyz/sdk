@@ -1,7 +1,7 @@
-import type { Address } from 'viem'
+import type { Address, Chain } from 'viem'
 import { SoundAPI } from '../api'
 import { MissingMerkleProvider, MissingProviderError, MissingSignerError, MissingSoundAPI } from '../errors'
-import type { MerkleProvider, SoundClientContractProvider, ClientProvider, Wallet } from '../types'
+import type { ClientProvider, MerkleProvider, SoundClientContractProvider, Wallet } from '../types'
 import { getLazyOption } from '../utils/helpers'
 
 export type SoundClientInstanceConfig = SoundClientContractProvider & {
@@ -21,13 +21,29 @@ export type SoundClientInstanceConfig = SoundClientContractProvider & {
   merkleProvider?: MerkleProvider
 }
 
+export interface SoundClientInstance {
+  instance: {
+    client: NonNullable<SoundClientInstanceConfig['client']> | null
+    wallet: NonNullable<SoundClientInstanceConfig['account']> | null
+    merkleProvider: NonNullable<SoundClientInstanceConfig['merkleProvider']> | null
+    onUnhandledError: NonNullable<SoundClientInstanceConfig['onUnhandledError']>
+    soundAPI: NonNullable<SoundClientInstanceConfig['soundAPI']> | null
+    idempotentCachedCall<T>(key: string, cb: () => Promise<Awaited<T>>): Promise<Awaited<T>> | Awaited<T>
+  }
+  expectMerkleProvider(): MerkleProvider
+  expectWallet(): Promise<{ wallet: Wallet; userAddress: Address }>
+  expectClient(): Promise<ClientProvider>
+  expectSoundAPI(): SoundAPI
+  getNetworkChainId(): Promise<Chain | undefined>
+}
+
 export function SoundClientInstance({
   client,
   account,
   merkleProvider,
   onUnhandledError = console.error,
   soundAPI,
-}: SoundClientInstanceConfig) {
+}: SoundClientInstanceConfig): SoundClientInstance {
   const IdempotentCache: Record<string, unknown> = {}
   const IdempotentCachePromises: Record<string, Promise<unknown>> = {}
 
@@ -44,7 +60,7 @@ export function SoundClientInstance({
       }))
   }
 
-  const instance = {
+  const instance: SoundClientInstance['instance'] = {
     client: client || null,
     wallet: account || null,
     merkleProvider: merkleProvider || null,
@@ -104,5 +120,3 @@ export function SoundClientInstance({
     getNetworkChainId,
   }
 }
-
-export type SoundClientInstance = ReturnType<typeof SoundClientInstance>

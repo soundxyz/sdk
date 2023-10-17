@@ -1,8 +1,13 @@
 import type { Address } from 'viem'
-import type { SoundClientConfig } from '../types'
+import type { EditionConfig, MintConfig, SoundClientConfig, TransactionGasOptions } from '../types'
 import { curry } from '../utils/helpers'
 import { LazyPromise } from '../utils/promise'
-import { createEdition, estimateCreateEdition, expectedEditionAddress } from './edition/create'
+import {
+  createEdition,
+  estimateCreateEdition,
+  expectedEditionAddress,
+  type CreateEditionOptions,
+} from './edition/create'
 import { editionInfo } from './edition/info'
 import { eligibleQuantity, estimateMint, mint, numberMinted, numberOfTokensOwned } from './edition/mint'
 import { editionMinterMintIds, editionRegisteredMinters, editionScheduleIds, mintSchedules } from './edition/schedules'
@@ -16,10 +21,71 @@ import {
   SamTotalBuyPrice,
   SamTotalSellPrice,
 } from './sam/contract'
-import type { SamEditionAddress } from './sam/types'
+import type { SamBuyOptions, SamEditionAddress, SamSellOptions } from './sam/types'
 import { isSoundEdition } from './validation'
 
-export function SoundClient(config: SoundClientConfig) {
+export interface SoundClient {
+  instance: SoundClientInstance
+  isSoundEdition: OmitThisParameter<typeof isSoundEdition>
+
+  edition: {
+    info: OmitThisParameter<typeof editionInfo>
+    mintSchedules: OmitThisParameter<typeof mintSchedules>
+    mint: OmitThisParameter<typeof mint>
+    estimateMint: OmitThisParameter<typeof estimateMint>
+    sam: (args: SamEditionAddress) => {
+      contract: {
+        address: Promise<string | null>
+        info: ReturnType<typeof SamEditionInfo>
+
+        totalBuyPrice: (args: { offset: number; quantity: number }) => Promise<{
+          total: bigint
+          platformFee: bigint
+          artistFee: bigint
+          goldenEggFee: bigint
+          affiliateFee: bigint
+        } | null>
+        totalSellPrice: (args: { offset: number; quantity: number }) => Promise<bigint | null>
+
+        buy: (args: SamBuyOptions) => Promise<{
+          transactionHash: Address
+        }>
+
+        sell: (args: SamSellOptions) => Promise<{
+          transactionHash: Address
+        }>
+      }
+      api: {
+        availableTokensToSell: (args: { quantity: number; ownerPublicAddress: string }) => Promise<number[]>
+      }
+    }
+
+    eligibleQuantity: OmitThisParameter<typeof eligibleQuantity>
+    numberOfTokensOwned: OmitThisParameter<typeof numberOfTokensOwned>
+    numberMinted: OmitThisParameter<typeof numberMinted>
+
+    scheduleIds: OmitThisParameter<typeof editionScheduleIds>
+    registeredMinters: OmitThisParameter<typeof editionRegisteredMinters>
+    minterMintIds: OmitThisParameter<typeof editionMinterMintIds>
+  }
+
+  creation: ({ creatorAddress }: { creatorAddress: Address }) => {
+    createEdition: (args: CreateEditionOptions) => Promise<Address>
+    estimateEdition: (
+      args: {
+        editionConfig: EditionConfig
+        mintConfigs: MintConfig[]
+        salt?: string | number | undefined
+      } & TransactionGasOptions,
+    ) => ReturnType<typeof estimateCreateEdition>
+    expectedEditionAddress: (args: { deployer: `0x${string}`; salt: string | number }) => Promise<{
+      editionAddress: `0x${string}`
+      exists: boolean
+    }>
+  }
+}
+
+export function SoundClient(config: SoundClientConfig): SoundClient {
   const instance = SoundClientInstance(config)
 
   const client = instance
@@ -79,5 +145,3 @@ export function SoundClient(config: SoundClientConfig) {
     },
   }
 }
-
-export type SoundClient = ReturnType<typeof SoundClient>

@@ -1,6 +1,7 @@
 {
-  "name": "@soundxyz/sdk-viem",
-  "version": "0.0.2",
+  "name": "@soundxyz/old-sdk",
+  "private": true,
+  "version": "3.0.0",
   "homepage": "https://docs.sound.xyz",
   "repository": {
     "type": "git",
@@ -29,18 +30,26 @@
   "scripts": {
     "prepack": "node build.mjs",
     "prepare": "node build.mjs",
-    "pull-env": "dotenv-vault pull",
-    "test": "vitest dev",
-    "test:cov": "vitest dev --coverage",
-    "test:ci": "CI=true vitest --coverage",
-    "tsc": "tsc -p tsconfig.build.json"
+    "postpublish": "gh-release",
+    "validate": "graphql-inspector validate \"./graphql/*.gql\" \"./schema.graphql\" --deprecated"
   },
   "dependencies": {
+    "@ethersproject/abstract-provider": "^5.7.0",
+    "@ethersproject/abstract-signer": "^5.7.0",
+    "@ethersproject/address": "^5.7.0",
     "keccak256": "^1.0.6",
     "zod": "^3.22.4"
   },
   "devDependencies": {
+    "@ethersproject/abi": "^5.7.0",
+    "@ethersproject/bignumber": "^5.7.0",
+    "@ethersproject/bytes": "^5.7.0",
+    "@ethersproject/contracts": "^5.7.0",
+    "@ethersproject/providers": "^5.7.2",
+    "@ethersproject/sha2": "^5.7.0",
     "@ethersproject/solidity": "^5.7.0",
+    "@ethersproject/units": "^5.7.0",
+    "@ethersproject/wallet": "^5.7.0",
     "@graphql-codegen/cli": "^5.0.0",
     "@graphql-codegen/core": "^4.0.0",
     "@graphql-codegen/typescript": "^4.0.1",
@@ -49,18 +58,30 @@
     "@graphql-inspector/cli": "^4.0.2",
     "@graphql-inspector/config": "^4.0.1",
     "@graphql-tools/utils": "^10.0.7",
+    "@soundxyz/sound-protocol": "^1.7.0",
+    "@soundxyz/sound-protocol-v1-0": "npm:@soundxyz/sound-protocol@1.1.0",
+    "@soundxyz/sound-protocol-v1-1": "npm:@soundxyz/sound-protocol@1.3.0",
+    "@types/chai": "^4.3.8",
+    "@types/mocha": "^10.0.2",
     "@types/node": "20.8.6",
-    "@viem/anvil": "^0.0.6",
     "bob-ts": "^4.1.1",
     "bob-tsm": "^1.1.2",
+    "chai": "^4.3.10",
+    "changesets-github-release": "^0.1.0",
+    "dotenv": "^16.3.1",
     "esbuild": "^0.19.4",
+    "ethereum-waffle": "^4.0.10",
+    "ethers": "^5.7.2",
+    "graphql": "^16.8.1",
     "merkletreejs": "^0.3.10",
+    "prettier": "^3.0.3",
     "require-env-variable": "^4.0.2",
-    "typescript": "5.2.2",
-    "viem": "^1.16.6"
+    "ts-node": "^10.9.1",
+    "tslib": "^2.6.2",
+    "typescript": "5.2.2"
   },
   "peerDependencies": {
-    "viem": "^1.10.8"
+    "@soundxyz/sound-protocol": "~1.7.0"
   },
   "publishConfig": {
     "access": "public",
