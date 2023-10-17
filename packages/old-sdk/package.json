@@ -31,7 +31,6 @@
     "prepack": "node build.mjs",
     "prepare": "node build.mjs",
     "postpublish": "gh-release",
-    "pull-env": "dotenv-vault pull",
     "validate": "graphql-inspector validate \"./graphql/*.gql\" \"./schema.graphql\" --deprecated"
   },
   "dependencies": {
