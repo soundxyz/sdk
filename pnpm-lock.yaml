@@ -1,9 +1,5 @@
 lockfileVersion: '6.0'
 
-settings:
-  autoInstallPeers: true
-  excludeLinksFromLockfile: false
-
 overrides:
   '@graphql-codegen/visitor-plugin-common': 3.0.2
 
@@ -242,11 +238,11 @@ importers:
         specifier: ^1.7.0
         version: 1.7.0
       '@soundxyz/sound-protocol-v1-0':
-        specifier: npm:@soundxyz/sound-protocol@1.1.0
-        version: /@soundxyz/sound-protocol@1.1.0
+        specifier: npm:@soundxyz/sound-protocol@1.7.0
+        version: /@soundxyz/sound-protocol@1.7.0
       '@soundxyz/sound-protocol-v1-1':
-        specifier: npm:@soundxyz/sound-protocol@1.3.0
-        version: /@soundxyz/sound-protocol@1.3.0
+        specifier: npm:@soundxyz/sound-protocol@1.7.0
+        version: /@soundxyz/sound-protocol@1.7.0
       '@types/chai':
         specifier: ^4.3.8
         version: 4.3.8
@@ -560,7 +556,7 @@ packages:
       '@babel/types': 7.23.0
       '@nicolo-ribaudo/semver-v6': 6.3.3
       convert-source-map: 1.9.0
-      debug: 4.3.4
+      debug: 4.3.4(supports-color@8.1.1)
       gensync: 1.0.0-beta.2
       json5: 2.2.3
     transitivePeerDependencies:
@@ -582,7 +578,7 @@ packages:
       '@babel/traverse': 7.23.2
       '@babel/types': 7.23.0
       convert-source-map: 2.0.0
-      debug: 4.3.4
+      debug: 4.3.4(supports-color@8.1.1)
       gensync: 1.0.0-beta.2
       json5: 2.2.3
       semver: 6.3.1
@@ -1116,7 +1112,7 @@ packages:
       '@babel/helper-split-export-declaration': 7.22.6
       '@babel/parser': 7.23.0
       '@babel/types': 7.23.0
-      debug: 4.3.4
+      debug: 4.3.4(supports-color@8.1.1)
       globals: 11.12.0
     transitivePeerDependencies:
       - supports-color
@@ -2654,7 +2650,7 @@ packages:
       '@graphql-inspector/graphql-loader': 4.0.1(graphql@16.8.1)
       '@graphql-inspector/introspect-command': 4.0.2(@graphql-inspector/config@4.0.1)(@graphql-inspector/loaders@4.0.2)(graphql@16.8.1)(yargs@17.7.2)
       '@graphql-inspector/json-loader': 4.0.1(graphql@16.8.1)
-      '@graphql-inspector/loaders': 4.0.2(@babel/core@7.22.8)(@graphql-inspector/config@4.0.1)(graphql@16.8.1)
+      '@graphql-inspector/loaders': 4.0.2(@babel/core@7.23.2)(@graphql-inspector/config@4.0.1)(graphql@16.8.1)
       '@graphql-inspector/serve-command': 4.0.2(@graphql-inspector/config@4.0.1)(@graphql-inspector/loaders@4.0.2)(graphql@16.8.1)(yargs@17.7.2)
       '@graphql-inspector/similar-command': 4.0.2(@graphql-inspector/config@4.0.1)(@graphql-inspector/loaders@4.0.2)(graphql@16.8.1)(yargs@17.7.2)
       '@graphql-inspector/url-loader': 4.0.1(@types/node@20.8.6)(graphql@16.8.1)
@@ -2694,7 +2690,7 @@ packages:
       yargs: 17.7.2
     dependencies:
       '@graphql-inspector/config': 4.0.1(graphql@16.8.1)
-      '@graphql-inspector/loaders': 4.0.2(@babel/core@7.22.8)(@graphql-inspector/config@4.0.1)(graphql@16.8.1)
+      '@graphql-inspector/loaders': 4.0.2(@babel/core@7.23.2)(@graphql-inspector/config@4.0.1)(graphql@16.8.1)
       graphql: 16.8.1
       tslib: 2.6.0
       yargs: 17.7.2
@@ -2841,7 +2837,7 @@ packages:
       tslib: 2.6.0
     dev: true
 
-  /@graphql-inspector/loaders@4.0.2(@babel/core@7.22.8)(@graphql-inspector/config@4.0.1)(graphql@16.8.1):
+  /@graphql-inspector/loaders@4.0.2(@babel/core@7.23.2)(@graphql-inspector/config@4.0.1)(graphql@16.8.1):
     resolution: {integrity: sha512-jTybFvSHLz0d1CIJKE6CBoKSIz0kbXxBxVvTYzcEtfLOSPpRPrlJ5GUUsCzL5yZ3Sya5NZAx2aZmCZ1z1TdPbQ==}
     engines: {node: '>=16.0.0'}
     peerDependencies:
@@ -2849,7 +2845,7 @@ packages:
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0
     dependencies:
       '@graphql-inspector/config': 4.0.1(graphql@16.8.1)
-      '@graphql-tools/code-file-loader': 8.0.1(@babel/core@7.22.8)(graphql@16.8.1)
+      '@graphql-tools/code-file-loader': 8.0.1(@babel/core@7.23.2)(graphql@16.8.1)
       '@graphql-tools/load': 8.0.0(graphql@16.8.1)
       '@graphql-tools/utils': 10.0.1(graphql@16.8.1)
       graphql: 16.8.1
@@ -2974,6 +2970,23 @@ packages:
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
     dependencies:
       '@graphql-tools/graphql-tag-pluck': 8.0.1(@babel/core@7.22.8)(graphql@16.8.1)
+      '@graphql-tools/utils': 10.0.7(graphql@16.8.1)
+      globby: 11.1.0
+      graphql: 16.8.1
+      tslib: 2.6.2
+      unixify: 1.0.0
+    transitivePeerDependencies:
+      - '@babel/core'
+      - supports-color
+    dev: true
+
+  /@graphql-tools/code-file-loader@8.0.1(@babel/core@7.23.2)(graphql@16.8.1):
+    resolution: {integrity: sha512-pmg81lsIXGW3uW+nFSCIG0lFQIxWVbgDjeBkSWlnP8CZsrHTQEkB53DT7t4BHLryoxDS4G4cPxM52yNINDSL8w==}
+    engines: {node: '>=16.0.0'}
+    peerDependencies:
+      graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
+    dependencies:
+      '@graphql-tools/graphql-tag-pluck': 8.0.1(@babel/core@7.23.2)(graphql@16.8.1)
       '@graphql-tools/utils': 10.0.7(graphql@16.8.1)
       globby: 11.1.0
       graphql: 16.8.1
@@ -3169,6 +3182,24 @@ packages:
       - supports-color
     dev: true
 
+  /@graphql-tools/graphql-tag-pluck@8.0.1(@babel/core@7.23.2)(graphql@16.8.1):
+    resolution: {integrity: sha512-4sfBJSoXxVB4rRCCp2GTFhAYsUJgAPSKxSV+E3Voc600mK52JO+KsHCCTnPgCeyJFMNR9l94J6+tqxVKmlqKvw==}
+    engines: {node: '>=16.0.0'}
+    peerDependencies:
+      graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
+    dependencies:
+      '@babel/parser': 7.23.0
+      '@babel/plugin-syntax-import-assertions': 7.22.5(@babel/core@7.23.2)
+      '@babel/traverse': 7.23.2
+      '@babel/types': 7.23.0
+      '@graphql-tools/utils': 10.0.7(graphql@16.8.1)
+      graphql: 16.8.1
+      tslib: 2.6.2
+    transitivePeerDependencies:
+      - '@babel/core'
+      - supports-color
+    dev: true
+
   /@graphql-tools/graphql-tag-pluck@8.0.2(graphql@16.8.1):
     resolution: {integrity: sha512-U6fE4yEHxuk/nqmPixHpw1WhqdS6aYuaV60m1bEmUmGJNbpAhaMBy01JncpvpF15yZR5LZ0UjkHg+A3Lhoc8YQ==}
     engines: {node: '>=16.0.0'}
@@ -3257,7 +3288,7 @@ packages:
       '@types/json-stable-stringify': 1.0.34
       '@whatwg-node/fetch': 0.9.13
       chalk: 4.1.2
-      debug: 4.3.4
+      debug: 4.3.4(supports-color@8.1.1)
       dotenv: 16.3.1
       graphql: 16.8.1
       graphql-request: 6.1.0(graphql@16.8.1)
@@ -4240,28 +4271,6 @@ packages:
     resolution: {integrity: sha512-oqEbqxj3Ff4xHCz91Gf9m7C259xaQlzCCR8lpNjtJXTsYiPTDdISJMmlOOstOgQqoTOk+nw+d9K2UQzMMFIMmg==}
     dev: true
 
-  /@soundxyz/sound-protocol@1.1.0:
-    resolution: {integrity: sha512-Njsg+ZTm8m3neTMVjRERlGctLvZx8296YET5AVRdsXUxZjXKJkNAbhziDc6kPxmaUwtJFTIUvcwp8BTzQFzoSQ==}
-    dependencies:
-      '@ethersproject/abi': 5.7.0
-      '@ethersproject/providers': 5.7.2
-      ethers: 5.7.2
-    transitivePeerDependencies:
-      - bufferutil
-      - utf-8-validate
-    dev: true
-
-  /@soundxyz/sound-protocol@1.3.0:
-    resolution: {integrity: sha512-FPZMxfL5KPvnaIBTiBTYyxoFP1XPK8lhSwCx5hYUQH0zRTs3YbGrA91g3S67EQp2Q2JNaT3QcqU4vMKsphe+9w==}
-    dependencies:
-      '@ethersproject/abi': 5.7.0
-      '@ethersproject/providers': 5.7.2
-      ethers: 5.7.2
-    transitivePeerDependencies:
-      - bufferutil
-      - utf-8-validate
-    dev: true
-
   /@soundxyz/sound-protocol@1.7.0:
     resolution: {integrity: sha512-PihoLizBMWxHyOoTElqXHEwZPDfn37OCBwnTN6qeX2CXzdO1eyhF5nBYWui14bK7r/k/pT3EajUmQQvA8G/T9w==}
     dependencies:
@@ -4885,7 +4894,7 @@ packages:
     resolution: {integrity: sha512-o/zjMZRhJxny7OyEF+Op8X+efiELC7k7yOjMzgfzVqOzXqkBkWI79YoTdOtsuWd5BWhAGAuOY/Xa6xpiaWXiNg==}
     engines: {node: '>= 14'}
     dependencies:
-      debug: 4.3.4
+      debug: 4.3.4(supports-color@8.1.1)
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -6262,18 +6271,6 @@ packages:
         optional: true
     dependencies:
       ms: 2.1.3
-
-  /debug@4.3.4:
-    resolution: {integrity: sha512-PRWFHuSU3eDtQJPvnNY7Jcket1j0t5OuOsFzPPzsekD52Zl8qUfFIPEiswXqIvHWGVHOgX+7G/vCNNhehwxfkQ==}
-    engines: {node: '>=6.0'}
-    peerDependencies:
-      supports-color: '*'
-    peerDependenciesMeta:
-      supports-color:
-        optional: true
-    dependencies:
-      ms: 2.1.2
-    dev: true
 
   /debug@4.3.4(supports-color@8.1.1):
     resolution: {integrity: sha512-PRWFHuSU3eDtQJPvnNY7Jcket1j0t5OuOsFzPPzsekD52Zl8qUfFIPEiswXqIvHWGVHOgX+7G/vCNNhehwxfkQ==}
@@ -8217,7 +8214,7 @@ packages:
     engines: {node: '>= 14'}
     dependencies:
       agent-base: 7.1.0
-      debug: 4.3.4
+      debug: 4.3.4(supports-color@8.1.1)
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -8252,7 +8249,7 @@ packages:
     engines: {node: '>= 14'}
     dependencies:
       agent-base: 7.1.0
-      debug: 4.3.4
+      debug: 4.3.4(supports-color@8.1.1)
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -13024,3 +13021,7 @@ packages:
 
   /zod@3.22.4:
     resolution: {integrity: sha512-iC+8Io04lddc+mVqQ9AZ7OQ2MrUKGN+oIQyq1vemgt46jwCwLfhq7/pwnBnNXXXZb8VTVLKwp9EDkx+ryxIWmg==}
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
