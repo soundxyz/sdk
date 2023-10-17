@@ -39,7 +39,7 @@
     "@graphql-inspector/cli": "^4.0.2",
     "@graphql-inspector/config": "^4.0.1",
     "@parcel/watcher": "^2.3.0",
-    "@soundxyz/codegen-fragments": "^2.0.0",
+    "@soundxyz/codegen-fragments": "^2.0.1",
     "@types/node": "20.8.6",
     "bob-ts": "^4.1.1",
     "esbuild": "^0.19.4",
