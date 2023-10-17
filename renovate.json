@@ -20,5 +20,6 @@
   ],
   "rangeStrategy": "bump",
   "rebaseWhen": "behind-base-branch",
-  "prHourlyLimit": 0
+  "prHourlyLimit": 0,
+  "enabled": false
 }
