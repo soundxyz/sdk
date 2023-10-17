@@ -14,7 +14,7 @@
     "alchemy-sdk": "^2.10.1",
     "date-fns": "^2.30.0",
     "ethers": "^5.7.2",
-    "require-env-variable": "^4.0.1"
+    "require-env-variable": "^4.0.2"
   },
   "devDependencies": {
     "@types/node": "20.8.6",

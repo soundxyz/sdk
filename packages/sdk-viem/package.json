@@ -54,7 +54,7 @@
     "bob-tsm": "^1.1.2",
     "esbuild": "^0.19.4",
     "merkletreejs": "^0.3.10",
-    "require-env-variable": "^4.0.1",
+    "require-env-variable": "^4.0.2",
     "typescript": "5.2.2",
     "viem": "^1.16.6"
   },

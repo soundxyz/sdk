@@ -10,6 +10,7 @@
   },
   "license": "MIT",
   "author": "Sound.xyz",
+  "sideEffects": false,
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -26,9 +27,17 @@
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
+  "scripts": {
+    "prepack": "node build.mjs",
+    "prepare": "node build.mjs",
+    "postpublish": "gh-release",
+    "validate": "graphql-inspector validate \"./graphql/*.gql\" \"./schema.graphql\" --deprecated"
+  },
   "devDependencies": {
     "@graphql-codegen/cli": "^5.0.0",
     "@graphql-codegen/core": "^4.0.0",
+    "@graphql-inspector/cli": "^4.0.2",
+    "@graphql-inspector/config": "^4.0.1",
     "@parcel/watcher": "^2.3.0",
     "@soundxyz/codegen-fragments": "^2.0.0",
     "@types/node": "20.8.6",

@@ -3,6 +3,7 @@ import { SoundAPI } from '../api'
 import { MissingMerkleProvider, MissingProviderError, MissingSignerError, MissingSoundAPI } from '../errors'
 import type { MerkleProvider, SoundClientContractProvider, ClientProvider, Wallet } from '../types'
 import { getLazyOption } from '../utils/helpers'
+import type {} from '../../node_modules/viem/_types/actions/wallet/sendRawTransaction'
 
 export type SoundClientInstanceConfig = SoundClientContractProvider & {
   /**
@@ -19,6 +20,23 @@ export type SoundClientInstanceConfig = SoundClientContractProvider & {
    * Merkle provider to be used
    */
   merkleProvider?: MerkleProvider
+}
+
+export interface SoundClientInstanceType {
+  instance: {
+    client: NonNullable<SoundClientInstanceConfig['client']> | null
+    wallet: NonNullable<SoundClientInstanceConfig['account']> | null
+    merkleProvider: NonNullable<SoundClientInstanceConfig['merkleProvider']> | null
+    onUnhandledError: NonNullable<SoundClientInstanceConfig['onUnhandledError']>
+    soundAPI: NonNullable<SoundClientInstanceConfig['soundAPI']> | null
+    idempotentCachedCall<T>(key: string, cb: () => Promise<Awaited<T>>): Promise<Awaited<T>> | Awaited<T>
+  }
+
+  expectMerkleProvider(): MerkleProvider
+  expectWallet(): Promise<{ wallet: Wallet; userAddress: Address }>
+  expectClient(): Promise<ClientProvider>
+  expectSoundAPI(): SoundAPI
+  getNetworkChainId(): Promise<number>
 }
 
 export function SoundClientInstance({
@@ -44,7 +62,7 @@ export function SoundClientInstance({
       }))
   }
 
-  const instance = {
+  const instance: SoundClientInstanceType['instance'] = {
     client: client || null,
     wallet: account || null,
     merkleProvider: merkleProvider || null,
