@@ -1,9 +1,8 @@
-import type { Address } from 'viem'
+import type { Address, Chain } from 'viem'
 import { SoundAPI } from '../api'
 import { MissingMerkleProvider, MissingProviderError, MissingSignerError, MissingSoundAPI } from '../errors'
-import type { MerkleProvider, SoundClientContractProvider, ClientProvider, Wallet } from '../types'
+import type { ClientProvider, MerkleProvider, SoundClientContractProvider, Wallet } from '../types'
 import { getLazyOption } from '../utils/helpers'
-import type {} from '../../node_modules/viem/_types/actions/wallet/sendRawTransaction'
 
 export type SoundClientInstanceConfig = SoundClientContractProvider & {
   /**
@@ -22,7 +21,7 @@ export type SoundClientInstanceConfig = SoundClientContractProvider & {
   merkleProvider?: MerkleProvider
 }
 
-export interface SoundClientInstanceType {
+export interface SoundClientInstance {
   instance: {
     client: NonNullable<SoundClientInstanceConfig['client']> | null
     wallet: NonNullable<SoundClientInstanceConfig['account']> | null
@@ -31,12 +30,11 @@ export interface SoundClientInstanceType {
     soundAPI: NonNullable<SoundClientInstanceConfig['soundAPI']> | null
     idempotentCachedCall<T>(key: string, cb: () => Promise<Awaited<T>>): Promise<Awaited<T>> | Awaited<T>
   }
-
   expectMerkleProvider(): MerkleProvider
   expectWallet(): Promise<{ wallet: Wallet; userAddress: Address }>
   expectClient(): Promise<ClientProvider>
   expectSoundAPI(): SoundAPI
-  getNetworkChainId(): Promise<number>
+  getNetworkChainId(): Promise<Chain | undefined>
 }
 
 export function SoundClientInstance({
@@ -45,7 +43,7 @@ export function SoundClientInstance({
   merkleProvider,
   onUnhandledError = console.error,
   soundAPI,
-}: SoundClientInstanceConfig) {
+}: SoundClientInstanceConfig): SoundClientInstance {
   const IdempotentCache: Record<string, unknown> = {}
   const IdempotentCachePromises: Record<string, Promise<unknown>> = {}
 
@@ -62,7 +60,7 @@ export function SoundClientInstance({
       }))
   }
 
-  const instance: SoundClientInstanceType['instance'] = {
+  const instance: SoundClientInstance['instance'] = {
     client: client || null,
     wallet: account || null,
     merkleProvider: merkleProvider || null,
@@ -122,5 +120,3 @@ export function SoundClientInstance({
     getNetworkChainId,
   }
 }
-
-export type SoundClientInstance = ReturnType<typeof SoundClientInstance>

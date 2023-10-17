@@ -32,7 +32,8 @@
     "pull-env": "dotenv-vault pull",
     "test": "vitest dev",
     "test:cov": "vitest dev --coverage",
-    "test:ci": "CI=true vitest --coverage"
+    "test:ci": "CI=true vitest --coverage",
+    "tsc": "tsc -p tsconfig.build.json"
   },
   "dependencies": {
     "keccak256": "^1.0.6",
