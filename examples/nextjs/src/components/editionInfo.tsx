@@ -42,7 +42,6 @@ export function EditionInfo() {
 
       return publicClient.editionV1.sam.buy.buyPrice({
         editionAddress: contractAddress,
-      })({
         samAddress,
       })({
         offset: 0,
