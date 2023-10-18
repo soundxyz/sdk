@@ -10,7 +10,7 @@ BigInt.prototype.toJSON = function () {
 export function EditionInfo() {
   const { contractAddress } = useContractAddress()
 
-  const { data: editionBaseInfo } = useQuery({
+  const { data: editionBaseInfo = null } = useQuery({
     queryKey: ['edition-info', contractAddress],
     async queryFn() {
       if (!contractAddress) return null
@@ -21,7 +21,7 @@ export function EditionInfo() {
     },
   })
 
-  const { data: tierEditionBaseInfo } = useQuery({
+  const { data: tierEditionBaseInfo = null } = useQuery({
     queryKey: ['tier-edition-info', contractAddress],
     async queryFn() {
       if (!contractAddress) return null
@@ -32,7 +32,18 @@ export function EditionInfo() {
     },
   })
 
-  const { data: samAddress } = useQuery({
+  const { data: tieredSchedules = null } = useQuery({
+    queryKey: ['tier-schedules', contractAddress],
+    async queryFn() {
+      if (!contractAddress) return null
+
+      return publicClient.editionV2.mintSchedules({
+        editionAddress: contractAddress,
+      })
+    },
+  })
+
+  const { data: samAddress = null } = useQuery({
     queryKey: ['edition-sam-address', contractAddress],
     async queryFn() {
       if (!contractAddress) return null
@@ -43,7 +54,7 @@ export function EditionInfo() {
     },
   })
 
-  const { data: samTotalBuyPrice } = useQuery({
+  const { data: samTotalBuyPrice = null } = useQuery({
     queryKey: ['edition-buy-sam-price', contractAddress, samAddress],
     async queryFn() {
       if (!samAddress || !contractAddress) return null
@@ -60,7 +71,13 @@ export function EditionInfo() {
 
   return (
     <div>
-      <p>{JSON.stringify({ editionBaseInfo, tierEditionBaseInfo, samAddress, samTotalBuyPrice }, null, 2)}</p>
+      <p>
+        {JSON.stringify(
+          { editionBaseInfo, tierEditionBaseInfo, tieredSchedules, samAddress, samTotalBuyPrice },
+          null,
+          2,
+        )}
+      </p>
     </div>
   )
 }
