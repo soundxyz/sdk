@@ -17,20 +17,31 @@ import {
   SamTotalBuyPrice,
   SamTotalSellPrice,
 } from './sam'
+import { editionMintSchedules, editionMintSchedulesFromIds, editionScheduleIds } from './schedules'
 
 export function editionV1PublicActions<
-  Client extends Pick<PublicClient, 'readContract' | 'multicall' | 'estimateContractGas'>,
+  Client extends Pick<
+    PublicClient,
+    'readContract' | 'multicall' | 'estimateContractGas' | 'createEventFilter' | 'getFilterLogs'
+  >,
 >(client: Client) {
   return {
     editionV1: {
       getEditionInfo: curry(getEditionInfo)(client),
-      numberOfTokensOwned: curry(numberOfTokensOwned)(client),
-      numberMinted: curry(numberMinted)(client),
-      eligibleQuantity: curry(eligibleQuantity)(client),
-      editionMintParameters: curry(editionMintParameters)(client),
-      editionMintToParameters: curry(editionMintToParameters)(client),
+
+      mint: {
+        numberOfTokensOwned: curry(numberOfTokensOwned)(client),
+        numberMinted: curry(numberMinted)(client),
+        eligibleQuantity: curry(eligibleQuantity)(client),
+        mintParameters: curry(editionMintParameters)(client),
+        mintToParameters: curry(editionMintToParameters)(client),
+      },
 
       isSoundV1_2_OrGreater: curry(isSoundV1_2_OrGreater)(client),
+
+      scheduleIds: curry(editionScheduleIds)(client),
+      editionMintSchedules: curry(editionMintSchedules)(client),
+      editionMintSchedulesFromIds: curry(editionMintSchedulesFromIds)(client),
 
       sam: {
         samAddress: curry(SamContractAddress)(client),

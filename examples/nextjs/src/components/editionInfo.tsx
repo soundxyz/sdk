@@ -1,24 +1,67 @@
 import { useContractAddress } from '@/context/contractAddress'
 import { publicClient } from '@/context/wagmi'
 import { useQuery } from '@tanstack/react-query'
-import { editionV1PublicActions } from '@soundxyz/sdk/contract/edition-v1/read/actions'
+
+// @ts-expect-error
+BigInt.prototype.toJSON = function () {
+  return this.toString()
+}
 
 export function EditionInfo() {
   const { contractAddress } = useContractAddress()
 
-  const { data } = useQuery({
+  const { data: editionBaseInfo, error: baseInfoError } = useQuery({
     queryKey: ['edition-info', contractAddress],
-    enabled: !contractAddress,
+    enabled: !!contractAddress,
     async queryFn() {
       if (!contractAddress) return null
 
-      const { editionV1 } = publicClient.extend(editionV1PublicActions)
-
-      return editionV1.getEditionInfo({
+      return publicClient.editionV1.getEditionInfo({
         editionAddress: contractAddress,
       })
     },
   })
 
-  return <p>{JSON.stringify(data, null, 2)}</p>
+  const { data: samAddress } = useQuery({
+    queryKey: ['edition-sam-address', contractAddress],
+    enabled: !!contractAddress,
+    async queryFn() {
+      if (!contractAddress) return null
+
+      return publicClient.editionV1.sam.samAddress({
+        editionAddress: contractAddress,
+      })
+    },
+  })
+
+  const {
+    data: totalBuyPrice,
+    error,
+    ...rest
+  } = useQuery({
+    queryKey: ['edition-buy-sam-price', contractAddress, samAddress],
+    enabled: !!samAddress,
+    async queryFn() {
+      if (!samAddress || !contractAddress) return null
+
+      const result = await publicClient.editionV1.sam.buy.buyPrice({
+        editionAddress: contractAddress,
+      })({
+        samAddress,
+      })({
+        offset: 0,
+        quantity: 1,
+      })
+
+      return result
+    },
+  })
+
+  if (error) console.error(error)
+
+  return (
+    <div>
+      <p>{JSON.stringify({ editionBaseInfo, samAddress, totalBuyPrice, error, ...rest }, null, 2)}</p>
+    </div>
+  )
 }
