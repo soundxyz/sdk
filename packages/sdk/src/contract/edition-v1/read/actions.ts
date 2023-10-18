@@ -18,6 +18,7 @@ import {
   SamTotalSellPrice,
 } from './sam'
 import { editionMintSchedules, editionMintSchedulesFromIds, editionScheduleIds } from './schedules'
+import type { MerkleProvider } from '../../../utils/types'
 
 export function editionV1PublicActions<
   Client extends Pick<
@@ -29,12 +30,16 @@ export function editionV1PublicActions<
     editionV1: {
       getEditionInfo: curry(getEditionInfo)(client),
 
-      mint: {
-        numberOfTokensOwned: curry(numberOfTokensOwned)(client),
-        numberMinted: curry(numberMinted)(client),
-        eligibleQuantity: curry(eligibleQuantity)(client),
-        mintParameters: curry(editionMintParameters)(client),
-        mintToParameters: curry(editionMintToParameters)(client),
+      mint({ merkleProvider }: { merkleProvider: MerkleProvider }) {
+        return {
+          numberOfTokensOwned: curry(numberOfTokensOwned)(client),
+          numberMinted: curry(numberMinted)(client),
+
+          eligibleQuantity: curry(eligibleQuantity)(client)({ merkleProvider }),
+
+          mintParameters: curry(editionMintParameters)(client)({ merkleProvider }),
+          mintToParameters: curry(editionMintToParameters)(client)({ merkleProvider }),
+        }
       },
 
       isSoundV1_2_OrGreater: curry(isSoundV1_2_OrGreater)(client),
@@ -49,12 +54,12 @@ export function editionV1PublicActions<
         info: curry(SamEditionInfo)(client),
 
         sell: {
-          parameters: curry(SamSellParameters)(client),
+          sellParameters: curry(SamSellParameters)(client),
           sellPrice: curry(SamTotalSellPrice)(client),
         },
 
         buy: {
-          parameters: curry(SamBuyParameters)(client),
+          buyParameters: curry(SamBuyParameters)(client),
           buyPrice: curry(SamTotalBuyPrice)(client),
         },
       },

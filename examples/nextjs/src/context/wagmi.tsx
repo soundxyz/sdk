@@ -6,6 +6,7 @@ import { createPublicClient, http, type PublicClientConfig } from 'viem'
 import assert from 'assert'
 import { IS_PRODUCTION } from '@/utils/constants'
 import { editionV1PublicActions } from '@soundxyz/sdk/contract/edition-v1/read/actions'
+import { editionV2PublicActions } from '@soundxyz/sdk/contract/edition-v2/read/actions'
 
 const PUBLIC_ALCHEMY_KEY = process.env.PUBLIC_ALCHEMY_KEY
 
@@ -20,7 +21,9 @@ export const chain: PublicClientConfig['chain'] = IS_PRODUCTION ? optimism : opt
 export const publicClient = createPublicClient({
   chain,
   transport: http(RPC_URL),
-}).extend(editionV1PublicActions)
+})
+  .extend(editionV1PublicActions)
+  .extend(editionV2PublicActions)
 
 const config = createConfig({
   autoConnect: true,
