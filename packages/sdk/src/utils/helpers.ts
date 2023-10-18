@@ -53,11 +53,11 @@ type Curry<T extends (...args: any[]) => any> = T extends (args: infer A, ...res
   : T
 
 export function curry<T extends (...args: any[]) => any>(fn: T): Curry<T> {
-  const curried = (...args: any[]): any => {
+  return function curried(...args: any[]): any {
     if (args.length >= fn.length) {
       return fn(...args)
+    } else {
+      return (...args2: any[]) => curried(...args, ...args2)
     }
-    return curry((...args2: any[]) => fn(...args, ...args2))
-  }
-  return curried as Curry<T>
+  } as Curry<T>
 }
