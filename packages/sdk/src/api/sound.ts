@@ -3,7 +3,8 @@ import { z } from 'zod'
 import { SoundAPIGraphQLError, UnexpectedApiResponse, MissingApiKey } from '../utils/errors'
 import { MerkleProof, type MerkleProofQuery, type MerkleProofQueryVariables, Test, type TestQuery } from './graphql/gql'
 
-import type { ExecutionResult, MerkleProofParameters } from '../utils/types'
+import type { ExecutionResult, MerkleProofParameters, MerkleProofProvider } from '../utils/types'
+import { isHexList } from '../utils/helpers'
 
 const graphqlRequestBody = z.object({
   data: z.record(z.unknown()).nullable().optional(),
@@ -31,9 +32,14 @@ export interface SoundAPIConfig {
    * API Key required to interact with Sound.xyz endpoints
    */
   apiKey: string
+
+  /**
+   * Customize base fetch options
+   */
+  fetchOptions?: Omit<Partial<RequestInit>, 'body' | 'method' | 'headers'> & { headers?: Record<string, string> }
 }
 
-export function SoundAPI({ apiEndpoint = 'https://api.sound.xyz/graphql', apiKey }: SoundAPIConfig) {
+export function SoundAPI({ apiEndpoint = 'https://api.sound.xyz/graphql', apiKey, fetchOptions }: SoundAPIConfig) {
   const apiUrl = new URL(apiEndpoint)
 
   function graphqlRequest<
@@ -44,10 +50,6 @@ export function SoundAPI({ apiEndpoint = 'https://api.sound.xyz/graphql', apiKey
 
     return fetch(apiUrl, {
       method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-        [CLIENT_KEY_HEADER]: apiKey,
-      },
       body: JSON.stringify(
         variables
           ? {
@@ -59,6 +61,12 @@ export function SoundAPI({ apiEndpoint = 'https://api.sound.xyz/graphql', apiKey
             },
       ),
       mode: 'cors',
+      ...fetchOptions,
+      headers: {
+        'content-type': 'application/json',
+        [CLIENT_KEY_HEADER]: apiKey,
+        ...fetchOptions?.headers,
+      },
     })
       .then((response) =>
         response.json().then<ExecutionResult<Data>>(
@@ -91,11 +99,11 @@ export function SoundAPI({ apiEndpoint = 'https://api.sound.xyz/graphql', apiKey
 
       if (errors) throw new SoundAPIGraphQLError({ graphqlErrors: errors })
 
-      if (!data?.merkleTreeProof) return null
+      if (!data?.merkleTreeProof || !isHexList(data.merkleTreeProof.proof)) return null
 
       return data.merkleTreeProof.proof
     },
-  }
+  } satisfies Record<string, unknown> & MerkleProofProvider
 }
 
 export type SoundAPI = ReturnType<typeof SoundAPI>
