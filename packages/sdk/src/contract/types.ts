@@ -1,4 +1,4 @@
-import type { Chain, Hex } from 'viem'
+import type { Account, Chain, Hex } from 'viem'
 
 export interface MintParameters {
   readonly interfaceId?: Hex
@@ -8,7 +8,7 @@ export interface MintParameters {
         readonly type: 'mint'
         readonly input: {
           readonly args: readonly unknown[]
-          readonly account: `0x${string}`
+          readonly account: `0x${string}` | Account
           readonly address: `0x${string}`
           readonly chain: Chain
           readonly functionName: 'mint' | 'mintTo'

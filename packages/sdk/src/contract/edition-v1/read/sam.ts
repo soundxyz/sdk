@@ -1,4 +1,4 @@
-import type { Address, Chain, Hex, PublicClient } from 'viem'
+import type { Account, Address, Chain, Hex, PublicClient } from 'viem'
 import { isSoundV1_2_OrGreater } from './interface'
 import { soundEditionV1_2Abi } from '../abi/sound-edition-v1_2'
 import { MINT_FALLBACK_GAS_LIMIT, MINT_GAS_LIMIT_MULTIPLIER, NULL_ADDRESS, scaleAmount } from '../../../utils/helpers'
@@ -14,7 +14,7 @@ export interface SamEditionAddress {
 }
 
 export interface SamBuyOptions extends TransactionGasOptions {
-  userAddress: Address
+  account: Address | Account
 
   mintTo: Address
 
@@ -138,7 +138,7 @@ export async function SamBuyParameters<Client extends Pick<PublicClient, 'readCo
   {
     quantity,
 
-    userAddress,
+    account,
     mintTo,
 
     maxTotalValue,
@@ -165,7 +165,7 @@ export async function SamBuyParameters<Client extends Pick<PublicClient, 'readCo
 
   const input = {
     abi: samv1Abi,
-    account: userAddress,
+    account,
     address: samAddress,
     chain,
     functionName: 'buy',

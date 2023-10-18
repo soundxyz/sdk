@@ -42,7 +42,5 @@ export function useContractAddress() {
 
 export function setContractAddress(contractAddress: string) {
   ContractAddressInput.contractAddress = contractAddress
-  ContractAddressPersistence.set(contractAddress).catch(() => {
-    ContractAddressPersistence.set(null).catch(console.error)
-  })
+  ContractAddressPersistence.set(contractAddress).catch(() => null)
 }

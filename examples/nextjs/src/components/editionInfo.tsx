@@ -1,18 +1,26 @@
 import { useContractAddress } from '@/context/contractAddress'
-import { publicClient } from '@/context/wagmi'
+import { chain, publicClient } from '@/context/wagmi'
 import { useQuery } from '@tanstack/react-query'
+import { SoundAPI } from '@soundxyz/sdk/api/sound'
+import { useWallet } from '@/context/wallet'
 
 // @ts-expect-error
 BigInt.prototype.toJSON = function () {
   return this.toString()
 }
 
+const soundApi = SoundAPI({
+  apiEndpoint: 'https://preview.api.sound.xyz/graphql',
+  apiKey: 'preview-no-key',
+})
+
 export function EditionInfo() {
   const { contractAddress } = useContractAddress()
 
-  const { data: editionBaseInfo, error: baseInfoError } = useQuery({
+  const { wallet } = useWallet()
+
+  const { data: editionBaseInfo = null } = useQuery({
     queryKey: ['edition-info', contractAddress],
-    enabled: !!contractAddress,
     async queryFn() {
       if (!contractAddress) return null
 
@@ -22,9 +30,30 @@ export function EditionInfo() {
     },
   })
 
-  const { data: samAddress } = useQuery({
+  const { data: tierEditionBaseInfo = null } = useQuery({
+    queryKey: ['tier-edition-info', contractAddress],
+    async queryFn() {
+      if (!contractAddress) return null
+
+      return publicClient.editionV2.info({
+        edition: contractAddress,
+      })
+    },
+  })
+
+  const { data: tieredSchedules = null } = useQuery({
+    queryKey: ['tier-schedules', contractAddress],
+    async queryFn() {
+      if (!contractAddress) return null
+
+      return publicClient.editionV2.mintSchedules({
+        editionAddress: contractAddress,
+      })
+    },
+  })
+
+  const { data: samAddress = null } = useQuery({
     queryKey: ['edition-sam-address', contractAddress],
-    enabled: !!contractAddress,
     async queryFn() {
       if (!contractAddress) return null
 
@@ -34,9 +63,8 @@ export function EditionInfo() {
     },
   })
 
-  const { data: samTotalBuyPrice } = useQuery({
+  const { data: samTotalBuyPrice = null } = useQuery({
     queryKey: ['edition-buy-sam-price', contractAddress, samAddress],
-    enabled: !!samAddress,
     async queryFn() {
       if (!samAddress || !contractAddress) return null
 
@@ -50,9 +78,63 @@ export function EditionInfo() {
     },
   })
 
+  const activeGASchedule = tieredSchedules?.activeSchedules.filter((v) => v.tier === 0)[0]
+
+  const { data: tieredMintEstimation = null } = useQuery({
+    queryKey: [
+      'edition-tiered-mint-estimation',
+      contractAddress,
+      activeGASchedule?.tier,
+      activeGASchedule?.scheduleNum,
+      wallet?.account.address,
+    ],
+    async queryFn() {
+      if (!contractAddress || !wallet || !activeGASchedule) return null
+
+      const mintParams = await publicClient.editionV2
+        .mint({
+          merkleProvider: soundApi,
+        })
+        .mintParameters({
+          editionAddress: contractAddress,
+        })({
+        quantity: 1,
+        tier: activeGASchedule.tier,
+        chain,
+        mintTo: wallet.account.address,
+        schedule: activeGASchedule,
+        account: wallet.account,
+      })
+
+      if (mintParams.mint.type === 'mint') {
+        wallet.walletClient.writeContract(mintParams.mint.input).then(console.log).catch(console.error)
+      }
+
+      return {
+        args: mintParams.mint.input?.args,
+        gasEstimate: mintParams.mint.gasEstimate,
+      }
+    },
+  })
+
   return (
     <div>
-      <p>{JSON.stringify({ editionBaseInfo, samAddress, samTotalBuyPrice }, null, 2)}</p>
+      <p>
+        {JSON.stringify(
+          { editionBaseInfo, tierEditionBaseInfo, tieredSchedules, samAddress, samTotalBuyPrice },
+          null,
+          2,
+        )}
+      </p>
+      <p>
+        {JSON.stringify(
+          {
+            tieredMintEstimation,
+          },
+          null,
+          2,
+        )}
+      </p>
     </div>
   )
 }

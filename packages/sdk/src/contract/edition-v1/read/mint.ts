@@ -1,4 +1,4 @@
-import type { Address, Chain, Hex, PublicClient } from 'viem'
+import type { Account, Address, Chain, Hex, PublicClient } from 'viem'
 import { soundEditionV1_2Abi } from '../abi/sound-edition-v1_2'
 import { minterAbiMap, type MintSchedule } from './schedules'
 import type { MerkleProvider, TransactionGasOptions } from '../../../utils/types'
@@ -140,7 +140,7 @@ export interface MintOptions extends TransactionGasOptions {
   quantity: number
   mintSchedule: MintSchedule
 
-  userAddress: Address
+  account: Address | Account
 
   affiliate?: Address
 
@@ -169,7 +169,7 @@ export async function editionMintParameters<
     gas,
     maxFeePerGas,
     maxPriorityFeePerGas,
-    userAddress,
+    account,
     chain,
     affiliate = NULL_ADDRESS,
   }: MintOptions,
@@ -186,7 +186,7 @@ export async function editionMintParameters<
   } satisfies TransactionGasOptions
 
   const sharedWriteContractParameters = {
-    account: userAddress,
+    account,
     address: mintSchedule.minterAddress,
     chain,
     functionName: 'mint',
@@ -200,7 +200,7 @@ export async function editionMintParameters<
     },
     {
       mintSchedule,
-      userAddress,
+      userAddress: typeof account === 'string' ? account : account.address,
     },
   )
   if (eligibleMintQuantity < quantity) {
@@ -265,7 +265,7 @@ export async function editionMintParameters<
 
       const proof = await merkleProvider.merkleProof({
         merkleRoot: mintSchedule.merkleRoot,
-        userAddress,
+        userAddress: typeof account === 'string' ? account : account.address,
       })
 
       if (!proof?.length) {
@@ -329,7 +329,7 @@ export async function editionMintToParameters<
     gas,
     maxFeePerGas,
     maxPriorityFeePerGas,
-    userAddress,
+    account,
     chain,
     affiliate = NULL_ADDRESS,
     mintTo,
@@ -373,7 +373,7 @@ export async function editionMintToParameters<
   } satisfies TransactionGasOptions
 
   const sharedWriteContractParameters = {
-    account: userAddress,
+    account,
     address: mintSchedule.minterAddress,
     chain,
     functionName: 'mintTo',
@@ -437,7 +437,7 @@ export async function editionMintToParameters<
 
       const proof = await merkleProvider.merkleProof({
         merkleRoot: mintSchedule.merkleRoot,
-        userAddress,
+        userAddress: typeof account === 'string' ? account : account.address,
       })
 
       if (!proof?.length) {
