@@ -2,6 +2,7 @@ import type { Address, Hex, PublicClient } from 'viem'
 import { SOUND_EDITION_V2_ABI } from '../abi/sound-edition-v2'
 import { getTierCurrentMaxMintable } from './helpers'
 import { SUPER_MINTER_ABI, SUPER_MINTER_ADDRESS } from '../abi/super-minter'
+import { nowUnixTimestamp } from '../../../utils/helpers'
 
 export type GetEditionContractInfoParams = {
   edition: Address
@@ -136,7 +137,7 @@ export type GetMintingSchedulesReturnType = {
 
 export async function mintingSchedules<Client extends Pick<PublicClient, 'readContract'>>(
   client: Client,
-  { editionAddress, unixTimestamp = Date.now() / 1000 }: GetMintingSchedulesParams,
+  { editionAddress, unixTimestamp = nowUnixTimestamp() }: GetMintingSchedulesParams,
 ): Promise<GetMintingSchedulesReturnType> {
   const schedules: SuperMinterSchedule[] = await client
     .readContract({
