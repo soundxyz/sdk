@@ -95,6 +95,9 @@ export async function SamBuy(
   { editionAddress }: SamEditionAddress,
   {
     quantity,
+
+    mintTo,
+
     maxTotalValue,
 
     affiliate = NULL_ADDRESS,
@@ -129,7 +132,7 @@ export async function SamBuy(
     address: samAddress,
     chain,
     functionName: 'buy',
-    args: [editionAddress, userAddress, quantity, affiliate, affiliateProof, attributonId],
+    args: [editionAddress, mintTo ?? userAddress, quantity, affiliate, affiliateProof, attributonId],
     value: maxTotalValue,
     ...txnOverrides,
   } as const

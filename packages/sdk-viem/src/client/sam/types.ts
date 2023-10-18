@@ -8,6 +8,8 @@ export interface SamEditionAddress {
 export interface SamBuyOptions extends TransactionGasOptions {
   quantity: number
 
+  mintTo?: Address
+
   maxTotalValue: bigint
 
   attributonId?: bigint
