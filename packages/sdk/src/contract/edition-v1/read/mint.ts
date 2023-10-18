@@ -13,6 +13,7 @@ import {
   scaleAmount,
 } from '../../../utils/helpers'
 import { InvalidQuantityError } from '../../../utils/errors'
+import type { MintParameters } from '../../types'
 
 export async function numberOfTokensOwned<Client extends Pick<PublicClient, 'readContract'>>(
   client: Client,
@@ -155,27 +156,6 @@ export interface MintToOptions extends MintOptions {
   attributonId?: bigint
 
   affiliateProof?: Hex[]
-}
-
-interface MintParameters {
-  readonly interfaceId: keyof typeof minterAbiMap
-  readonly abi: (typeof minterAbiMap)[keyof typeof minterAbiMap]
-  readonly mint:
-    | {
-        readonly type: 'mint'
-        readonly input: {
-          readonly args: readonly unknown[]
-          readonly account: `0x${string}`
-          readonly address: `0x${string}`
-          readonly chain: Chain
-          readonly functionName: 'mint' | 'mintTo'
-          readonly value: bigint
-        }
-        readonly gasEstimate: bigint | null
-      }
-    | {
-        readonly type: 'not-eligible'
-      }
 }
 
 export async function editionMintParameters<

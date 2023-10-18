@@ -43,3 +43,5 @@ export function scaleAmount({ amount, multiplier }: { amount: bigint; multiplier
 }
 
 export const MINT_GAS_LIMIT_MULTIPLIER = 1.2
+
+export const UINT32_MAX = 4294967295
