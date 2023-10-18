@@ -1,4 +1,4 @@
-import type { Hex } from 'viem'
+import type { BlockTag, Hex } from 'viem'
 
 export interface MerkleProofParameters {
   merkleRoot: string
@@ -70,3 +70,5 @@ export type AddressInputType =
   | 'CREATOR_ADDRESS'
 
 export declare type PromiseOrValue<T> = T | Promise<T>
+
+export type FromBlock = bigint | BlockTag
