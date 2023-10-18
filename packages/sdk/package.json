@@ -28,6 +28,8 @@
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "scripts": {
+    "dev": "concurrently pnpm:dev:*",
+    "dev:codegen": "graphql-codegen --watch",
     "prepack": "node build.mjs",
     "prepare": "node build.mjs",
     "postpublish": "gh-release",
@@ -42,6 +44,7 @@
     "@soundxyz/codegen-fragments": "^2.0.1",
     "@types/node": "20.8.6",
     "bob-ts": "^4.1.1",
+    "concurrently": "^8.2.1",
     "esbuild": "^0.19.4",
     "prettier": "^3.0.3",
     "typescript": "5.2.2",
