@@ -45,3 +45,19 @@ export function scaleAmount({ amount, multiplier }: { amount: bigint; multiplier
 export const MINT_GAS_LIMIT_MULTIPLIER = 1.2
 
 export const UINT32_MAX = 4294967295
+
+type Curry<T extends (...args: any[]) => any> = T extends (args: infer A, ...rest: infer Rest) => infer R
+  ? Rest extends []
+    ? (args: A) => R
+    : (args: A) => Curry<(...args: Rest) => R>
+  : T
+
+export function curry<T extends (...args: any[]) => any>(fn: T): Curry<T> {
+  const curried = (...args: any[]): any => {
+    if (args.length >= fn.length) {
+      return fn(...args)
+    }
+    return curry((...args2: any[]) => fn(...args, ...args2))
+  }
+  return curried as Curry<T>
+}
