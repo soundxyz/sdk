@@ -78,37 +78,42 @@ export function EditionInfo() {
     },
   })
 
-  const activeSchedule = tieredSchedules?.activeSchedules[0]
+  const activeGASchedule = tieredSchedules?.activeSchedules.filter((v) => v.tier === 0)[0]
 
   const { data: tieredMintEstimation = null } = useQuery({
     queryKey: [
       'edition-tiered-mint-estimation',
       contractAddress,
-      activeSchedule?.tier,
-      activeSchedule?.scheduleNum,
+      activeGASchedule?.tier,
+      activeGASchedule?.scheduleNum,
       wallet?.account.address,
     ],
     async queryFn() {
-      if (!contractAddress || !wallet || !activeSchedule) return null
+      if (!contractAddress || !wallet || !activeGASchedule) return null
 
-      return publicClient.editionV2
+      const mintParams = await publicClient.editionV2
         .mint({
           merkleProvider: soundApi,
         })
         .mintParameters({
           editionAddress: contractAddress,
         })({
-          quantity: 1,
-          tier: activeSchedule.tier,
-          chain,
-          mintTo: wallet.account.address,
-          schedule: activeSchedule,
-          userAddress: wallet.account.address,
-        })
-        .then((data) => ({
-          args: data.mint.input?.args,
-          gasEstimate: data.mint.gasEstimate,
-        }))
+        quantity: 1,
+        tier: activeGASchedule.tier,
+        chain,
+        mintTo: wallet.account.address,
+        schedule: activeGASchedule,
+        account: wallet.account,
+      })
+
+      if (mintParams.mint.type === 'mint') {
+        wallet.walletClient.writeContract(mintParams.mint.input).then(console.log).catch(console.error)
+      }
+
+      return {
+        args: mintParams.mint.input?.args,
+        gasEstimate: mintParams.mint.gasEstimate,
+      }
     },
   })
 

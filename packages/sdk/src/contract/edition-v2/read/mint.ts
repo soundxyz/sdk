@@ -1,4 +1,4 @@
-import type { Address, Chain, Hex, PublicClient } from 'viem'
+import type { Account, Address, Chain, Hex, PublicClient } from 'viem'
 import { SUPER_MINTER_ABI, SUPER_MINTER_ADDRESS } from '../abi/super-minter'
 import type { MerkleProvider, TransactionGasOptions } from '../../../utils/types'
 import { SOUND_EDITION_V2_ABI } from '../abi/sound-edition-v2'
@@ -176,7 +176,7 @@ export async function mintEligibility<Client extends Pick<PublicClient, 'multica
 
 export interface MintTieredEditionArgs extends TransactionGasOptions {
   tier: number
-  userAddress: Address
+  account: Address | Account
   mintTo: Address
   quantity: number
   schedule: SuperMinterSchedule
@@ -203,7 +203,7 @@ export async function editionMintParameters<
     quantity,
     schedule,
     tier,
-    userAddress,
+    account,
     gas,
     maxFeePerGas,
     maxPriorityFeePerGas,
@@ -274,7 +274,7 @@ export async function editionMintParameters<
     address: SUPER_MINTER_ADDRESS,
     abi: SUPER_MINTER_ABI,
     functionName: 'mintTo',
-    account: userAddress,
+    account,
     value,
     chain,
   } as const
