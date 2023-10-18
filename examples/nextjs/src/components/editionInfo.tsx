@@ -1,8 +1,7 @@
 import { useContractAddress } from '@/context/contractAddress'
-import { publicClient } from '@/context/wagmi'
+import { chain, publicClient } from '@/context/wagmi'
 import { useQuery } from '@tanstack/react-query'
 import { SoundAPI } from '@soundxyz/sdk/api/sound'
-import { optimismGoerli } from 'viem/chains'
 import { useWallet } from '@/context/wallet'
 
 // @ts-expect-error
@@ -101,7 +100,7 @@ export function EditionInfo() {
         })({
           quantity: 1,
           tier: activeSchedule.tier,
-          chain: optimismGoerli,
+          chain,
           mintTo: wallet.account.address,
           schedule: activeSchedule,
           userAddress: wallet.account.address,
