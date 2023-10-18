@@ -10,7 +10,7 @@ export function WalletPrivateKeyInput() {
     setIsPasswordVisible(!isPasswordVisible)
   }
 
-  const privateKey = useWalletPrivateKey()
+  const { privateKey, isHydrated } = useWalletPrivateKey()
 
   return (
     <div className="flex flex-col space-y-4">
@@ -22,11 +22,12 @@ export function WalletPrivateKeyInput() {
           id="privateKey"
           name="privateKey"
           type={isPasswordVisible ? 'text' : 'password'}
+          disabled={!isHydrated}
           value={privateKey}
           onChange={(e) => setWalletPrivateKey(e.target.value)}
           required
           className="focus:ring-indigo-500 focus:border-indigo-500 block w-full pr-10 sm:text-sm border-gray-500 border-solid rounded-md p-2 border-co"
-          placeholder="Enter private key text-black"
+          placeholder={isHydrated ? 'Enter private key text-black' : 'Loading...'}
         />
         <div
           className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer"
