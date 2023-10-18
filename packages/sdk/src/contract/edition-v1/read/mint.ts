@@ -1,4 +1,4 @@
-import type { Address, Chain, PublicClient } from 'viem'
+import type { Address, Chain, Hex, PublicClient } from 'viem'
 import { soundEditionV1_2Abi } from '../abi/sound-edition-v1_2'
 import { minterAbiMap, type MintSchedule } from './schedules'
 import type { MerkleProvider, TransactionGasOptions } from '../../../utils/types'
@@ -151,6 +151,10 @@ export interface MintOptions extends TransactionGasOptions {
 
 export interface MintToOptions extends MintOptions {
   mintTo: Address
+
+  attributonId?: bigint
+
+  affiliateProof?: Hex[]
 }
 
 interface MintParameters {
@@ -164,7 +168,7 @@ interface MintParameters {
           readonly account: `0x${string}`
           readonly address: `0x${string}`
           readonly chain: Chain
-          readonly functionName: 'mint'
+          readonly functionName: 'mint' | 'mintTo'
           readonly value: bigint
         }
         readonly gasEstimate: bigint | null
@@ -348,9 +352,36 @@ export async function editionMintToParameters<
     userAddress,
     chain,
     affiliate = NULL_ADDRESS,
-  }: MintOptions,
+    mintTo,
+    attributonId = 0n,
+    affiliateProof = [],
+  }: MintToOptions,
 ) {
   if (quantity <= 0 || Math.floor(quantity) !== quantity) throw new InvalidQuantityError({ quantity })
+
+  const eligibleMintQuantity = await eligibleQuantity(
+    client,
+    {
+      merkleProvider,
+    },
+    {
+      mintSchedule,
+      /**
+       * Is the mintTo quantity eligiblity relative to the address of the user or the mintTo address?
+       */
+      userAddress: mintTo,
+    },
+  )
+  if (eligibleMintQuantity < quantity) {
+    return {
+      interfaceId: mintSchedule.interfaceId,
+      abi: minterAbiMap[mintSchedule.interfaceId],
+
+      mint: {
+        type: 'not-eligible',
+      },
+    } as const satisfies MintParameters
+  }
 
   const value =
     (mintSchedule.price + mintSchedule.platformPerTokenFee) * BigInt(quantity) + mintSchedule.platformPerTransactionFee
@@ -365,40 +396,24 @@ export async function editionMintToParameters<
     account: userAddress,
     address: mintSchedule.minterAddress,
     chain,
-    functionName: 'mint',
+    functionName: 'mintTo',
     value,
   } as const
 
   switch (mintSchedule.interfaceId) {
     case interfaceIds.IRangeEditionMinterV2:
     case interfaceIds.IRangeEditionMinterV2_1: {
-      const eligibleMintQuantity = await eligibleQuantity(
-        client,
-        {
-          merkleProvider,
-        },
-        {
-          mintSchedule,
-          /**
-           * Is the mintTo quantity eligiblity relative to the address of the user or the mintTo address?
-           */
-          userAddress,
-        },
-      )
-      if (eligibleMintQuantity < quantity) {
-        return {
-          interfaceId: mintSchedule.interfaceId,
-          abi: minterAbiMap[mintSchedule.interfaceId],
-
-          mint: {
-            type: 'not-eligible',
-          },
-        } as const satisfies MintParameters
-      }
-
-      const interfaceId = interfaceIds.IRangeEditionMinter
+      const interfaceId = interfaceIds.IRangeEditionMinterV2_1
       const abi = minterAbiMap[interfaceId]
-      const args = [mintSchedule.editionAddress, BigInt(mintSchedule.mintId), quantity, affiliate] as const
+      const args = [
+        mintSchedule.editionAddress,
+        BigInt(mintSchedule.mintId),
+        mintTo,
+        quantity,
+        affiliate,
+        affiliateProof,
+        attributonId,
+      ] as const
 
       let gasEstimate: bigint | null
 
@@ -421,8 +436,73 @@ export async function editionMintToParameters<
       }
 
       return {
-        interfaceId: interfaceIds.IRangeEditionMinter,
+        interfaceId: interfaceIds.IRangeEditionMinterV2_1,
         abi,
+        mint: {
+          type: 'mint',
+          input: {
+            args,
+            ...sharedWriteContractParameters,
+            ...txnOverrides,
+          },
+          gasEstimate,
+        },
+      } as const satisfies MintParameters
+    }
+
+    case interfaceIds.IMerkleDropMinterV2:
+    case interfaceIds.IMerkleDropMinterV2_1: {
+      const interfaceId = interfaceIds.IMerkleDropMinterV2_1
+      const abi = minterAbiMap[interfaceId]
+
+      const proof = await merkleProvider.merkleProof({
+        merkleRoot: mintSchedule.merkleRoot,
+        userAddress,
+      })
+
+      if (!proof?.length) {
+        return {
+          abi,
+          interfaceId,
+          mint: {
+            type: 'not-eligible',
+          },
+        } as const satisfies MintParameters
+      }
+
+      const args = [
+        mintSchedule.editionAddress,
+        mintSchedule.mintId,
+        mintTo,
+        quantity,
+        mintTo,
+        proof,
+        affiliate,
+        affiliateProof,
+        attributonId,
+      ] as const
+      let gasEstimate: bigint | null
+
+      try {
+        // Add a buffer to the gas estimate to account for node provider estimate variance.
+        gasEstimate = txnOverrides.gas = scaleAmount({
+          amount: await client.estimateContractGas({
+            abi: minterAbiMap[interfaceIds.IMerkleDropMinterV2_1],
+            ...sharedWriteContractParameters,
+            ...txnOverrides,
+            args,
+          }),
+          multiplier: MINT_GAS_LIMIT_MULTIPLIER,
+        })
+      } catch (err) {
+        // If estimation fails, provide a hardcoded gas limit that is guaranteed to succeed.
+        txnOverrides.gas = MINT_FALLBACK_GAS_LIMIT
+        gasEstimate = null
+      }
+
+      return {
+        abi,
+        interfaceId,
         mint: {
           type: 'mint',
           input: {
