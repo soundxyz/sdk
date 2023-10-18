@@ -1,6 +1,7 @@
 'use client'
 
 import { ContractAddressInput } from '@/components/contractInput'
+import { EditionInfo } from '@/components/editionInfo'
 import { WalletPrivateKeyInput } from '@/components/walletInput'
 import { useContractAddress } from '@/context/contractAddress'
 import { useWallet } from '@/context/wallet'
@@ -45,6 +46,10 @@ export default function Home() {
         <br />
         <br />
         <p>Valid Contract Address: {isContractAddressHydrated ? contractAddress ?? 'not set' : 'Loading...'}</p>
+
+        <br />
+        <br />
+        <EditionInfo />
       </div>
     </main>
   )

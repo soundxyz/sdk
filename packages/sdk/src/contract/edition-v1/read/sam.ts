@@ -10,6 +10,7 @@ import { samV1_1Abi } from '../abi/sam-v1_1'
 
 export interface SamEditionAddress {
   editionAddress: Address
+  samAddress: Address
 }
 
 export interface SamBuyOptions extends TransactionGasOptions {
@@ -49,7 +50,7 @@ export interface SamSellOptions extends TransactionGasOptions {
 
 export async function SamContractAddress<Client extends Pick<PublicClient, 'readContract'>>(
   client: Client,
-  { editionAddress }: SamEditionAddress,
+  { editionAddress }: { editionAddress: Address },
 ) {
   const isSoundV1_2_OrGreaterValue = await isSoundV1_2_OrGreater(client, { editionAddress })
 
@@ -66,8 +67,7 @@ export async function SamContractAddress<Client extends Pick<PublicClient, 'read
 
 export async function SamSellParameters<Client extends Pick<PublicClient, 'readContract' | 'estimateContractGas'>>(
   client: Client,
-  { editionAddress }: SamEditionAddress,
-  { samAddress }: { samAddress: Address },
+  { editionAddress, samAddress }: SamEditionAddress,
   {
     userAddress,
 
@@ -134,8 +134,7 @@ export async function SamSellParameters<Client extends Pick<PublicClient, 'readC
 
 export async function SamBuyParameters<Client extends Pick<PublicClient, 'readContract' | 'estimateContractGas'>>(
   client: Client,
-  { editionAddress }: SamEditionAddress,
-  { samAddress }: { samAddress: Address },
+  { editionAddress, samAddress }: SamEditionAddress,
   {
     quantity,
 
@@ -200,8 +199,7 @@ export async function SamBuyParameters<Client extends Pick<PublicClient, 'readCo
 
 export async function SamTotalSellPrice<Client extends Pick<PublicClient, 'readContract'>>(
   client: Client,
-  { editionAddress }: SamEditionAddress,
-  { samAddress }: { samAddress: Address },
+  { editionAddress, samAddress }: SamEditionAddress,
   { offset, quantity }: { offset: number; quantity: number },
 ) {
   if (typeof quantity !== 'number' || !Number.isInteger(quantity) || quantity <= 0)
@@ -219,8 +217,7 @@ export async function SamTotalSellPrice<Client extends Pick<PublicClient, 'readC
 
 export async function SamTotalBuyPrice<Client extends Pick<PublicClient, 'readContract'>>(
   client: Client,
-  { editionAddress }: SamEditionAddress,
-  { samAddress }: { samAddress: Address },
+  { editionAddress, samAddress }: SamEditionAddress,
   { offset, quantity }: { offset: number; quantity: number },
 ) {
   if (typeof quantity !== 'number' || !Number.isInteger(quantity) || quantity <= 0)
@@ -264,8 +261,8 @@ export interface SAM {
 
 export async function SamEditionInfo<Client extends Pick<PublicClient, 'readContract' | 'multicall'>>(
   client: Client,
-  { editionAddress }: SamEditionAddress,
-  { samAddress }: { samAddress: Address },
+
+  { editionAddress, samAddress }: SamEditionAddress,
 ): Promise<SAM | null> {
   const interfaceId = await client.readContract({
     abi: samv1Abi,
