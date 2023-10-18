@@ -34,17 +34,13 @@ export function EditionInfo() {
     },
   })
 
-  const {
-    data: totalBuyPrice,
-    error,
-    ...rest
-  } = useQuery({
+  const { data: samTotalBuyPrice } = useQuery({
     queryKey: ['edition-buy-sam-price', contractAddress, samAddress],
     enabled: !!samAddress,
     async queryFn() {
       if (!samAddress || !contractAddress) return null
 
-      const result = await publicClient.editionV1.sam.buy.buyPrice({
+      return publicClient.editionV1.sam.buy.buyPrice({
         editionAddress: contractAddress,
       })({
         samAddress,
@@ -52,16 +48,12 @@ export function EditionInfo() {
         offset: 0,
         quantity: 1,
       })
-
-      return result
     },
   })
 
-  if (error) console.error(error)
-
   return (
     <div>
-      <p>{JSON.stringify({ editionBaseInfo, samAddress, totalBuyPrice, error, ...rest }, null, 2)}</p>
+      <p>{JSON.stringify({ editionBaseInfo, samAddress, samTotalBuyPrice }, null, 2)}</p>
     </div>
   )
 }
