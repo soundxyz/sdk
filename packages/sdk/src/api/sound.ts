@@ -1,7 +1,17 @@
 import { object, record, array, unknown, string, number, union } from 'zod'
 
 import { SoundAPIGraphQLError, UnexpectedApiResponse, MissingApiKey } from '../utils/errors'
-import { MerkleProof, type MerkleProofQuery, type MerkleProofQueryVariables, Test, type TestQuery } from './graphql/gql'
+import {
+  MerkleProof,
+  type MerkleProofQuery,
+  type MerkleProofQueryVariables,
+  Test,
+  type TestQuery,
+  type EditionOwnedTokenIdsQuery,
+  type EditionOwnedTokenIdsQueryVariables,
+  EditionOwnedTokenIds,
+  type EditionOwnedTokenIdsInput,
+} from './graphql/gql'
 
 import type { ExecutionResult, MerkleProofParameters, MerkleProofProvider } from '../utils/types'
 import { isHexList } from '../utils/helpers'
@@ -100,6 +110,15 @@ export function SoundAPI({ apiEndpoint = 'https://api.sound.xyz/graphql', apiKey
       if (!data?.merkleTreeProof || !isHexList(data.merkleTreeProof.proof)) return null
 
       return data.merkleTreeProof.proof
+    },
+
+    editionOwnedTokenIds(input: EditionOwnedTokenIdsInput) {
+      return graphqlRequest<EditionOwnedTokenIdsQuery, EditionOwnedTokenIdsQueryVariables>({
+        query: EditionOwnedTokenIds,
+        variables: {
+          input,
+        },
+      })
     },
   } satisfies Record<string, unknown> & MerkleProofProvider
 }
