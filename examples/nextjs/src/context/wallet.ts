@@ -1,11 +1,24 @@
 import { proxy, useSnapshot } from 'valtio'
 import { derive } from 'valtio/utils'
-import { createWalletClient, http, isHash, isHex } from 'viem'
+import { createWalletClient, http, isHex } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 import { RPC_URL, chain } from './wagmi'
+import { PersistenceStorage } from '@/lib/persistence'
+import { string } from 'zod'
 
 const WalletInput = proxy({
   privateKey: '',
+})
+
+const walletKeyPersistence = PersistenceStorage({
+  key: 'walletKey',
+  schema: string().length(66).refine(isHex),
+})
+
+walletKeyPersistence.get().then((privateKey) => {
+  if (privateKey) {
+    WalletInput.privateKey = privateKey
+  }
 })
 
 export function useWalletPrivateKey() {
@@ -14,6 +27,7 @@ export function useWalletPrivateKey() {
 
 export function setWalletPrivateKey(privateKey: string) {
   WalletInput.privateKey = privateKey
+  walletKeyPersistence.set(privateKey).catch(() => null)
 }
 
 const WalletState = derive({
