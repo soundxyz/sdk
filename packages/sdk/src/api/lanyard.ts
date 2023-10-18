@@ -1,24 +1,22 @@
 import type { MerkleProofProvider } from '../utils/types'
-import { z } from 'zod'
+import { string, union, array, object, boolean } from 'zod'
 
 import { UnexpectedLanyardResponse } from '../utils/errors'
 import { isHex } from 'viem'
 
-const lanyardProofResponseSchema = z.union([
-  z.object({
-    proof: z.array(
-      z.string().refine(isHex, {
+const lanyardProofResponseSchema = union([
+  object({
+    proof: array(
+      string().refine(isHex, {
         message: 'Proof is not a hex string',
       }),
     ),
-    unhashedLeaf: z.string().nullable().optional(),
+    unhashedLeaf: string().nullable().optional(),
   }),
-  z
-    .object({
-      error: z.boolean(),
-      message: z.string().nullable(),
-    })
-    .partial(),
+  object({
+    error: boolean(),
+    message: string().nullable(),
+  }).partial(),
 ])
 
 export interface BaseLanyardMerkleProofProvider {

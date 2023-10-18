@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import { object, record, array, unknown, string, number, union } from 'zod'
 
 import { SoundAPIGraphQLError, UnexpectedApiResponse, MissingApiKey } from '../utils/errors'
 import { MerkleProof, type MerkleProofQuery, type MerkleProofQueryVariables, Test, type TestQuery } from './graphql/gql'
@@ -6,19 +6,17 @@ import { MerkleProof, type MerkleProofQuery, type MerkleProofQueryVariables, Tes
 import type { ExecutionResult, MerkleProofParameters, MerkleProofProvider } from '../utils/types'
 import { isHexList } from '../utils/helpers'
 
-const graphqlRequestBody = z.object({
-  data: z.record(z.unknown()).nullable().optional(),
-  errors: z
-    .array(
-      z.object({
-        message: z.string(),
-        locations: z.array(z.object({ line: z.number(), column: z.number() })).optional(),
-        path: z.array(z.union([z.string(), z.number()])).optional(),
-        extensions: z.record(z.unknown()).optional(),
-      }),
-    )
-    .optional(),
-  extensions: z.record(z.unknown()).optional(),
+const graphqlRequestBody = object({
+  data: record(unknown()).nullable().optional(),
+  errors: array(
+    object({
+      message: string(),
+      locations: array(object({ line: number(), column: number() })).optional(),
+      path: array(union([string(), number()])).optional(),
+      extensions: record(unknown()).optional(),
+    }),
+  ).optional(),
+  extensions: record(unknown()).optional(),
 })
 
 const CLIENT_KEY_HEADER = 'x-sound-client-key'
