@@ -4,15 +4,15 @@ import { soundEditionV1_2Abi } from '../abi/sound-edition-v1_2'
 import { MINT_FALLBACK_GAS_LIMIT, MINT_GAS_LIMIT_MULTIPLIER, NULL_ADDRESS, scaleAmount } from '../../../utils/helpers'
 import type { TransactionGasOptions } from '../../../utils/types'
 import { samv1Abi } from '../abi/sam-v1'
-import { InvalidQuantityError } from '../../../utils/errors'
+import { InvalidOffsetError, InvalidQuantityError, UnsupportedMinterError } from '../../../utils/errors'
+import { interfaceIds } from '../../interfaceIds'
+import { samV1_1Abi } from '../abi/sam-v1_1'
 
 export interface SamEditionAddress {
   editionAddress: Address
 }
 
 export interface SamBuyOptions extends TransactionGasOptions {
-  samAddress: Address
-
   userAddress: Address
 
   mintTo: Address
@@ -33,8 +33,6 @@ export interface SamBuyOptions extends TransactionGasOptions {
 }
 
 export interface SamSellOptions extends TransactionGasOptions {
-  samAddress: Address
-
   userAddress: Address
 
   /**
@@ -69,8 +67,8 @@ export async function SamContractAddress<Client extends Pick<PublicClient, 'read
 export async function SamSellParameters<Client extends Pick<PublicClient, 'readContract' | 'estimateContractGas'>>(
   client: Client,
   { editionAddress }: SamEditionAddress,
+  { samAddress }: { samAddress: Address },
   {
-    samAddress,
     userAddress,
 
     tokenIds,
@@ -137,6 +135,7 @@ export async function SamSellParameters<Client extends Pick<PublicClient, 'readC
 export async function SamBuyParameters<Client extends Pick<PublicClient, 'readContract' | 'estimateContractGas'>>(
   client: Client,
   { editionAddress }: SamEditionAddress,
+  { samAddress }: { samAddress: Address },
   {
     quantity,
 
@@ -154,8 +153,6 @@ export async function SamBuyParameters<Client extends Pick<PublicClient, 'readCo
     maxFeePerGas,
     maxPriorityFeePerGas,
     chain,
-
-    samAddress,
   }: SamBuyOptions,
 ) {
   if (typeof quantity !== 'number' || !Number.isInteger(quantity) || quantity <= 0)
@@ -199,4 +196,115 @@ export async function SamBuyParameters<Client extends Pick<PublicClient, 'readCo
     },
     gasEstimate,
   } as const
+}
+
+export async function SamTotalSellPrice<Client extends Pick<PublicClient, 'readContract'>>(
+  client: Client,
+  { editionAddress }: SamEditionAddress,
+  { samAddress }: { samAddress: Address },
+  { offset, quantity }: { offset: number; quantity: number },
+) {
+  if (typeof quantity !== 'number' || !Number.isInteger(quantity) || quantity <= 0)
+    throw new InvalidQuantityError({ quantity })
+
+  if (typeof offset !== 'number' || !Number.isInteger(offset) || offset < 0) throw new InvalidOffsetError({ offset })
+
+  return client.readContract({
+    abi: samv1Abi,
+    address: samAddress,
+    functionName: 'totalSellPrice',
+    args: [editionAddress, offset, quantity],
+  })
+}
+
+export async function SamTotalBuyPrice<Client extends Pick<PublicClient, 'readContract'>>(
+  client: Client,
+  { editionAddress }: SamEditionAddress,
+  { samAddress }: { samAddress: Address },
+  { offset, quantity }: { offset: number; quantity: number },
+) {
+  if (typeof quantity !== 'number' || !Number.isInteger(quantity) || quantity <= 0)
+    throw new InvalidQuantityError({ quantity })
+
+  if (typeof offset !== 'number' || !Number.isInteger(offset) || offset < 0) throw new InvalidOffsetError({ offset })
+
+  const [total, platformFee, artistFee, goldenEggFee, affiliateFee] = await client.readContract({
+    abi: samv1Abi,
+    address: samAddress,
+    functionName: 'totalBuyPriceAndFees',
+    args: [editionAddress, offset, quantity],
+  })
+
+  return {
+    total,
+    platformFee,
+    artistFee,
+    goldenEggFee,
+    affiliateFee,
+  }
+}
+
+export interface SAM {
+  platformFeeBPS: number
+  platformPerTxFlatFee: bigint
+  basePrice: bigint
+  linearPriceSlope: bigint
+  inflectionPrice: bigint
+  inflectionPoint: number
+  goldenEggFeesAccrued: bigint
+  balance: bigint
+  supply: number
+  maxSupply: number
+  buyFreezeTime: number
+  artistFeeBPS: number
+  affiliateFeeBPS: number
+  goldenEggFeeBPS: number
+  affiliateMerkleRoot: Hex
+}
+
+export async function SamEditionInfo<Client extends Pick<PublicClient, 'readContract' | 'multicall'>>(
+  client: Client,
+  { editionAddress }: SamEditionAddress,
+  { samAddress }: { samAddress: Address },
+): Promise<SAM | null> {
+  const interfaceId = await client.readContract({
+    abi: samv1Abi,
+    address: samAddress,
+    functionName: 'moduleInterfaceId',
+  })
+
+  switch (interfaceId) {
+    case interfaceIds.ISAM: {
+      const [info, platformFeeBPS] = await client.multicall({
+        contracts: [
+          {
+            abi: samv1Abi,
+            address: samAddress,
+            functionName: 'samInfo',
+            args: [editionAddress],
+          },
+          {
+            abi: samv1Abi,
+            address: samAddress,
+            functionName: 'platformFeeBPS',
+          },
+        ],
+        allowFailure: false,
+      })
+
+      return { ...info, platformFeeBPS, platformPerTxFlatFee: 0n }
+    }
+    case interfaceIds.ISAMV1_1: {
+      return client.readContract({
+        abi: samV1_1Abi,
+        address: samAddress,
+        functionName: 'samInfo',
+        args: [editionAddress],
+      })
+    }
+    default:
+      throw new UnsupportedMinterError({
+        interfaceId,
+      })
+  }
 }
