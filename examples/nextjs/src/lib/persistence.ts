@@ -2,7 +2,7 @@ import { IS_PRODUCTION, IS_SERVER } from '@/utils/constants'
 import type { Draft } from 'immer'
 import { produce } from 'immer'
 import { parse, stringify } from 'superjson'
-import { proxy, useSnapshot } from 'valtio'
+import { proxy, useSnapshot, type INTERNAL_Snapshot } from 'valtio'
 
 import { type ZodType, type ZodTypeDef } from 'zod'
 
@@ -17,6 +17,7 @@ export type PersistedStore<Input, Output> = {
   state: PersistedStoreState<Output>
   clear(): Promise<void>
   produceExistingState(callback: (draft: Draft<Output>) => void): void | Promise<Output | null>
+  useStore: () => INTERNAL_Snapshot<PersistedStoreState<Output>>
 }
 
 const PersistedStores: Map<string, PersistedStore<unknown, unknown>> = new Map()
@@ -35,7 +36,7 @@ interface PersistenceStorageInput<Output = unknown, Input = Output, Def extends 
 export function PersistenceStorage<Output = unknown, Input = Output, Def extends ZodTypeDef = ZodTypeDef>({
   schema,
   key: idempotentStoreKey,
-}: PersistenceStorageInput<Output, Input, Def>) {
+}: PersistenceStorageInput<Output, Input, Def>): PersistedStore<Input, Output> {
   const existingStore = PersistedStores.get(idempotentStoreKey)
 
   if (existingStore) return existingStore as PersistedStore<Input, Output>
@@ -127,7 +128,7 @@ export function PersistenceStorage<Output = unknown, Input = Output, Def extends
     return setStorage(newState)
   }
 
-  const store = {
+  const store: PersistedStore<Input, Output> = {
     get,
     set,
     clear,
@@ -136,7 +137,7 @@ export function PersistenceStorage<Output = unknown, Input = Output, Def extends
       return useSnapshot(state)
     },
     produceExistingState,
-  } satisfies Record<string, unknown> & PersistedStore<Input, Output>
+  }
 
   PersistedStores.set(idempotentStoreKey, store as PersistedStore<unknown, unknown>)
 
