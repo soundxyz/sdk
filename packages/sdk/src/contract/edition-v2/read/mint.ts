@@ -3,7 +3,7 @@ import { SUPER_MINTER_ABI, SUPER_MINTER_ADDRESS } from '../abi/super-minter'
 import type { MerkleProvider, TransactionGasOptions } from '../../../utils/types'
 import { SOUND_EDITION_V2_ABI } from '../abi/sound-edition-v2'
 import { getTierCurrentMaxMintable } from './helpers'
-import type { GetEditionContractInfoReturnType, SuperMinterSchedule } from './info'
+import type { SuperMinterSchedule } from './info'
 import type { MintParameters } from '../../types'
 import {
   MINT_FALLBACK_GAS_LIMIT,
@@ -175,7 +175,7 @@ export async function mintEligibility<Client extends Pick<PublicClient, 'multica
 }
 
 export interface MintTieredEditionArgs extends TransactionGasOptions {
-  tier: GetEditionContractInfoReturnType['tierInfo'][number]
+  tier: number
   userAddress: Address
   mintTo: Address
   quantity: number
@@ -223,7 +223,7 @@ export async function editionMintParameters<
     {
       collectorAddress: mintTo,
       scheduleNum: schedule.scheduleNum,
-      tier: tier.tier,
+      tier,
     },
   )
 
@@ -264,7 +264,7 @@ export async function editionMintParameters<
       editionAddress,
     },
     {
-      tier: tier.tier,
+      tier,
       quantity,
       scheduleNum: schedule.scheduleNum,
     },
@@ -284,7 +284,7 @@ export async function editionMintParameters<
       const args = [
         {
           edition: editionAddress,
-          tier: tier.tier,
+          tier,
           scheduleNum: schedule.scheduleNum,
           to: mintTo,
           quantity,
@@ -350,7 +350,7 @@ export async function editionMintParameters<
       const args = [
         {
           edition: editionAddress,
-          tier: tier.tier,
+          tier,
           scheduleNum: schedule.scheduleNum,
           to: mintTo,
           quantity,
