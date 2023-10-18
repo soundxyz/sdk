@@ -12,6 +12,7 @@
   "dependencies": {
     "@fortawesome/free-solid-svg-icons": "^6.4.2",
     "@fortawesome/react-fontawesome": "^0.2.0",
+    "@soundxyz/sdk": "workspace:^",
     "@tanstack/react-query": "^5.0.0",
     "immer": "^10.0.3",
     "next": "13.5.5",
