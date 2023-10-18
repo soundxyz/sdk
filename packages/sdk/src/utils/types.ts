@@ -1,4 +1,4 @@
-import type { BlockTag, Hex } from 'viem'
+import type { BlockTag, FeeValuesEIP1559, Hex, TransactionRequestBase } from 'viem'
 
 export interface MerkleProofParameters {
   merkleRoot: string
@@ -72,3 +72,7 @@ export type AddressInputType =
 export declare type PromiseOrValue<T> = T | Promise<T>
 
 export type FromBlock = bigint | BlockTag
+
+export interface TransactionGasOptions
+  extends Partial<Pick<FeeValuesEIP1559, 'maxFeePerGas' | 'maxPriorityFeePerGas'>>,
+    Pick<TransactionRequestBase, 'gas'> {}
