@@ -19,12 +19,12 @@ import { EMPTY_BYTES32, MINT_GAS_LIMIT_MULTIPLIER, NULL_ADDRESS, scaleAmount } f
 import type { Prettify, TransactionGasOptions } from '../../../utils/types'
 
 interface EditionV2EncodeArguments {
-  readonly owner: Address | Account
+  readonly owner: Address | Readonly<Account>
   readonly formattedSalt: Hex
   readonly precomputedEdition: Address
-  readonly editionConfig: TieredEditionConfig
-  readonly tierConfigs: readonly TierConfig[]
-  readonly mintConfigs: MinterScheduleConfig[]
+  readonly editionConfig: Readonly<TieredEditionConfig>
+  readonly tierConfigs: readonly Readonly<TierConfig>[]
+  readonly mintConfigs: readonly Readonly<MinterScheduleConfig>[]
   readonly createSplit: {
     readonly accountAllocations: readonly {
       readonly account: Address

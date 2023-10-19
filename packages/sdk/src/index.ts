@@ -1,1 +1,6 @@
-export { editionV2PublicActions, editionV2WalletActions } from './contract/edition-v2/main'
+export {
+  editionV1PublicActions,
+  editionV1WalletActions,
+  editionV2PublicActions,
+  editionV2WalletActions,
+} from './contract/main'

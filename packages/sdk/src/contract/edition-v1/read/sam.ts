@@ -5,7 +5,7 @@ import { MINT_FALLBACK_GAS_LIMIT, MINT_GAS_LIMIT_MULTIPLIER, NULL_ADDRESS, scale
 import type { TransactionGasOptions } from '../../../utils/types'
 import { samv1Abi } from '../abi/sam-v1'
 import { InvalidOffsetError, InvalidQuantityError, UnsupportedMinterError } from '../../../utils/errors'
-import { interfaceIds } from '../../interfaceIds'
+import { interfaceIds } from '../interfaceIds'
 import { samV1_1Abi } from '../abi/sam-v1_1'
 
 export interface SamEditionAddress {

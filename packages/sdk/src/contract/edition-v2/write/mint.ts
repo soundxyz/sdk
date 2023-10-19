@@ -3,7 +3,7 @@ import type { EditionMintContractInput } from '../read/mint'
 
 export function editionMint<Client extends Pick<WalletClient, 'writeContract'>>(
   client: Client,
-  input: EditionMintContractInput,
+  { input }: EditionMintContractInput,
 ) {
   return client.writeContract(input)
 }

@@ -1,7 +1,7 @@
 import type { Address, Hex, PublicClient } from 'viem'
 import { soundEditionV1_2Abi } from '../abi/sound-edition-v1_2'
 import { minterModuleV2_1Abi } from '../abi/minter-module-v2_1'
-import { interfaceIds } from '../../interfaceIds'
+import { interfaceIds } from '../interfaceIds'
 import type { FromBlock } from '../../../utils/types'
 import { UnsupportedMinterError } from '../../../utils/errors'
 import { rangeEditionMinterV1Abi } from '../abi/range-edition-minter-v1'

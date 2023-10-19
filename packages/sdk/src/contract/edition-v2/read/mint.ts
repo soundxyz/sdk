@@ -229,7 +229,6 @@ export async function editionMintParameters<
 
   if (!eligibility.remainingEligibility) {
     return {
-      abi: SUPER_MINTER_ABI,
       mint: {
         type: 'not-eligible',
       },
@@ -322,7 +321,6 @@ export async function editionMintParameters<
       }
 
       return {
-        abi: SUPER_MINTER_ABI,
         mint: {
           type: 'mint',
           input: {
@@ -340,7 +338,6 @@ export async function editionMintParameters<
 
       if (!proof?.length) {
         return {
-          abi: SUPER_MINTER_ABI,
           mint: {
             type: 'not-eligible',
           },
@@ -388,7 +385,6 @@ export async function editionMintParameters<
       }
 
       return {
-        abi: SUPER_MINTER_ABI,
         mint: {
           type: 'mint',
           input: {
@@ -408,7 +404,4 @@ export async function editionMintParameters<
   }
 }
 
-export type EditionMintContractInput = TypeFromUnion<
-  Awaited<ReturnType<typeof editionMintParameters>>['mint'],
-  'mint'
->['input']
+export type EditionMintContractInput = TypeFromUnion<Awaited<ReturnType<typeof editionMintParameters>>['mint'], 'mint'>
