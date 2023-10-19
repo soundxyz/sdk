@@ -15,7 +15,7 @@ import { SUPER_MINTER_ABI, SUPER_MINTER_ADDRESS } from '../abi/super-minter'
 import type { MinterScheduleConfig, TierConfig, TieredEditionConfig } from './info'
 import type { ContractCall } from '../../types'
 import { MINTER_ROLE } from './helpers'
-import { EMPTY_BYTES32, MINT_GAS_LIMIT_MULTIPLIER, NULL_ADDRESS, scaleAmount } from '../../../utils/helpers'
+import { MINT_GAS_LIMIT_MULTIPLIER, NULL_ADDRESS, scaleAmount } from '../../../utils/helpers'
 import type { Prettify, TransactionGasOptions } from '../../../utils/types'
 
 interface EditionV2EncodeArguments {
@@ -34,6 +34,8 @@ interface EditionV2EncodeArguments {
     readonly controller: Address
   } | null
 }
+
+export const EMPTY_MERKLE_ROOT = '0x0000000000000000000000000000000000000000000000000000000000000069'
 
 function createTieredEditionArgs({
   owner,
@@ -77,7 +79,7 @@ function createTieredEditionArgs({
             platform: mintConfig.platform,
             // TODO: add better typesafety here
             mode: mintConfig.mode === 'DEFAULT' ? 0 : mintConfig.mode === 'VERIFY_MERKLE' ? 1 : 2,
-            merkleRoot: mintConfig.mode === 'VERIFY_MERKLE' ? mintConfig.merkleRoot : EMPTY_BYTES32,
+            merkleRoot: mintConfig.mode === 'VERIFY_MERKLE' ? mintConfig.merkleRoot : EMPTY_MERKLE_ROOT,
             signer: mintConfig.mode === 'VERIFY_SIGNATURE' ? mintConfig.signer : NULL_ADDRESS,
           },
         ],
