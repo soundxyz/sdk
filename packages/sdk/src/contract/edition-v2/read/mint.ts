@@ -18,6 +18,8 @@ export type GetTotalMintPriceAndFeesParams = {
   tier: number
   scheduleNum: number
   quantity: number
+
+  editionAddress: Address
 }
 
 export type GetTotalMintPriceAndFeesReturnType = {
@@ -46,12 +48,7 @@ export type GetTotalMintPriceAndFeesReturnType = {
 
 export async function getTotalMintPriceAndFees<Client extends Pick<PublicClient, 'readContract'>>(
   client: Client,
-  {
-    editionAddress,
-  }: {
-    editionAddress: Address
-  },
-  { tier, scheduleNum, quantity }: GetTotalMintPriceAndFeesParams,
+  { tier, scheduleNum, quantity, editionAddress }: GetTotalMintPriceAndFeesParams,
 ): Promise<GetTotalMintPriceAndFeesReturnType> {
   return client.readContract({
     abi: SUPER_MINTER_ABI,
@@ -89,6 +86,8 @@ export async function getPlatformFees<Client extends Pick<PublicClient, 'multica
 }
 
 export type GetMintEligibilityParams = {
+  editionAddress: Address
+
   tier: number
   scheduleNum: number
   collectorAddress: Address
@@ -102,8 +101,7 @@ export type GetMintEligibilityReturnType = {
 export async function mintEligibility<Client extends Pick<PublicClient, 'multicall'>>(
   client: Client,
   { merkleProvider }: { merkleProvider: MerkleProvider },
-  { editionAddress }: { editionAddress: Address },
-  { tier, scheduleNum, collectorAddress }: GetMintEligibilityParams,
+  { tier, scheduleNum, collectorAddress, editionAddress }: GetMintEligibilityParams,
 ): Promise<GetMintEligibilityReturnType> {
   const [numberMintedOnSchedule, scheduleInfo, tierInfo] = await client.multicall({
     contracts: [
@@ -176,6 +174,8 @@ export async function mintEligibility<Client extends Pick<PublicClient, 'multica
 }
 
 export interface MintTieredEditionArgs extends TransactionGasOptions {
+  editionAddress: Address
+
   tier: number
   account: Address | Account
   mintTo: Address
@@ -196,10 +196,6 @@ export async function editionMintParameters<
   { merkleProvider }: { merkleProvider: MerkleProvider },
   {
     editionAddress,
-  }: {
-    editionAddress: Address
-  },
-  {
     mintTo,
     quantity,
     schedule,
@@ -219,12 +215,10 @@ export async function editionMintParameters<
     client,
     { merkleProvider },
     {
-      editionAddress,
-    },
-    {
       collectorAddress: mintTo,
       scheduleNum: schedule.scheduleNum,
       tier,
+      editionAddress,
     },
   )
 
@@ -258,17 +252,12 @@ export async function editionMintParameters<
 
   const allowlistedQuantity = UINT32_MAX
 
-  const { total: value } = await getTotalMintPriceAndFees(
-    client,
-    {
-      editionAddress,
-    },
-    {
-      tier,
-      quantity,
-      scheduleNum: schedule.scheduleNum,
-    },
-  )
+  const { total: value } = await getTotalMintPriceAndFees(client, {
+    tier,
+    quantity,
+    scheduleNum: schedule.scheduleNum,
+    editionAddress,
+  })
 
   const sharedWriteContractParameters = {
     address: SUPER_MINTER_ADDRESS,
@@ -408,21 +397,21 @@ export async function editionMintParameters<
 export type EditionMintContractInput = TypeFromUnion<Awaited<ReturnType<typeof editionMintParameters>>['mint'], 'mint'>
 
 export function editionV2PublicActionsMint<
-  Client extends Pick<PublicClient, 'readContract' | 'multicall' | 'estimateContractGas'> & { editionV2?: {} },
+  Client extends Pick<PublicClient, 'readContract' | 'multicall' | 'estimateContractGas'> & {
+    editionV2?: {}
+    merkleProvider: MerkleProvider
+  },
 >(client: Client) {
   return {
     editionV2: {
       ...client.editionV2,
-      mint({ merkleProvider }: { merkleProvider: MerkleProvider }) {
-        return {
-          totalMintPriceAndFees: curry(getTotalMintPriceAndFees)(client),
-          platformFees: curry(getPlatformFees)(client),
 
-          eligiblity: curry(mintEligibility)(client)({ merkleProvider }),
+      totalMintPriceAndFees: curry(getTotalMintPriceAndFees)(client),
+      platformFees: curry(getPlatformFees)(client),
 
-          mintParameters: curry(editionMintParameters)(client)({ merkleProvider }),
-        }
-      },
+      eligiblity: curry(mintEligibility)(client)({ merkleProvider: client.merkleProvider }),
+
+      mintParameters: curry(editionMintParameters)(client)({ merkleProvider: client.merkleProvider }),
     },
   }
 }

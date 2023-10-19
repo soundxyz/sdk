@@ -7,3 +7,4 @@ export {
   editionV2WalletActionsCreate,
   editionV2WalletActionsMint,
 } from './contract/main'
+export { withMerkleProvider } from './merkle'
