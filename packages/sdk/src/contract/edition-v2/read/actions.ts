@@ -3,6 +3,7 @@ import { curry } from '../../../utils/helpers'
 import { editionContractInfo, mintingSchedules } from './info'
 import { editionMintParameters, getPlatformFees, getTotalMintPriceAndFees, mintEligibility } from './mint'
 import type { MerkleProvider } from '../../../utils/types'
+import { createEditionParameters } from './create'
 
 export function editionV2PublicActions<
   Client extends Pick<PublicClient, 'readContract' | 'multicall' | 'estimateContractGas'>,
@@ -22,6 +23,8 @@ export function editionV2PublicActions<
           mintParameters: curry(editionMintParameters)(client)({ merkleProvider }),
         }
       },
+
+      create: curry(createEditionParameters)(client),
     },
   }
 }

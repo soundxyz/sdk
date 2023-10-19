@@ -36,6 +36,8 @@ export function BigIntMax(...[firstValue, ...values]: NonEmptyArray<bigint>): bi
 
 export const NULL_ADDRESS = '0x0000000000000000000000000000000000000000'
 
+export const EMPTY_BYTES32 = '0x0000000000000000000000000000000000000000000000000000000000000069'
+
 export const MINT_FALLBACK_GAS_LIMIT = 200_000n
 
 export function scaleAmount({ amount, multiplier }: { amount: bigint; multiplier: number }) {
