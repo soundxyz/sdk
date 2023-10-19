@@ -3,6 +3,7 @@ import { SOUND_EDITION_V2_ABI } from '../abi/sound-edition-v2'
 import { getTierCurrentMaxMintable } from './helpers'
 import { SUPER_MINTER_ABI, SUPER_MINTER_ADDRESS } from '../abi/super-minter'
 import { nowUnixTimestamp } from '../../../utils/helpers'
+import { curry } from '../../../utils/helpers'
 
 export type GetEditionContractInfoParams = {
   edition: Address
@@ -160,5 +161,17 @@ export async function mintingSchedules<Client extends Pick<PublicClient, 'readCo
   return {
     schedules,
     activeSchedules,
+  }
+}
+
+export function editionV2PublicActionsInfo<
+  Client extends Pick<PublicClient, 'readContract' | 'multicall' | 'estimateContractGas'> & { editionV2?: {} },
+>(client: Client) {
+  return {
+    editionV2: {
+      ...client.editionV2,
+      info: curry(editionContractInfo)(client),
+      mintSchedules: curry(mintingSchedules)(client),
+    },
   }
 }

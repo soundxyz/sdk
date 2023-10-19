@@ -12,6 +12,7 @@ import {
   UINT32_MAX,
   scaleAmount,
 } from '../../../utils/helpers'
+import { curry } from '../../../utils/helpers'
 
 export type GetTotalMintPriceAndFeesParams = {
   tier: number
@@ -405,3 +406,23 @@ export async function editionMintParameters<
 }
 
 export type EditionMintContractInput = TypeFromUnion<Awaited<ReturnType<typeof editionMintParameters>>['mint'], 'mint'>
+
+export function editionV2PublicActionsMint<
+  Client extends Pick<PublicClient, 'readContract' | 'multicall' | 'estimateContractGas'> & { editionV2?: {} },
+>(client: Client) {
+  return {
+    editionV2: {
+      ...client.editionV2,
+      mint({ merkleProvider }: { merkleProvider: MerkleProvider }) {
+        return {
+          totalMintPriceAndFees: curry(getTotalMintPriceAndFees)(client),
+          platformFees: curry(getPlatformFees)(client),
+
+          eligiblity: curry(mintEligibility)(client)({ merkleProvider }),
+
+          mintParameters: curry(editionMintParameters)(client)({ merkleProvider }),
+        }
+      },
+    },
+  }
+}

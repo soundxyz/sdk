@@ -6,6 +6,7 @@ import {
   type PublicClient,
   type Account,
   type Chain,
+  keccak256,
 } from 'viem'
 import { SPLIT_MAIN_ABI, SPLIT_MAIN_ADDRESS } from '../abi/external/split-main'
 import { SOUND_CREATOR_V2_ABI, SOUND_CREATOR_V2_ADDRESS } from '../abi/sound-creator-v2'
@@ -17,6 +18,7 @@ import type { ContractCall } from '../../types'
 import { MINTER_ROLE } from './helpers'
 import { MINT_GAS_LIMIT_MULTIPLIER, NULL_ADDRESS, scaleAmount } from '../../../utils/helpers'
 import type { Prettify, TransactionGasOptions } from '../../../utils/types'
+import { curry } from '../../../utils/helpers'
 
 interface EditionV2EncodeArguments {
   readonly owner: Address | Readonly<Account>
@@ -225,3 +227,45 @@ export async function createEditionParameters<
 }
 
 export type EditionCreateContractInput = Awaited<ReturnType<typeof createEditionParameters>>['input']
+
+export type GetExpectedEditionAddressParams = {
+  deployer: Address
+  salt: Hex | Uint8Array
+}
+
+export type GetExpectedEditionAddressReturnType = {
+  formattedSalt: Hex
+  edition: Address
+  exists: boolean
+}
+
+export async function getExpectedEditionAddress<Client extends Pick<PublicClient, 'readContract'>>(
+  client: Client,
+  { deployer, salt: customSalt }: GetExpectedEditionAddressParams,
+): Promise<GetExpectedEditionAddressReturnType> {
+  const formattedSalt = keccak256(customSalt)
+
+  const [edition, exists] = await client.readContract({
+    abi: SOUND_CREATOR_V2_ABI,
+    address: SOUND_CREATOR_V2_ADDRESS,
+    functionName: 'soundEditionAddress',
+    args: [SOUND_EDITION_V2_IMPLEMENTATION_ADDRESS, deployer, formattedSalt],
+  })
+
+  return {
+    formattedSalt,
+    edition,
+    exists,
+  }
+}
+
+export function editionV2PublicActionsCreate<
+  Client extends Pick<PublicClient, 'readContract' | 'multicall' | 'estimateContractGas'> & { editionV2?: {} },
+>(client: Client) {
+  return {
+    editionV2: {
+      ...client.editionV2,
+      createEditionParameters: curry(createEditionParameters)(client),
+    },
+  }
+}
