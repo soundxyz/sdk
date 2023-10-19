@@ -1,7 +1,8 @@
 import { useContractAddress } from '@/context/contractAddress'
-import { chain, publicClient } from '@/context/wagmi'
+import { chain, publicClient, soundApi } from '@/context/wagmi'
 import { useQuery } from '@tanstack/react-query'
 import { useWallet } from '@/context/wallet'
+import { useMemo } from 'react'
 
 // @ts-expect-error
 BigInt.prototype.toJSON = function () {
@@ -13,8 +14,36 @@ export function EditionInfo() {
 
   const { wallet } = useWallet()
 
+  const walletAddress = wallet?.account.address
+
+  const { data: editionRelease = null } = useQuery({
+    queryKey: ['edition-release', contractAddress, walletAddress],
+    async queryFn() {
+      if (!contractAddress) return null
+
+      return soundApi
+        .editionRelease({
+          contractAddress,
+          webappUriInput: walletAddress
+            ? {
+                referralAddress: walletAddress,
+              }
+            : null,
+          webEmbedInput: walletAddress
+            ? {
+                referralAddress: walletAddress,
+              }
+            : null,
+        })
+        .then((v) => v.data)
+    },
+  })
+
+  const { isEditionV1 = false, isEditionV2 = false } = editionRelease || {}
+
   const { data: editionBaseInfo = null } = useQuery({
     queryKey: ['edition-info', contractAddress],
+    enabled: isEditionV1,
     async queryFn() {
       if (!contractAddress) return null
 
@@ -26,6 +55,7 @@ export function EditionInfo() {
 
   const { data: tierEditionBaseInfo = null } = useQuery({
     queryKey: ['tier-edition-info', contractAddress],
+    enabled: isEditionV2,
     async queryFn() {
       if (!contractAddress) return null
 
@@ -37,6 +67,7 @@ export function EditionInfo() {
 
   const { data: tieredSchedules = null } = useQuery({
     queryKey: ['tier-schedules', contractAddress],
+    enabled: isEditionV2,
     async queryFn() {
       if (!contractAddress) return null
 
@@ -48,6 +79,7 @@ export function EditionInfo() {
 
   const { data: samAddress = null } = useQuery({
     queryKey: ['edition-sam-address', contractAddress],
+    enabled: isEditionV1,
     async queryFn() {
       if (!contractAddress) return null
 
@@ -59,6 +91,7 @@ export function EditionInfo() {
 
   const { data: samTotalBuyPrice = null } = useQuery({
     queryKey: ['edition-buy-sam-price', contractAddress, samAddress],
+    enabled: isEditionV1,
     async queryFn() {
       if (!samAddress || !contractAddress) return null
 
@@ -82,6 +115,7 @@ export function EditionInfo() {
       activeGASchedule?.scheduleNum,
       wallet?.account.address,
     ],
+    enabled: isEditionV2,
     async queryFn() {
       if (!contractAddress || !wallet || !activeGASchedule) return null
 
@@ -111,8 +145,26 @@ export function EditionInfo() {
     },
   })
 
+  const embed = useMemo(() => {
+    if (!editionRelease?.webEmbed) return null
+
+    return (
+      <div
+        dangerouslySetInnerHTML={{
+          __html: editionRelease.webEmbed,
+        }}
+      />
+    )
+  }, [editionRelease?.webEmbed])
+
   return (
-    <div>
+    <div className="flex flex-col gap-10">
+      {editionRelease ? (
+        <a target="_blank" href={editionRelease.webappUri}>
+          <p className="text-cyan-500">{editionRelease.webappUri}</p>
+        </a>
+      ) : null}
+      {embed}
       <p>
         {JSON.stringify(
           { editionBaseInfo, tierEditionBaseInfo, tieredSchedules, samAddress, samTotalBuyPrice },
@@ -128,6 +180,11 @@ export function EditionInfo() {
           null,
           2,
         )}
+      </p>
+      <p>
+        {JSON.stringify({
+          editionRelease,
+        })}
       </p>
     </div>
   )

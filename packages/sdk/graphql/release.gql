@@ -1,5 +1,43 @@
-query SdkReleaseInfo($contractAddress: Address!) {
+query SdkReleaseInfo(
+  $contractAddress: Address!
+  $webappUriInput: ReleaseWebappUriInput
+  $webEmbedInput: ReleaseWebEmbedInput
+) {
   releaseFromContract(contractAddress: $contractAddress) {
     id
+    webappUri(input: $webappUriInput)
+    webEmbed(input: $webEmbedInput)
+
+    auctionContractType
+
+    listing {
+      __typename
+      contractAddress
+      chain
+
+      ... on TieredEditionListing {
+        hasGA
+      }
+    }
+
+    coverImage {
+      id
+      url
+    }
+
+    gaCoverImage {
+      id
+      url
+    }
+
+    vipCoverImage {
+      id
+      url
+    }
+
+    goldenEggImage {
+      id
+      url
+    }
   }
 }

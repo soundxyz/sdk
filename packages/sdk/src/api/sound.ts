@@ -11,9 +11,12 @@ import {
   type EditionOwnedTokenIdsQueryVariables,
   EditionOwnedTokenIds,
   type EditionOwnedTokenIdsInput,
+  type SdkReleaseInfoQuery,
+  type SdkReleaseInfoQueryVariables,
+  SdkReleaseInfo,
 } from './graphql/gql'
 
-import type { ExecutionResult, MerkleProofParameters, MerkleProofProvider } from '../utils/types'
+import type { ExecutionResult, MerkleProofParameters, MerkleProofProvider, Prettify } from '../utils/types'
 import { isHexList } from '../utils/helpers'
 
 const graphqlRequestBody = object({
@@ -97,7 +100,7 @@ export function SoundAPI({ apiEndpoint = 'https://api.sound.xyz/graphql', apiKey
     },
 
     async merkleProof({ merkleRoot, userAddress }: MerkleProofParameters) {
-      const { data, errors } = await graphqlRequest<MerkleProofQuery, MerkleProofQueryVariables>({
+      const { data, errors } = await graphqlRequest<Prettify<MerkleProofQuery>, MerkleProofQueryVariables>({
         query: MerkleProof,
         variables: {
           root: merkleRoot,
@@ -113,11 +116,38 @@ export function SoundAPI({ apiEndpoint = 'https://api.sound.xyz/graphql', apiKey
     },
 
     editionOwnedTokenIds(input: EditionOwnedTokenIdsInput) {
-      return graphqlRequest<EditionOwnedTokenIdsQuery, EditionOwnedTokenIdsQueryVariables>({
+      return graphqlRequest<Prettify<EditionOwnedTokenIdsQuery>, EditionOwnedTokenIdsQueryVariables>({
         query: EditionOwnedTokenIds,
         variables: {
           input,
         },
+      }).then((response) => {
+        return {
+          ...response,
+          data: response.data ? response.data.editionOwnedTokenIds : null,
+        }
+      })
+    },
+
+    editionRelease({ contractAddress, webEmbedInput, webappUriInput }: Prettify<SdkReleaseInfoQueryVariables>) {
+      return graphqlRequest<Prettify<SdkReleaseInfoQuery>, SdkReleaseInfoQueryVariables>({
+        query: SdkReleaseInfo,
+        variables: {
+          contractAddress,
+          webEmbedInput,
+          webappUriInput,
+        },
+      }).then((response) => {
+        return {
+          ...response,
+          data: response.data?.releaseFromContract
+            ? {
+                ...response.data.releaseFromContract,
+                isEditionV1: response.data.releaseFromContract.auctionContractType === 'EDITION',
+                isEditionV2: response.data.releaseFromContract.auctionContractType === 'TIERED_EDITION',
+              }
+            : null,
+        }
       })
     },
   } satisfies Record<string, unknown> & MerkleProofProvider
