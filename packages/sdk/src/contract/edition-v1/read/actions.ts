@@ -24,10 +24,11 @@ export function editionV1PublicActions<
   Client extends Pick<
     PublicClient,
     'readContract' | 'multicall' | 'estimateContractGas' | 'createEventFilter' | 'getFilterLogs'
-  >,
+  > & { editionV1?: {} },
 >(client: Client) {
   return {
     editionV1: {
+      ...client.editionV1,
       getEditionInfo: curry(getEditionInfo)(client),
 
       mint({ merkleProvider }: { merkleProvider: MerkleProvider }) {
