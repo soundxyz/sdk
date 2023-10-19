@@ -1,0 +1,5 @@
+query SdkReleaseInfo($contractAddress: Address!) {
+  releaseFromContract(contractAddress: $contractAddress) {
+    id
+  }
+}
