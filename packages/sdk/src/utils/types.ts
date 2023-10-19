@@ -80,3 +80,9 @@ export interface TransactionGasOptions
 export type Prettify<T> = {
   [K in keyof T]: T[K]
 } & {}
+
+export type TypeFromUnion<Union extends { type: string }, Type extends string> = Union extends {
+  type: Type
+}
+  ? Union
+  : never

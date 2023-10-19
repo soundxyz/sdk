@@ -5,6 +5,7 @@ import {
   type Hex,
   type PublicClient,
   type Account,
+  type Chain,
 } from 'viem'
 import { SPLIT_MAIN_ABI, SPLIT_MAIN_ADDRESS } from '../abi/external/split-main'
 import { SOUND_CREATOR_V2_ABI, SOUND_CREATOR_V2_ADDRESS } from '../abi/sound-creator-v2'
@@ -42,7 +43,7 @@ function createTieredEditionArgs({
   tierConfigs,
   mintConfigs,
   createSplit,
-}: EditionV2EncodeArguments): EncodeFunctionDataParameters<typeof SOUND_CREATOR_V2_ABI, 'create'> {
+}: EditionV2EncodeArguments) {
   const contractCalls: ContractCall[] = []
 
   // Grant MINTER_ROLE for super minter
@@ -170,16 +171,18 @@ function createTieredEditionArgs({
         nonce: 0n,
       },
     ],
-  } as const
+  } as const satisfies EncodeFunctionDataParameters<typeof SOUND_CREATOR_V2_ABI, 'create'>
 }
 
-export interface CreateEditionArguments extends EditionV2EncodeArguments, TransactionGasOptions {}
+export interface CreateEditionArguments extends EditionV2EncodeArguments, TransactionGasOptions {
+  readonly chain: Chain
+}
 
 export const FALLBACK_ESTIMATED_UPLOAD_GAS = 1_000_000n
 
 export async function createEditionParameters<
   Client extends Pick<PublicClient, 'readContract' | 'multicall' | 'estimateContractGas'>,
->(client: Client, { gas, maxFeePerGas, maxPriorityFeePerGas, ...args }: Prettify<CreateEditionArguments>) {
+>(client: Client, { gas, maxFeePerGas, maxPriorityFeePerGas, chain, ...args }: Prettify<CreateEditionArguments>) {
   const txnOverrides = {
     gas,
     maxFeePerGas,
@@ -192,6 +195,7 @@ export async function createEditionParameters<
     address: SOUND_CREATOR_V2_ADDRESS,
     account: args.owner,
     ...txnOverrides,
+    chain,
   } as const
 
   let gasEstimate: bigint | null
@@ -217,3 +221,5 @@ export async function createEditionParameters<
     gasEstimate,
   } as const
 }
+
+export type EditionCreateContractInput = Awaited<ReturnType<typeof createEditionParameters>>['input']

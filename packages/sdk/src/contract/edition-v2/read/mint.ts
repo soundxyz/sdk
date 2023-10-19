@@ -1,6 +1,6 @@
 import type { Account, Address, Chain, Hex, PublicClient } from 'viem'
 import { SUPER_MINTER_ABI, SUPER_MINTER_ADDRESS } from '../abi/super-minter'
-import type { MerkleProvider, TransactionGasOptions } from '../../../utils/types'
+import type { MerkleProvider, TransactionGasOptions, TypeFromUnion } from '../../../utils/types'
 import { SOUND_EDITION_V2_ABI } from '../abi/sound-edition-v2'
 import { getTierCurrentMaxMintable } from './helpers'
 import type { SuperMinterSchedule } from './info'
@@ -407,3 +407,8 @@ export async function editionMintParameters<
     }
   }
 }
+
+export type EditionMintContractInput = TypeFromUnion<
+  Awaited<ReturnType<typeof editionMintParameters>>['mint'],
+  'mint'
+>['input']
