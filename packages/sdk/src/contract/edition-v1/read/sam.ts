@@ -1,5 +1,5 @@
 import type { Account, Address, Chain, Hex, PublicClient } from 'viem'
-import { isSoundV1_2_OrGreater } from './interface'
+import { isSoundV1_2 } from './interface'
 import { soundEditionV1_2Abi } from '../abi/sound-edition-v1_2'
 import { MINT_FALLBACK_GAS_LIMIT, MINT_GAS_LIMIT_MULTIPLIER, NULL_ADDRESS, scaleAmount } from '../../../utils/helpers'
 import type { TransactionGasOptions } from '../../../utils/types'
@@ -52,7 +52,7 @@ export async function SamContractAddress<Client extends Pick<PublicClient, 'read
   client: Client,
   { editionAddress }: { editionAddress: Address },
 ) {
-  const isSoundV1_2_OrGreaterValue = await isSoundV1_2_OrGreater(client, { editionAddress })
+  const isSoundV1_2_OrGreaterValue = await isSoundV1_2(client, { editionAddress })
 
   if (!isSoundV1_2_OrGreaterValue) return null
 

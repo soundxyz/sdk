@@ -13,6 +13,7 @@ import {
   withMerkleProvider,
 } from '@soundxyz/sdk'
 import { SoundAPI } from '@soundxyz/sdk/api/sound'
+import { soundEditionVersionPublicActions } from '@soundxyz/sdk/contract/version'
 
 const PUBLIC_ALCHEMY_KEY = process.env.PUBLIC_ALCHEMY_KEY
 
@@ -38,6 +39,7 @@ export const publicClient = createPublicClient({
   .extend(editionV2PublicActionsCreate)
   .extend(editionV2PublicActionsInfo)
   .extend(editionV2PublicActionsMint)
+  .extend(soundEditionVersionPublicActions)
 
 const config = createConfig({
   autoConnect: true,

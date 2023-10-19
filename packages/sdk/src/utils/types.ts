@@ -5,11 +5,9 @@ export interface MerkleProofParameters {
   userAddress: string
 }
 
-export interface MerkleProofProvider {
+export interface MerkleProvider {
   merkleProof(merkleProofParams: MerkleProofParameters): Promise<Hex[] | null> | Hex[] | null
 }
-
-export type MerkleProvider = MerkleProofProvider
 
 export type LazyOption<T extends object> = T | (() => T | Promise<T>)
 

@@ -16,7 +16,7 @@ import {
   SdkReleaseInfo,
 } from './graphql/gql'
 
-import type { ExecutionResult, MerkleProofParameters, MerkleProofProvider, Prettify } from '../utils/types'
+import type { ExecutionResult, MerkleProofParameters, MerkleProvider, Prettify } from '../utils/types'
 import { isHexList } from '../utils/helpers'
 
 const graphqlRequestBody = object({
@@ -143,14 +143,14 @@ export function SoundAPI({ apiEndpoint = 'https://api.sound.xyz/graphql', apiKey
           data: response.data?.releaseFromContract
             ? {
                 ...response.data.releaseFromContract,
-                isEditionV1: response.data.releaseFromContract.auctionContractType === 'EDITION',
-                isEditionV2: response.data.releaseFromContract.auctionContractType === 'TIERED_EDITION',
+                isSoundEditionV1: response.data.releaseFromContract.auctionContractType === 'EDITION',
+                isSoundEditionV2: response.data.releaseFromContract.auctionContractType === 'TIERED_EDITION',
               }
             : null,
         }
       })
     },
-  } satisfies Record<string, unknown> & MerkleProofProvider
+  } satisfies Record<string, unknown> & MerkleProvider
 }
 
 export type SoundAPI = ReturnType<typeof SoundAPI>

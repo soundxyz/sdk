@@ -1,8 +1,9 @@
 import type { Address, PublicClient } from 'viem'
-import { soundEditionV1_2Abi } from '../abi/sound-edition-v1_2'
+import { SOUND_EDITION_V2_ABI } from '../abi/sound-edition-v2'
 import { interfaceIds } from '../interfaceIds'
+import { SUPER_MINTER_ABI } from '../abi/super-minter'
 
-export function isSoundV1_2<Client extends Pick<PublicClient, 'readContract'>>(
+export function isSoundV2<Client extends Pick<PublicClient, 'readContract'>>(
   client: Client,
   {
     editionAddress,
@@ -11,14 +12,14 @@ export function isSoundV1_2<Client extends Pick<PublicClient, 'readContract'>>(
   },
 ) {
   return client.readContract({
-    abi: soundEditionV1_2Abi,
+    abi: SOUND_EDITION_V2_ABI,
     address: editionAddress,
     functionName: 'supportsInterface',
-    args: [interfaceIds.ISoundEditionV1_2],
+    args: [interfaceIds.ISoundEditionV2],
   })
 }
 
-export function isSoundV1<Client extends Pick<PublicClient, 'readContract'>>(
+export function isSuperMinter<Client extends Pick<PublicClient, 'readContract'>>(
   client: Client,
   {
     editionAddress,
@@ -27,9 +28,9 @@ export function isSoundV1<Client extends Pick<PublicClient, 'readContract'>>(
   },
 ) {
   return client.readContract({
-    abi: soundEditionV1_2Abi,
+    abi: SUPER_MINTER_ABI,
     address: editionAddress,
     functionName: 'supportsInterface',
-    args: [interfaceIds.ISoundEditionV1],
+    args: [interfaceIds.ISuperMinter],
   })
 }

@@ -16,6 +16,17 @@ export function EditionInfo() {
 
   const walletAddress = wallet?.account.address
 
+  const { data: { isSoundEditionV1 = false, isSoundEditionV2 = false } = {} } = useQuery({
+    queryKey: ['edition-version-check', contractAddress],
+    queryFn() {
+      if (!contractAddress) return undefined
+
+      return publicClient.soundEditionVersion({
+        contractAddress,
+      })
+    },
+  })
+
   const { data: editionRelease = null } = useQuery({
     queryKey: ['edition-release', contractAddress, walletAddress],
     async queryFn() {
@@ -39,11 +50,9 @@ export function EditionInfo() {
     },
   })
 
-  const { isEditionV1 = false, isEditionV2 = false } = editionRelease || {}
-
   const { data: editionBaseInfo = null } = useQuery({
     queryKey: ['edition-info', contractAddress],
-    enabled: isEditionV1,
+    enabled: isSoundEditionV1,
     async queryFn() {
       if (!contractAddress) return null
 
@@ -55,7 +64,7 @@ export function EditionInfo() {
 
   const { data: tierEditionBaseInfo = null } = useQuery({
     queryKey: ['tier-edition-info', contractAddress],
-    enabled: isEditionV2,
+    enabled: isSoundEditionV2,
     async queryFn() {
       if (!contractAddress) return null
 
@@ -67,7 +76,7 @@ export function EditionInfo() {
 
   const { data: tieredSchedules = null } = useQuery({
     queryKey: ['tier-schedules', contractAddress],
-    enabled: isEditionV2,
+    enabled: isSoundEditionV2,
     async queryFn() {
       if (!contractAddress) return null
 
@@ -79,7 +88,7 @@ export function EditionInfo() {
 
   const { data: samAddress = null } = useQuery({
     queryKey: ['edition-sam-address', contractAddress],
-    enabled: isEditionV1,
+    enabled: isSoundEditionV1,
     async queryFn() {
       if (!contractAddress) return null
 
@@ -91,7 +100,7 @@ export function EditionInfo() {
 
   const { data: samTotalBuyPrice = null } = useQuery({
     queryKey: ['edition-buy-sam-price', contractAddress, samAddress],
-    enabled: isEditionV1,
+    enabled: isSoundEditionV1,
     async queryFn() {
       if (!samAddress || !contractAddress) return null
 
@@ -115,7 +124,7 @@ export function EditionInfo() {
       activeGASchedule?.scheduleNum,
       wallet?.account.address,
     ],
-    enabled: isEditionV2,
+    enabled: isSoundEditionV2,
     async queryFn() {
       if (!contractAddress || !wallet || !activeGASchedule) return null
 

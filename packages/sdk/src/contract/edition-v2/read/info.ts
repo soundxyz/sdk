@@ -4,6 +4,7 @@ import { getTierCurrentMaxMintable } from './helpers'
 import { SUPER_MINTER_ABI, SUPER_MINTER_ADDRESS } from '../abi/super-minter'
 import { nowUnixTimestamp } from '../../../utils/helpers'
 import { curry } from '../../../utils/helpers'
+import { isSoundV2 } from './interface'
 
 export type GetEditionContractInfoParams = {
   edition: Address
@@ -170,6 +171,8 @@ export function editionV2PublicActionsInfo<
   return {
     editionV2: {
       ...client.editionV2,
+      isSoundV2: curry(isSoundV2)(client),
+
       info: curry(editionContractInfo)(client),
       mintSchedules: curry(mintingSchedules)(client),
     },

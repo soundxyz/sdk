@@ -1,4 +1,4 @@
-import type { MerkleProofProvider } from '../utils/types'
+import type { MerkleProvider } from '../utils/types'
 import { string, union, array, object, boolean } from 'zod'
 
 import { UnexpectedLanyardResponse } from '../utils/errors'
@@ -24,7 +24,7 @@ export interface BaseLanyardMerkleProofProvider {
   fetchOptions: Partial<RequestInit>
 }
 
-export const LanyardMerkleProofProvider = {
+export const LanyardMerkleProvider = {
   lanyardAPIEndpoint: new URL('https://lanyard.org/api/v1/proof'),
   fetchOptions: {
     method: 'GET',
@@ -68,4 +68,4 @@ export const LanyardMerkleProofProvider = {
 
     return null
   },
-} satisfies BaseLanyardMerkleProofProvider & MerkleProofProvider
+} satisfies BaseLanyardMerkleProofProvider & MerkleProvider

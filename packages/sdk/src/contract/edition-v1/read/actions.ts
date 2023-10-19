@@ -8,7 +8,7 @@ import {
   numberMinted,
   numberOfTokensOwned,
 } from './mint'
-import { isSoundV1_2_OrGreater } from './interface'
+import { isSoundV1, isSoundV1_2 } from './interface'
 import {
   SamBuyParameters,
   SamContractAddress,
@@ -39,7 +39,8 @@ export function editionV1PublicActions<
       mintParameters: curry(editionMintParameters)(client)({ merkleProvider: client.merkleProvider }),
       mintToParameters: curry(editionMintToParameters)(client)({ merkleProvider: client.merkleProvider }),
 
-      isSoundV1_2_OrGreater: curry(isSoundV1_2_OrGreater)(client),
+      isSoundV1: curry(isSoundV1)(client),
+      isSoundV1_2: curry(isSoundV1_2)(client),
 
       scheduleIds: curry(editionScheduleIds)(client),
       editionMintSchedules: curry(editionMintSchedules)(client),
