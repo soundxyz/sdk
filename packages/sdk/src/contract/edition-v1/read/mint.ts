@@ -1,8 +1,8 @@
 import type { Account, Address, Chain, Hex, PublicClient } from 'viem'
 import { soundEditionV1_2Abi } from '../abi/sound-edition-v1_2'
 import { minterAbiMap, type MintSchedule } from './schedules'
-import type { MerkleProvider, TransactionGasOptions } from '../../../utils/types'
-import { interfaceIds } from '../../interfaceIds'
+import type { MerkleProvider, TransactionGasOptions, TypeFromUnion } from '../../../utils/types'
+import { interfaceIds } from '../interfaceIds'
 import {
   BigIntMax,
   BigIntMin,
@@ -206,7 +206,6 @@ export async function editionMintParameters<
   if (eligibleMintQuantity < quantity) {
     return {
       interfaceId: mintSchedule.interfaceId,
-      abi: minterAbiMap[mintSchedule.interfaceId],
 
       mint: {
         type: 'not-eligible',
@@ -243,11 +242,12 @@ export async function editionMintParameters<
       }
 
       return {
-        interfaceId: interfaceIds.IRangeEditionMinter,
-        abi,
+        interfaceId,
         mint: {
           type: 'mint',
+          interfaceId,
           input: {
+            abi,
             args,
             ...sharedWriteContractParameters,
             ...txnOverrides,
@@ -270,7 +270,6 @@ export async function editionMintParameters<
 
       if (!proof?.length) {
         return {
-          abi,
           interfaceId,
           mint: {
             type: 'not-eligible',
@@ -299,11 +298,12 @@ export async function editionMintParameters<
       }
 
       return {
-        abi,
         interfaceId,
         mint: {
           type: 'mint',
+          interfaceId,
           input: {
+            abi,
             args,
             ...sharedWriteContractParameters,
             ...txnOverrides,
@@ -355,7 +355,6 @@ export async function editionMintToParameters<
   if (eligibleMintQuantity < quantity) {
     return {
       interfaceId: mintSchedule.interfaceId,
-      abi: minterAbiMap[mintSchedule.interfaceId],
 
       mint: {
         type: 'not-eligible',
@@ -416,11 +415,12 @@ export async function editionMintToParameters<
       }
 
       return {
-        interfaceId: interfaceIds.IRangeEditionMinterV2_1,
-        abi,
+        interfaceId,
         mint: {
           type: 'mint',
+          interfaceId,
           input: {
+            abi,
             args,
             ...sharedWriteContractParameters,
             ...txnOverrides,
@@ -442,7 +442,6 @@ export async function editionMintToParameters<
 
       if (!proof?.length) {
         return {
-          abi,
           interfaceId,
           mint: {
             type: 'not-eligible',
@@ -481,11 +480,12 @@ export async function editionMintToParameters<
       }
 
       return {
-        abi,
         interfaceId,
         mint: {
           type: 'mint',
+          interfaceId,
           input: {
+            abi,
             args,
             ...sharedWriteContractParameters,
             ...txnOverrides,
@@ -497,12 +497,18 @@ export async function editionMintToParameters<
 
     default: {
       return {
-        abi: minterAbiMap[mintSchedule.interfaceId],
         interfaceId: mintSchedule.interfaceId,
         mint: {
-          type: 'not-eligible',
+          type: 'not-compatible',
         },
       } as const satisfies MintParameters
     }
   }
 }
+
+export type EditionMintContractInput = TypeFromUnion<Awaited<ReturnType<typeof editionMintParameters>>['mint'], 'mint'>
+
+export type EditionMintToContractInput = TypeFromUnion<
+  Awaited<ReturnType<typeof editionMintToParameters>>['mint'],
+  'mint'
+>

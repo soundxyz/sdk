@@ -1,12 +1,13 @@
-import type { Account, Chain, Hex } from 'viem'
+import type { Account, Address, Chain, Hex } from 'viem'
 
 export interface MintParameters {
   readonly interfaceId?: Hex
-  readonly abi: unknown
   readonly mint:
     | {
         readonly type: 'mint'
+        readonly interfaceId?: Hex
         readonly input: {
+          readonly abi: unknown
           readonly args: readonly unknown[]
           readonly account: `0x${string}` | Account
           readonly address: `0x${string}`
@@ -17,6 +18,11 @@ export interface MintParameters {
         readonly gasEstimate: bigint | null
       }
     | {
-        readonly type: 'not-eligible'
+        readonly type: 'not-eligible' | 'not-compatible'
       }
+}
+
+export type ContractCall = {
+  contractAddress: Address
+  calldata: Address
 }

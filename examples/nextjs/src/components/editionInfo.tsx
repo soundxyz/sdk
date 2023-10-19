@@ -1,18 +1,12 @@
 import { useContractAddress } from '@/context/contractAddress'
 import { chain, publicClient } from '@/context/wagmi'
 import { useQuery } from '@tanstack/react-query'
-import { SoundAPI } from '@soundxyz/sdk/api/sound'
 import { useWallet } from '@/context/wallet'
 
 // @ts-expect-error
 BigInt.prototype.toJSON = function () {
   return this.toString()
 }
-
-const soundApi = SoundAPI({
-  apiEndpoint: 'https://preview.api.sound.xyz/graphql',
-  apiKey: 'preview-no-key',
-})
 
 export function EditionInfo() {
   const { contractAddress } = useContractAddress()
@@ -91,13 +85,8 @@ export function EditionInfo() {
     async queryFn() {
       if (!contractAddress || !wallet || !activeGASchedule) return null
 
-      const mintParams = await publicClient.editionV2
-        .mint({
-          merkleProvider: soundApi,
-        })
-        .mintParameters({
-          editionAddress: contractAddress,
-        })({
+      const mintParams = await publicClient.editionV2.mintParameters({
+        editionAddress: contractAddress,
         quantity: 1,
         tier: activeGASchedule.tier,
         chain,
@@ -107,7 +96,12 @@ export function EditionInfo() {
       })
 
       if (mintParams.mint.type === 'mint') {
-        wallet.walletClient.writeContract(mintParams.mint.input).then(console.log).catch(console.error)
+        wallet.walletClient.editionV2
+          .mint(mintParams.mint)
+          .then((transactionHash) => {
+            console.log({ transactionHash })
+          })
+          .catch(console.error)
       }
 
       return {

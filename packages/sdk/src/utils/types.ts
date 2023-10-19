@@ -74,5 +74,15 @@ export declare type PromiseOrValue<T> = T | Promise<T>
 export type FromBlock = bigint | BlockTag
 
 export interface TransactionGasOptions
-  extends Partial<Pick<FeeValuesEIP1559, 'maxFeePerGas' | 'maxPriorityFeePerGas'>>,
-    Pick<TransactionRequestBase, 'gas'> {}
+  extends Readonly<Partial<Pick<FeeValuesEIP1559, 'maxFeePerGas' | 'maxPriorityFeePerGas'>>>,
+    Readonly<Pick<TransactionRequestBase, 'gas'>> {}
+
+export type Prettify<T> = {
+  [K in keyof T]: T[K]
+} & {}
+
+export type TypeFromUnion<Union extends { type: string }, Type extends string> = Union extends {
+  type: Type
+}
+  ? Union
+  : never

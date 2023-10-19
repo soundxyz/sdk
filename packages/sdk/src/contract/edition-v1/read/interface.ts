@@ -1,6 +1,6 @@
 import type { Address, PublicClient } from 'viem'
 import { soundEditionV1_2Abi } from '../abi/sound-edition-v1_2'
-import { interfaceIds } from '../../interfaceIds'
+import { interfaceIds } from '../interfaceIds'
 
 export function isSoundV1_2_OrGreater<Client extends Pick<PublicClient, 'readContract'>>(
   client: Client,
