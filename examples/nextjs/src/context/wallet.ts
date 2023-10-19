@@ -6,6 +6,7 @@ import { RPC_URL, chain } from './wagmi'
 import { PersistenceStorage } from '@/lib/persistence'
 import { string } from 'zod'
 import { onHydration, useHydration } from './hydration'
+import { editionV1WalletActions, editionV2WalletActionsCreate, editionV2WalletActionsMint } from '@soundxyz/sdk'
 
 const WalletInput = proxy({
   privateKey: '',
@@ -58,6 +59,9 @@ const WalletState = derive({
       account,
       chain,
     })
+      .extend(editionV1WalletActions)
+      .extend(editionV2WalletActionsCreate)
+      .extend(editionV2WalletActionsMint)
 
     return {
       walletClient,
