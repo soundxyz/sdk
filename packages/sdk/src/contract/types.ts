@@ -7,6 +7,7 @@ export interface MintParameters {
     | {
         readonly type: 'mint'
         readonly input: {
+          readonly abi: unknown
           readonly args: readonly unknown[]
           readonly account: `0x${string}` | Account
           readonly address: `0x${string}`

@@ -1,7 +1,7 @@
 import type { Account, Address, Chain, Hex, PublicClient } from 'viem'
 import { soundEditionV1_2Abi } from '../abi/sound-edition-v1_2'
 import { minterAbiMap, type MintSchedule } from './schedules'
-import type { MerkleProvider, TransactionGasOptions } from '../../../utils/types'
+import type { MerkleProvider, TransactionGasOptions, TypeFromUnion } from '../../../utils/types'
 import { interfaceIds } from '../../interfaceIds'
 import {
   BigIntMax,
@@ -248,6 +248,7 @@ export async function editionMintParameters<
         mint: {
           type: 'mint',
           input: {
+            abi,
             args,
             ...sharedWriteContractParameters,
             ...txnOverrides,
@@ -304,6 +305,7 @@ export async function editionMintParameters<
         mint: {
           type: 'mint',
           input: {
+            abi,
             args,
             ...sharedWriteContractParameters,
             ...txnOverrides,
@@ -421,6 +423,7 @@ export async function editionMintToParameters<
         mint: {
           type: 'mint',
           input: {
+            abi,
             args,
             ...sharedWriteContractParameters,
             ...txnOverrides,
@@ -486,6 +489,7 @@ export async function editionMintToParameters<
         mint: {
           type: 'mint',
           input: {
+            abi,
             args,
             ...sharedWriteContractParameters,
             ...txnOverrides,
@@ -506,3 +510,13 @@ export async function editionMintToParameters<
     }
   }
 }
+
+export type EditionMintContractInput = TypeFromUnion<
+  Awaited<ReturnType<typeof editionMintParameters>>['mint'],
+  'mint'
+>['input']
+
+export type EditionMintToContractInput = TypeFromUnion<
+  Awaited<ReturnType<typeof editionMintToParameters>>['mint'],
+  'mint'
+>['input']
