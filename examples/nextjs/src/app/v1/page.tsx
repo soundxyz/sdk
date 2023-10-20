@@ -137,7 +137,7 @@ export default function EditionV1Fixed() {
     queryKey: [EDITION_V1, 'info', contractAddress],
     enabled: isSoundEditionV1,
     queryFn() {
-      return publicClient.editionV1.getEditionInfo({
+      return publicClient.editionV1.info({
         editionAddress: contractAddress,
       })
     },
@@ -147,7 +147,7 @@ export default function EditionV1Fixed() {
     queryKey: [EDITION_V1, 'schedules', contractAddress],
     enabled: isSoundEditionV1,
     queryFn() {
-      return publicClient.editionV1.editionMintSchedules({
+      return publicClient.editionV1.mintSchedules({
         editionAddress: contractAddress,
       })
     },

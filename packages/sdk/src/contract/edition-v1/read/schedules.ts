@@ -329,10 +329,8 @@ export async function mintInfosFromMinter<Client extends Pick<PublicClient, 'rea
             editionAddress: editionAddress,
             endTime: scheduleInfo.endTime,
             interfaceId,
-            maxMintable: (unixTimestamp?: number) =>
-              (unixTimestamp || Math.floor(Date.now() / 1000)) < scheduleInfo.cutoffTime
-                ? scheduleInfo.maxMintableUpper
-                : scheduleInfo.maxMintableLower,
+            maxMintable: (unixTimestamp: number = nowUnixTimestamp()) =>
+              unixTimestamp < scheduleInfo.cutoffTime ? scheduleInfo.maxMintableUpper : scheduleInfo.maxMintableLower,
             maxMintableLower: scheduleInfo.maxMintableLower,
             maxMintablePerAccount: scheduleInfo.maxMintablePerAccount,
             maxMintableUpper: scheduleInfo.maxMintableUpper,
@@ -371,10 +369,8 @@ export async function mintInfosFromMinter<Client extends Pick<PublicClient, 'rea
             editionAddress: editionAddress,
             endTime: scheduleInfo.endTime,
             interfaceId,
-            maxMintable: (unixTimestamp?: number) =>
-              (unixTimestamp || Math.floor(Date.now() / 1000)) < scheduleInfo.cutoffTime
-                ? scheduleInfo.maxMintableUpper
-                : scheduleInfo.maxMintableLower,
+            maxMintable: (unixTimestamp: number = nowUnixTimestamp()) =>
+              unixTimestamp < scheduleInfo.cutoffTime ? scheduleInfo.maxMintableUpper : scheduleInfo.maxMintableLower,
             maxMintableLower: scheduleInfo.maxMintableLower,
             maxMintablePerAccount: scheduleInfo.maxMintablePerAccount,
             maxMintableUpper: scheduleInfo.maxMintableUpper,
@@ -404,10 +400,8 @@ export async function mintInfosFromMinter<Client extends Pick<PublicClient, 'rea
             editionAddress: editionAddress,
             endTime: scheduleInfo.endTime,
             interfaceId,
-            maxMintable: (unixTimestamp?: number) =>
-              (unixTimestamp || Math.floor(Date.now() / 1000)) < scheduleInfo.cutoffTime
-                ? scheduleInfo.maxMintableUpper
-                : scheduleInfo.maxMintableLower,
+            maxMintable: (unixTimestamp: number = nowUnixTimestamp()) =>
+              unixTimestamp < scheduleInfo.cutoffTime ? scheduleInfo.maxMintableUpper : scheduleInfo.maxMintableLower,
             maxMintableLower: scheduleInfo.maxMintableLower,
             maxMintablePerAccount: scheduleInfo.maxMintablePerAccount,
             maxMintableUpper: scheduleInfo.maxMintableUpper,

@@ -164,7 +164,7 @@ export default function EditionV2Fixed() {
     enabled: isSoundEditionV2,
     queryFn() {
       return publicClient.editionV2.info({
-        edition: contractAddress,
+        editionAddress: contractAddress,
       })
     },
   })

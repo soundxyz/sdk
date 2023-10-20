@@ -1,7 +1,7 @@
 import type { Address, PublicClient } from 'viem'
 import { soundEditionV1_2Abi } from '../abi/sound-edition-v1_2'
 
-export function getEditionInfo<Client extends Pick<PublicClient, 'readContract'>>(
+export function editionContractInfo<Client extends Pick<PublicClient, 'readContract'>>(
   client: Client,
   {
     editionAddress,

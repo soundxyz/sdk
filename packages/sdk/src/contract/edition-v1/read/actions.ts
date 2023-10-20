@@ -1,6 +1,6 @@
 import type { PublicClient } from 'viem'
 import { curry } from '../../../utils/helpers'
-import { getEditionInfo } from './info'
+import { editionContractInfo } from './info'
 import {
   editionMintParameters,
   editionMintToParameters,
@@ -29,7 +29,7 @@ export function editionV1PublicActions<
   return {
     editionV1: {
       ...client.editionV1,
-      getEditionInfo: curry(getEditionInfo)(client),
+      info: curry(editionContractInfo)(client),
 
       numberOfTokensOwned: curry(numberOfTokensOwned)(client),
       numberMinted: curry(numberMinted)(client),
@@ -43,8 +43,9 @@ export function editionV1PublicActions<
       isSoundV1_2: curry(isSoundV1_2)(client),
 
       scheduleIds: curry(editionScheduleIds)(client),
-      editionMintSchedules: curry(editionMintSchedules)(client),
-      editionMintSchedulesFromIds: curry(editionMintSchedulesFromIds)(client),
+
+      mintSchedules: curry(editionMintSchedules)(client),
+      mintSchedulesFromIds: curry(editionMintSchedulesFromIds)(client),
 
       sam: {
         samAddress: curry(SamContractAddress)(client),
