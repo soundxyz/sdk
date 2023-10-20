@@ -12,8 +12,8 @@ import {
   editionV2PublicActionsMint,
   withMerkleProvider,
 } from '@soundxyz/sdk'
-import { SoundAPI } from '@soundxyz/sdk/api/sound'
 import { soundEditionVersionPublicActions } from '@soundxyz/sdk/contract/version'
+import { soundApi } from './sound'
 
 const PUBLIC_ALCHEMY_KEY = process.env.PUBLIC_ALCHEMY_KEY
 
@@ -24,11 +24,6 @@ export const RPC_URL = IS_PRODUCTION
   : `https://opt-goerli.g.alchemy.com/v2/${PUBLIC_ALCHEMY_KEY}`
 
 export const chain: Chain = IS_PRODUCTION ? optimism : optimismGoerli
-
-export const soundApi = SoundAPI({
-  apiEndpoint: 'https://preview.api.sound.xyz/graphql',
-  apiKey: 'preview-no-key',
-})
 
 export const publicClient = createPublicClient({
   chain,

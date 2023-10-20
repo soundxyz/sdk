@@ -176,7 +176,6 @@ export async function mintEligibility<Client extends Pick<PublicClient, 'multica
 export interface MintTieredEditionArgs extends TransactionGasOptions {
   editionAddress: Address
 
-  tier: number
   account: Address | Account
   mintTo: Address
   quantity: number
@@ -199,7 +198,6 @@ export async function editionMintParameters<
     mintTo,
     quantity,
     schedule,
-    tier,
     account,
     gas,
     maxFeePerGas,
@@ -211,6 +209,8 @@ export async function editionMintParameters<
     attributionId = 0n,
   }: MintTieredEditionArgs,
 ) {
+  const tier = schedule.tier
+
   const eligibility = await mintEligibility(
     client,
     { merkleProvider },

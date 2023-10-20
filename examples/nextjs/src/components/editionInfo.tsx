@@ -1,8 +1,9 @@
 import { useContractAddress } from '@/context/contractAddress'
-import { chain, publicClient, soundApi } from '@/context/wagmi'
+import { chain, publicClient } from '@/context/wagmi'
 import { useQuery } from '@tanstack/react-query'
 import { useWallet } from '@/context/wallet'
 import { useMemo } from 'react'
+import { soundApi } from '@/context/sound'
 
 // @ts-expect-error
 BigInt.prototype.toJSON = function () {
@@ -131,7 +132,6 @@ export function EditionInfo() {
       const mintParams = await publicClient.editionV2.mintParameters({
         editionAddress: contractAddress,
         quantity: 1,
-        tier: activeGASchedule.tier,
         chain,
         mintTo: wallet.account.address,
         schedule: activeGASchedule,
