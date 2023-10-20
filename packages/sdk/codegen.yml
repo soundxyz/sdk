@@ -32,7 +32,7 @@ generates:
         NonEmptyString: 'string'
         URL: 'string'
         EmailAddress: 'string'
-        Address: 'string'
+        Address: '`0x${string }`'
         ENS: 'string'
         JWT: 'string'
         SemanticVersion: 'string'
