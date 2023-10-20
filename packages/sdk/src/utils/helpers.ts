@@ -61,3 +61,44 @@ export function curry<T extends (...args: any[]) => any>(fn: T): Curry<T> {
     }
   } as Curry<T>
 }
+
+async function wait(duration: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, duration))
+}
+
+export interface RetryAsyncOptions {
+  attempts: number
+  interval: number
+
+  onError?: ({ error, currentTry }: { error: unknown; currentTry: number }) => void
+}
+
+export async function retryAsync<T>(
+  fn: (args: { attempt: number; isFinalAttempt: boolean }) => Promise<T>,
+  { attempts, interval, onError }: RetryAsyncOptions,
+): Promise<T> {
+  let currentTry = 0
+  let latestError: unknown
+
+  while (currentTry < attempts) {
+    try {
+      currentTry += 1
+
+      const result = await fn({
+        attempt: currentTry,
+        isFinalAttempt: currentTry === attempts,
+      })
+
+      return result
+    } catch (error) {
+      onError?.({ error, currentTry })
+      latestError = error
+
+      if (currentTry < attempts) {
+        await wait(interval)
+      }
+    }
+  }
+
+  throw latestError || new Error(`Invalid attempts: ${attempts}`)
+}
