@@ -241,9 +241,9 @@ export type GetExpectedEditionAddressReturnType = {
 
 export async function getExpectedEditionAddress<Client extends Pick<PublicClient, 'readContract'>>(
   client: Client,
-  { deployer, salt: customSalt }: GetExpectedEditionAddressParams,
+  { deployer, salt }: GetExpectedEditionAddressParams,
 ): Promise<GetExpectedEditionAddressReturnType> {
-  const formattedSalt = keccak256(customSalt)
+  const formattedSalt = keccak256(salt)
 
   const [edition, exists] = await client.readContract({
     abi: SOUND_CREATOR_V2_ABI,
@@ -266,6 +266,7 @@ export function editionV2PublicActionsCreate<
     editionV2: {
       ...client.editionV2,
       createEditionParameters: curry(createEditionParameters)(client),
+      getExpectedEditionAddress: curry(getExpectedEditionAddress)(client),
     },
   }
 }
