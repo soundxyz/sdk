@@ -132,7 +132,6 @@ export function EditionInfo() {
       const mintParams = await publicClient.editionV2.mintParameters({
         editionAddress: contractAddress,
         quantity: 1,
-        tier: activeGASchedule.tier,
         chain,
         mintTo: wallet.account.address,
         schedule: activeGASchedule,
