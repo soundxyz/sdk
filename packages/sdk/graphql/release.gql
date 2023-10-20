@@ -10,6 +10,26 @@ query SdkReleaseInfo(
 
     auctionContractType
 
+    title
+
+    artist {
+      id
+      name
+      webappUri
+    }
+
+    track {
+      id
+      duration
+      normalizedPeaks
+      audio {
+        audioOriginal {
+          id
+          url
+        }
+      }
+    }
+
     listing {
       __typename
       contractAddress

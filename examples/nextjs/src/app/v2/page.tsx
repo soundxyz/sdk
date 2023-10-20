@@ -94,15 +94,15 @@ function EditionSchedule({ schedule }: { schedule: SuperMinterSchedule }) {
 
   return (
     <div key={schedule.scheduleNum.toString() + schedule.tier.toString()} className="flex flex-col gap-5">
-      <p>
+      <h2>
         {schedule.mode === 'VERIFY_MERKLE'
           ? 'Presale Limited Edition'
           : schedule.tier === 0
           ? 'Forever Edition'
           : 'Limited Edition'}
-      </p>
+      </h2>
 
-      <img className="w-[100px]" src={coverImage} alt="Cover Image" />
+      {coverImage ? <img className="w-[100px]" src={coverImage} alt="Cover Image" /> : null}
 
       {message ? <Text>{message}</Text> : null}
 
