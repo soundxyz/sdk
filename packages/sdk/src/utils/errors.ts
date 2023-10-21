@@ -278,6 +278,7 @@ export class InvalidTxHashError extends Error {
 
 export class InvalidUint32 extends Error {
   readonly field: string
+  readonly value: unknown
 
   constructor(
     {
@@ -289,8 +290,12 @@ export class InvalidUint32 extends Error {
     },
     options?: ErrorOptions,
   ) {
-    super(`Invalid uint32, maximum of ${UINT32_MAX} and minimum of 0, but provided ${String(value)}`, options)
+    super(
+      `Invalid uint32 for ${field}, maximum of ${UINT32_MAX} and minimum of 0, but provided ${String(value)}`,
+      options,
+    )
 
     this.field = field
+    this.value = value
   }
 }
