@@ -1,29 +1,25 @@
 'use client'
 
 import { WagmiConfig, createConfig } from 'wagmi'
-import { optimism, optimismGoerli } from 'viem/chains'
+import { optimismGoerli } from 'viem/chains'
 import { createPublicClient, http, type Chain } from 'viem'
 import assert from 'assert'
-import { IS_PRODUCTION } from '@/utils/constants'
 import {
   editionV1PublicActions,
   editionV2PublicActionsCreate,
   editionV2PublicActionsInfo,
   editionV2PublicActionsMint,
   withMerkleProvider,
+  soundEditionVersionPublicActions,
 } from '@soundxyz/sdk'
-import { soundEditionVersionPublicActions } from '@soundxyz/sdk/contract/version'
 import { soundApi } from './sound'
 
 const PUBLIC_ALCHEMY_KEY = process.env.PUBLIC_ALCHEMY_KEY
 
 assert(PUBLIC_ALCHEMY_KEY, 'Missing public alchemy key')
 
-export const RPC_URL = IS_PRODUCTION
-  ? `https://opt-mainnet.g.alchemy.com/v2/${PUBLIC_ALCHEMY_KEY}`
-  : `https://opt-goerli.g.alchemy.com/v2/${PUBLIC_ALCHEMY_KEY}`
-
-export const chain: Chain = IS_PRODUCTION ? optimism : optimismGoerli
+export const RPC_URL = `https://opt-goerli.g.alchemy.com/v2/${PUBLIC_ALCHEMY_KEY}`
+export const chain: Chain = optimismGoerli
 
 export const publicClient = createPublicClient({
   chain,

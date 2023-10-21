@@ -6,10 +6,6 @@ import { nowUnixTimestamp } from '../../../utils/helpers'
 import { curry } from '../../../utils/helpers'
 import { isSoundV2 } from './interface'
 
-export type GetEditionContractInfoParams = {
-  edition: Address
-}
-
 export type GetEditionContractInfoReturnType = {
   baseURI: string
   contractURI: string
@@ -40,11 +36,15 @@ export type GetEditionContractInfoReturnType = {
 
 export async function editionContractInfo<Client extends Pick<PublicClient, 'readContract'>>(
   client: Client,
-  { edition }: GetEditionContractInfoParams,
+  {
+    editionAddress,
+  }: {
+    editionAddress: Address
+  },
 ): Promise<GetEditionContractInfoReturnType> {
   const data = await client.readContract({
     abi: SOUND_EDITION_V2_ABI,
-    address: edition,
+    address: editionAddress,
     functionName: 'editionInfo',
   })
 

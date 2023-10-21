@@ -1,4 +1,4 @@
-import { IS_PRODUCTION, IS_SERVER } from '@/utils/constants'
+import { IS_SERVER } from '@/utils/constants'
 import type { Draft } from 'immer'
 import { produce } from 'immer'
 import { parse, stringify } from 'superjson'
@@ -46,7 +46,7 @@ export function PersistenceStorage<Output = unknown, Input = Output, Def extends
     isLoading: true,
   })
 
-  const key = `sound-${IS_PRODUCTION ? 1 : 0}-${idempotentStoreKey}`
+  const key = `sound-${idempotentStoreKey}`
 
   async function get(): Promise<Output | null> {
     if (IS_SERVER) return null

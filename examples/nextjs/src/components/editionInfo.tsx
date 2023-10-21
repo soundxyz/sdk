@@ -57,7 +57,7 @@ export function EditionInfo() {
     async queryFn() {
       if (!contractAddress) return null
 
-      return publicClient.editionV1.getEditionInfo({
+      return publicClient.editionV1.info({
         editionAddress: contractAddress,
       })
     },
@@ -70,7 +70,7 @@ export function EditionInfo() {
       if (!contractAddress) return null
 
       return publicClient.editionV2.info({
-        edition: contractAddress,
+        editionAddress: contractAddress,
       })
     },
   })
@@ -105,10 +105,9 @@ export function EditionInfo() {
     async queryFn() {
       if (!samAddress || !contractAddress) return null
 
-      return publicClient.editionV1.sam.buy.buyPrice({
+      return publicClient.editionV1.sam.buyPrice({
         editionAddress: contractAddress,
         samAddress,
-      })({
         offset: 0,
         quantity: 1,
       })

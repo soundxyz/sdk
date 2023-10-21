@@ -6,5 +6,6 @@ export {
   editionV2PublicActionsMint,
   editionV2WalletActionsCreate,
   editionV2WalletActionsMint,
+  soundEditionVersionPublicActions,
 } from './contract/main'
 export { withMerkleProvider } from './merkle'

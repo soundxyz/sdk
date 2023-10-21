@@ -10,6 +10,7 @@ import {
   MINT_GAS_LIMIT_MULTIPLIER,
   NULL_ADDRESS,
   exhaustiveGuard,
+  nowUnixTimestamp,
   scaleAmount,
 } from '../../../utils/helpers'
 import { InvalidQuantityError } from '../../../utils/errors'
@@ -50,7 +51,7 @@ export async function eligibleQuantity<Client extends Pick<PublicClient, 'multic
   },
   {
     mintSchedule,
-    timestamp = Math.floor(Date.now() / 1000),
+    timestamp = nowUnixTimestamp(),
     userAddress,
   }: {
     mintSchedule: MintSchedule

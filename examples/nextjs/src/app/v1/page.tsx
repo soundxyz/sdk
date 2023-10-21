@@ -101,7 +101,12 @@ function EditionSchedule({ schedule }: { schedule: MintSchedule }) {
 
       <Box className="flex flex-row gap-2">
         <Text>Quantity</Text>
-        <TextFieldInput value={quantity} type="number" onChange={(ev) => setQuantity(ev.target.valueAsNumber)} />
+        <TextFieldInput
+          min={1}
+          value={quantity}
+          type="number"
+          onChange={(ev) => setQuantity(ev.target.valueAsNumber)}
+        />
       </Box>
 
       {mintParameters?.mint.type === 'mint' && <Text>Price {formatEther(mintParameters.mint.input.value)} ETH</Text>}
@@ -137,7 +142,7 @@ export default function EditionV1Fixed() {
     queryKey: [EDITION_V1, 'info', contractAddress],
     enabled: isSoundEditionV1,
     queryFn() {
-      return publicClient.editionV1.getEditionInfo({
+      return publicClient.editionV1.info({
         editionAddress: contractAddress,
       })
     },
@@ -147,7 +152,7 @@ export default function EditionV1Fixed() {
     queryKey: [EDITION_V1, 'schedules', contractAddress],
     enabled: isSoundEditionV1,
     queryFn() {
-      return publicClient.editionV1.editionMintSchedules({
+      return publicClient.editionV1.mintSchedules({
         editionAddress: contractAddress,
       })
     },
