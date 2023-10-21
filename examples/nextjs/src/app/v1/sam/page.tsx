@@ -17,7 +17,7 @@ import assert from 'assert'
 import { useState } from 'react'
 import { formatEther } from 'viem'
 
-export const contractAddress = '0x0638741d244b7896a6527bd79a699335aa81831d'
+const contractAddress = '0x0638741d244b7896a6527bd79a699335aa81831d'
 
 const EDITION_V1 = 'edition-v1'
 
