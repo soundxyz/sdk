@@ -46,6 +46,9 @@ importers:
       '@typescript-eslint/parser':
         specifier: ^6.8.0
         version: 6.8.0(eslint@8.51.0)(typescript@5.2.2)
+      changesets-github-release:
+        specifier: ^0.1.0
+        version: 0.1.0
       dotenv-vault:
         specifier: ^1.25.0
         version: 1.25.0(@types/node@20.8.6)(typescript@5.2.2)
