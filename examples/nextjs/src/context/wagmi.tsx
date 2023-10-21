@@ -19,6 +19,7 @@ const PUBLIC_ALCHEMY_KEY = process.env.PUBLIC_ALCHEMY_KEY
 assert(PUBLIC_ALCHEMY_KEY, 'Missing public alchemy key')
 
 export const RPC_URL = `https://opt-goerli.g.alchemy.com/v2/${PUBLIC_ALCHEMY_KEY}`
+
 export const chain: Chain = optimismGoerli
 
 export const publicClient = createPublicClient({

@@ -5,7 +5,7 @@ import { Embed } from '@/components/iframe'
 import { Spinner } from '@/components/spinner'
 import { WalletPrivateKeyInput } from '@/components/walletInput'
 import { soundApi } from '@/context/sound'
-import { chain, publicClient } from '@/context/wagmi'
+import { publicClient } from '@/context/wagmi'
 import { useWallet } from '@/context/wallet'
 import { useEditionVersion } from '@/hooks/edition'
 import { Box, Button, Link, Text, TextFieldInput } from '@radix-ui/themes'
@@ -14,8 +14,8 @@ import { useMutation, useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import assert from 'assert'
 import { queryClient } from '@/context/reactQuery'
-import { retryAsync } from '@soundxyz/sdk/utils/helpers'
 import { formatEther } from 'viem'
+import { retryAsync } from '@soundxyz/sdk'
 
 const contractAddress = '0x946bba3ab4fa3931850390df93a070295c78e433'
 
@@ -24,7 +24,9 @@ const EDITION_V1 = 'edition-v1'
 function EditionSchedule({ schedule }: { schedule: MintSchedule }) {
   const { wallet } = useWallet()
 
-  const [quantity, setQuantity] = useState(1)
+  const [quantityInput, setQuantity] = useState(1)
+
+  const quantity = Number.isSafeInteger(quantityInput) && quantityInput > 0 ? quantityInput : null
 
   const [message, setMessage] = useState('')
 
@@ -40,24 +42,20 @@ function EditionSchedule({ schedule }: { schedule: MintSchedule }) {
     queryFn() {
       if (!wallet) return undefined
 
-      const quantityNumber = Number.isSafeInteger(quantity) ? quantity : null
-
-      if (!quantityNumber || quantityNumber < 0) return undefined
+      if (!quantity) return undefined
 
       return publicClient.editionV1.mintParameters({
         account: wallet.account,
-        chain: chain,
+        chain: wallet.walletClient.chain,
         mintSchedule: schedule,
-        quantity: quantityNumber,
+        quantity,
       })
     },
   })
 
   const { mutate, isPending, error } = useMutation({
-    async mutationFn({ quantity }: { quantity: number }) {
-      assert(wallet)
-
-      assert(mintParameters?.mint.type === 'mint')
+    async mutationFn() {
+      assert(wallet && quantity && mintParameters?.mint.type === 'mint')
 
       setMessage('Minting...')
 
@@ -103,7 +101,7 @@ function EditionSchedule({ schedule }: { schedule: MintSchedule }) {
         <Text>Quantity</Text>
         <TextFieldInput
           min={1}
-          value={quantity}
+          value={quantityInput}
           type="number"
           onChange={(ev) => setQuantity(ev.target.valueAsNumber)}
         />
@@ -122,11 +120,7 @@ function EditionSchedule({ schedule }: { schedule: MintSchedule }) {
         disabled={mintParameters?.mint.type !== 'mint' || isPending}
         className="cursor-pointer"
         type="button"
-        onClick={() =>
-          mutate({
-            quantity,
-          })
-        }
+        onClick={() => mutate()}
       >
         Mint
       </Button>

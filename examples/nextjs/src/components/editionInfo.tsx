@@ -1,5 +1,5 @@
 import { useContractAddress } from '@/context/contractAddress'
-import { chain, publicClient } from '@/context/wagmi'
+import { publicClient } from '@/context/wagmi'
 import { useQuery } from '@tanstack/react-query'
 import { useWallet } from '@/context/wallet'
 import { useMemo } from 'react'
@@ -131,7 +131,7 @@ export function EditionInfo() {
       const mintParams = await publicClient.editionV2.mintParameters({
         editionAddress: contractAddress,
         quantity: 1,
-        chain,
+        chain: wallet.walletClient.chain,
         mintTo: wallet.account.address,
         schedule: activeGASchedule,
         account: wallet.account,

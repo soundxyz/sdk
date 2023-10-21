@@ -9,3 +9,4 @@ export {
   soundEditionVersionPublicActions,
 } from './contract/main'
 export { withMerkleProvider } from './merkle'
+export { retryAsync } from './utils/helpers'

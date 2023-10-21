@@ -6,7 +6,7 @@ import { Spinner } from '@/components/spinner'
 import { WalletPrivateKeyInput } from '@/components/walletInput'
 import { queryClient } from '@/context/reactQuery'
 import { soundApi } from '@/context/sound'
-import { chain, publicClient } from '@/context/wagmi'
+import { publicClient } from '@/context/wagmi'
 import { useWallet } from '@/context/wallet'
 import { useEditionVersion } from '@/hooks/edition'
 import { Box, Button, Link, Text, TextFieldInput } from '@radix-ui/themes'
@@ -24,24 +24,22 @@ const EDITION_V2 = 'edition-v2'
 function EditionSchedule({ schedule }: { schedule: SuperMinterSchedule }) {
   const { wallet } = useWallet()
 
-  const [quantity, setQuantity] = useState(1)
+  const [quantityInput, setQuantity] = useState(1)
+
+  const quantity = Number.isSafeInteger(quantityInput) && quantityInput > 0 ? quantityInput : null
 
   const [message, setMessage] = useState('')
 
   const { data: mintParameters, refetch } = useQuery({
-    queryKey: [EDITION_V2, 'mint-params', schedule.scheduleNum, schedule.tier, wallet?.account.address, quantity],
+    queryKey: [EDITION_V2, 'mint-params', schedule.tier, schedule.scheduleNum, wallet?.account.address, quantity],
     queryFn() {
-      if (!wallet) return undefined
-
-      const quantityNumber = Number.isSafeInteger(quantity) ? quantity : null
-
-      if (!quantityNumber || quantityNumber < 0) return undefined
+      if (!wallet || !quantity) return null
 
       return publicClient.editionV2.mintParameters({
         account: wallet.account,
-        chain,
+        chain: wallet.walletClient.chain,
         schedule,
-        quantity: quantityNumber,
+        quantity,
         editionAddress: contractAddress,
         mintTo: wallet.account.address,
       })
@@ -49,8 +47,8 @@ function EditionSchedule({ schedule }: { schedule: SuperMinterSchedule }) {
   })
 
   const { mutate, isPending, error } = useMutation({
-    async mutationFn({ quantity }: { quantity: number }) {
-      assert(wallet)
+    async mutationFn() {
+      assert(wallet && quantity)
 
       assert(mintParameters?.mint.type === 'mint')
 
@@ -116,7 +114,7 @@ function EditionSchedule({ schedule }: { schedule: SuperMinterSchedule }) {
         <Text>Quantity</Text>
         <TextFieldInput
           min={1}
-          value={quantity}
+          value={quantityInput}
           type="number"
           onChange={(ev) => setQuantity(ev.target.valueAsNumber)}
         />
@@ -135,11 +133,7 @@ function EditionSchedule({ schedule }: { schedule: SuperMinterSchedule }) {
         disabled={mintParameters?.mint.type !== 'mint' || isPending}
         className="cursor-pointer"
         type="button"
-        onClick={() =>
-          mutate({
-            quantity,
-          })
-        }
+        onClick={() => mutate()}
       >
         Mint
       </Button>
