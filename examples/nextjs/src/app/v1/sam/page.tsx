@@ -157,7 +157,11 @@ export default function EditionV1SAM() {
     },
   })
 
-  const { mutate: samBuy, isPending: samBuyIsPending } = useMutation({
+  const {
+    mutate: samBuy,
+    isPending: samBuyIsPending,
+    error: buyError,
+  } = useMutation({
     async mutationFn() {
       assert(samBuyParams?.type === 'mint' && wallet && quantity)
 
@@ -210,7 +214,11 @@ export default function EditionV1SAM() {
     },
   })
 
-  const { mutate: samSell, isPending: samSellIsPending } = useMutation({
+  const {
+    mutate: samSell,
+    isPending: samSellIsPending,
+    error: sellError,
+  } = useMutation({
     async mutationFn() {
       assert(samSellParams?.type === 'available' && wallet && quantity)
 
@@ -267,6 +275,10 @@ export default function EditionV1SAM() {
           <Text>{samAddress}</Text>
           <Text>SAM Supply: {samInfo.supply}</Text>
           {ownedTokens && <Text>Owned Tokens: {ownedTokens.join()}</Text>}
+
+          {buyError ? <Text className="w-[200px] whitespace-pre">Buy Error: {buyError.message}</Text> : null}
+
+          {sellError ? <Text className="w-[200px] whitespace-pre">Sell Error: {sellError.message}</Text> : null}
 
           {message ? <Text>{message}</Text> : null}
 

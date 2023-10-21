@@ -53,7 +53,11 @@ function EditionSchedule({ schedule }: { schedule: MintSchedule }) {
     },
   })
 
-  const { mutate, isPending, error } = useMutation({
+  const {
+    mutate: mint,
+    isPending,
+    error,
+  } = useMutation({
     async mutationFn() {
       assert(wallet && quantity && mintParameters?.mint.type === 'mint')
 
@@ -120,7 +124,7 @@ function EditionSchedule({ schedule }: { schedule: MintSchedule }) {
         disabled={mintParameters?.mint.type !== 'mint' || isPending}
         className="cursor-pointer"
         type="button"
-        onClick={() => mutate()}
+        onClick={() => mint()}
       >
         Mint
       </Button>

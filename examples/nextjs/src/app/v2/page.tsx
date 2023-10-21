@@ -46,7 +46,11 @@ function EditionSchedule({ schedule }: { schedule: SuperMinterSchedule }) {
     },
   })
 
-  const { mutate, isPending, error } = useMutation({
+  const {
+    mutate: mint,
+    isPending: isPendingMint,
+    error,
+  } = useMutation({
     async mutationFn() {
       assert(wallet && quantity)
 
@@ -106,7 +110,7 @@ function EditionSchedule({ schedule }: { schedule: SuperMinterSchedule }) {
 
       {error ? <Text className="w-[200px] whitespace-pre">Error: {error.message}</Text> : null}
 
-      {isPending ? <Spinner /> : null}
+      {isPendingMint ? <Spinner /> : null}
 
       <p>Total Minted: {schedule.minted}</p>
 
@@ -130,10 +134,10 @@ function EditionSchedule({ schedule }: { schedule: SuperMinterSchedule }) {
 
       <Button
         variant="classic"
-        disabled={mintParameters?.mint.type !== 'mint' || isPending}
+        disabled={mintParameters?.mint.type !== 'mint' || isPendingMint}
         className="cursor-pointer"
         type="button"
-        onClick={() => mutate()}
+        onClick={() => mint()}
       >
         Mint
       </Button>
