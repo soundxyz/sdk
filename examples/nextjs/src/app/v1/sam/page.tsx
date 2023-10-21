@@ -124,7 +124,7 @@ export default function EditionV1SAM() {
   const { data: buyPrice } = useQuery({
     queryKey: [EDITION_V1, 'sam-buy-price', contractAddress, samAddress, quantity],
     queryFn() {
-      if (!wallet || !samAddress || !quantity) return null
+      if (!samAddress || !quantity) return null
 
       return publicClient.editionV1.sam
         .buyPrice({
