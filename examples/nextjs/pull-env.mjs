@@ -10,3 +10,4 @@ await fetch('https://vault.dotenv.org/pull.txt', {
 })
   .then((response) => response.text())
   .then((env) => promises.writeFile('.env', env))
+  .catch(console.error)

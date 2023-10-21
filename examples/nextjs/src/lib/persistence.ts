@@ -1,6 +1,4 @@
 import { IS_SERVER } from '@/utils/constants'
-import type { Draft } from 'immer'
-import { produce } from 'immer'
 import { parse, stringify } from 'superjson'
 import { proxy, useSnapshot, type INTERNAL_Snapshot } from 'valtio'
 
@@ -16,7 +14,6 @@ export type PersistedStore<Input, Output> = {
   set: (value: Input) => Promise<Output | null>
   state: PersistedStoreState<Output>
   clear(): Promise<void>
-  produceExistingState(callback: (draft: Draft<Output>) => void): void | Promise<Output | null>
   useStore: () => INTERNAL_Snapshot<PersistedStoreState<Output>>
 }
 
@@ -111,23 +108,6 @@ export function PersistenceStorage<Output = unknown, Input = Output, Def extends
     }
   }
 
-  function produceExistingState(callback: (draft: Draft<Output>) => void): void | Promise<Output | null> {
-    if (IS_SERVER) return
-
-    if (state.value == null) {
-      throw Error(`Unexpected empty persisted store state for ${key}`)
-    }
-
-    const newState = produce(state.value, callback)
-
-    // Skip persisting if the value didn't change
-    if (newState === state.value) return
-
-    state.value = newState
-
-    return setStorage(newState)
-  }
-
   const store: PersistedStore<Input, Output> = {
     get,
     set,
@@ -136,7 +116,6 @@ export function PersistenceStorage<Output = unknown, Input = Output, Def extends
     useStore() {
       return useSnapshot(state)
     },
-    produceExistingState,
   }
 
   PersistedStores.set(idempotentStoreKey, store as PersistedStore<unknown, unknown>)
