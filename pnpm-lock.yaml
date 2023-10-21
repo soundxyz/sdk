@@ -125,12 +125,6 @@ importers:
 
   examples/nextjs:
     dependencies:
-      '@fortawesome/free-solid-svg-icons':
-        specifier: ^6.4.2
-        version: 6.4.2
-      '@fortawesome/react-fontawesome':
-        specifier: ^0.2.0
-        version: 0.2.0(@fortawesome/fontawesome-svg-core@6.4.2)(react@18.2.0)
       '@radix-ui/themes':
         specifier: ^2.0.0
         version: 2.0.0(@types/react-dom@18.2.13)(@types/react@18.2.28)(react-dom@18.2.0)(react@18.2.0)
@@ -140,9 +134,6 @@ importers:
       '@tanstack/react-query':
         specifier: ^5.0.0
         version: 5.0.0(react-dom@18.2.0)(react@18.2.0)
-      immer:
-        specifier: ^10.0.3
-        version: 10.0.3
       next:
         specifier: 13.5.5
         version: 13.5.5(react-dom@18.2.0)(react@18.2.0)
@@ -166,7 +157,7 @@ importers:
         version: 1.16.6(typescript@5.2.2)(zod@3.22.4)
       wagmi:
         specifier: ^1.4.4
-        version: 1.4.4(@types/react@18.2.28)(immer@10.0.3)(react-dom@18.2.0)(react@18.2.0)(typescript@5.2.2)(viem@1.16.6)(zod@3.22.4)
+        version: 1.4.4(@types/react@18.2.28)(react-dom@18.2.0)(react@18.2.0)(typescript@5.2.2)(viem@1.16.6)(zod@3.22.4)
       zod:
         specifier: ^3.22.4
         version: 3.22.4
@@ -2390,39 +2381,6 @@ packages:
 
   /@floating-ui/utils@0.1.6:
     resolution: {integrity: sha512-OfX7E2oUDYxtBvsuS4e/jSn4Q9Qb6DzgeYtsAdkPZ47znpoNsMgZw0+tVijiv3uGNR6dgNlty6r9rzIzHjtd/A==}
-    dev: false
-
-  /@fortawesome/fontawesome-common-types@6.4.2:
-    resolution: {integrity: sha512-1DgP7f+XQIJbLFCTX1V2QnxVmpLdKdzzo2k8EmvDOePfchaIGQ9eCHj2up3/jNEbZuBqel5OxiaOJf37TWauRA==}
-    engines: {node: '>=6'}
-    requiresBuild: true
-    dev: false
-
-  /@fortawesome/fontawesome-svg-core@6.4.2:
-    resolution: {integrity: sha512-gjYDSKv3TrM2sLTOKBc5rH9ckje8Wrwgx1CxAPbN5N3Fm4prfi7NsJVWd1jklp7i5uSCVwhZS5qlhMXqLrpAIg==}
-    engines: {node: '>=6'}
-    requiresBuild: true
-    dependencies:
-      '@fortawesome/fontawesome-common-types': 6.4.2
-    dev: false
-
-  /@fortawesome/free-solid-svg-icons@6.4.2:
-    resolution: {integrity: sha512-sYwXurXUEQS32fZz9hVCUUv/xu49PEJEyUOsA51l6PU/qVgfbTb2glsTEaJngVVT8VqBATRIdh7XVgV1JF1LkA==}
-    engines: {node: '>=6'}
-    requiresBuild: true
-    dependencies:
-      '@fortawesome/fontawesome-common-types': 6.4.2
-    dev: false
-
-  /@fortawesome/react-fontawesome@0.2.0(@fortawesome/fontawesome-svg-core@6.4.2)(react@18.2.0):
-    resolution: {integrity: sha512-uHg75Rb/XORTtVt7OS9WoK8uM276Ufi7gCzshVWkUJbHhh3svsUUeqXerrM96Wm7fRiDzfKRwSoahhMIkGAYHw==}
-    peerDependencies:
-      '@fortawesome/fontawesome-svg-core': ~1 || ~6
-      react: '>=16.3'
-    dependencies:
-      '@fortawesome/fontawesome-svg-core': 6.4.2
-      prop-types: 15.8.1
-      react: 18.2.0
     dev: false
 
   /@ganache/ethereum-address@0.1.4:
@@ -6307,7 +6265,7 @@ packages:
       - zod
     dev: false
 
-  /@wagmi/core@1.4.4(@types/react@18.2.28)(immer@10.0.3)(react@18.2.0)(typescript@5.2.2)(viem@1.16.6)(zod@3.22.4):
+  /@wagmi/core@1.4.4(@types/react@18.2.28)(react@18.2.0)(typescript@5.2.2)(viem@1.16.6)(zod@3.22.4):
     resolution: {integrity: sha512-38Pa5iH9/2zHX837vYm6M+c//BBikt6vKJqUiEgkIzSqFvlfzbxaNmwybpIxl98N5r+X22C3yHv5bboO9eP0vQ==}
     peerDependencies:
       typescript: '>=5.0.4'
@@ -6321,7 +6279,7 @@ packages:
       eventemitter3: 4.0.7
       typescript: 5.2.2
       viem: 1.16.6(typescript@5.2.2)(zod@3.22.4)
-      zustand: 4.4.3(@types/react@18.2.28)(immer@10.0.3)(react@18.2.0)
+      zustand: 4.4.3(@types/react@18.2.28)(react@18.2.0)
     transitivePeerDependencies:
       - '@react-native-async-storage/async-storage'
       - '@types/react'
@@ -10479,10 +10437,6 @@ packages:
     resolution: {integrity: sha512-HR7EVodfFUdQCTIeySw+WDRFJlPcLOJbXfwwZ7Oom6tjsvZ3bOkCDJHehQC3nxJrv7+f9XecwazynjU8e4Vw3Q==}
     dev: true
 
-  /immer@10.0.3:
-    resolution: {integrity: sha512-pwupu3eWfouuaowscykeckFmVTpqbzW+rXFCX8rQLkZzM9ftBmU/++Ra+o+L27mz03zJTlyV4UUr+fdKNffo4A==}
-    dev: false
-
   /immutable@3.7.6:
     resolution: {integrity: sha512-AizQPcaofEtO11RZhPPHBOJRdo/20MKQF9mBLnVkBoyHi1/zXK8fzVdnEpSV9gxqtnh6Qomfp3F0xT5qP/vThw==}
     engines: {node: '>=0.8.0'}
@@ -13021,6 +12975,7 @@ packages:
       loose-envify: 1.4.0
       object-assign: 4.1.1
       react-is: 16.13.1
+    dev: true
 
   /protobufjs@6.11.4:
     resolution: {integrity: sha512-5kQWPaJHi1WoCpjTGszzQ32PG2F4+wRY6BmAT4Vfw56Q2FZ4YZzK20xUYQH4YkfehY1e6QSICrJquM6xXZNcrw==}
@@ -13162,6 +13117,7 @@ packages:
 
   /react-is@16.13.1:
     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}
+    dev: true
 
   /react-is@18.2.0:
     resolution: {integrity: sha512-xWGDIW6x921xtzPkhiULtthJHoJvBbF3q26fzloPCK0hsvxtPVelvftw3zjbHWSkR2km9Z+4uxbDDK/6Zw9B8w==}
@@ -15149,7 +15105,7 @@ packages:
     hasBin: true
     dev: true
 
-  /wagmi@1.4.4(@types/react@18.2.28)(immer@10.0.3)(react-dom@18.2.0)(react@18.2.0)(typescript@5.2.2)(viem@1.16.6)(zod@3.22.4):
+  /wagmi@1.4.4(@types/react@18.2.28)(react-dom@18.2.0)(react@18.2.0)(typescript@5.2.2)(viem@1.16.6)(zod@3.22.4):
     resolution: {integrity: sha512-uT6GRNrw3WTrdVRQ7wAHiQL2/gaqaUjcEeHRwsbiqrAT9ZfVtZw7uhl+ZueLpem2zFxlR2zhnRMNbAOKD0IcEA==}
     peerDependencies:
       react: '>=17.0.0'
@@ -15162,7 +15118,7 @@ packages:
       '@tanstack/query-sync-storage-persister': 4.36.1
       '@tanstack/react-query': 4.36.1(react-dom@18.2.0)(react@18.2.0)
       '@tanstack/react-query-persist-client': 4.36.1(@tanstack/react-query@4.36.1)
-      '@wagmi/core': 1.4.4(@types/react@18.2.28)(immer@10.0.3)(react@18.2.0)(typescript@5.2.2)(viem@1.16.6)(zod@3.22.4)
+      '@wagmi/core': 1.4.4(@types/react@18.2.28)(react@18.2.0)(typescript@5.2.2)(viem@1.16.6)(zod@3.22.4)
       abitype: 0.8.7(typescript@5.2.2)(zod@3.22.4)
       react: 18.2.0
       typescript: 5.2.2
@@ -15601,7 +15557,7 @@ packages:
   /zod@3.22.4:
     resolution: {integrity: sha512-iC+8Io04lddc+mVqQ9AZ7OQ2MrUKGN+oIQyq1vemgt46jwCwLfhq7/pwnBnNXXXZb8VTVLKwp9EDkx+ryxIWmg==}
 
-  /zustand@4.4.3(@types/react@18.2.28)(immer@10.0.3)(react@18.2.0):
+  /zustand@4.4.3(@types/react@18.2.28)(react@18.2.0):
     resolution: {integrity: sha512-oRy+X3ZazZvLfmv6viIaQmtLOMeij1noakIsK/Y47PWYhT8glfXzQ4j0YcP5i0P0qI1A4rIB//SGROGyZhx91A==}
     engines: {node: '>=12.7.0'}
     peerDependencies:
@@ -15617,7 +15573,6 @@ packages:
         optional: true
     dependencies:
       '@types/react': 18.2.28
-      immer: 10.0.3
       react: 18.2.0
       use-sync-external-store: 1.2.0(react@18.2.0)
     dev: false
