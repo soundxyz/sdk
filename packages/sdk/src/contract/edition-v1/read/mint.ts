@@ -3,18 +3,10 @@ import { soundEditionV1_2Abi } from '../abi/sound-edition-v1_2'
 import { minterAbiMap, type MintSchedule } from './schedules'
 import type { MerkleProvider, TransactionGasOptions, TypeFromUnion } from '../../../utils/types'
 import { interfaceIds } from '../interfaceIds'
-import {
-  BigIntMax,
-  BigIntMin,
-  MINT_FALLBACK_GAS_LIMIT,
-  MINT_GAS_LIMIT_MULTIPLIER,
-  NULL_ADDRESS,
-  exhaustiveGuard,
-  nowUnixTimestamp,
-  scaleAmount,
-} from '../../../utils/helpers'
+import { BigIntMax, BigIntMin, exhaustiveGuard, nowUnixTimestamp, scaleAmount } from '../../../utils/helpers'
 import { InvalidQuantityError } from '../../../utils/errors'
 import type { MintParameters } from '../../types'
+import { MINT_FALLBACK_GAS_LIMIT, MINT_GAS_LIMIT_MULTIPLIER, NULL_ADDRESS } from '../../../utils/constants'
 
 export async function numberOfTokensOwned<Client extends Pick<PublicClient, 'readContract'>>(
   client: Client,

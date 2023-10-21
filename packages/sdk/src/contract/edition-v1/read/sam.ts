@@ -1,12 +1,13 @@
 import type { Account, Address, Chain, Hex, PublicClient } from 'viem'
 import { isSoundV1_2 } from './interface'
 import { soundEditionV1_2Abi } from '../abi/sound-edition-v1_2'
-import { MINT_FALLBACK_GAS_LIMIT, MINT_GAS_LIMIT_MULTIPLIER, NULL_ADDRESS, scaleAmount } from '../../../utils/helpers'
+import { scaleAmount } from '../../../utils/helpers'
 import type { TransactionGasOptions, TypeFromUnion } from '../../../utils/types'
 import { samv1Abi } from '../abi/sam-v1'
 import { InvalidOffsetError, InvalidQuantityError, UnsupportedMinterError } from '../../../utils/errors'
 import { interfaceIds } from '../interfaceIds'
 import { samV1_1Abi } from '../abi/sam-v1_1'
+import { MINT_FALLBACK_GAS_LIMIT, MINT_GAS_LIMIT_MULTIPLIER, NULL_ADDRESS } from '../../../utils/constants'
 
 export interface SamEditionAddress {
   editionAddress: Address
