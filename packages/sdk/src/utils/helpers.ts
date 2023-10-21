@@ -34,17 +34,9 @@ export function BigIntMax(...[firstValue, ...values]: NonEmptyArray<bigint>): bi
   return value
 }
 
-export const NULL_ADDRESS = '0x0000000000000000000000000000000000000000'
-
-export const MINT_FALLBACK_GAS_LIMIT = 200_000n
-
 export function scaleAmount({ amount, multiplier }: { amount: bigint; multiplier: number }) {
   return (amount * BigInt(multiplier * 100)) / 100n
 }
-
-export const MINT_GAS_LIMIT_MULTIPLIER = 1.2
-
-export const UINT32_MAX = 4294967295
 
 type Curry<T extends (...args: any[]) => any> = T extends (args: infer A, ...rest: infer Rest) => infer R
   ? Rest extends []

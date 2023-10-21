@@ -1,3 +1,4 @@
+import { UINT32_MAX } from './constants'
 import type { AddressInputType, GraphQLExecutionErrors } from './types'
 import type { ZodError } from 'zod'
 
@@ -272,5 +273,29 @@ export class InvalidTxHashError extends Error {
     super('Must be a valid bytes32 transaction hash')
 
     this.txHash = txHash
+  }
+}
+
+export class InvalidUint32 extends Error {
+  readonly field: string
+  readonly value: unknown
+
+  constructor(
+    {
+      field,
+      value,
+    }: {
+      field: string
+      value: unknown
+    },
+    options?: ErrorOptions,
+  ) {
+    super(
+      `Invalid uint32 for ${field}, maximum of ${UINT32_MAX} and minimum of 0, but provided ${String(value)}`,
+      options,
+    )
+
+    this.field = field
+    this.value = value
   }
 }

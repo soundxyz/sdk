@@ -5,14 +5,9 @@ import { SOUND_EDITION_V2_ABI } from '../abi/sound-edition-v2'
 import { getTierCurrentMaxMintable } from './helpers'
 import type { SuperMinterSchedule } from './info'
 import type { MintParameters } from '../../types'
-import {
-  MINT_FALLBACK_GAS_LIMIT,
-  MINT_GAS_LIMIT_MULTIPLIER,
-  NULL_ADDRESS,
-  UINT32_MAX,
-  scaleAmount,
-} from '../../../utils/helpers'
+import { scaleAmount } from '../../../utils/helpers'
 import { curry } from '../../../utils/helpers'
+import { MINT_FALLBACK_GAS_LIMIT, MINT_GAS_LIMIT_MULTIPLIER, NULL_ADDRESS, UINT32_MAX } from '../../../utils/constants'
 
 export type GetTotalMintPriceAndFeesParams = {
   tier: number

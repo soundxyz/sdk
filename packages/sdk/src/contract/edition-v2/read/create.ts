@@ -16,9 +16,11 @@ import { SUPER_MINTER_ABI, SUPER_MINTER_ADDRESS } from '../abi/super-minter'
 import type { MinterScheduleConfig, TierConfig, TieredEditionConfig } from './info'
 import type { ContractCall } from '../../types'
 import { MINTER_ROLE } from './helpers'
-import { MINT_GAS_LIMIT_MULTIPLIER, NULL_ADDRESS, scaleAmount } from '../../../utils/helpers'
+import { scaleAmount } from '../../../utils/helpers'
 import type { Prettify, TransactionGasOptions } from '../../../utils/types'
 import { curry } from '../../../utils/helpers'
+import { InvalidUint32 } from '../../../utils/errors'
+import { MINT_GAS_LIMIT_MULTIPLIER, NULL_ADDRESS, UINT32_MAX } from '../../../utils/constants'
 
 interface EditionV2EncodeArguments {
   readonly owner: Address | Readonly<Account>
@@ -38,6 +40,12 @@ interface EditionV2EncodeArguments {
 }
 
 export const EMPTY_MERKLE_ROOT = '0x0000000000000000000000000000000000000000000000000000000000000069'
+
+function isValidUint32(value: number) {
+  if (!Number.isSafeInteger(value) || value < 0 || value > UINT32_MAX) return false
+
+  return true
+}
 
 function createTieredEditionArgs({
   owner,
@@ -62,6 +70,34 @@ function createTieredEditionArgs({
 
   // Set up tier schedules on super minter
   for (const mintConfig of mintConfigs) {
+    if (!isValidUint32(mintConfig.startTime)) {
+      throw new InvalidUint32({
+        field: 'mintConfig.startTime',
+        value: mintConfig.startTime,
+      })
+    }
+
+    if (!isValidUint32(mintConfig.endTime)) {
+      throw new InvalidUint32({
+        field: 'mintConfig.endTime',
+        value: mintConfig.endTime,
+      })
+    }
+
+    if (!isValidUint32(mintConfig.maxMintablePerAccount)) {
+      throw new InvalidUint32({
+        field: 'mintConfig.maxMintablePerAccount',
+        value: mintConfig.maxMintablePerAccount,
+      })
+    }
+
+    if (!isValidUint32(mintConfig.maxMintable)) {
+      throw new InvalidUint32({
+        field: 'mintConfig.maxMintable',
+        value: mintConfig.maxMintable,
+      })
+    }
+
     contractCalls.push({
       contractAddress: SUPER_MINTER_ADDRESS,
       calldata: encodeFunctionData({
@@ -145,14 +181,37 @@ function createTieredEditionArgs({
         royaltyBPS: editionConfig.royaltyBPS,
         isCreateTierFrozen: editionConfig.shouldFreezeTierCreation,
         isMetadataFrozen: editionConfig.shouldFreezeMetadata,
-        tierCreations: tierConfigs.map((tierConfig) => ({
-          tier: tierConfig.tier,
-          cutoffTime: tierConfig.cutoffTime,
-          isFrozen: tierConfig.isFrozen,
-          maxMintableLower: tierConfig.maxMintableLower,
-          maxMintableUpper: tierConfig.maxMintableUpper,
-          mintRandomnessEnabled: tierConfig.mintRandomnessEnabled,
-        })),
+        tierCreations: tierConfigs.map((tierConfig) => {
+          if (!isValidUint32(tierConfig.cutoffTime)) {
+            throw new InvalidUint32({
+              field: 'tierConfig.cutoffTime',
+              value: tierConfig.cutoffTime,
+            })
+          }
+
+          if (!isValidUint32(tierConfig.maxMintableLower)) {
+            throw new InvalidUint32({
+              field: 'tierConfig.maxMintableLower',
+              value: tierConfig.maxMintableLower,
+            })
+          }
+
+          if (!isValidUint32(tierConfig.maxMintableUpper)) {
+            throw new InvalidUint32({
+              field: 'tierConfig.maxMintableUpper',
+              value: tierConfig.maxMintableUpper,
+            })
+          }
+
+          return {
+            tier: tierConfig.tier,
+            cutoffTime: tierConfig.cutoffTime,
+            isFrozen: tierConfig.isFrozen,
+            maxMintableLower: tierConfig.maxMintableLower,
+            maxMintableUpper: tierConfig.maxMintableUpper,
+            mintRandomnessEnabled: tierConfig.mintRandomnessEnabled,
+          }
+        }),
       },
     ],
   })
