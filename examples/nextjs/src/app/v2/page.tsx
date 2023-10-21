@@ -114,7 +114,12 @@ function EditionSchedule({ schedule }: { schedule: SuperMinterSchedule }) {
 
       <Box className="flex flex-row gap-2">
         <Text>Quantity</Text>
-        <TextFieldInput value={quantity} type="number" onChange={(ev) => setQuantity(ev.target.valueAsNumber)} />
+        <TextFieldInput
+          min={1}
+          value={quantity}
+          type="number"
+          onChange={(ev) => setQuantity(ev.target.valueAsNumber)}
+        />
       </Box>
 
       {mintParameters?.mint.type === 'mint' && <Text>Price: {formatEther(mintParameters.mint.input.value)} ETH</Text>}

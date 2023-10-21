@@ -24,7 +24,12 @@ export function editionV1PublicActions<
   Client extends Pick<
     PublicClient,
     'readContract' | 'multicall' | 'estimateContractGas' | 'createEventFilter' | 'getFilterLogs'
-  > & { editionV1?: {}; merkleProvider: MerkleProvider },
+  > & {
+    editionV1?: {
+      sam?: {}
+    }
+    merkleProvider: MerkleProvider
+  },
 >(client: Client) {
   return {
     editionV1: {
@@ -48,19 +53,16 @@ export function editionV1PublicActions<
       mintSchedulesFromIds: curry(editionMintSchedulesFromIds)(client),
 
       sam: {
+        ...client.editionV1?.sam,
         samAddress: curry(SamContractAddress)(client),
 
         info: curry(SamEditionInfo)(client),
 
-        sell: {
-          sellParameters: curry(SamSellParameters)(client),
-          sellPrice: curry(SamTotalSellPrice)(client),
-        },
+        sellParameters: curry(SamSellParameters)(client),
+        sellPrice: curry(SamTotalSellPrice)(client),
 
-        buy: {
-          buyParameters: curry(SamBuyParameters)(client),
-          buyPrice: curry(SamTotalBuyPrice)(client),
-        },
+        buyParameters: curry(SamBuyParameters)(client),
+        buyPrice: curry(SamTotalBuyPrice)(client),
       },
     },
   }

@@ -5,12 +5,15 @@
 import { Embed } from '@/components/iframe'
 import { Spinner } from '@/components/spinner'
 import { WalletPrivateKeyInput } from '@/components/walletInput'
+import { queryClient } from '@/context/reactQuery'
 import { soundApi } from '@/context/sound'
 import { publicClient } from '@/context/wagmi'
 import { useWallet } from '@/context/wallet'
 import { useEditionVersion } from '@/hooks/edition'
-import { Box, Link, Text, TextFieldInput } from '@radix-ui/themes'
-import { useQuery } from '@tanstack/react-query'
+import { Box, Button, Link, Text, TextFieldInput } from '@radix-ui/themes'
+import { retryAsync } from '@soundxyz/sdk/utils/helpers'
+import { useMutation, useQuery } from '@tanstack/react-query'
+import assert from 'assert'
 import { useState } from 'react'
 import { formatEther } from 'viem'
 
@@ -66,9 +69,9 @@ export default function EditionV1SAM() {
 
   const { wallet } = useWallet()
 
-  const [quantity, setQuantity] = useState(1)
+  const [quantityInput, setQuantity] = useState(1)
 
-  const quantityNumber = Number.isSafeInteger(quantity) && quantity > 0 ? quantity : null
+  const quantity = Number.isSafeInteger(quantityInput) && quantityInput > 0 ? quantityInput : null
 
   const { data: ownedTokens } = useQuery({
     queryKey: [EDITION_V1, 'owned-tokens', contractAddress, wallet?.account.address],
@@ -82,40 +85,160 @@ export default function EditionV1SAM() {
           sort: {
             serialNumber: 'DESC',
           },
+          filter: {
+            includeGoldenEgg: false,
+          },
         })
         .then((v) => v.data)
     },
+    refetchInterval: 1000,
   })
 
-  const { data: sellPrice } = useQuery({
-    queryKey: [EDITION_V1, 'sam-sell-price', contractAddress, samAddress, quantityNumber],
-    queryFn() {
-      if (!wallet || !samAddress || !quantityNumber) return null
+  const samInfoSupply = samInfo?.supply
+  const ownedTokensLength = ownedTokens?.length
 
-      return publicClient.editionV1.sam.sell.sellPrice({
+  const { data: sellPrice } = useQuery({
+    queryKey: [EDITION_V1, 'sam-sell-price', contractAddress, samAddress, quantity, ownedTokensLength, samInfoSupply],
+    queryFn() {
+      if (
+        !wallet ||
+        !samAddress ||
+        !ownedTokensLength ||
+        !quantity ||
+        ownedTokensLength < quantity ||
+        !samInfoSupply ||
+        samInfoSupply < quantity
+      ) {
+        return null
+      }
+
+      return publicClient.editionV1.sam.sellPrice({
         editionAddress: contractAddress,
         samAddress,
-      })({
-        offset: 1000,
-        quantity: quantityNumber,
+        offset: 0,
+        quantity,
       })
     },
   })
 
   const { data: buyPrice } = useQuery({
-    queryKey: [EDITION_V1, 'sam-buy-price', contractAddress, samAddress, quantityNumber],
+    queryKey: [EDITION_V1, 'sam-buy-price', contractAddress, samAddress, quantity],
     queryFn() {
-      if (!wallet || !samAddress || !quantityNumber) return null
+      if (!wallet || !samAddress || !quantity) return null
 
-      return publicClient.editionV1.sam.buy
+      return publicClient.editionV1.sam
         .buyPrice({
           editionAddress: contractAddress,
           samAddress,
-        })({
-          offset: 1000,
-          quantity: quantityNumber,
+          offset: 0,
+          quantity,
         })
         .then((v) => v.total)
+    },
+  })
+
+  const [message, setMessage] = useState('')
+
+  const { data: samBuyParams } = useQuery({
+    queryKey: [EDITION_V1, 'sam-buy', contractAddress, samAddress, buyPrice?.toString()],
+    queryFn() {
+      if (!wallet || !samAddress || !buyPrice || !quantity) return null
+
+      return publicClient.editionV1.sam.buyParameters({
+        editionAddress: contractAddress,
+        samAddress,
+
+        account: wallet.account,
+        chain: wallet.walletClient.chain,
+        maxTotalValue: buyPrice,
+        mintTo: wallet.account.address,
+        quantity,
+      })
+    },
+  })
+
+  const { mutate: samBuy, isPending: samBuyIsPending } = useMutation({
+    async mutationFn() {
+      assert(samBuyParams?.type === 'mint' && wallet && quantity)
+
+      setMessage(`Buying ${quantity}...`)
+
+      const hash = await wallet.walletClient.editionV1.sam.buy(samBuyParams)
+
+      setMessage('Waiting for transaction...')
+
+      const receipt = await retryAsync(
+        () =>
+          publicClient.getTransactionReceipt({
+            hash,
+          }),
+        {
+          attempts: 10,
+          interval: 500,
+        },
+      )
+
+      setMessage(`- Successfully minted ${quantity} -`)
+
+      if (receipt.status !== 'success') throw Error('Transaction failed')
+    },
+    onSuccess() {
+      queryClient.invalidateQueries({
+        queryKey: [EDITION_V1],
+      })
+    },
+  })
+
+  const tokenIdsToSell = quantity ? ownedTokens?.slice(0, quantity) : null
+
+  const { data: samSellParams } = useQuery({
+    queryKey: [EDITION_V1, 'sam-sell', contractAddress, samAddress, quantity, sellPrice?.toString(), tokenIdsToSell],
+    queryFn() {
+      if (!wallet || !samAddress || !sellPrice || !quantity || !tokenIdsToSell || tokenIdsToSell.length !== quantity)
+        return null
+
+      return publicClient.editionV1.sam.sellParameters({
+        editionAddress: contractAddress,
+        samAddress,
+
+        account: wallet.account,
+        chain: wallet.walletClient.chain,
+
+        minimumPayout: sellPrice,
+        tokenIds: tokenIdsToSell,
+      })
+    },
+  })
+
+  const { mutate: samSell, isPending: samSellIsPending } = useMutation({
+    async mutationFn() {
+      assert(samSellParams?.type === 'available' && wallet && quantity)
+
+      setMessage(`Selling ${quantity}...`)
+
+      const hash = await wallet.walletClient.editionV1.sam.sell(samSellParams)
+
+      setMessage('Waiting for transaction...')
+
+      const receipt = await retryAsync(
+        () =>
+          publicClient.getTransactionReceipt({
+            hash,
+          }),
+        {
+          attempts: 10,
+          interval: 500,
+        },
+      )
+
+      setMessage(`- Successfully sold ${quantity} -`)
+
+      if (receipt.status !== 'success') throw Error('Transaction failed')
+    },
+    onSuccess() {
+      queryClient.invalidateQueries({
+        queryKey: [EDITION_V1],
+      })
     },
   })
 
@@ -130,36 +253,49 @@ export default function EditionV1SAM() {
       ) : (
         <>
           <p>{soundEditionInfo.name}</p>
-
           <Link href={soundEditionApi.data.webappUri} target="_blank">
             {soundEditionApi.data.webappUri}
           </Link>
-
           <div className="w-[600px]">
             <Embed embedUri={soundEditionApi.data.webEmbed} />
           </div>
-
           <Text>Cover Image</Text>
           <img className="w-[100px]" src={soundEditionApi.data.coverImage.url} alt="Cover Image" />
-
           <Text>Golden Egg</Text>
           <img className="w-[100px]" src={soundEditionApi.data.goldenEggImage.url} alt="Egg Game Image" />
-
           <Text>Sam Address</Text>
           <Text>{samAddress}</Text>
-
-          <Text>Supply: {samInfo.supply}</Text>
-
+          <Text>SAM Supply: {samInfo.supply}</Text>
           {ownedTokens && <Text>Owned Tokens: {ownedTokens.join()}</Text>}
+
+          {message ? <Text>{message}</Text> : null}
 
           <Box className="flex flex-row gap-2">
             <Text>Quantity</Text>
-            <TextFieldInput value={quantity} type="number" onChange={(ev) => setQuantity(ev.target.valueAsNumber)} />
+            <TextFieldInput
+              min={1}
+              value={quantityInput}
+              type="number"
+              onChange={(ev) => setQuantity(ev.target.valueAsNumber)}
+            />
           </Box>
+          <Text>Buy Price: {buyPrice ? Number(formatEther(buyPrice)).toPrecision(5) : '...'} ETH</Text>
+          <Button
+            className="!cursor-pointer"
+            disabled={samBuyParams?.type !== 'mint' || samBuyIsPending}
+            onClick={() => samBuy()}
+          >
+            Buy
+          </Button>
+          <Text>Sell Price: {sellPrice ? Number(formatEther(sellPrice)).toPrecision(5) : '...'} ETH</Text>
 
-          {buyPrice != null ? <Text>Buy Price: {Number(formatEther(buyPrice)).toPrecision(5)} ETH</Text> : null}
-
-          {sellPrice != null ? <Text>Sell Price: {Number(formatEther(sellPrice)).toPrecision(5)} ETH</Text> : null}
+          <Button
+            className="!cursor-pointer"
+            disabled={samSellParams?.type !== 'available' || samSellIsPending}
+            onClick={() => samSell()}
+          >
+            Sell
+          </Button>
         </>
       )}
     </main>

@@ -2,7 +2,7 @@ import type { Account, Address, Chain, Hex, PublicClient } from 'viem'
 import { isSoundV1_2 } from './interface'
 import { soundEditionV1_2Abi } from '../abi/sound-edition-v1_2'
 import { MINT_FALLBACK_GAS_LIMIT, MINT_GAS_LIMIT_MULTIPLIER, NULL_ADDRESS, scaleAmount } from '../../../utils/helpers'
-import type { TransactionGasOptions } from '../../../utils/types'
+import type { TransactionGasOptions, TypeFromUnion } from '../../../utils/types'
 import { samv1Abi } from '../abi/sam-v1'
 import { InvalidOffsetError, InvalidQuantityError, UnsupportedMinterError } from '../../../utils/errors'
 import { interfaceIds } from '../interfaceIds'
@@ -13,7 +13,7 @@ export interface SamEditionAddress {
   samAddress: Address
 }
 
-export interface SamBuyOptions extends TransactionGasOptions {
+export interface SamBuyOptions extends TransactionGasOptions, SamEditionAddress {
   account: Address | Account
 
   mintTo: Address
@@ -33,8 +33,8 @@ export interface SamBuyOptions extends TransactionGasOptions {
   chain: Chain
 }
 
-export interface SamSellOptions extends TransactionGasOptions {
-  userAddress: Address
+export interface SamSellOptions extends TransactionGasOptions, SamEditionAddress {
+  account: Address | Account
 
   /**
    * Chain of expected edition to be minted
@@ -67,10 +67,11 @@ export async function SamContractAddress<Client extends Pick<PublicClient, 'read
 
 export async function SamSellParameters<Client extends Pick<PublicClient, 'readContract' | 'estimateContractGas'>>(
   client: Client,
-  { editionAddress, samAddress }: SamEditionAddress,
   {
-    userAddress,
+    editionAddress,
+    samAddress,
 
+    account,
     tokenIds,
 
     minimumPayout,
@@ -100,11 +101,17 @@ export async function SamSellParameters<Client extends Pick<PublicClient, 'readC
 
   const input = {
     abi: samv1Abi,
-    account: userAddress,
+    account,
     address: samAddress,
     chain,
     functionName: 'sell',
-    args: [editionAddress, tokenIdsContract, minimumPayout, userAddress, attributonId],
+    args: [
+      editionAddress,
+      tokenIdsContract,
+      minimumPayout,
+      typeof account === 'string' ? account : account.address,
+      attributonId,
+    ],
     ...txnOverrides,
   } as const
 
@@ -134,8 +141,9 @@ export async function SamSellParameters<Client extends Pick<PublicClient, 'readC
 
 export async function SamBuyParameters<Client extends Pick<PublicClient, 'readContract' | 'estimateContractGas'>>(
   client: Client,
-  { editionAddress, samAddress }: SamEditionAddress,
   {
+    editionAddress,
+    samAddress,
     quantity,
 
     account,
@@ -197,10 +205,14 @@ export async function SamBuyParameters<Client extends Pick<PublicClient, 'readCo
   } as const
 }
 
+export interface SamSellPriceInput extends SamEditionAddress {
+  offset: number
+  quantity: number
+}
+
 export async function SamTotalSellPrice<Client extends Pick<PublicClient, 'readContract'>>(
   client: Client,
-  { editionAddress, samAddress }: SamEditionAddress,
-  { offset, quantity }: { offset: number; quantity: number },
+  { editionAddress, samAddress, offset, quantity }: SamSellPriceInput,
 ) {
   if (typeof quantity !== 'number' || !Number.isInteger(quantity) || quantity <= 0)
     throw new InvalidQuantityError({ quantity })
@@ -215,10 +227,14 @@ export async function SamTotalSellPrice<Client extends Pick<PublicClient, 'readC
   })
 }
 
+export interface SamBuyPriceInput extends SamEditionAddress {
+  offset: number
+  quantity: number
+}
+
 export async function SamTotalBuyPrice<Client extends Pick<PublicClient, 'readContract'>>(
   client: Client,
-  { editionAddress, samAddress }: SamEditionAddress,
-  { offset, quantity }: { offset: number; quantity: number },
+  { editionAddress, samAddress, offset, quantity }: SamBuyPriceInput,
 ) {
   if (typeof quantity !== 'number' || !Number.isInteger(quantity) || quantity <= 0)
     throw new InvalidQuantityError({ quantity })
@@ -261,7 +277,6 @@ export interface SAM {
 
 export async function SamEditionInfo<Client extends Pick<PublicClient, 'readContract' | 'multicall'>>(
   client: Client,
-
   { editionAddress, samAddress }: SamEditionAddress,
 ): Promise<SAM | null> {
   const interfaceId = await client.readContract({
@@ -305,3 +320,6 @@ export async function SamEditionInfo<Client extends Pick<PublicClient, 'readCont
       })
   }
 }
+
+export type SamBuyContractInput = TypeFromUnion<Awaited<ReturnType<typeof SamBuyParameters>>, 'mint'>
+export type SamSellContractInput = TypeFromUnion<Awaited<ReturnType<typeof SamSellParameters>>, 'available'>

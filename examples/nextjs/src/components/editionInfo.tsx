@@ -105,10 +105,9 @@ export function EditionInfo() {
     async queryFn() {
       if (!samAddress || !contractAddress) return null
 
-      return publicClient.editionV1.sam.buy.buyPrice({
+      return publicClient.editionV1.sam.buyPrice({
         editionAddress: contractAddress,
         samAddress,
-      })({
         offset: 0,
         quantity: 1,
       })
