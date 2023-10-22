@@ -1,5 +1,11 @@
 # @soundxyz/sdk
 
+## 4.0.1
+
+### Patch Changes
+
+- [`6410a2b`](https://github.com/soundxyz/sdk/commit/6410a2bcd9077c3c65ae9dd2b88eba583f1c5267) Thanks [@PabloSzx](https://github.com/PabloSzx)! - Publish without dist sub-folder
+
 ## 4.0.0
 
 ### Major Changes
