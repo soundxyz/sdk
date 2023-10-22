@@ -87,7 +87,7 @@ importers:
     dependencies:
       '@soundxyz/sdk':
         specifier: workspace:^
-        version: link:../../packages/sdk
+        version: link:../../packages/sdk/dist
       '@soundxyz/sound-protocol':
         specifier: ^1.7.0
         version: 1.7.0
@@ -139,7 +139,7 @@ importers:
         version: 2.0.0(@types/react-dom@18.2.13)(@types/react@18.2.28)(react-dom@18.2.0)(react@18.2.0)
       '@soundxyz/sdk':
         specifier: workspace:^
-        version: link:../../packages/sdk
+        version: link:../../packages/sdk/dist
       '@tanstack/react-query':
         specifier: ^5.0.0
         version: 5.0.0(react-dom@18.2.0)(react@18.2.0)
@@ -380,6 +380,7 @@ importers:
       zod:
         specifier: ^3.22.4
         version: 3.22.4
+    publishDirectory: dist
 
   packages/sdk-viem:
     dependencies:
