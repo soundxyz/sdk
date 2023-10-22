@@ -57,5 +57,9 @@
   "peerDependencies": {
     "viem": "^1.16.6",
     "zod": "^3.22.4"
+  },
+  "publishConfig": {
+    "access": "public",
+    "directory": "dist"
   }
 }
