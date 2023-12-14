@@ -61,7 +61,8 @@
   },
   "pnpm": {
     "overrides": {
-      "@graphql-codegen/visitor-plugin-common": "3.0.2"
+      "@graphql-codegen/visitor-plugin-common": "3.0.2",
+      "@manypkg/get-packages": "^1.1.3"
     },
     "patchedDependencies": {
       "@graphql-codegen/visitor-plugin-common@3.0.2": "patches/@graphql-codegen__visitor-plugin-common@3.0.2.patch"
