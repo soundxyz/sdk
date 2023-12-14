@@ -17,9 +17,7 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "pnpm -r --filter=sdk-subgraph build",
     "changeset": "changeset",
-    "codegen": "pnpm -r --filter=sdk-subgraph codegen",
     "format": "prettier . --write",
     "postinstall": "husky install",
     "prettier:write": "prettier \"**/*.{ts,tsx,mjs,cjs,js}\" --write",
