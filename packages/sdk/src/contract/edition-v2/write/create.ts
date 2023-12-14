@@ -1,6 +1,6 @@
 import type { WalletClient } from 'viem'
-import type { EditionCreateContractInput } from '../read/create'
 import { curry } from '../../../utils/helpers'
+import type { EditionCreateContractInput } from '../read/create'
 
 export function editionCreate<Client extends Pick<WalletClient, 'writeContract'>>(
   client: Client,
