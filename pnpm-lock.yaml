@@ -120,11 +120,11 @@ importers:
         specifier: ^1.11.2
         version: 1.12.1(@types/react@18.2.45)(react@18.2.0)
       viem:
-        specifier: ^1.16.6
-        version: 1.19.15(typescript@5.2.2)(zod@3.22.4)
+        specifier: ^1.20.0
+        version: 1.20.0(typescript@5.2.2)(zod@3.22.4)
       wagmi:
         specifier: ^1.4.4
-        version: 1.4.11(@types/react@18.2.45)(react-dom@18.2.0)(react@18.2.0)(typescript@5.2.2)(viem@1.19.15)(zod@3.22.4)
+        version: 1.4.11(@types/react@18.2.45)(react-dom@18.2.0)(react@18.2.0)(typescript@5.2.2)(viem@1.20.0)(zod@3.22.4)
       zod:
         specifier: ^3.22.4
         version: 3.22.4
@@ -5094,7 +5094,7 @@ packages:
       pretty-format: 29.7.0
     dev: true
 
-  /@wagmi/connectors@3.1.9(@types/react@18.2.45)(react@18.2.0)(typescript@5.2.2)(viem@1.19.15)(zod@3.22.4):
+  /@wagmi/connectors@3.1.9(@types/react@18.2.45)(react@18.2.0)(typescript@5.2.2)(viem@1.20.0)(zod@3.22.4):
     resolution: {integrity: sha512-q7Hz6WDnvOcZ/EPzuFgilirSwyoWYo1owowHmHqHTxEu0yu6HFNQGuaMNK9hsM/XCHeCisW/ZdUvudQSBUVpHQ==}
     peerDependencies:
       typescript: '>=5.0.4'
@@ -5114,7 +5114,7 @@ packages:
       abitype: 0.8.7(typescript@5.2.2)(zod@3.22.4)
       eventemitter3: 4.0.7
       typescript: 5.2.2
-      viem: 1.19.15(typescript@5.2.2)(zod@3.22.4)
+      viem: 1.20.0(typescript@5.2.2)(zod@3.22.4)
     transitivePeerDependencies:
       - '@azure/app-configuration'
       - '@azure/cosmos'
@@ -5137,7 +5137,7 @@ packages:
       - zod
     dev: false
 
-  /@wagmi/core@1.4.11(@types/react@18.2.45)(react@18.2.0)(typescript@5.2.2)(viem@1.19.15)(zod@3.22.4):
+  /@wagmi/core@1.4.11(@types/react@18.2.45)(react@18.2.0)(typescript@5.2.2)(viem@1.20.0)(zod@3.22.4):
     resolution: {integrity: sha512-H6y5v+PpvYbT5Qsk7PTVu5MtcSqudDqGZC/LZFV6Y+UeJlBsnfJNy5+cPEzKmvaz+6tSyVPGCF9aWK+sNdC0sQ==}
     peerDependencies:
       typescript: '>=5.0.4'
@@ -5146,11 +5146,11 @@ packages:
       typescript:
         optional: true
     dependencies:
-      '@wagmi/connectors': 3.1.9(@types/react@18.2.45)(react@18.2.0)(typescript@5.2.2)(viem@1.19.15)(zod@3.22.4)
+      '@wagmi/connectors': 3.1.9(@types/react@18.2.45)(react@18.2.0)(typescript@5.2.2)(viem@1.20.0)(zod@3.22.4)
       abitype: 0.8.7(typescript@5.2.2)(zod@3.22.4)
       eventemitter3: 4.0.7
       typescript: 5.2.2
-      viem: 1.19.15(typescript@5.2.2)(zod@3.22.4)
+      viem: 1.20.0(typescript@5.2.2)(zod@3.22.4)
       zustand: 4.4.7(@types/react@18.2.45)(react@18.2.0)
     transitivePeerDependencies:
       - '@azure/app-configuration'
@@ -12010,29 +12010,6 @@ packages:
     engines: {node: '>=12'}
     dev: true
 
-  /viem@1.19.15(typescript@5.2.2)(zod@3.22.4):
-    resolution: {integrity: sha512-rc87AkyrUUsoOAgMNYP+X/wN4GYwbhP87DkmsqQCYKxxQyzTX0+yliKs6Bxljbjr8ybU72GOb12Oyus6393AjQ==}
-    peerDependencies:
-      typescript: '>=5.0.4'
-    peerDependenciesMeta:
-      typescript:
-        optional: true
-    dependencies:
-      '@adraffy/ens-normalize': 1.10.0
-      '@noble/curves': 1.2.0
-      '@noble/hashes': 1.3.2
-      '@scure/bip32': 1.3.2
-      '@scure/bip39': 1.2.1
-      abitype: 0.9.8(typescript@5.2.2)(zod@3.22.4)
-      isows: 1.0.3(ws@8.13.0)
-      typescript: 5.2.2
-      ws: 8.13.0
-    transitivePeerDependencies:
-      - bufferutil
-      - utf-8-validate
-      - zod
-    dev: false
-
   /viem@1.20.0(typescript@5.2.2)(zod@3.22.4):
     resolution: {integrity: sha512-yPjV9pJr10xi28C/9LEvs5zdZNEMiru3Kz7nufghVYABJAfeSkoZQXb6b23n7MscS7c55JO5nmUI3xKkd9g6Yg==}
     peerDependencies:
@@ -12178,7 +12155,7 @@ packages:
       - terser
     dev: true
 
-  /wagmi@1.4.11(@types/react@18.2.45)(react-dom@18.2.0)(react@18.2.0)(typescript@5.2.2)(viem@1.19.15)(zod@3.22.4):
+  /wagmi@1.4.11(@types/react@18.2.45)(react-dom@18.2.0)(react@18.2.0)(typescript@5.2.2)(viem@1.20.0)(zod@3.22.4):
     resolution: {integrity: sha512-Kslc5wwuPTSOqxpqElE9lGZahyPwlwAXrRpvmw+h89e8lPg7DWThQsPQMWiSvKcg+NloEHwQRGmy5rpfKFKLaA==}
     peerDependencies:
       react: '>=17.0.0'
@@ -12191,12 +12168,12 @@ packages:
       '@tanstack/query-sync-storage-persister': 4.36.1
       '@tanstack/react-query': 4.36.1(react-dom@18.2.0)(react@18.2.0)
       '@tanstack/react-query-persist-client': 4.36.1(@tanstack/react-query@4.36.1)
-      '@wagmi/core': 1.4.11(@types/react@18.2.45)(react@18.2.0)(typescript@5.2.2)(viem@1.19.15)(zod@3.22.4)
+      '@wagmi/core': 1.4.11(@types/react@18.2.45)(react@18.2.0)(typescript@5.2.2)(viem@1.20.0)(zod@3.22.4)
       abitype: 0.8.7(typescript@5.2.2)(zod@3.22.4)
       react: 18.2.0
       typescript: 5.2.2
       use-sync-external-store: 1.2.0(react@18.2.0)
-      viem: 1.19.15(typescript@5.2.2)(zod@3.22.4)
+      viem: 1.20.0(typescript@5.2.2)(zod@3.22.4)
     transitivePeerDependencies:
       - '@azure/app-configuration'
       - '@azure/cosmos'
