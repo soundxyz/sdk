@@ -19,9 +19,9 @@ jobs:
       - name: Setup PNPM
         uses: pnpm/action-setup@v2.2.4
         with:
-          version: 7.19.0
+          version: latest
 
-      - name: Use Node
+      - name: Setup Node v18
         uses: actions/setup-node@v3
         with:
           node-version: 18.x
