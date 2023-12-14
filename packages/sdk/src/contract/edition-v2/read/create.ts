@@ -46,7 +46,7 @@ function isValidUint32(value: number) {
   return true
 }
 
-function createTieredEditionArgs({
+export function createTieredEditionArgs({
   owner,
   formattedSalt,
   precomputedEdition,
