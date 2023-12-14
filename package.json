@@ -17,16 +17,14 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "pnpm -r --filter=sdk-subgraph build",
     "changeset": "changeset",
-    "codegen": "pnpm -r --filter=sdk-subgraph codegen",
     "format": "prettier . --write",
     "postinstall": "husky install",
     "prettier:write": "prettier \"**/*.{ts,tsx,mjs,cjs,js}\" --write",
     "pretty-quick": "pretty-quick --staged",
     "release": "pnpm -r --access=public publish --no-git-checks",
     "release:canary": "(node scripts/canary-release.js && pnpm -r publish --access public --no-git-checks --tag alpha) || echo Skipping Canary...",
-    "test": "pnpm -r --filter=sdk --filter=old-sdk test",
+    "test": "pnpm -r --filter=sdk --filter=legacy-sdk test",
     "tsc": "tsc -p tsconfig.json",
     "typecheck": "pnpm tsc"
   },

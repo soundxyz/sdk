@@ -1,5 +1,0 @@
-query MerkleProof($root: String!, $unhashedLeaf: String!) {
-  merkleTreeProof(root: $root, unhashedLeaf: $unhashedLeaf) {
-    proof
-  }
-}

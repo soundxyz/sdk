@@ -29,10 +29,6 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
-      - name: Codegen
-        run: pnpm codegen
-      - name: Build
-        run: pnpm build
       - name: Type Check
         run: pnpm tsc
       - name: Run tests
