@@ -28,7 +28,6 @@
   "types": "./dist/index.d.ts",
   "scripts": {
     "prepack": "node build.mjs",
-    "prepare": "node build.mjs",
     "pull-env": "dotenv-vault pull",
     "test": "vitest dev",
     "test:cov": "vitest dev --coverage",
