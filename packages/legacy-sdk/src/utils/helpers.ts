@@ -1,12 +1,7 @@
-import keccak256 from 'keccak256'
 import { isHex, type Hex } from 'viem'
 
 export function isHexList(list: string[]): list is Hex[] {
   return list.every((value) => isHex(value))
-}
-
-export function getSaltAsBytes32(salt: string | number) {
-  return `0x${keccak256(salt.toString()).toString('hex')}` as const
 }
 
 export function getLazyOption<T extends object>(option: T | (() => T | Promise<T>)) {

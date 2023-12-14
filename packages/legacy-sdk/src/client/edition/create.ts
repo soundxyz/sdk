@@ -1,5 +1,5 @@
 import { type Address, type Chain } from 'viem'
-import { encodeFunctionData } from 'viem/utils'
+import { encodeFunctionData, keccak256, toHex } from 'viem/utils'
 import { soundCreatorV1Abi } from '../../abi/sound-creator-v1'
 import {
   InvalidEditionMaxMintableError,
@@ -10,7 +10,7 @@ import {
 } from '../../errors'
 import type { ContractCall, EditionConfig, MintConfig, TransactionGasOptions } from '../../types'
 import { editionInitFlags, MINTER_ROLE, NULL_ADDRESS, NULL_BYTES32, UINT32_MAX } from '../../utils/constants'
-import { getSaltAsBytes32, retry } from '../../utils/helpers'
+import { retry } from '../../utils/helpers'
 import { SoundClientInstance } from '../instance'
 import { soundEditionV1_2Abi } from '../../abi/sound-edition-v1_2'
 import { rangeEditionMinterV2_1Abi } from '../../abi/range-edition-minter-v2_1'
@@ -50,7 +50,7 @@ async function createEditionHelper(
     maxPriorityFeePerGas,
   }
 
-  const formattedSalt = getSaltAsBytes32(customSalt || Math.random() * 1_000_000_000_000_000)
+  const formattedSalt = keccak256(toHex(customSalt || Math.random() * 1_000_000_000_000_000))
 
   // Precompute the edition address.
   const [editionAddress, _] = await retry(
@@ -352,15 +352,16 @@ export async function expectedEditionAddress(
   }: {
     creatorAddress: Address
   },
-  { deployer, salt }: { deployer: Address; salt: string | number },
+  { deployer, salt: customSalt }: { deployer: Address; salt: string | number },
 ) {
   const { readContract } = await this.expectClient()
+  const formattedSalt = keccak256(toHex(customSalt || Math.random() * 1_000_000_000_000_000))
 
   const [editionAddress, exists] = await readContract({
     abi: soundCreatorV1Abi,
     address: creatorAddress,
     functionName: 'soundEditionAddress',
-    args: [deployer, getSaltAsBytes32(salt)],
+    args: [deployer, formattedSalt],
   })
 
   return {

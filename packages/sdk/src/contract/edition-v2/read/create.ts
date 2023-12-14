@@ -7,6 +7,7 @@ import {
   type EncodeFunctionDataParameters,
   type Hex,
   type PublicClient,
+  toHex,
 } from 'viem'
 import { MINT_GAS_LIMIT_MULTIPLIER, UINT32_MAX } from '../../../utils/constants'
 import { InvalidUint32 } from '../../../utils/errors'
@@ -287,7 +288,7 @@ export type EditionCreateContractInput = Awaited<ReturnType<typeof createEdition
 
 export type GetExpectedEditionAddressParams = {
   deployer: Address
-  salt: Hex | Uint8Array
+  salt?: string | number
 }
 
 export type GetExpectedEditionAddressReturnType = {
@@ -298,9 +299,9 @@ export type GetExpectedEditionAddressReturnType = {
 
 export async function getExpectedEditionAddress<Client extends Pick<PublicClient, 'readContract'>>(
   client: Client,
-  { deployer, salt }: GetExpectedEditionAddressParams,
+  { deployer, salt: customSalt }: GetExpectedEditionAddressParams,
 ): Promise<GetExpectedEditionAddressReturnType> {
-  const formattedSalt = keccak256(salt)
+  const formattedSalt = keccak256(toHex(customSalt || Math.random() * 1_000_000_000_000_000))
 
   const [edition, exists] = await client.readContract({
     abi: SOUND_CREATOR_V2_ABI,
