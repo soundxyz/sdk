@@ -33,6 +33,7 @@
     "dev:codegen": "graphql-codegen --watch",
     "dev:tsc": "tsc -p tsconfig.build.json --watch --preserveWatchOutput",
     "prepack": "node build.mjs",
+    "prepare": "graphql-codegen",
     "postpublish": "gh-release",
     "validate": "graphql-inspector validate \"./graphql/*.gql\" \"./schema.graphql\" --deprecated"
   },

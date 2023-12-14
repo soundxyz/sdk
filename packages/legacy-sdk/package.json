@@ -28,6 +28,7 @@
   "types": "./dist/index.d.ts",
   "scripts": {
     "prepack": "node build.mjs",
+    "prepare": "graphql-codegen",
     "pull-env": "dotenv-vault pull",
     "test": "vitest dev",
     "test:cov": "vitest dev --coverage",
