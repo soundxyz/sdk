@@ -1,3 +1,0 @@
-query EditionOwnedTokenIds($input: EditionOwnedTokenIdsInput!) {
-  editionOwnedTokenIds(input: $input)
-}

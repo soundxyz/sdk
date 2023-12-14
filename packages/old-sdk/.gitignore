@@ -1,5 +1,0 @@
-
-.env*
-!.env.project
-!.env.vault
-src/api/graphql
