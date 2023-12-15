@@ -1,4 +1,4 @@
-export const SUPER_MINTER_V1_1_ADDRESS = '0x4b6fdcbb545bb1737eba144625b66d491c65dc38'
+export const SUPER_MINTER_V1_1_ADDRESS = '0x000000000000dB7a98221b2c663e4150a5117343'
 
 export const SUPER_MINTER_V1_1_ABI = [
   { inputs: [], name: 'CallerNotDelegated', type: 'error' },
