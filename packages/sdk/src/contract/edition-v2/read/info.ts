@@ -80,6 +80,7 @@ export type TierConfig = {
 }
 
 type ScheduleConfigBase = {
+  minterAddress: Address
   tier: number
   platform: Address
   price: bigint
@@ -148,6 +149,7 @@ export async function mintingSchedules<Client extends Pick<PublicClient, 'readCo
       schedules.map((schedule) => ({
         ...schedule,
         mode: schedule.mode === 0 ? 'DEFAULT' : schedule.mode === 1 ? 'VERIFY_MERKLE' : 'VERIFY_SIGNATURE',
+        minterAddress: address,
       })),
     )
 
