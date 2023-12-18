@@ -1,26 +1,26 @@
 import {
   encodeFunctionData,
+  keccak256,
+  type Account,
   type Address,
+  type Chain,
   type EncodeFunctionDataParameters,
   type Hex,
   type PublicClient,
-  type Account,
-  type Chain,
-  keccak256,
+  toHex,
 } from 'viem'
+import { MINT_GAS_LIMIT_MULTIPLIER, UINT32_MAX } from '../../../utils/constants'
+import { InvalidUint32 } from '../../../utils/errors'
+import { curry, scaleAmount } from '../../../utils/helpers'
+import type { Prettify, TransactionGasOptions } from '../../../utils/types'
+import type { ContractCall } from '../../types'
 import { SPLIT_MAIN_ABI, SPLIT_MAIN_ADDRESS } from '../abi/external/split-main'
 import { SOUND_CREATOR_V2_ABI, SOUND_CREATOR_V2_ADDRESS } from '../abi/sound-creator-v2'
 import { SOUND_EDITION_V2_ABI, SOUND_EDITION_V2_IMPLEMENTATION_ADDRESS } from '../abi/sound-edition-v2'
 import { SOUND_METADATA_ABI, SOUND_METADATA_ADDRESS } from '../abi/sound-metadata'
-import { SUPER_MINTER_ABI, SUPER_MINTER_ADDRESS } from '../abi/super-minter'
-import type { MinterScheduleConfig, TierConfig, TieredEditionConfig } from './info'
-import type { ContractCall } from '../../types'
+import { SUPER_MINTER_V2_ABI, SUPER_MINTER_V2_ADDRESS } from '../abi/super-minter-v2'
 import { MINTER_ROLE } from './helpers'
-import { scaleAmount } from '../../../utils/helpers'
-import type { Prettify, TransactionGasOptions } from '../../../utils/types'
-import { curry } from '../../../utils/helpers'
-import { InvalidUint32 } from '../../../utils/errors'
-import { MINT_GAS_LIMIT_MULTIPLIER, NULL_ADDRESS, UINT32_MAX } from '../../../utils/constants'
+import type { MinterScheduleConfig, TierConfig, TieredEditionConfig } from './info'
 
 interface EditionV2EncodeArguments {
   readonly owner: Address | Readonly<Account>
@@ -47,7 +47,7 @@ function isValidUint32(value: number) {
   return true
 }
 
-function createTieredEditionArgs({
+export function createTieredEditionArgs({
   owner,
   formattedSalt,
   precomputedEdition,
@@ -64,7 +64,7 @@ function createTieredEditionArgs({
     calldata: encodeFunctionData({
       abi: SOUND_EDITION_V2_ABI,
       functionName: 'grantRoles',
-      args: [SUPER_MINTER_ADDRESS, MINTER_ROLE],
+      args: [SUPER_MINTER_V2_ADDRESS, MINTER_ROLE],
     }),
   })
 
@@ -99,9 +99,9 @@ function createTieredEditionArgs({
     }
 
     contractCalls.push({
-      contractAddress: SUPER_MINTER_ADDRESS,
+      contractAddress: SUPER_MINTER_V2_ADDRESS,
       calldata: encodeFunctionData({
-        abi: SUPER_MINTER_ABI,
+        abi: SUPER_MINTER_V2_ABI,
         functionName: 'createEditionMint',
         args: [
           {
@@ -118,7 +118,6 @@ function createTieredEditionArgs({
             // TODO: add better typesafety here
             mode: mintConfig.mode === 'DEFAULT' ? 0 : mintConfig.mode === 'VERIFY_MERKLE' ? 1 : 2,
             merkleRoot: mintConfig.mode === 'VERIFY_MERKLE' ? mintConfig.merkleRoot : EMPTY_MERKLE_ROOT,
-            signer: mintConfig.mode === 'VERIFY_SIGNATURE' ? mintConfig.signer : NULL_ADDRESS,
           },
         ],
       }),
@@ -289,7 +288,7 @@ export type EditionCreateContractInput = Awaited<ReturnType<typeof createEdition
 
 export type GetExpectedEditionAddressParams = {
   deployer: Address
-  salt: Hex | Uint8Array
+  salt?: string | number
 }
 
 export type GetExpectedEditionAddressReturnType = {
@@ -300,9 +299,9 @@ export type GetExpectedEditionAddressReturnType = {
 
 export async function getExpectedEditionAddress<Client extends Pick<PublicClient, 'readContract'>>(
   client: Client,
-  { deployer, salt }: GetExpectedEditionAddressParams,
+  { deployer, salt: customSalt }: GetExpectedEditionAddressParams,
 ): Promise<GetExpectedEditionAddressReturnType> {
-  const formattedSalt = keccak256(salt)
+  const formattedSalt = keccak256(toHex(customSalt || Math.random() * 1_000_000_000_000_000))
 
   const [edition, exists] = await client.readContract({
     abi: SOUND_CREATOR_V2_ABI,

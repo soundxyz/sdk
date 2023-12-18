@@ -1,6 +1,6 @@
-export const SUPER_MINTER_ADDRESS = '0x0000000000CF4558c36229ac0026ee16D3aE35Cd'
+export const SUPER_MINTER_V1_ADDRESS = '0x0000000000CF4558c36229ac0026ee16D3aE35Cd'
 
-export const SUPER_MINTER_ABI = [
+export const SUPER_MINTER_V1_ABI = [
   { inputs: [], name: 'CallerNotDelegated', type: 'error' },
   { inputs: [], name: 'ExceedsMaxPerAccount', type: 'error' },
   { inputs: [], name: 'ExceedsMintSupply', type: 'error' },
@@ -981,3 +981,9 @@ export const SUPER_MINTER_ABI = [
   },
   { stateMutability: 'payable', type: 'receive' },
 ] as const
+
+export const SUPER_MINTER_V1 = {
+  version: '1',
+  address: SUPER_MINTER_V1_ADDRESS,
+  abi: SUPER_MINTER_V1_ABI,
+} as const

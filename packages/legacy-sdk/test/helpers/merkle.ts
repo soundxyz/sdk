@@ -1,5 +1,5 @@
 import { keccak256 as solidityKeccak256 } from '@ethersproject/solidity'
-import keccak256 from 'keccak256'
+import keccak256 from 'viem/utils'
 import { MerkleTree } from 'merkletreejs'
 import { type Address, type Hex } from 'viem'
 

@@ -1,9 +1,7 @@
 import type { Address, Hex, PublicClient } from 'viem'
+import { curry, nowUnixTimestamp } from '../../../utils/helpers'
 import { SOUND_EDITION_V2_ABI } from '../abi/sound-edition-v2'
-import { getTierCurrentMaxMintable } from './helpers'
-import { SUPER_MINTER_ABI, SUPER_MINTER_ADDRESS } from '../abi/super-minter'
-import { nowUnixTimestamp } from '../../../utils/helpers'
-import { curry } from '../../../utils/helpers'
+import { getSuperMinterForEdition, getTierCurrentMaxMintable } from './helpers'
 import { isSoundV2 } from './interface'
 
 export type GetEditionContractInfoReturnType = {
@@ -101,12 +99,11 @@ export type MerkleScheduleConfig = ScheduleConfigBase & {
 }
 export type SignatureScheduleConfig = ScheduleConfigBase & {
   mode: 'VERIFY_SIGNATURE'
-  signer: Address
-  usePlatformSigner: boolean
 }
 export type MinterScheduleConfig = DefaultScheduleConfig | MerkleScheduleConfig | SignatureScheduleConfig
 
 export type ScheduleBase = ScheduleConfigBase & {
+  minterAddress: Address
   scheduleNum: number
   minted: number
   hasMints: boolean
@@ -121,8 +118,6 @@ export type MerkleSchedule = ScheduleBase & {
 }
 export type SignatureSchedule = ScheduleBase & {
   mode: 'VERIFY_SIGNATURE'
-  signer: Address
-  usePlatformSigner: boolean
 }
 
 export type SuperMinterSchedule = DefaultSchedule | MerkleSchedule | SignatureSchedule
@@ -137,14 +132,16 @@ export type GetMintingSchedulesReturnType = {
   activeSchedules: readonly SuperMinterSchedule[]
 }
 
-export async function mintingSchedules<Client extends Pick<PublicClient, 'readContract'>>(
+export async function mintingSchedules<Client extends Pick<PublicClient, 'readContract' | 'multicall'>>(
   client: Client,
   { editionAddress, unixTimestamp = nowUnixTimestamp() }: GetMintingSchedulesParams,
 ): Promise<GetMintingSchedulesReturnType> {
+  const { address, abi } = await getSuperMinterForEdition(client, { editionAddress })
+
   const schedules: SuperMinterSchedule[] = await client
-    .readContract({
-      abi: SUPER_MINTER_ABI,
-      address: SUPER_MINTER_ADDRESS,
+    .readContract<typeof abi, 'mintInfoList'>({
+      abi,
+      address,
       functionName: 'mintInfoList',
       args: [editionAddress],
     })
@@ -152,6 +149,7 @@ export async function mintingSchedules<Client extends Pick<PublicClient, 'readCo
       schedules.map((schedule) => ({
         ...schedule,
         mode: schedule.mode === 0 ? 'DEFAULT' : schedule.mode === 1 ? 'VERIFY_MERKLE' : 'VERIFY_SIGNATURE',
+        minterAddress: address,
       })),
     )
 

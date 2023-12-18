@@ -1,13 +1,11 @@
 import type { Account, Address, Chain, Hex, PublicClient } from 'viem'
-import { SUPER_MINTER_ABI, SUPER_MINTER_ADDRESS } from '../abi/super-minter'
-import type { MerkleProvider, TransactionGasOptions, TypeFromUnion } from '../../../utils/types'
-import { SOUND_EDITION_V2_ABI } from '../abi/sound-edition-v2'
-import { getTierCurrentMaxMintable } from './helpers'
-import type { SuperMinterSchedule } from './info'
-import type { MintParameters } from '../../types'
-import { scaleAmount } from '../../../utils/helpers'
-import { curry } from '../../../utils/helpers'
 import { MINT_FALLBACK_GAS_LIMIT, MINT_GAS_LIMIT_MULTIPLIER, NULL_ADDRESS, UINT32_MAX } from '../../../utils/constants'
+import { curry, exhaustiveGuard, scaleAmount } from '../../../utils/helpers'
+import type { MerkleProvider, TransactionGasOptions, TypeFromUnion } from '../../../utils/types'
+import type { MintParameters } from '../../types'
+import { SOUND_EDITION_V2_ABI } from '../abi/sound-edition-v2'
+import { getSuperMinterForEdition, getTierCurrentMaxMintable } from './helpers'
+import type { SuperMinterSchedule } from './info'
 
 export type GetTotalMintPriceAndFeesParams = {
   tier: number
@@ -41,43 +39,35 @@ export type GetTotalMintPriceAndFeesReturnType = {
   affiliateFee: bigint
 }
 
-export async function getTotalMintPriceAndFees<Client extends Pick<PublicClient, 'readContract'>>(
+export async function getTotalMintPriceAndFees<Client extends Pick<PublicClient, 'readContract' | 'multicall'>>(
   client: Client,
   { tier, scheduleNum, quantity, editionAddress }: GetTotalMintPriceAndFeesParams,
-): Promise<GetTotalMintPriceAndFeesReturnType> {
-  return client.readContract({
-    abi: SUPER_MINTER_ABI,
-    address: SUPER_MINTER_ADDRESS,
-    functionName: 'totalPriceAndFees',
-    args: [editionAddress, tier, scheduleNum, quantity],
-  })
-}
+) {
+  const superMinter = await getSuperMinterForEdition(client, { editionAddress })
 
-export type GetPlatformFeesParams = {
-  platform: Address
-  tiers: number[]
-}
+  switch (superMinter.version) {
+    case '1': {
+      const { abi, address } = superMinter
+      return client.readContract({
+        abi,
+        address,
+        functionName: 'totalPriceAndFees',
+        args: [editionAddress, tier, scheduleNum, quantity],
+      })
+    }
 
-export type GetPlatformFeesReturnType = {
-  perTxFlat: bigint
-  perMintFlat: bigint
-  perMintBPS: number
-  active: boolean
-}[]
-
-export async function getPlatformFees<Client extends Pick<PublicClient, 'multicall'>>(
-  client: Client,
-  { platform, tiers }: GetPlatformFeesParams,
-): Promise<GetPlatformFeesReturnType> {
-  return client.multicall({
-    contracts: tiers.map((tier) => ({
-      abi: SUPER_MINTER_ABI,
-      address: SUPER_MINTER_ADDRESS,
-      functionName: 'platformFeeConfig',
-      args: [platform, tier],
-    })),
-    allowFailure: false,
-  })
+    case '2': {
+      const { abi, address } = superMinter
+      return client.readContract({
+        abi,
+        address,
+        functionName: 'totalPriceAndFees',
+        args: [editionAddress, tier, scheduleNum, quantity, false],
+      })
+    }
+    default:
+      exhaustiveGuard(superMinter)
+  }
 }
 
 export type GetMintEligibilityParams = {
@@ -98,17 +88,19 @@ export async function mintEligibility<Client extends Pick<PublicClient, 'multica
   { merkleProvider }: { merkleProvider: MerkleProvider },
   { tier, scheduleNum, collectorAddress, editionAddress }: GetMintEligibilityParams,
 ): Promise<GetMintEligibilityReturnType> {
+  const { address, abi } = await getSuperMinterForEdition(client, { editionAddress })
+
   const [numberMintedOnSchedule, scheduleInfo, tierInfo] = await client.multicall({
     contracts: [
       {
-        abi: SUPER_MINTER_ABI,
-        address: SUPER_MINTER_ADDRESS,
+        abi,
+        address,
         functionName: 'numberMinted',
         args: [editionAddress, tier, scheduleNum, collectorAddress],
       },
       {
-        abi: SUPER_MINTER_ABI,
-        address: SUPER_MINTER_ADDRESS,
+        abi,
+        address,
         functionName: 'mintInfo',
         args: [editionAddress, tier, scheduleNum],
       },
@@ -254,9 +246,11 @@ export async function editionMintParameters<
     editionAddress,
   })
 
+  const superMinter = await getSuperMinterForEdition(client, { editionAddress })
+
   const sharedWriteContractParameters = {
-    address: SUPER_MINTER_ADDRESS,
-    abi: SUPER_MINTER_ABI,
+    address: superMinter.address,
+    abi: superMinter.abi,
     functionName: 'mintTo',
     account,
     value,
@@ -291,7 +285,7 @@ export async function editionMintParameters<
       try {
         // Add a buffer to the gas estimate to account for node provider estimate variance.
         gasEstimate = txnOverrides.gas = scaleAmount({
-          amount: await client.estimateContractGas({
+          amount: await client.estimateContractGas<Chain, typeof superMinter.abi, 'mintTo'>({
             args,
             ...sharedWriteContractParameters,
             ...txnOverrides,
@@ -355,7 +349,7 @@ export async function editionMintParameters<
       try {
         // Add a buffer to the gas estimate to account for node provider estimate variance.
         gasEstimate = txnOverrides.gas = scaleAmount({
-          amount: await client.estimateContractGas({
+          amount: await client.estimateContractGas<Chain, typeof superMinter.abi, 'mintTo'>({
             args,
             ...sharedWriteContractParameters,
             ...txnOverrides,
@@ -402,9 +396,8 @@ export function editionV2PublicActionsMint<
       ...client.editionV2,
 
       totalMintPriceAndFees: curry(getTotalMintPriceAndFees)(client),
-      platformFees: curry(getPlatformFees)(client),
 
-      eligiblity: curry(mintEligibility)(client)({ merkleProvider: client.merkleProvider }),
+      eligibility: curry(mintEligibility)(client)({ merkleProvider: client.merkleProvider }),
 
       mintParameters: curry(editionMintParameters)(client)({ merkleProvider: client.merkleProvider }),
     },
