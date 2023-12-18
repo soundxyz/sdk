@@ -3,4 +3,4 @@
 '@soundxyz/legacy-sdk': patch
 ---
 
-support SuperMinterV1_1
+support SuperMinterV2
