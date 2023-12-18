@@ -80,7 +80,6 @@ export type TierConfig = {
 }
 
 type ScheduleConfigBase = {
-  minterAddress: Address
   tier: number
   platform: Address
   price: bigint
@@ -104,6 +103,7 @@ export type SignatureScheduleConfig = ScheduleConfigBase & {
 export type MinterScheduleConfig = DefaultScheduleConfig | MerkleScheduleConfig | SignatureScheduleConfig
 
 export type ScheduleBase = ScheduleConfigBase & {
+  minterAddress: Address
   scheduleNum: number
   minted: number
   hasMints: boolean
