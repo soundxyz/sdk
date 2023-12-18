@@ -48,22 +48,26 @@ export async function getTotalMintPriceAndFees<Client extends Pick<PublicClient,
   switch (superMinter.version) {
     case '1': {
       const { abi, address } = superMinter
-      return client.readContract({
-        abi,
-        address,
-        functionName: 'totalPriceAndFees',
-        args: [editionAddress, tier, scheduleNum, quantity],
-      })
+      return client
+        .readContract({
+          abi,
+          address,
+          functionName: 'totalPriceAndFees',
+          args: [editionAddress, tier, scheduleNum, quantity],
+        })
+        .then((res) => ({ ...res, version: superMinter.version }))
     }
 
     case '2': {
       const { abi, address } = superMinter
-      return client.readContract({
-        abi,
-        address,
-        functionName: 'totalPriceAndFees',
-        args: [editionAddress, tier, scheduleNum, quantity, false],
-      })
+      return client
+        .readContract({
+          abi,
+          address,
+          functionName: 'totalPriceAndFees',
+          args: [editionAddress, tier, scheduleNum, quantity, false],
+        })
+        .then((res) => ({ ...res, version: superMinter.version }))
     }
     default:
       exhaustiveGuard(superMinter)
