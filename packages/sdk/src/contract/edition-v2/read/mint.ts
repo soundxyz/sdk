@@ -45,12 +45,9 @@ export async function getTotalMintPriceAndFees<Client extends Pick<PublicClient,
 ) {
   const superMinter = await getSuperMinterForEdition(client, { editionAddress })
 
-  const version = superMinter.version
-
-  switch (version) {
+  switch (superMinter.version) {
     case '1': {
-      const abi = superMinter.abi
-      const address = superMinter.address
+      const { abi, address } = superMinter
       return client.readContract({
         abi,
         address,
@@ -60,8 +57,7 @@ export async function getTotalMintPriceAndFees<Client extends Pick<PublicClient,
     }
 
     case '2': {
-      const abi = superMinter.abi
-      const address = superMinter.address
+      const { abi, address } = superMinter
       return client.readContract({
         abi,
         address,
@@ -70,7 +66,7 @@ export async function getTotalMintPriceAndFees<Client extends Pick<PublicClient,
       })
     }
     default:
-      exhaustiveGuard(version)
+      exhaustiveGuard(superMinter)
   }
 }
 
