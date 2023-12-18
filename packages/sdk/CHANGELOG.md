@@ -1,5 +1,15 @@
 # @soundxyz/sdk
 
+## 5.0.0
+
+### Major Changes
+
+- [#292](https://github.com/soundxyz/sdk/pull/292) [`69a4e0f`](https://github.com/soundxyz/sdk/commit/69a4e0fc72653b0376de9b037f5eeb25ae188394) Thanks [@vigneshka](https://github.com/vigneshka)! - support SuperMinterV2
+
+### Patch Changes
+
+- [#299](https://github.com/soundxyz/sdk/pull/299) [`202bca1`](https://github.com/soundxyz/sdk/commit/202bca1a842ffbd17c4641849cc71c4394811672) Thanks [@vigneshka](https://github.com/vigneshka)! - add version to getTotalMintPriceAndFees
+
 ## 4.0.1
 
 ### Patch Changes
