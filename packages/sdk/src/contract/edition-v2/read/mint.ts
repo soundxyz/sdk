@@ -1,6 +1,6 @@
 import type { Account, Address, Chain, Hex, PublicClient } from 'viem'
 import { MINT_FALLBACK_GAS_LIMIT, MINT_GAS_LIMIT_MULTIPLIER, NULL_ADDRESS, UINT32_MAX } from '../../../utils/constants'
-import { curry, scaleAmount } from '../../../utils/helpers'
+import { curry, exhaustiveGuard, scaleAmount } from '../../../utils/helpers'
 import type { MerkleProvider, TransactionGasOptions, TypeFromUnion } from '../../../utils/types'
 import type { MintParameters } from '../../types'
 import { SOUND_EDITION_V2_ABI } from '../abi/sound-edition-v2'
@@ -45,12 +45,33 @@ export async function getTotalMintPriceAndFees<Client extends Pick<PublicClient,
 ) {
   const superMinter = await getSuperMinterForEdition(client, { editionAddress })
 
-  return client.readContract<typeof superMinter.abi, 'totalPriceAndFees'>({
-    abi: superMinter.abi,
-    address: superMinter.address,
-    functionName: 'totalPriceAndFees',
-    args: [editionAddress, tier, scheduleNum, quantity],
-  })
+  const version = superMinter.version
+
+  switch (version) {
+    case '1': {
+      const abi = superMinter.abi
+      const address = superMinter.address
+      return client.readContract({
+        abi,
+        address,
+        functionName: 'totalPriceAndFees',
+        args: [editionAddress, tier, scheduleNum, quantity],
+      })
+    }
+
+    case '2': {
+      const abi = superMinter.abi
+      const address = superMinter.address
+      return client.readContract({
+        abi,
+        address,
+        functionName: 'totalPriceAndFees',
+        args: [editionAddress, tier, scheduleNum, quantity, false],
+      })
+    }
+    default:
+      exhaustiveGuard(version)
+  }
 }
 
 export type GetMintEligibilityParams = {

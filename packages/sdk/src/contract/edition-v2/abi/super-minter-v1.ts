@@ -983,6 +983,7 @@ export const SUPER_MINTER_V1_ABI = [
 ] as const
 
 export const SUPER_MINTER_V1 = {
+  version: '1',
   address: SUPER_MINTER_V1_ADDRESS,
   abi: SUPER_MINTER_V1_ABI,
 } as const
