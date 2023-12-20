@@ -50,7 +50,7 @@ async function createEditionHelper(
     maxPriorityFeePerGas,
   }
 
-  const formattedSalt = keccak256(toHex(customSalt || Math.random() * 1_000_000_000_000_000))
+  const formattedSalt = keccak256(toHex(customSalt || Math.floor(Math.random() * 1_000_000_000_000_000)))
 
   // Precompute the edition address.
   const [editionAddress, _] = await retry(
@@ -355,7 +355,7 @@ export async function expectedEditionAddress(
   { deployer, salt: customSalt }: { deployer: Address; salt: string | number },
 ) {
   const { readContract } = await this.expectClient()
-  const formattedSalt = keccak256(toHex(customSalt || Math.random() * 1_000_000_000_000_000))
+  const formattedSalt = keccak256(toHex(customSalt))
 
   const [editionAddress, exists] = await readContract({
     abi: soundCreatorV1Abi,
