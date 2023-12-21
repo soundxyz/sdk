@@ -21,6 +21,8 @@ import { SOUND_METADATA_ABI, SOUND_METADATA_ADDRESS } from '../abi/sound-metadat
 import { SUPER_MINTER_V2_ABI, SUPER_MINTER_V2_ADDRESS } from '../abi/super-minter-v2'
 
 import type { MinterScheduleConfig, TierConfig, TieredEditionConfig } from './info'
+import { SOUND_EDITION_V2_ABI } from '../abi/sound-edition-v2'
+import { MINTER_ROLE } from './helpers'
 
 interface EditionV2EncodeArguments {
   readonly owner: Address | Readonly<Account>
@@ -57,6 +59,16 @@ export function createTieredEditionArgs({
   createSplit,
 }: EditionV2EncodeArguments) {
   const contractCalls: ContractCall[] = []
+
+  // Grant MINTER_ROLE for super minter
+  contractCalls.push({
+    contractAddress: precomputedEdition,
+    calldata: encodeFunctionData({
+      abi: SOUND_EDITION_V2_ABI,
+      functionName: 'grantRoles',
+      args: [SUPER_MINTER_V2_ADDRESS, MINTER_ROLE],
+    }),
+  })
 
   // Set up tier schedules on super minter
   for (const mintConfig of mintConfigs) {
