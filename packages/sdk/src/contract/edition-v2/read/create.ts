@@ -98,6 +98,23 @@ export function createTieredEditionArgs({
       })
     }
 
+    const mode: number = (() => {
+      switch (mintConfig.mode) {
+        case 'DEFAULT': {
+          return 0
+        }
+        case 'VERIFY_MERKLE': {
+          return 1
+        }
+        case 'VERIFY_SIGNATURE': {
+          return 2
+        }
+        case 'PLATFORM_AIRDROP': {
+          return 3
+        }
+      }
+    })()
+
     contractCalls.push({
       contractAddress: SUPER_MINTER_V2_ADDRESS,
       calldata: encodeFunctionData({
@@ -115,8 +132,7 @@ export function createTieredEditionArgs({
             affiliateMerkleRoot: mintConfig.affiliateMerkleRoot,
             tier: mintConfig.tier,
             platform: mintConfig.platform,
-            // TODO: add better typesafety here
-            mode: mintConfig.mode === 'DEFAULT' ? 0 : mintConfig.mode === 'VERIFY_MERKLE' ? 1 : 2,
+            mode,
             merkleRoot: mintConfig.mode === 'VERIFY_MERKLE' ? mintConfig.merkleRoot : EMPTY_MERKLE_ROOT,
           },
         ],
