@@ -11,7 +11,7 @@ import {
 } from 'viem'
 import { MINT_GAS_LIMIT_MULTIPLIER, UINT32_MAX } from '../../../utils/constants'
 import { InvalidUint32 } from '../../../utils/errors'
-import { curry, scaleAmount } from '../../../utils/helpers'
+import { curry, exhaustiveGuard, scaleAmount } from '../../../utils/helpers'
 import type { Prettify, TransactionGasOptions } from '../../../utils/types'
 import type { ContractCall } from '../../types'
 import { SPLIT_MAIN_ABI, SPLIT_MAIN_ADDRESS } from '../abi/external/split-main'
@@ -111,6 +111,9 @@ export function createTieredEditionArgs({
         }
         case 'PLATFORM_AIRDROP': {
           return 3
+        }
+        default: {
+          exhaustiveGuard(mintConfig)
         }
       }
     })()
