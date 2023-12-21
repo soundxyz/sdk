@@ -320,7 +320,7 @@ export async function getExpectedEditionAddress<Client extends Pick<PublicClient
   client: Client,
   { deployer, salt: customSalt }: GetExpectedEditionAddressParams,
 ): Promise<GetExpectedEditionAddressReturnType> {
-  const formattedSalt = keccak256(toHex(customSalt || Math.random() * 1_000_000_000_000_000))
+  const formattedSalt = keccak256(toHex(customSalt || Math.floor(Math.random() * 1_000_000_000_000_000)))
 
   const [edition, exists] = await client.readContract({
     abi: SOUND_CREATOR_V2_ABI,
