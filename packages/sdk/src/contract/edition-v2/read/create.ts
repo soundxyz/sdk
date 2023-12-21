@@ -11,7 +11,7 @@ import {
 } from 'viem'
 import { MINT_GAS_LIMIT_MULTIPLIER, UINT32_MAX } from '../../../utils/constants'
 import { InvalidUint32 } from '../../../utils/errors'
-import { curry, scaleAmount } from '../../../utils/helpers'
+import { curry, exhaustiveGuard, scaleAmount } from '../../../utils/helpers'
 import type { Prettify, TransactionGasOptions } from '../../../utils/types'
 import type { ContractCall } from '../../types'
 import { SPLIT_MAIN_ABI, SPLIT_MAIN_ADDRESS } from '../abi/external/split-main'
@@ -98,6 +98,26 @@ export function createTieredEditionArgs({
       })
     }
 
+    const mode: number = (() => {
+      switch (mintConfig.mode) {
+        case 'DEFAULT': {
+          return 0
+        }
+        case 'VERIFY_MERKLE': {
+          return 1
+        }
+        case 'VERIFY_SIGNATURE': {
+          return 2
+        }
+        case 'PLATFORM_AIRDROP': {
+          return 3
+        }
+        default: {
+          exhaustiveGuard(mintConfig)
+        }
+      }
+    })()
+
     contractCalls.push({
       contractAddress: SUPER_MINTER_V2_ADDRESS,
       calldata: encodeFunctionData({
@@ -115,8 +135,7 @@ export function createTieredEditionArgs({
             affiliateMerkleRoot: mintConfig.affiliateMerkleRoot,
             tier: mintConfig.tier,
             platform: mintConfig.platform,
-            // TODO: add better typesafety here
-            mode: mintConfig.mode === 'DEFAULT' ? 0 : mintConfig.mode === 'VERIFY_MERKLE' ? 1 : 2,
+            mode,
             merkleRoot: mintConfig.mode === 'VERIFY_MERKLE' ? mintConfig.merkleRoot : EMPTY_MERKLE_ROOT,
           },
         ],

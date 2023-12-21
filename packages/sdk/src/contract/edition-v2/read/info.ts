@@ -100,7 +100,16 @@ export type MerkleScheduleConfig = ScheduleConfigBase & {
 export type SignatureScheduleConfig = ScheduleConfigBase & {
   mode: 'VERIFY_SIGNATURE'
 }
-export type MinterScheduleConfig = DefaultScheduleConfig | MerkleScheduleConfig | SignatureScheduleConfig
+
+export type PlatformAirdropScheduleConfig = ScheduleConfigBase & {
+  mode: 'PLATFORM_AIRDROP'
+}
+
+export type MinterScheduleConfig =
+  | DefaultScheduleConfig
+  | MerkleScheduleConfig
+  | SignatureScheduleConfig
+  | PlatformAirdropScheduleConfig
 
 export type ScheduleBase = ScheduleConfigBase & {
   minterAddress: Address
@@ -119,8 +128,11 @@ export type MerkleSchedule = ScheduleBase & {
 export type SignatureSchedule = ScheduleBase & {
   mode: 'VERIFY_SIGNATURE'
 }
+export type PlatformAirdropSchedule = ScheduleBase & {
+  mode: 'PLATFORM_AIRDROP'
+}
 
-export type SuperMinterSchedule = DefaultSchedule | MerkleSchedule | SignatureSchedule
+export type SuperMinterSchedule = DefaultSchedule | MerkleSchedule | SignatureSchedule | PlatformAirdropSchedule
 
 export type GetMintingSchedulesParams = {
   editionAddress: Address
@@ -146,11 +158,41 @@ export async function mintingSchedules<Client extends Pick<PublicClient, 'readCo
       args: [editionAddress],
     })
     .then((schedules) =>
-      schedules.map((schedule) => ({
-        ...schedule,
-        mode: schedule.mode === 0 ? 'DEFAULT' : schedule.mode === 1 ? 'VERIFY_MERKLE' : 'VERIFY_SIGNATURE',
-        minterAddress: address,
-      })),
+      schedules.map((schedule): SuperMinterSchedule => {
+        const scheduleData = {
+          ...schedule,
+          minterAddress: address,
+        } satisfies Omit<SuperMinterSchedule, 'mode'>
+        switch (schedule.mode) {
+          case 0: {
+            return {
+              ...scheduleData,
+              mode: 'DEFAULT',
+            }
+          }
+          case 1: {
+            return {
+              ...scheduleData,
+              mode: 'VERIFY_MERKLE',
+            }
+          }
+          case 2: {
+            return {
+              ...scheduleData,
+              mode: 'VERIFY_SIGNATURE',
+            }
+          }
+          case 3: {
+            return {
+              ...scheduleData,
+              mode: 'PLATFORM_AIRDROP',
+            }
+          }
+          default: {
+            throw Error(`Unsupported schedule mode ${schedule.mode}`)
+          }
+        }
+      }),
     )
 
   const activeSchedules = schedules.filter((mintSchedule) => {
