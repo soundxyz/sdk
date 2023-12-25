@@ -11,7 +11,9 @@ export function editionMint<Client extends Pick<WalletClient, 'writeContract' | 
   const compressedCalldata = cdCompress(calldata)
 
   return client.sendTransaction({
-    ...input,
+    account: input.account,
+    chain: input.chain,
+    to: input.address,
     data: compressedCalldata,
   })
 }
