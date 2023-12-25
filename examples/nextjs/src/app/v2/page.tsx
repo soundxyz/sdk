@@ -91,8 +91,8 @@ function EditionSchedule({ schedule }: { schedule: SuperMinterSchedule }) {
     (schedule.tier === 0
       ? apiInfo?.data?.gaCoverImage?.url
       : schedule.tier === 1
-      ? apiInfo?.data?.vipCoverImage?.url
-      : null) ?? apiInfo?.data?.coverImage.url
+        ? apiInfo?.data?.vipCoverImage?.url
+        : null) ?? apiInfo?.data?.coverImage.url
 
   return (
     <div key={schedule.scheduleNum.toString() + schedule.tier.toString()} className="flex flex-col gap-5">
@@ -100,8 +100,8 @@ function EditionSchedule({ schedule }: { schedule: SuperMinterSchedule }) {
         {schedule.mode === 'VERIFY_MERKLE'
           ? 'Presale Limited Edition'
           : schedule.tier === 0
-          ? 'Forever Edition'
-          : 'Limited Edition'}
+            ? 'Forever Edition'
+            : 'Limited Edition'}
       </h2>
 
       {coverImage ? <img className="w-[100px]" src={coverImage} alt="Cover Image" /> : null}
