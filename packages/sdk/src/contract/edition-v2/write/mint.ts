@@ -1,17 +1,24 @@
-import type { Chain, WalletClient } from 'viem'
+import { encodeFunctionData, type WalletClient } from 'viem'
 import { curry } from '../../../utils/helpers'
 import type { EditionMintContractInput } from '../read/mint'
+import { cdCompress } from '../../../utils/calldata'
 
-export function editionMint<Client extends Pick<WalletClient, 'writeContract'>>(
+export function editionMint<Client extends Pick<WalletClient, 'writeContract' | 'sendTransaction'>>(
   client: Client,
   { input }: EditionMintContractInput,
 ) {
-  return client.writeContract<typeof input.abi, typeof input.functionName, Chain>(input)
+  const calldata = encodeFunctionData({ abi: input.abi, functionName: input.functionName, args: input.args })
+  const compressedCalldata = cdCompress(calldata)
+
+  return client.sendTransaction({
+    ...input,
+    data: compressedCalldata,
+  })
 }
 
-export function editionV2WalletActionsMint<Client extends Pick<WalletClient, 'writeContract'> & { editionV2?: {} }>(
-  client: Client,
-) {
+export function editionV2WalletActionsMint<
+  Client extends Pick<WalletClient, 'writeContract' | 'sendTransaction'> & { editionV2?: {} },
+>(client: Client) {
   return {
     editionV2: {
       ...client.editionV2,

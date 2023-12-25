@@ -35,6 +35,10 @@
     "prepack": "node build.mjs",
     "prepare": "node build.mjs",
     "postpublish": "gh-release",
+    "test": "vitest dev",
+    "test:cov": "vitest dev --coverage",
+    "test:ci": "CI=true vitest --coverage",
+    "tsc": "tsc -p tsconfig.build.json",
     "validate": "graphql-inspector validate \"./graphql/*.gql\" \"./schema.graphql\" --deprecated"
   },
   "devDependencies": {
