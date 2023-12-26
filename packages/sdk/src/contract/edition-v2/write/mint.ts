@@ -10,13 +10,15 @@ export function editionMint<Client extends Pick<WalletClient, 'writeContract' | 
   const calldata = encodeFunctionData({ abi: input.abi, functionName: input.functionName, args: input.args })
   const compressedCalldata = cdCompress(calldata)
 
-  // destructuring the input object to remove the abi and functionName
-  // since we don't need them for the sendTransaction call
-  // not removing those causes an error, so it's important
-  const { abi, functionName, ...rest } = input
   return client.sendTransaction({
-    ...rest,
+    account: input.account,
+    chain: input.chain,
+    value: input.value,
+    to: input.address,
     data: compressedCalldata,
+    gas: input.gas,
+    maxFeePerGas: input.maxFeePerGas,
+    maxPriorityFeePerGas: input.maxPriorityFeePerGas,
   })
 }
 
