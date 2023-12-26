@@ -103,5 +103,5 @@
   "include": ["packages"],
 
   // subgraph typechecking is not necessary since the build scripts there convert AS code
-  "exclude": ["node_modules", "packages/subgraph"]
+  "exclude": ["node_modules", "**/*.test.ts", "vitest.config.ts"]
 }

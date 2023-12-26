@@ -19,6 +19,7 @@ export function soundEditionVersionPublicActions<Client extends Pick<PublicClien
             abi: SOUND_EDITION_V2_ABI,
             address: contractAddress,
             functionName: 'supportsInterface',
+            // v2 and v2.1 have the same interface id
             args: [editionV2InterfaceIds.ISoundEditionV2],
           },
         ],

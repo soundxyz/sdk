@@ -162,14 +162,14 @@ async function mintHelper(
               abi: minterAbiMap[interfaceId],
             })
           : interfaceId === interfaceIds.IMerkleDropMinterV2
-          ? client.readContract({
-              ...params,
-              abi: minterAbiMap[interfaceId],
-            })
-          : client.readContract({
-              ...params,
-              abi: minterAbiMap[interfaceId],
-            }))
+            ? client.readContract({
+                ...params,
+                abi: minterAbiMap[interfaceId],
+              })
+            : client.readContract({
+                ...params,
+                abi: minterAbiMap[interfaceId],
+              }))
 
         proof = await getMerkleProof.call(this, {
           merkleRoot,
