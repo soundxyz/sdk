@@ -16,33 +16,47 @@ export type GetTotalMintPriceAndFeesParams = {
 }
 
 export type GetTotalMintPriceAndFeesReturnType = {
-  // The required Ether value.
-  // `subTotal + platformFlatFee`.
+  /** The required Ether value. */
   total: bigint
-  // The total price before any additive fees.
+  /** The total price before any additive fees. */
   subTotal: bigint
-  // The price per token.
+  /** The price per token. */
   unitPrice: bigint
-  // The total platform fees.
-  // `platformFlatFee + platformMintBPSFee`.
-  platformFee: bigint
-  // The total platform flat fees.
-  // `platformTxFlatFee + platformMintFlatFee`.
-  platformFlatFee: bigint
-  // The platform per-transaction flat fees.
-  platformTxFlatFee: bigint
-  // The total platform per-token flat fees.
-  platformMintFlatFee: bigint
-  // The total platform per-token BPS fees.
-  platformMintBPSFee: bigint
-  // The total affiliate fees.
-  affiliateFee: bigint
-}
+} & (
+  | {
+      /** SuperMinterV1 */
+      version: '1'
+      /** The total platform fees.
+       `platformFlatFee + platformMintBPSFee`. */
+      platformFee: bigint
+      /** The total platform flat fees.
+       `platformTxFlatFee + platformMintFlatFee`. */
+      platformFlatFee: bigint
+      /** The platform per-transaction flat fees. */
+      platformTxFlatFee: bigint
+      /** The total platform per-token flat fees. */
+      platformMintFlatFee: bigint
+      /** The total platform per-token BPS fees. */
+      platformMintBPSFee: bigint
+      /** The total affiliate fees. */
+      affiliateFee: bigint
+    }
+  | {
+      /** SuperMinterV2 */
+      version: '2'
+      /** The total artist fees. */
+      finalArtistFee: bigint
+      /** The total platform fees. */
+      finalAffiliateFee: bigint
+      /** The total platform fees. */
+      finalPlatformFee: bigint
+    }
+)
 
 export async function getTotalMintPriceAndFees<Client extends Pick<PublicClient, 'readContract' | 'multicall'>>(
   client: Client,
   { tier, scheduleNum, quantity, editionAddress }: GetTotalMintPriceAndFeesParams,
-) {
+): Promise<GetTotalMintPriceAndFeesReturnType> {
   const superMinter = await getSuperMinterForEdition(client, { editionAddress })
 
   switch (superMinter.version) {
