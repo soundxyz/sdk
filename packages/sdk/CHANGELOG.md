@@ -1,5 +1,11 @@
 # @soundxyz/sdk
 
+## 6.1.0
+
+### Minor Changes
+
+- [#307](https://github.com/soundxyz/sdk/pull/307) [`19d6b92`](https://github.com/soundxyz/sdk/commit/19d6b923fadff59f3479f63c25590528bd8a42b3) Thanks [@vigneshka](https://github.com/vigneshka)! - add optional hasValidAffiliate param to getTotalMintPriceAndFees to show accurate affiliateFee
+
 ## 6.0.1
 
 ### Patch Changes
