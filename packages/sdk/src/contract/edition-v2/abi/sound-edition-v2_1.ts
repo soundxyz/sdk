@@ -1,4 +1,4 @@
-export const SOUND_EDITION_V2_1_IMPLEMENTATION_ADDRESS = '0x000000000000Be2397A709213a10cf71b07f42eE'
+export const SOUND_EDITION_V2_1_IMPLEMENTATION_ADDRESS = '0x000000000053C8B49473BDa4b8d1DC47CAb411CC'
 
 export const SOUND_EDITION_V2_1_ABI = [
   { inputs: [], name: 'AlreadyInitialized', type: 'error' },
@@ -44,7 +44,6 @@ export const SOUND_EDITION_V2_1_ABI = [
       { indexed: false, internalType: 'address[]', name: 'to', type: 'address[]' },
       { indexed: false, internalType: 'uint256', name: 'quantity', type: 'uint256' },
       { indexed: false, internalType: 'uint256', name: 'fromTokenId', type: 'uint256' },
-      { indexed: false, internalType: 'uint32', name: 'fromTierTokenIdIndex', type: 'uint32' },
     ],
     name: 'Airdropped',
     type: 'event',
@@ -180,7 +179,6 @@ export const SOUND_EDITION_V2_1_ABI = [
       { indexed: false, internalType: 'address', name: 'to', type: 'address' },
       { indexed: false, internalType: 'uint256', name: 'quantity', type: 'uint256' },
       { indexed: false, internalType: 'uint256', name: 'fromTokenId', type: 'uint256' },
-      { indexed: false, internalType: 'uint32', name: 'fromTierTokenIdIndex', type: 'uint32' },
     ],
     name: 'Minted',
     type: 'event',
@@ -320,6 +318,13 @@ export const SOUND_EDITION_V2_1_ABI = [
     inputs: [],
     name: 'MINTER_ROLE',
     outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'V2_1',
+    outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
     stateMutability: 'view',
     type: 'function',
   },
