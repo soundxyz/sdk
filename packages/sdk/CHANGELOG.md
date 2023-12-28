@@ -1,5 +1,11 @@
 # @soundxyz/sdk
 
+## 6.0.1
+
+### Patch Changes
+
+- [#305](https://github.com/soundxyz/sdk/pull/305) [`6074901`](https://github.com/soundxyz/sdk/commit/60749016736c6297d94d415a3721da4df0eead9d) Thanks [@vigneshka](https://github.com/vigneshka)! - Add exported return type for GetTotalMintPriceAndFeesReturnType
+
 ## 6.0.0
 
 ### Major Changes
