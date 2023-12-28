@@ -1,5 +1,19 @@
 # @soundxyz/sdk
 
+## 6.0.0
+
+### Major Changes
+
+- [#302](https://github.com/soundxyz/sdk/pull/302) [`6f7f687`](https://github.com/soundxyz/sdk/commit/6f7f6879a57d3f4fc1ddb43b9d511210ba3d0c07) Thanks [@PabloSzx](https://github.com/PabloSzx)! - Add support for Platform Airdrop schedule mode
+
+### Minor Changes
+
+- [#300](https://github.com/soundxyz/sdk/pull/300) [`4dce1f4`](https://github.com/soundxyz/sdk/commit/4dce1f467ad6050f1177eb2c61cd85411105bcad) Thanks [@vigneshka](https://github.com/vigneshka)! - Fix default salt for create
+
+### Patch Changes
+
+- [#304](https://github.com/soundxyz/sdk/pull/304) [`23e48a8`](https://github.com/soundxyz/sdk/commit/23e48a824be9ed9916469fb1386f304288e07d6f) Thanks [@vigneshka](https://github.com/vigneshka)! - Add calldata compression to mint function
+
 ## 5.0.0
 
 ### Major Changes

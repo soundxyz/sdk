@@ -1,5 +1,11 @@
 # @soundxyz/legacy-sdk
 
+## 1.1.0
+
+### Minor Changes
+
+- [#300](https://github.com/soundxyz/sdk/pull/300) [`4dce1f4`](https://github.com/soundxyz/sdk/commit/4dce1f467ad6050f1177eb2c61cd85411105bcad) Thanks [@vigneshka](https://github.com/vigneshka)! - Fix default salt for create
+
 ## 1.0.0
 
 ### Major Changes
