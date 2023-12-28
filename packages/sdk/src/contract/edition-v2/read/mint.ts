@@ -11,8 +11,8 @@ export type GetTotalMintPriceAndFeesParams = {
   tier: number
   scheduleNum: number
   quantity: number
-
   editionAddress: Address
+  hasValidAffiliate?: boolean
 }
 
 export type GetTotalMintPriceAndFeesReturnType = {
@@ -48,14 +48,14 @@ export type GetTotalMintPriceAndFeesReturnType = {
       finalArtistFee: bigint
       /** The total platform fees. */
       finalAffiliateFee: bigint
-      /** The total platform fees. */
+      /** The total affiliate fees. */
       finalPlatformFee: bigint
     }
 )
 
 export async function getTotalMintPriceAndFees<Client extends Pick<PublicClient, 'readContract' | 'multicall'>>(
   client: Client,
-  { tier, scheduleNum, quantity, editionAddress }: GetTotalMintPriceAndFeesParams,
+  { tier, scheduleNum, quantity, editionAddress, hasValidAffiliate }: GetTotalMintPriceAndFeesParams,
 ): Promise<GetTotalMintPriceAndFeesReturnType> {
   const superMinter = await getSuperMinterForEdition(client, { editionAddress })
 
@@ -69,7 +69,11 @@ export async function getTotalMintPriceAndFees<Client extends Pick<PublicClient,
           functionName: 'totalPriceAndFees',
           args: [editionAddress, tier, scheduleNum, quantity],
         })
-        .then((res) => ({ ...res, version: superMinter.version }))
+        .then((res) => ({
+          ...res,
+          affiliateFee: !!hasValidAffiliate ? res.affiliateFee : 0n,
+          version: superMinter.version,
+        }))
     }
 
     case '2': {
@@ -79,7 +83,7 @@ export async function getTotalMintPriceAndFees<Client extends Pick<PublicClient,
           abi,
           address,
           functionName: 'totalPriceAndFees',
-          args: [editionAddress, tier, scheduleNum, quantity, false],
+          args: [editionAddress, tier, scheduleNum, quantity, !!hasValidAffiliate],
         })
         .then((res) => ({ ...res, version: superMinter.version }))
     }
