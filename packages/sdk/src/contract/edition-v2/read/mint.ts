@@ -15,47 +15,43 @@ export type GetTotalMintPriceAndFeesParams = {
   editionAddress: Address
 }
 
-export type GetTotalMintPriceAndFeesReturnType =
+export type GetTotalMintPriceAndFeesReturnType = {
+  /** The required Ether value. */
+  total: bigint
+  /** The total price before any additive fees. */
+  subTotal: bigint
+  /** The price per token. */
+  unitPrice: bigint
+} & (
   | {
-      // SuperMinterV1
+      /** SuperMinterV1 */
       version: '1'
-      // The required Ether value.
-      total: bigint
-      // The total price before any additive fees.
-      subTotal: bigint
-      // The price per token.
-      unitPrice: bigint
-      // The total platform fees.
-      // `platformFlatFee + platformMintBPSFee`.
+      /** The total platform fees.
+       `platformFlatFee + platformMintBPSFee`. */
       platformFee: bigint
-      // The total platform flat fees.
-      // `platformTxFlatFee + platformMintFlatFee`.
+      /** The total platform flat fees.
+       `platformTxFlatFee + platformMintFlatFee`. */
       platformFlatFee: bigint
-      // The platform per-transaction flat fees.
+      /** The platform per-transaction flat fees. */
       platformTxFlatFee: bigint
-      // The total platform per-token flat fees.
+      /** The total platform per-token flat fees. */
       platformMintFlatFee: bigint
-      // The total platform per-token BPS fees.
+      /** The total platform per-token BPS fees. */
       platformMintBPSFee: bigint
-      // The total affiliate fees.
+      /** The total affiliate fees. */
       affiliateFee: bigint
     }
   | {
-      // SuperMinterV2
+      /** SuperMinterV2 */
       version: '2'
-      // The required Ether value.
-      total: bigint
-      // The total price before any additive fees.
-      subTotal: bigint
-      // The price per token.
-      unitPrice: bigint
-      // The total artist fees.
+      /** The total artist fees. */
       finalArtistFee: bigint
-      // The total platform fees.
+      /** The total platform fees. */
       finalAffiliateFee: bigint
-      // The total platform fees.
+      /** The total platform fees. */
       finalPlatformFee: bigint
     }
+)
 
 export async function getTotalMintPriceAndFees<Client extends Pick<PublicClient, 'readContract' | 'multicall'>>(
   client: Client,
