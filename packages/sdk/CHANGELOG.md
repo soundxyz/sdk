@@ -1,5 +1,11 @@
 # @soundxyz/sdk
 
+## 7.0.0
+
+### Major Changes
+
+- [#301](https://github.com/soundxyz/sdk/pull/301) [`9d111b4`](https://github.com/soundxyz/sdk/commit/9d111b4f7a1db1f8ee4be112405a1dff7988534c) Thanks [@PabloSzx](https://github.com/PabloSzx)! - Edition v2 creation implements Sound Edition V2.1
+
 ## 6.1.0
 
 ### Minor Changes
