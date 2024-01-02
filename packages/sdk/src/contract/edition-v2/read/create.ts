@@ -16,11 +16,12 @@ import type { Prettify, TransactionGasOptions } from '../../../utils/types'
 import type { ContractCall } from '../../types'
 import { SPLIT_MAIN_ABI, SPLIT_MAIN_ADDRESS } from '../abi/external/split-main'
 import { SOUND_CREATOR_V2_ABI, SOUND_CREATOR_V2_ADDRESS } from '../abi/sound-creator-v2'
-import { SOUND_EDITION_V2_ABI, SOUND_EDITION_V2_IMPLEMENTATION_ADDRESS } from '../abi/sound-edition-v2'
+import { SOUND_EDITION_V2_1_ABI, SOUND_EDITION_V2_1_IMPLEMENTATION_ADDRESS } from '../abi/sound-edition-v2_1'
 import { SOUND_METADATA_ABI, SOUND_METADATA_ADDRESS } from '../abi/sound-metadata'
 import { SUPER_MINTER_V2_ABI, SUPER_MINTER_V2_ADDRESS } from '../abi/super-minter-v2'
-import { MINTER_ROLE } from './helpers'
+
 import type { MinterScheduleConfig, TierConfig, TieredEditionConfig } from './info'
+import { MINTER_ROLE } from './helpers'
 
 interface EditionV2EncodeArguments {
   readonly owner: Address | Readonly<Account>
@@ -62,7 +63,7 @@ export function createTieredEditionArgs({
   contractCalls.push({
     contractAddress: precomputedEdition,
     calldata: encodeFunctionData({
-      abi: SOUND_EDITION_V2_ABI,
+      abi: SOUND_EDITION_V2_1_ABI,
       functionName: 'grantRoles',
       args: [SUPER_MINTER_V2_ADDRESS, MINTER_ROLE],
     }),
@@ -177,7 +178,7 @@ export function createTieredEditionArgs({
     contractCalls.push({
       contractAddress: precomputedEdition,
       calldata: encodeFunctionData({
-        abi: SOUND_EDITION_V2_ABI,
+        abi: SOUND_EDITION_V2_1_ABI,
         functionName: 'createSplit',
         args: [SPLIT_MAIN_ADDRESS, splitCalldata],
       }),
@@ -186,7 +187,7 @@ export function createTieredEditionArgs({
 
   // Encode the SoundEdition.initialize call.
   const editionInitData = encodeFunctionData({
-    abi: SOUND_EDITION_V2_ABI,
+    abi: SOUND_EDITION_V2_1_ABI,
     functionName: 'initialize',
     args: [
       {
@@ -244,7 +245,7 @@ export function createTieredEditionArgs({
       {
         contracts: addresses,
         data: calldata,
-        implementation: SOUND_EDITION_V2_IMPLEMENTATION_ADDRESS,
+        implementation: SOUND_EDITION_V2_1_IMPLEMENTATION_ADDRESS,
         initData: editionInitData,
         owner: typeof owner === 'string' ? owner : owner.address,
         salt: formattedSalt,
@@ -326,7 +327,7 @@ export async function getExpectedEditionAddress<Client extends Pick<PublicClient
     abi: SOUND_CREATOR_V2_ABI,
     address: SOUND_CREATOR_V2_ADDRESS,
     functionName: 'soundEditionAddress',
-    args: [SOUND_EDITION_V2_IMPLEMENTATION_ADDRESS, deployer, formattedSalt],
+    args: [SOUND_EDITION_V2_1_IMPLEMENTATION_ADDRESS, deployer, formattedSalt],
   })
 
   return {
