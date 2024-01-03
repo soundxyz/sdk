@@ -5,17 +5,16 @@ import { cdCompress } from '../../../utils/calldata'
 
 export function editionMint<Client extends Pick<WalletClient, 'writeContract' | 'sendTransaction'>>(
   client: Client,
-  { input }: EditionMintContractInput,
+  { input, disableCdCompress }: EditionMintContractInput & { disableCdCompress?: boolean },
 ) {
   const calldata = encodeFunctionData({ abi: input.abi, functionName: input.functionName, args: input.args })
-  const compressedCalldata = cdCompress(calldata)
 
   return client.sendTransaction({
     account: input.account,
     chain: input.chain,
     value: input.value,
     to: input.address,
-    data: compressedCalldata,
+    data: !!disableCdCompress ? calldata : cdCompress(calldata),
     gas: input.gas,
     maxFeePerGas: input.maxFeePerGas,
     maxPriorityFeePerGas: input.maxPriorityFeePerGas,
