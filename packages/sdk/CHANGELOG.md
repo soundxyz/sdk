@@ -1,5 +1,11 @@
 # @soundxyz/sdk
 
+## 7.0.1
+
+### Patch Changes
+
+- [#310](https://github.com/soundxyz/sdk/pull/310) [`6032816`](https://github.com/soundxyz/sdk/commit/6032816a881e082fab98fa0ea8eae85821c25d36) Thanks [@vigneshka](https://github.com/vigneshka)! - Add option to disable cdCompress for mints
+
 ## 7.0.0
 
 ### Major Changes
