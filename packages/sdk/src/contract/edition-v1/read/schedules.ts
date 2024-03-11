@@ -27,9 +27,7 @@ export function isHandledMinterInterfaceId(interfaceId: string): interfaceId is 
   return HANDLED_MINTER_INTERFACE_IDS_SET.has(interfaceId)
 }
 
-export async function editionRegisteredMinters<
-  Client extends Pick<PublicClient, 'readContract' | 'createEventFilter' | 'getFilterLogs'>,
->(
+export async function editionRegisteredMinters<Client extends Pick<PublicClient, 'readContract' | 'getLogs'>>(
   client: Client,
   {
     editionAddress,
@@ -48,7 +46,7 @@ export async function editionRegisteredMinters<
     functionName: 'MINTER_ROLE',
   })
 
-  const rolesUpdatedFilter = await client.createEventFilter({
+  const roleEvents = await client.getLogs({
     event: {
       anonymous: false,
       inputs: [
@@ -71,17 +69,8 @@ export async function editionRegisteredMinters<
     strict: true,
   })
 
-  const roleEvents = await client.getFilterLogs({
-    filter: rolesUpdatedFilter,
-  })
-
-  const candidateMinters = Array.from(
-    roleEvents.reduce((acc, event) => {
-      if (event.args?.user) acc.add(event.args.user)
-
-      return acc
-    }, new Set<Address>()),
-  )
+  // This list may contain duplicates if MINTER_ROLE was granted multiple times
+  const candidateMinters = [...new Set(roleEvents.map((event) => event.args.user))]
 
   // Check supportsInterface() to verify each address is a minter
   const minters = await Promise.all(
@@ -100,16 +89,11 @@ export async function editionRegisteredMinters<
       }
     }),
   )
-  // This list may contain duplicates if MINTER_ROLE was granted multiple times
-  const allMinters = minters.reduce((acc, minter) => {
-    if (minter) acc.add(minter)
-    return acc
-  }, new Set<Address>())
 
-  return Array.from(allMinters)
+  return minters.filter((minter): minter is Address => minter != null)
 }
 
-export async function editionMinterMintIds<Client extends Pick<PublicClient, 'createEventFilter' | 'getFilterLogs'>>(
+export async function editionMinterMintIds<Client extends Pick<PublicClient, 'getLogs'>>(
   client: Client,
   {
     editionAddress,
@@ -121,8 +105,8 @@ export async function editionMinterMintIds<Client extends Pick<PublicClient, 'cr
     fromBlock?: FromBlock
   },
 ) {
-  // Query MintConfigCreated event, for v1 and v2, this signature is the same
-  const filter = await client.createEventFilter({
+  // Query MintConfigCreated event, for v1.0-v1.2, this signature is the same
+  const mintScheduleConfigEvents = await client.getLogs({
     address: minterAddress,
     event: {
       anonymous: false,
@@ -174,21 +158,10 @@ export async function editionMinterMintIds<Client extends Pick<PublicClient, 'cr
     strict: true,
   })
 
-  const mintScheduleConfigEvents = await client.getFilterLogs({
-    filter,
-  })
-
-  return Array.from(
-    mintScheduleConfigEvents.reduce((acc, event) => {
-      if (event.args?.mintId != null) acc.add(event.args.mintId)
-      return acc
-    }, new Set<bigint>()),
-  )
+  return [...new Set(mintScheduleConfigEvents.map((event) => event.args.mintId))]
 }
 
-export async function editionScheduleIds<
-  Client extends Pick<PublicClient, 'createEventFilter' | 'getFilterLogs' | 'readContract'>,
->(
+export async function editionScheduleIds<Client extends Pick<PublicClient, 'getLogs' | 'readContract'>>(
   client: Client,
   {
     editionAddress,
@@ -575,9 +548,7 @@ export async function editionMintSchedulesFromIds<Client extends Pick<PublicClie
   }
 }
 
-export async function editionMintSchedules<
-  Client extends Pick<PublicClient, 'readContract' | 'multicall' | 'createEventFilter' | 'getFilterLogs'>,
->(
+export async function editionMintSchedules<Client extends Pick<PublicClient, 'readContract' | 'multicall' | 'getLogs'>>(
   client: Client,
   {
     editionAddress,

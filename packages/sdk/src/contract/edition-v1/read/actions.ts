@@ -21,10 +21,7 @@ import { editionMintSchedules, editionMintSchedulesFromIds, editionScheduleIds }
 import type { MerkleProvider } from '../../../utils/types'
 
 export function editionV1PublicActions<
-  Client extends Pick<
-    PublicClient,
-    'readContract' | 'multicall' | 'estimateContractGas' | 'createEventFilter' | 'getFilterLogs'
-  > & {
+  Client extends Pick<PublicClient, 'readContract' | 'multicall' | 'estimateContractGas' | 'getLogs'> & {
     editionV1?: {
       sam?: {}
     }

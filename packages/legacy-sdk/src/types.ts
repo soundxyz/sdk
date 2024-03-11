@@ -18,7 +18,7 @@ type LazyOption<T extends object> = T | (() => T | Promise<T>)
 
 export type ClientProvider = Pick<
   PublicClient,
-  'chain' | 'readContract' | 'getFilterLogs' | 'createEventFilter' | 'estimateContractGas' | 'multicall'
+  'chain' | 'readContract' | 'getLogs' | 'estimateContractGas' | 'multicall'
 >
 export type Wallet = Pick<WalletClient, 'account' | 'chain' | 'writeContract' | 'signMessage' | 'sendTransaction'>
 
