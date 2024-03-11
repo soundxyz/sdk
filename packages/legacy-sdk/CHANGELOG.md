@@ -1,5 +1,11 @@
 # @soundxyz/legacy-sdk
 
+## 1.2.0
+
+### Minor Changes
+
+- [#312](https://github.com/soundxyz/sdk/pull/312) [`079f3d5`](https://github.com/soundxyz/sdk/commit/079f3d56984c153cf44508f67cfc0b9b5fe544e1) Thanks [@vigneshka](https://github.com/vigneshka)! - legacy sdk minter performance issue fix
+
 ## 1.1.0
 
 ### Minor Changes
