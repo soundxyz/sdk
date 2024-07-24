@@ -34,8 +34,10 @@ export const publicClient = createPublicClient({
   .extend(soundEditionVersionPublicActions)
 
 const config = createConfig({
-  autoConnect: true,
-  publicClient,
+  chains: [chain],
+  transports: {
+    [chain.id]: http(RPC_URL),
+  },
 })
 
 export function WagmiContext({ children }: { children: React.ReactNode }) {

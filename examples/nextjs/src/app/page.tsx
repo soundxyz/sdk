@@ -5,15 +5,21 @@ import { EditionInfo } from '@/components/editionInfo'
 import { WalletPrivateKeyInput } from '@/components/walletInput'
 import { useContractAddress } from '@/context/contractAddress'
 import { useWallet } from '@/context/wallet'
-import { useBalance } from 'wagmi'
+import { useQueryClient } from '@tanstack/react-query'
+import { useEffect } from 'react'
+import { useBlockNumber, useBalance } from 'wagmi'
 
 export default function Home() {
   const { wallet } = useWallet()
 
-  const balance = useBalance({
+  const queryClient = useQueryClient()
+  const { data: blockNumber } = useBlockNumber({ watch: true })
+  const { data: balance, queryKey } = useBalance({
     address: wallet?.account.address,
-    watch: true,
   })
+  useEffect(() => {
+    queryClient.invalidateQueries({ queryKey })
+  }, [blockNumber, queryClient, queryKey])
 
   const {
     contractAddress,
@@ -33,7 +39,7 @@ export default function Home() {
         {wallet && (
           <>
             <p>Balance of {wallet.account.address}</p>
-            <p>{balance.data ? `${Number(balance.data.formatted).toFixed(5)} eth` : 'Loading...'}</p>
+            <p>{balance?.decimals != null ? `${Number(balance.decimals).toFixed(5)} eth` : 'Loading...'}</p>
             <br />
           </>
         )}
