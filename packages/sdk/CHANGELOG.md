@@ -1,5 +1,11 @@
 # @soundxyz/sdk
 
+## 8.0.0
+
+### Major Changes
+
+- [`6bd185b`](https://github.com/soundxyz/sdk/commit/6bd185b0df344f3b5d1fdf7823ddab834113050c) Thanks [@vigneshka](https://github.com/vigneshka)! - upgrade to viem 2.17.11
+
 ## 7.1.0
 
 ### Minor Changes
