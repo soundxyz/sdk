@@ -53,11 +53,11 @@
     "esbuild": "^0.19.4",
     "prettier": "^3.1.1",
     "typescript": "5.2.2",
-    "viem": "^1.20.0",
+    "viem": "^2.17.11",
     "zod": "^3.22.4"
   },
   "peerDependencies": {
-    "viem": "^1.20.0",
+    "viem": "^2.17.11",
     "zod": "^3.22.4"
   },
   "publishConfig": {

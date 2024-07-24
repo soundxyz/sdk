@@ -151,7 +151,7 @@ export async function mintingSchedules<Client extends Pick<PublicClient, 'readCo
   const { address, abi } = await getSuperMinterForEdition(client, { editionAddress })
 
   const schedules: SuperMinterSchedule[] = await client
-    .readContract<typeof abi, 'mintInfoList'>({
+    .readContract({
       abi,
       address,
       functionName: 'mintInfoList',

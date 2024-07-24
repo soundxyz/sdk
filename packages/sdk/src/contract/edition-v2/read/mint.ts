@@ -307,7 +307,7 @@ export async function editionMintParameters<
       try {
         // Add a buffer to the gas estimate to account for node provider estimate variance.
         gasEstimate = txnOverrides.gas = scaleAmount({
-          amount: await client.estimateContractGas<Chain, typeof superMinter.abi, 'mintTo'>({
+          amount: await client.estimateContractGas({
             args,
             ...sharedWriteContractParameters,
             ...txnOverrides,
@@ -371,7 +371,7 @@ export async function editionMintParameters<
       try {
         // Add a buffer to the gas estimate to account for node provider estimate variance.
         gasEstimate = txnOverrides.gas = scaleAmount({
-          amount: await client.estimateContractGas<Chain, typeof superMinter.abi, 'mintTo'>({
+          amount: await client.estimateContractGas({
             args,
             ...sharedWriteContractParameters,
             ...txnOverrides,
