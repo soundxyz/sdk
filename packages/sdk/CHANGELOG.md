@@ -1,5 +1,11 @@
 # @soundxyz/sdk
 
+## 8.0.1
+
+### Patch Changes
+
+- [`f94a74e`](https://github.com/soundxyz/sdk/commit/f94a74e4115de887092e611063222478584daa84) Thanks [@vigneshka](https://github.com/vigneshka)! - Add extra time and hex validations
+
 ## 8.0.0
 
 ### Major Changes
