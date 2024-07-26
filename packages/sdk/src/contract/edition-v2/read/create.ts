@@ -10,7 +10,7 @@ import {
   toHex,
 } from 'viem'
 import { MINT_GAS_LIMIT_MULTIPLIER, UINT32_MAX } from '../../../utils/constants'
-import { InvalidUint32 } from '../../../utils/errors'
+import { InvalidUint32, InvalidTimeValuesError, InvalidBytes32 } from '../../../utils/errors'
 import { curry, exhaustiveGuard, scaleAmount } from '../../../utils/helpers'
 import type { Prettify, TransactionGasOptions } from '../../../utils/types'
 import type { ContractCall } from '../../types'
@@ -46,6 +46,11 @@ function isValidUint32(value: number) {
   if (!Number.isSafeInteger(value) || value < 0 || value > UINT32_MAX) return false
 
   return true
+}
+
+function isValidBytes32(value: Hex) {
+  // 2 character for '0x' and then 64 characters for 32 bytes (each byte is 2 hex)
+  return value.length === 66
 }
 
 export function createTieredEditionArgs({
@@ -85,6 +90,13 @@ export function createTieredEditionArgs({
       })
     }
 
+    if (mintConfig.endTime <= mintConfig.startTime) {
+      throw new InvalidTimeValuesError({
+        startTime: mintConfig.startTime,
+        endTime: mintConfig.endTime,
+      })
+    }
+
     if (!isValidUint32(mintConfig.maxMintablePerAccount)) {
       throw new InvalidUint32({
         field: 'mintConfig.maxMintablePerAccount',
@@ -96,6 +108,20 @@ export function createTieredEditionArgs({
       throw new InvalidUint32({
         field: 'mintConfig.maxMintable',
         value: mintConfig.maxMintable,
+      })
+    }
+
+    if (!isValidBytes32(mintConfig.affiliateMerkleRoot)) {
+      throw new InvalidBytes32({
+        field: 'mintConfig.affiliateMerkleRoot',
+        value: mintConfig.affiliateMerkleRoot,
+      })
+    }
+
+    if (mintConfig.mode === 'VERIFY_MERKLE' && !isValidBytes32(mintConfig.merkleRoot)) {
+      throw new InvalidBytes32({
+        field: 'mintConfig.merkleRoot',
+        value: mintConfig.merkleRoot,
       })
     }
 

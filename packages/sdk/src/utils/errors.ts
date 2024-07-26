@@ -252,14 +252,12 @@ export class InvalidTimeValuesError extends Error {
   readonly name = 'InvalidTimeValuesError'
 
   readonly startTime: number
-  readonly cutoffTime: number
   readonly endTime: number
 
-  constructor({ startTime, cutoffTime, endTime }: { startTime: number; cutoffTime: number; endTime: number }) {
-    super('startTime must be earlier than cutoffTime and cutoffTime must be earlier than endTime')
+  constructor({ startTime, endTime }: { startTime: number; endTime: number }) {
+    super('startTime must be earlier than endTime')
 
     this.startTime = startTime
-    this.cutoffTime = cutoffTime
     this.endTime = endTime
   }
 }
@@ -294,6 +292,18 @@ export class InvalidUint32 extends Error {
       `Invalid uint32 for ${field}, maximum of ${UINT32_MAX} and minimum of 0, but provided ${String(value)}`,
       options,
     )
+
+    this.field = field
+    this.value = value
+  }
+}
+
+export class InvalidBytes32 extends Error {
+  readonly field: string
+  readonly value: unknown
+
+  constructor({ field, value }: { field: string; value: unknown }) {
+    super(`Invalid bytes32 for ${field}, this should be 0x followed by 64 characters, but provided ${String(value)}`)
 
     this.field = field
     this.value = value
