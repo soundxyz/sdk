@@ -621,7 +621,7 @@ enum ArtistActivityFeedTypeFilterOption {
 }
 
 """
-User appliction to be an artist
+User application to be an artist
 """
 type ArtistApplication implements Node {
   """
@@ -766,7 +766,7 @@ type ArtistCollectorConnectionEdge implements Edge {
 }
 
 """
-Pagination paramaters for artist collectors
+Pagination parameters for artist collectors
 """
 input ArtistCollectorCursorConnectionArgs {
   """
@@ -800,7 +800,7 @@ input ArtistCollectorCursorConnectionSort {
   """
   firstNftCollectedDate: SortOrder
   """
-  Sort by amount nfts collected, with tie-breaker of earliest collector first
+  Sort by amount nfts collected, with tie-breaker of the earliest collector first
   """
   nftsCount: SortOrder
 }
@@ -3959,7 +3959,7 @@ type PlaylistChartRankConnectionEdge implements Edge {
 }
 
 """
-Pagination paramaters for release chart ranks
+Pagination parameters for release chart ranks
 """
 input PlaylistChartRankCursorConnectionArgs {
   """
@@ -5814,7 +5814,7 @@ type ReleaseChartConnectionEdge implements Edge {
 }
 
 """
-Pagination paramaters for release charts
+Pagination parameters for release charts
 """
 input ReleaseChartCursorConnectionArgs {
   """
@@ -5922,7 +5922,7 @@ type ReleaseChartRankConnectionEdge implements Edge {
 }
 
 """
-Pagination paramaters for release chart ranks
+Pagination parameters for release chart ranks
 """
 input ReleaseChartRankCursorConnectionArgs {
   """
