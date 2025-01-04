@@ -38,6 +38,7 @@ interface EditionV2EncodeArguments {
     readonly distributorFee: number
     readonly controller: Address
   } | null
+  readonly metadataNumberedUpTo?: number
 }
 
 export const EMPTY_MERKLE_ROOT = '0x0000000000000000000000000000000000000000000000000000000000000069'
@@ -61,6 +62,7 @@ export function createTieredEditionArgs({
   tierConfigs,
   mintConfigs,
   createSplit,
+  metadataNumberedUpTo,
 }: EditionV2EncodeArguments) {
   const contractCalls: ContractCall[] = []
 
@@ -181,6 +183,18 @@ export function createTieredEditionArgs({
         args: [precomputedEdition, tierConfig.tier, tierConfig.baseURI],
       }),
     })
+
+    // set metadataNumberedUpTo if specified
+    if (metadataNumberedUpTo != null) {
+      contractCalls.push({
+        contractAddress: SOUND_METADATA_ADDRESS,
+        calldata: encodeFunctionData({
+          abi: SOUND_METADATA_ABI,
+          functionName: 'setNumberedUpTo',
+          args: [precomputedEdition, metadataNumberedUpTo],
+        }),
+      })
+    }
   }
 
   // Create split if supplied
